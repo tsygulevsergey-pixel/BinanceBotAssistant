@@ -25,7 +25,7 @@ class Candle(Base):
     taker_buy_quote = Column(Float)
     
     __table_args__ = (
-        Index('idx_symbol_timeframe_time', 'symbol', 'timeframe', 'open_time'),
+        Index('idx_candles_symbol_timeframe_time', 'symbol', 'timeframe', 'open_time'),
     )
 
 
@@ -76,7 +76,7 @@ class Signal(Base):
     pnl_percent = Column(Float)
     closed_at = Column(DateTime)
     
-    metadata = Column(JSON)
+    meta_data = Column(JSON)
     
     __table_args__ = (
         Index('idx_status_symbol', 'status', 'symbol'),
@@ -94,7 +94,7 @@ class Metric(Base):
     strategy_id = Column(Integer, index=True)
     
     value = Column(Float, nullable=False)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)
     
     __table_args__ = (
         Index('idx_type_symbol_time', 'metric_type', 'symbol', 'timestamp'),
@@ -123,8 +123,8 @@ class MarketState(Base):
     
     late_trend_flag = Column(Boolean, default=False)
     
-    metadata = Column(JSON)
+    meta_data = Column(JSON)
     
     __table_args__ = (
-        Index('idx_symbol_timeframe_time', 'symbol', 'timeframe', 'timestamp'),
+        Index('idx_market_state_symbol_timeframe_time', 'symbol', 'timeframe', 'timestamp'),
     )
