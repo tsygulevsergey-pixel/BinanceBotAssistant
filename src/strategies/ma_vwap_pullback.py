@@ -81,9 +81,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         
         # LONG pullback (восходящий тренд)
         if ema50_slope > 0 and bias != 'Bearish':
-            # Проверка: находимся ли в зоне откат
-
-а
+            # Проверка: находимся ли в зоне отката
             if pullback_zone_lower <= current_close <= pullback_zone_upper:
                 # Проверка: свеча закрылась над EMA20 (подтверждение)
                 if current_close > current_ema20:

@@ -61,3 +61,15 @@ class VWAPCalculator:
         lower_band = vwap - (std * std_mult)
         
         return upper_band, lower_band
+
+
+# Standalone функции для совместимости
+def calculate_daily_vwap(df: pd.DataFrame, tz: str = 'Europe/Kiev') -> tuple:
+    """Calculate daily VWAP with bands"""
+    vwap = VWAPCalculator.calculate_daily_vwap(df, tz)
+    upper, lower = VWAPCalculator.calculate_vwap_bands(df, vwap, std_mult=1.0)
+    return vwap, upper, lower
+
+def calculate_anchored_vwap(df: pd.DataFrame, anchor_index: int) -> pd.Series:
+    """Calculate anchored VWAP"""
+    return VWAPCalculator.calculate_anchored_vwap(df, anchor_index)

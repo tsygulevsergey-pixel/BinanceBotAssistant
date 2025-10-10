@@ -33,34 +33,76 @@ class RangeFadeStrategy(BaseStrategy):
     def get_category(self) -> str:
         return "mean_reversion"
     
-    def _find_range_boundaries(self, df: pd.DataFrame) -> Optional[Dict]:
-        """Найти границы рейнджа с ≥2-3 теста"""
+    def _find_range_boundaries_with_h4(self, df: pd.DataFrame, vah: float, val: float, vwap: float, 
+                                        h4_high: float, h4_low: float) -> Optional[Dict]:
+        """
+        Найти качественные границы рейнджа с ≥2-3 теста и confluence с VA/VWAP/H4 свинг
+        Согласно мануалу: границы должны совпадать с VAH/VAL/VWAP/H4 свингами
+        Использует РЕАЛЬНЫЕ H4 swing levels
+        """
+        from src.indicators.technical import calculate_atr
+        
         recent_data = df.tail(self.lookback_bars)
+        atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
+        current_atr = atr.iloc[-1]
         
-        # Упрощённая логика: находим resistance и support
-        # Resistance = зона где было ≥2 касания максимумов
-        # Support = зона где было ≥2 касания минимумов
+        # Ищем resistance: должен быть confluence с VAH или H4 swing high
+        resistance_candidates = []
         
-        highs = recent_data['high']
-        lows = recent_data['low']
+        # Проверка VAH как resistance
+        vah_tests = ((recent_data['high'] >= vah - 0.1*current_atr) & 
+                     (recent_data['high'] <= vah + 0.1*current_atr)).sum()
+        if vah_tests >= self.min_tests:
+            resistance_candidates.append({'level': vah, 'tests': vah_tests, 'type': 'VAH'})
         
-        # Найти potential resistance (верхние 10% цен)
-        high_threshold = highs.quantile(0.90)
-        high_tests = (highs >= high_threshold).sum()
+        # Проверка H4 swing high как resistance
+        h4_high_tests = ((recent_data['high'] >= h4_high - 0.2*current_atr) & 
+                         (recent_data['high'] <= h4_high + 0.2*current_atr)).sum()
+        if h4_high_tests >= self.min_tests:
+            resistance_candidates.append({'level': h4_high, 'tests': h4_high_tests, 'type': 'H4_high'})
         
-        # Найти potential support (нижние 10% цен)
-        low_threshold = lows.quantile(0.10)
-        low_tests = (lows <= low_threshold).sum()
+        # Ищем support: должен быть confluence с VAL или H4 swing low
+        support_candidates = []
         
-        if high_tests >= self.min_tests and low_tests >= self.min_tests:
-            return {
-                'resistance': high_threshold,
-                'support': low_threshold,
-                'resistance_tests': high_tests,
-                'support_tests': low_tests
-            }
+        # Проверка VAL как support
+        val_tests = ((recent_data['low'] >= val - 0.1*current_atr) & 
+                     (recent_data['low'] <= val + 0.1*current_atr)).sum()
+        if val_tests >= self.min_tests:
+            support_candidates.append({'level': val, 'tests': val_tests, 'type': 'VAL'})
         
-        return None
+        # Проверка H4 swing low как support
+        h4_low_tests = ((recent_data['low'] >= h4_low - 0.2*current_atr) & 
+                        (recent_data['low'] <= h4_low + 0.2*current_atr)).sum()
+        if h4_low_tests >= self.min_tests:
+            support_candidates.append({'level': h4_low, 'tests': h4_low_tests, 'type': 'H4_low'})
+        
+        # ТРЕБОВАНИЕ: должно быть минимум 2 confluence для каждой границы
+        # (например VAH + H4_high или VAL + H4_low)
+        if len(resistance_candidates) < 2 or len(support_candidates) < 2:
+            return None
+        
+        # Выбираем лучшие уровни
+        best_resistance = max(resistance_candidates, key=lambda x: x['tests'])
+        best_support = max(support_candidates, key=lambda x: x['tests'])
+        
+        # Дополнительная проверка: уровни должны быть достаточно близки друг к другу
+        # (показывает confluence)
+        res_confluence = any(abs(best_resistance['level'] - c['level']) <= 0.2*current_atr 
+                            for c in resistance_candidates if c != best_resistance)
+        sup_confluence = any(abs(best_support['level'] - c['level']) <= 0.2*current_atr 
+                            for c in support_candidates if c != best_support)
+        
+        if not (res_confluence and sup_confluence):
+            return None
+        
+        return {
+            'resistance': best_resistance['level'],
+            'support': best_support['level'],
+            'resistance_tests': best_resistance['tests'],
+            'support_tests': best_support['tests'],
+            'resistance_type': best_resistance['type'],
+            'support_type': best_support['type']
+        }
     
     def check_signal(self, symbol: str, df: pd.DataFrame, 
                      regime: str, bias: str, 
@@ -73,9 +115,39 @@ class RangeFadeStrategy(BaseStrategy):
         if len(df) < self.lookback_bars:
             return None
         
-        # Найти границы рейнджа
-        range_bounds = self._find_range_boundaries(df)
+        # Получить VA/VWAP для confluence проверки
+        from src.indicators.vwap import calculate_daily_vwap
+        from src.indicators.volume_profile import calculate_volume_profile
+        
+        vwap, vwap_upper, vwap_lower = calculate_daily_vwap(df)
+        vp_result = calculate_volume_profile(df, num_bins=50)
+        vah = vp_result['vah']
+        val = vp_result['val']
+        
+        # Получить H4 swings из indicators (реальные 4h данные)
+        h4_swing_high = indicators.get('h4_swing_high')
+        h4_swing_low = indicators.get('h4_swing_low')
+        
+        if h4_swing_high is None or h4_swing_low is None:
+            return None
+        
+        # Найти границы рейнджа с confluence проверкой (передаём реальные H4 swings)
+        range_bounds = self._find_range_boundaries_with_h4(df, vah, val, vwap.iloc[-1], h4_swing_high, h4_swing_low)
         if range_bounds is None:
+            return None
+        
+        # Проверка IB width (не чрезмерно широкий)
+        # IB = первый час дня (упрощённо - последние 4 бара на 15m)
+        ib_high = df['high'].tail(4).max()
+        ib_low = df['low'].tail(4).min()
+        ib_width = ib_high - ib_low
+        
+        from src.indicators.technical import calculate_atr
+        atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
+        current_atr = atr.iloc[-1]
+        
+        # IB не должен быть >1.5 ATR (чрезмерно широкий)
+        if ib_width > 1.5 * current_atr:
             return None
         
         resistance = range_bounds['resistance']

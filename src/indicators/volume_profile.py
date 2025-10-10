@@ -83,3 +83,9 @@ class VolumeProfile:
         if atr and atr > 0:
             return distance / atr
         return distance
+
+
+# Standalone функция для совместимости
+def calculate_volume_profile(df: pd.DataFrame, num_bins: int = 50) -> Dict:
+    """Calculate volume profile with VAH, VAL, VPOC"""
+    return VolumeProfile.calculate_profile(df, num_bins=num_bins)

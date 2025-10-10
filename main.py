@@ -32,8 +32,8 @@ class TradingBot:
         
         # Компоненты бота
         self.strategy_manager = StrategyManager()
-        self.signal_scorer = SignalScorer(config.data)
-        self.btc_filter = BTCFilter(config.data)
+        self.signal_scorer = SignalScorer(config._config)  # Передаём внутренний словарь config
+        self.btc_filter = BTCFilter(config._config)
         self.regime_detector = MarketRegimeDetector()
         
         self._register_strategies()
@@ -190,14 +190,20 @@ class TradingBot:
         regime = self.regime_detector.detect_regime(h4_data)
         bias = self.regime_detector.detect_bias(h4_data)
         
-        # Заглушки для indicators (в реальности нужно рассчитывать)
+        # Рассчитать H4 swings для confluence проверки
+        h4_swing_high = h4_data['high'].tail(20).max() if h4_data is not None and len(h4_data) >= 20 else None
+        h4_swing_low = h4_data['low'].tail(20).min() if h4_data is not None and len(h4_data) >= 20 else None
+        
+        # Indicators для стратегий
         indicators = {
             'cvd': 0.0,
             'doi_pct': 0.0,
             'depth_imbalance': 1.0,
             'late_trend': False,
             'funding_extreme': False,
-            'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral'
+            'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
+            'h4_swing_high': h4_swing_high,
+            'h4_swing_low': h4_swing_low
         }
         
         # Проверка MR блокировки по BTC
