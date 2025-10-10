@@ -63,6 +63,7 @@ class VolumeProfile:
         val = bin_centers[min(value_area_indices)]
         
         return {
+            'poc': vpoc,
             'vpoc': vpoc,
             'vah': vah,
             'val': val,

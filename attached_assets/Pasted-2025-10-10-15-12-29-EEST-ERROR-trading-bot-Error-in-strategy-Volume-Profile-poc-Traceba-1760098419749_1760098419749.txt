@@ -1,0 +1,95 @@
+2025-10-10 15:12:29 EEST | ERROR    | trading_bot | Error in strategy Volume Profile: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\volume_profile.py", line 51, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:29 EEST | ERROR    | trading_bot | Error in strategy Order Flow: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\order_flow.py", line 55, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:30 EEST | ERROR    | trading_bot | Error in strategy Volume Profile: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\volume_profile.py", line 51, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:30 EEST | ERROR    | trading_bot | Error in strategy Order Flow: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\order_flow.py", line 55, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+D:\bot\Новая папка\BinanceBotAssistant\src\strategies\cvd_divergence.py:119: RuntimeWarning: invalid value encountered in scalar divide
+  cvd_divergence = (cvd_tail.iloc[-1] - cvd_tail.min()) / abs(cvd_tail.min())
+2025-10-10 15:12:30 EEST | ERROR    | trading_bot | Error in strategy Volume Profile: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\volume_profile.py", line 51, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:30 EEST | ERROR    | trading_bot | Error in strategy Order Flow: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\order_flow.py", line 55, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:30 EEST | ERROR    | trading_bot | Error in strategy Volume Profile: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\volume_profile.py", line 51, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:30 EEST | ERROR    | trading_bot | Error in strategy Order Flow: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\order_flow.py", line 55, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:31 EEST | ERROR    | trading_bot | Error in strategy Volume Profile: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\volume_profile.py", line 51, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+2025-10-10 15:12:31 EEST | ERROR    | trading_bot | Error in strategy Order Flow: 'poc'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\strategy_manager.py", line 55, in check_all_signals
+    signal = strategy.check_signal(symbol, df, regime, bias, indicators)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\src\strategies\order_flow.py", line 55, in check_signal
+    poc = vp_result['poc']
+          ~~~~~~~~~^^^^^^^
+KeyError: 'poc'
+D:\bot\Новая папка\BinanceBotAssistant\src\strategies\cvd_divergence.py:111: RuntimeWarning: invalid value encountered in scalar divide
+  cvd_divergence = (cvd_tail.max() - cvd_tail.iloc[-1]) / abs(cvd_tail.max())
+2025-10-10 15:12:31 EEST | INFO     | trading_bot | Status: 248 symbols | 16 strategies active | 0 total signals | Rate limit: 0.0%

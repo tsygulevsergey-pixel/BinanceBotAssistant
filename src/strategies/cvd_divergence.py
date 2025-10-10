@@ -108,17 +108,21 @@ class CVDDivergenceStrategy(BaseStrategy):
             if price_tail.iloc[-1] == price_tail.max():
                 # Но CVD не подтверждает (CVD максимум был раньше)
                 if price_high_idx > cvd_high_idx:
-                    cvd_divergence = (cvd_tail.max() - cvd_tail.iloc[-1]) / abs(cvd_tail.max())
-                    if cvd_divergence > self.divergence_threshold:
-                        return 'bearish'
+                    cvd_max = abs(cvd_tail.max())
+                    if cvd_max > 0:
+                        cvd_divergence = (cvd_tail.max() - cvd_tail.iloc[-1]) / cvd_max
+                        if cvd_divergence > self.divergence_threshold:
+                            return 'bearish'
         
         # БЫЧЬЯ ДИВЕРГЕНЦИЯ: цена падает (новый лоу), но CVD растет
         if current_close < prev_close:
             if price_tail.iloc[-1] == price_tail.min():
                 if price_low_idx > cvd_low_idx:
-                    cvd_divergence = (cvd_tail.iloc[-1] - cvd_tail.min()) / abs(cvd_tail.min())
-                    if cvd_divergence > self.divergence_threshold:
-                        return 'bullish'
+                    cvd_min = abs(cvd_tail.min())
+                    if cvd_min > 0:
+                        cvd_divergence = (cvd_tail.iloc[-1] - cvd_tail.min()) / cvd_min
+                        if cvd_divergence > self.divergence_threshold:
+                            return 'bullish'
         
         # ПОДТВЕРЖДЕНИЕ ПРОБОЯ: CVD в направлении движения
         # Если цена пробивает вверх И CVD также растет

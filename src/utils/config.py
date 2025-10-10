@@ -2,6 +2,9 @@ import os
 import yaml
 from typing import Any, Dict
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Config:
