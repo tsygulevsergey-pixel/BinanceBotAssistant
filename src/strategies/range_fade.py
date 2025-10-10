@@ -4,6 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.indicators.technical import calculate_atr
+from src.utils.reclaim_checker import check_range_reclaim
 
 
 class RangeFadeStrategy(BaseStrategy):
@@ -24,6 +25,7 @@ class RangeFadeStrategy(BaseStrategy):
         
         self.min_tests = strategy_config.get('min_tests', 2)
         self.time_stop = strategy_config.get('time_stop', [6, 8])
+        self.reclaim_bars = strategy_config.get('reclaim_bars', 2)  # Hold N bars для reclaim
         self.timeframe = '15m'
         self.lookback_bars = 100  # Для определения границ рейнджа
     
@@ -162,11 +164,21 @@ class RangeFadeStrategy(BaseStrategy):
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         
-        # LONG fade: цена у support, отбой вверх
-        if current_low <= support + 0.1 * current_atr:  # Около support
-            # Проверка: есть ли признаки отбоя (close выше low)
-            if current_close > current_low + 0.2 * current_atr:
-                
+        # LONG fade: цена ОКОЛО support + RECLAIM механизм
+        # 1. Proximity check: цена около support (в пределах 0.3 ATR)
+        near_support = current_close <= support + 0.3 * current_atr
+        
+        if near_support:
+            # 2. RECLAIM проверка: цена была ниже support, вернулась и удержалась
+            long_reclaim = check_range_reclaim(
+                df=df,
+                range_low=support,
+                range_high=resistance,
+                direction='long',
+                hold_bars=self.reclaim_bars
+            )
+            
+            if long_reclaim:
                 entry = current_close
                 stop_loss = current_low - 0.25 * current_atr
                 
@@ -193,15 +205,27 @@ class RangeFadeStrategy(BaseStrategy):
                         'support': float(support),
                         'resistance_tests': int(range_bounds['resistance_tests']),
                         'support_tests': int(range_bounds['support_tests']),
-                        'fade_from': 'support'
+                        'fade_from': 'support',
+                        'reclaim_bars': self.reclaim_bars
                     }
                 )
                 return signal
         
-        # SHORT fade: цена у resistance, отбой вниз
-        elif current_high >= resistance - 0.1 * current_atr:  # Около resistance
-            if current_close < current_high - 0.2 * current_atr:
-                
+        # SHORT fade: цена ОКОЛО resistance + RECLAIM механизм
+        # 1. Proximity check: цена около resistance (в пределах 0.3 ATR)
+        near_resistance = current_close >= resistance - 0.3 * current_atr
+        
+        if near_resistance:
+            # 2. RECLAIM проверка: цена была выше resistance, вернулась и удержалась
+            short_reclaim = check_range_reclaim(
+                df=df,
+                range_low=support,
+                range_high=resistance,
+                direction='short',
+                hold_bars=self.reclaim_bars
+            )
+            
+            if short_reclaim:
                 entry = current_close
                 stop_loss = current_high + 0.25 * current_atr
                 
@@ -227,7 +251,8 @@ class RangeFadeStrategy(BaseStrategy):
                         'support': float(support),
                         'resistance_tests': int(range_bounds['resistance_tests']),
                         'support_tests': int(range_bounds['support_tests']),
-                        'fade_from': 'resistance'
+                        'fade_from': 'resistance',
+                        'reclaim_bars': self.reclaim_bars
                     }
                 )
                 return signal

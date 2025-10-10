@@ -5,6 +5,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.indicators.technical import calculate_atr
 from src.indicators.volume_profile import calculate_volume_profile
+from src.utils.reclaim_checker import check_value_area_reclaim
 
 
 class VolumeProfileStrategy(BaseStrategy):
@@ -30,6 +31,7 @@ class VolumeProfileStrategy(BaseStrategy):
         self.atr_threshold = 0.25  # ATR для acceptance
         self.min_closes_outside = 2  # Минимум 2 close за VA для acceptance
         self.poc_shift_threshold = 0.1  # Порог смещения POC (% от range)
+        self.reclaim_bars = strategy_config.get('reclaim_bars', 2)  # Hold N bars для reclaim
         
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -137,9 +139,17 @@ class VolumeProfileStrategy(BaseStrategy):
                 if cvd < 0 or doi_pct < -1.0:
                     return 'acceptance_short'
         
-        # --- ПРОВЕРКА REJECTION ---
-        # Rejection от VAH (был выше, вернулся в value)
-        if prev_close >= vah and current_close < vah:
+        # --- ПРОВЕРКА REJECTION с RECLAIM механизмом ---
+        # Rejection от VAH: RECLAIM - цена была выше VAH, вернулась в value area и удержалась
+        vah_reclaim = check_value_area_reclaim(
+            df=df,
+            val=val,
+            vah=vah,
+            direction='short',  # для rejection от VAH
+            hold_bars=self.reclaim_bars
+        )
+        
+        if vah_reclaim:
             # CVD flip (было покупки, стали продажи)
             if cvd < 0:
                 # Imbalance flip (depth показывает давление вниз)
@@ -148,8 +158,16 @@ class VolumeProfileStrategy(BaseStrategy):
                     if doi_pct < 2.0:
                         return 'rejection_long'  # Rejection вниз = fade short (но вход long при откате)
         
-        # Rejection от VAL (был ниже, вернулся в value)
-        if prev_close <= val and current_close > val:
+        # Rejection от VAL: RECLAIM - цена была ниже VAL, вернулась в value area и удержалась
+        val_reclaim = check_value_area_reclaim(
+            df=df,
+            val=val,
+            vah=vah,
+            direction='long',  # для rejection от VAL
+            hold_bars=self.reclaim_bars
+        )
+        
+        if val_reclaim:
             # CVD flip вверх
             if cvd > 0:
                 # Imbalance flip вверх
@@ -176,19 +194,23 @@ class VolumeProfileStrategy(BaseStrategy):
             take_profit_2 = level + 0.5 * atr  # TP2 к противоположной стороне value
             
             return Signal(
-                symbol=symbol,
-                direction='long',
-                entry_price=entry,
-                stop_loss=stop_loss,
-                take_profit_1=take_profit_1,
-                take_profit_2=take_profit_2,
-                confidence=2.5,
                 strategy_name=self.name,
+                symbol=symbol,
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
+                entry_price=float(entry),
+                stop_loss=float(stop_loss),
+                take_profit_1=float(take_profit_1),
+                take_profit_2=float(take_profit_2),
+                regime='RANGE',
+                bias='neutral',
+                base_score=2.5,
                 metadata={
                     'type': 'rejection_fade',
-                    'level': level,
-                    'poc': poc,
-                    'regime': 'range'
+                    'level': float(level),
+                    'poc': float(poc),
+                    'reclaim_bars': self.reclaim_bars
                 }
             )
         else:
@@ -198,19 +220,23 @@ class VolumeProfileStrategy(BaseStrategy):
             take_profit_2 = level - 0.5 * atr
             
             return Signal(
-                symbol=symbol,
-                direction='short',
-                entry_price=entry,
-                stop_loss=stop_loss,
-                take_profit_1=take_profit_1,
-                take_profit_2=take_profit_2,
-                confidence=2.5,
                 strategy_name=self.name,
+                symbol=symbol,
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
+                entry_price=float(entry),
+                stop_loss=float(stop_loss),
+                take_profit_1=float(take_profit_1),
+                take_profit_2=float(take_profit_2),
+                regime='RANGE',
+                bias='neutral',
+                base_score=2.5,
                 metadata={
                     'type': 'rejection_fade',
-                    'level': level,
-                    'poc': poc,
-                    'regime': 'range'
+                    'level': float(level),
+                    'poc': float(poc),
+                    'reclaim_bars': self.reclaim_bars
                 }
             )
     
@@ -230,18 +256,21 @@ class VolumeProfileStrategy(BaseStrategy):
             take_profit_2 = entry + 3.0 * atr  # TP2 = +3R
             
             return Signal(
-                symbol=symbol,
-                direction='long',
-                entry_price=entry,
-                stop_loss=stop_loss,
-                take_profit_1=take_profit_1,
-                take_profit_2=take_profit_2,
-                confidence=2.0,
                 strategy_name=self.name,
+                symbol=symbol,
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
+                entry_price=float(entry),
+                stop_loss=float(stop_loss),
+                take_profit_1=float(take_profit_1),
+                take_profit_2=float(take_profit_2),
+                regime='EXPANSION',
+                bias='neutral',
+                base_score=2.0,
                 metadata={
                     'type': 'acceptance_breakout',
-                    'level': level,
-                    'regime': 'expansion'
+                    'level': float(level)
                 }
             )
         else:
@@ -251,17 +280,20 @@ class VolumeProfileStrategy(BaseStrategy):
             take_profit_2 = entry - 3.0 * atr
             
             return Signal(
-                symbol=symbol,
-                direction='short',
-                entry_price=entry,
-                stop_loss=stop_loss,
-                take_profit_1=take_profit_1,
-                take_profit_2=take_profit_2,
-                confidence=2.0,
                 strategy_name=self.name,
+                symbol=symbol,
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
+                entry_price=float(entry),
+                stop_loss=float(stop_loss),
+                take_profit_1=float(take_profit_1),
+                take_profit_2=float(take_profit_2),
+                regime='EXPANSION',
+                bias='neutral',
+                base_score=2.0,
                 metadata={
                     'type': 'acceptance_breakout',
-                    'level': level,
-                    'regime': 'expansion'
+                    'level': float(level)
                 }
             )

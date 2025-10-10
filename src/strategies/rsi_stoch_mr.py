@@ -4,6 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.indicators.technical import calculate_rsi, calculate_stochastic, calculate_atr
+from src.utils.reclaim_checker import check_level_reclaim
 
 
 class RSIStochMRStrategy(BaseStrategy):
@@ -27,6 +28,7 @@ class RSIStochMRStrategy(BaseStrategy):
         self.oversold_percentile = strategy_config.get('oversold_percentile', 20)  # p15-20
         self.overbought_percentile = strategy_config.get('overbought_percentile', 80)  # p80-85
         self.lookback = strategy_config.get('lookback', 90)  # 90 дней
+        self.reclaim_bars = strategy_config.get('reclaim_bars', 2)  # Hold N bars для reclaim
         self.timeframe = '15m'
     
     def get_timeframe(self) -> str:
@@ -72,10 +74,42 @@ class RSIStochMRStrategy(BaseStrategy):
         current_low = df['low'].iloc[-1]
         current_atr = atr.iloc[-1]
         
-        # LONG: RSI в oversold + stoch крест вверх
+        # Получаем VWAP/VA для reclaim проверки (зона = край рейнджа ∩ VWAP/VA)
+        from src.indicators.vwap import calculate_daily_vwap
+        from src.indicators.volume_profile import calculate_volume_profile
+        
+        vwap, vwap_upper, vwap_lower = calculate_daily_vwap(df)
+        vp_result = calculate_volume_profile(df, num_bins=50)
+        val = vp_result['val']
+        
+        current_vwap = vwap.iloc[-1]
+        current_vwap_lower = vwap_lower.iloc[-1]
+        
+        # LONG: RSI в oversold + stoch крест вверх + RECLAIM механизм
         if current_rsi <= rsi_oversold:
             # Стохастик крест: K пересекает D снизу вверх
             if prev_stoch_k <= prev_stoch_d and current_stoch_k > current_stoch_d:
+                
+                # RECLAIM: проверяем что цена вернулась в зону (выше VAL или VWAP lower) с удержанием
+                val_reclaim = check_level_reclaim(
+                    df=df,
+                    level=val,
+                    direction='long',
+                    hold_bars=self.reclaim_bars,
+                    tolerance_pct=0.15
+                )
+                
+                vwap_reclaim = check_level_reclaim(
+                    df=df,
+                    level=current_vwap_lower,
+                    direction='long',
+                    hold_bars=self.reclaim_bars,
+                    tolerance_pct=0.15
+                )
+                
+                # Хотя бы одно подтверждение reclaim
+                if not (val_reclaim or vwap_reclaim):
+                    return None
                 
                 entry = current_close
                 stop_loss = current_low - 0.25 * current_atr
@@ -105,15 +139,43 @@ class RSIStochMRStrategy(BaseStrategy):
                         'rsi_overbought': float(rsi_overbought),
                         'stoch_k': float(current_stoch_k),
                         'stoch_d': float(current_stoch_d),
-                        'cross_type': 'bullish'
+                        'cross_type': 'bullish',
+                        'reclaim_bars': self.reclaim_bars,
+                        'val_reclaim': val_reclaim,
+                        'vwap_reclaim': vwap_reclaim
                     }
                 )
                 return signal
         
-        # SHORT: RSI в overbought + stoch крест вниз
+        # SHORT: RSI в overbought + stoch крест вниз + RECLAIM механизм
         elif current_rsi >= rsi_overbought:
             # Стохастик крест: K пересекает D сверху вниз
             if prev_stoch_k >= prev_stoch_d and current_stoch_k < current_stoch_d:
+                
+                # Получаем VAH и VWAP upper для SHORT reclaim
+                vah = vp_result['vah']
+                current_vwap_upper = vwap_upper.iloc[-1]
+                
+                # RECLAIM: проверяем что цена вернулась в зону (ниже VAH или VWAP upper) с удержанием
+                vah_reclaim = check_level_reclaim(
+                    df=df,
+                    level=vah,
+                    direction='short',
+                    hold_bars=self.reclaim_bars,
+                    tolerance_pct=0.15
+                )
+                
+                vwap_upper_reclaim = check_level_reclaim(
+                    df=df,
+                    level=current_vwap_upper,
+                    direction='short',
+                    hold_bars=self.reclaim_bars,
+                    tolerance_pct=0.15
+                )
+                
+                # Хотя бы одно подтверждение reclaim
+                if not (vah_reclaim or vwap_upper_reclaim):
+                    return None
                 
                 entry = current_close
                 stop_loss = current_high + 0.25 * current_atr
@@ -141,7 +203,10 @@ class RSIStochMRStrategy(BaseStrategy):
                         'rsi_overbought': float(rsi_overbought),
                         'stoch_k': float(current_stoch_k),
                         'stoch_d': float(current_stoch_d),
-                        'cross_type': 'bearish'
+                        'cross_type': 'bearish',
+                        'reclaim_bars': self.reclaim_bars,
+                        'vah_reclaim': vah_reclaim,
+                        'vwap_upper_reclaim': vwap_upper_reclaim
                     }
                 )
                 return signal
