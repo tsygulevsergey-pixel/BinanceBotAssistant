@@ -250,3 +250,4 @@ universe:
   fetch_all_pairs: true  # Fetch all USDT-M pairs from Binance
   filter_quote: "USDT"
   min_volume_24h: 10000000  # $10M minimum
+  update_interval_hours: 1  # Auto-update symbol list every N hours

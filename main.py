@@ -90,6 +90,28 @@ class TradingBot:
         finally:
             await self.stop()
     
+    async def _fetch_symbols_by_volume(self) -> List[str]:
+        """Получить список символов по минимальному объему"""
+        if not config.get('universe.fetch_all_pairs', True):
+            symbols = config.get('universe.initial_symbols', ['BTCUSDT', 'ETHUSDT'])
+            logger.info(f"Using configured symbols: {symbols}")
+            return symbols
+        
+        logger.info("Fetching USDT-M futures pairs by volume...")
+        all_pairs = await self.client.get_futures_pairs()
+        
+        min_volume = config.get('universe.min_volume_24h', 10000000)
+        ticker_data = await self.client.get_24h_ticker()
+        
+        if isinstance(ticker_data, dict):
+            ticker_data = [ticker_data]
+        
+        volume_map = {t['symbol']: float(t['quoteVolume']) for t in ticker_data}
+        
+        symbols = [s for s in all_pairs if volume_map.get(s, 0) >= min_volume]
+        logger.info(f"Filtered to {len(symbols)} pairs with volume >= ${min_volume:,.0f}")
+        return symbols
+    
     async def _initialize(self):
         logger.info("Initializing bot...")
         
@@ -99,23 +121,8 @@ class TradingBot:
         rate_limit_status = self.client.get_rate_limit_status()
         logger.info(f"Rate limit status: {rate_limit_status['current_weight']}/{rate_limit_status['limit']}")
         
-        if config.get('universe.fetch_all_pairs', True):
-            logger.info("Fetching all USDT-M futures pairs...")
-            all_pairs = await self.client.get_futures_pairs()
-            
-            min_volume = config.get('universe.min_volume_24h', 10000000)
-            ticker_data = await self.client.get_24h_ticker()
-            
-            if isinstance(ticker_data, dict):
-                ticker_data = [ticker_data]
-            
-            volume_map = {t['symbol']: float(t['quoteVolume']) for t in ticker_data}
-            
-            self.symbols = [s for s in all_pairs if volume_map.get(s, 0) >= min_volume]
-            logger.info(f"Filtered to {len(self.symbols)} pairs with volume >= ${min_volume:,.0f}")
-        else:
-            self.symbols = config.get('universe.initial_symbols', ['BTCUSDT', 'ETHUSDT'])
-            logger.info(f"Using configured symbols: {self.symbols}")
+        # Получаем начальный список символов
+        self.symbols = await self._fetch_symbols_by_volume()
         
         logger.info(f"Starting parallel data loading for {len(self.symbols)} symbols...")
         
@@ -123,8 +130,9 @@ class TradingBot:
         
         loader_task = asyncio.create_task(self._symbol_loader_task())
         analyzer_task = asyncio.create_task(self._symbol_analyzer_task())
+        update_symbols_task = asyncio.create_task(self._update_symbols_task())
         
-        logger.info("Background tasks started (loader + analyzer running in parallel)")
+        logger.info("Background tasks started (loader + analyzer + symbol updater running in parallel)")
         logger.info("Bot will start analyzing symbols as soon as their data is loaded")
         
         # Запуск системы трекинга производительности
@@ -477,6 +485,66 @@ class TradingBot:
             await asyncio.sleep(0.5)
         
         logger.info(f"Analyzer task stopped. {len(self.ready_symbols)} symbols ready for analysis")
+    
+    async def _update_symbols_task(self):
+        """Background task to update symbol list every hour based on volume"""
+        if not config.get('universe.fetch_all_pairs', True):
+            logger.info("Symbol auto-update disabled (using configured symbols)")
+            return
+        
+        update_interval = config.get('universe.update_interval_hours', 1) * 3600  # Convert to seconds
+        logger.info(f"📊 Symbol auto-update started (interval: {update_interval/3600:.0f}h)")
+        
+        while self.running:
+            await asyncio.sleep(update_interval)
+            
+            if not self.running:
+                break
+            
+            try:
+                logger.info("🔄 Updating symbol list by volume...")
+                new_symbols = await self._fetch_symbols_by_volume()
+                
+                # Найти новые символы (которых нет в текущем списке)
+                current_set = set(self.symbols)
+                new_set = set(new_symbols)
+                
+                added_symbols = new_set - current_set
+                removed_symbols = current_set - new_set
+                
+                if added_symbols:
+                    logger.info(f"➕ Adding {len(added_symbols)} new symbols: {', '.join(list(added_symbols)[:5])}{'...' if len(added_symbols) > 5 else ''}")
+                    
+                    # Добавляем новые символы и загружаем данные
+                    for symbol in added_symbols:
+                        self.symbols.append(symbol)
+                        
+                        # Загружаем данные напрямую (loader task уже завершен)
+                        if self.data_loader:
+                            try:
+                                logger.info(f"Loading data for new symbol: {symbol}")
+                                success = await self.data_loader.load_warm_up_data(symbol, silent=False)
+                                if success:
+                                    # Добавляем в ready_symbols для анализа
+                                    if symbol not in self.ready_symbols:
+                                        self.ready_symbols.append(symbol)
+                                        logger.info(f"✅ {symbol} loaded and ready for analysis ({len(self.ready_symbols)} symbols)")
+                            except Exception as e:
+                                logger.error(f"Error loading new symbol {symbol}: {e}")
+                
+                if removed_symbols:
+                    logger.info(f"➖ Removing {len(removed_symbols)} symbols (low volume): {', '.join(list(removed_symbols)[:5])}{'...' if len(removed_symbols) > 5 else ''}")
+                    # Удаляем из обоих списков
+                    self.symbols = [s for s in self.symbols if s not in removed_symbols]
+                    self.ready_symbols = [s for s in self.ready_symbols if s not in removed_symbols]
+                
+                if not added_symbols and not removed_symbols:
+                    logger.info(f"✓ Symbol list unchanged ({len(self.symbols)} pairs)")
+                    
+            except Exception as e:
+                logger.error(f"Error updating symbols: {e}", exc_info=True)
+        
+        logger.info("Symbol auto-update task stopped")
     
     def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None):
         """Сохранить сигнал в базу данных"""

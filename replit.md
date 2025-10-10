@@ -53,6 +53,7 @@ Preferred communication style: Simple, everyday language.
 - **SymbolLoadCoordinator**: Manages thread-safe coordination for parallel loading and analysis.
 - **Loader Task**: Loads historical data with retry logic and pushes symbols to a queue.
 - **Analyzer Task**: Consumes symbols from the queue, allowing immediate analysis of loaded data while background loading continues.
+- **Symbol Auto-Update Task**: Automatically updates the symbol list every hour based on 24h volume criteria, adding new high-volume pairs and removing low-volume pairs dynamically.
 
 ## Data Flow
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis of available symbols. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
@@ -82,7 +83,15 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
-1. ✅ **Strategy Debug Logging** - Детальное логирование для отладки стратегий
+1. ✅ **Symbol Auto-Update System** - Автоматическое обновление списка монет
+   - **Периодическое обновление**: каждый час бот проверяет объемы и обновляет список монет
+   - **Динамическое добавление**: новые монеты с высоким объемом автоматически добавляются и загружаются
+   - **Динамическое удаление**: монеты с низким объемом удаляются из списка анализа
+   - **Настройка**: интервал обновления настраивается через `universe.update_interval_hours` в config.yaml (по умолчанию 1 час)
+   - **Логирование**: показывает какие монеты добавлены/удалены при каждом обновлении
+   - **Оптимизация**: фокус на монетах с высокой ликвидностью без перезапуска бота
+
+2. ✅ **Strategy Debug Logging** - Детальное логирование для отладки стратегий
    - **Режим рынка**: показывает Regime (TREND/RANGE/SQUEEZE) и Bias (LONG/SHORT/NEUTRAL)
    - **Какие стратегии проверялись**: логирует все стратегии которые сработали
    - **Почему не прошли**: показывает Score, Base, Volume ratio, CVD, Late trend, BTC против
