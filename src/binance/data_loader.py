@@ -50,8 +50,6 @@ class DataLoader:
                 if day_counter % 10 == 0 or current_date >= end_date - timedelta(days=1):
                     progress = (day_counter / total_days) * 100
                     logger.info(f"  Progress: {progress:.1f}% ({day_counter}/{total_days} days) - {symbol} {interval}")
-                
-                await asyncio.sleep(0.1)
             
             except Exception as e:
                 logger.error(f"Error downloading klines for {symbol} {interval} on {current_date.date()}: {e}")
@@ -109,7 +107,7 @@ class DataLoader:
         timeframes = ['1m', '5m', '15m', '1h', '4h', '1d']
         total_tf = len(timeframes)
         
-        for idx, interval in enumerate(timeframes, 1):
+        async def load_timeframe(idx: int, interval: str):
             existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
             expected_count = self._expected_candle_count(interval, warm_up_days)
             
@@ -118,6 +116,9 @@ class DataLoader:
                 await self.download_historical_klines(symbol, interval, start_date, end_date)
             else:
                 logger.info(f"  [{idx}/{total_tf}] ✓ {symbol} {interval} already complete ({existing_count} candles)")
+        
+        tasks = [load_timeframe(idx, interval) for idx, interval in enumerate(timeframes, 1)]
+        await asyncio.gather(*tasks)
     
     def _count_existing_candles(self, symbol: str, interval: str, 
                                 start_date: datetime, end_date: datetime) -> int:
