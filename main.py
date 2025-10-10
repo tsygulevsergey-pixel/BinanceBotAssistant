@@ -23,6 +23,11 @@ from src.strategies.range_fade import RangeFadeStrategy
 from src.strategies.rsi_stoch_mr import RSIStochMRStrategy
 from src.strategies.volume_profile import VolumeProfileStrategy
 from src.strategies.liquidity_sweep import LiquiditySweepStrategy
+from src.strategies.cvd_divergence import CVDDivergenceStrategy
+from src.strategies.time_of_day import TimeOfDayStrategy
+from src.strategies.order_flow import OrderFlowStrategy
+from src.strategies.cash_and_carry import CashAndCarryStrategy
+from src.strategies.market_making import MarketMakingStrategy
 
 
 class TradingBot:
@@ -119,6 +124,11 @@ class TradingBot:
             VolumeProfileStrategy(),             # Стратегия #9
             RSIStochMRStrategy(),                # Стратегия #10
             LiquiditySweepStrategy(),            # Стратегия #11
+            OrderFlowStrategy(),                 # Стратегия #12
+            CVDDivergenceStrategy(),             # Стратегия #13
+            TimeOfDayStrategy(),                 # Стратегия #14
+            CashAndCarryStrategy(),              # Стратегия #19 (требует funding данных)
+            MarketMakingStrategy(),              # Стратегия #26 (требует HFT orderbook)
         ]
         
         self.strategy_manager.register_all(strategies)
