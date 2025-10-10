@@ -157,11 +157,14 @@ Preferred communication style: Simple, everyday language.
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
-1. ✅ **Optimized data loading speed** - 1.5-2x faster loading by removing artificial delays
+1. ✅ **Optimized data loading speed** - 4-5x faster by removing unused timeframes
+   - Removed 1m and 5m timeframes (not used in strategies, only for entry execution)
+   - Load only essential timeframes: 15m, 1h, 4h, 1d (reduced from 6 to 4 TFs)
    - Removed artificial 0.1s delays (RateLimiter handles throttling automatically)
    - Fixed critical deadlock in RateLimiter.acquire (lock now released before sleep)
-   - Sequential timeframe loading for API safety
-   - Estimated reduction: 30-40 min → 20-25 min for 246 symbols
+   - Entry points use real-time price via API (no history needed)
+   - Estimated reduction: 30-40 min → 10-12 min for 246 symbols
+   - Database size reduction: ~40M fewer records
 2. ✅ **Added progress indicators for data loading** - Shows real-time progress for symbols, timeframes, and days
    - Symbol progress: `[1/246] Loading data for BTCUSDT... (0.4%)`
    - Timeframe progress: `[1/6] Loading BTCUSDT 1m (have 0/129600)`

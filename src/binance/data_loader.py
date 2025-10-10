@@ -104,7 +104,7 @@ class DataLoader:
         end_date = datetime.now(pytz.UTC)
         start_date = end_date - timedelta(days=warm_up_days)
         
-        timeframes = ['1m', '5m', '15m', '1h', '4h', '1d']
+        timeframes = ['15m', '1h', '4h', '1d']
         total_tf = len(timeframes)
         
         for idx, interval in enumerate(timeframes, 1):
