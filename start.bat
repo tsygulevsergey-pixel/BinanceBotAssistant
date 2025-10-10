@@ -32,6 +32,11 @@ if not exist "venv" (
 REM Activate virtual environment
 echo [INFO] Activating virtual environment...
 call venv\Scripts\activate.bat
+if errorlevel 1 (
+    echo [ERROR] Failed to activate virtual environment
+    pause
+    exit /b 1
+)
 
 REM Check requirements.txt
 if not exist "requirements.txt" (
@@ -42,10 +47,10 @@ if not exist "requirements.txt" (
 
 REM Check installed packages
 echo [INFO] Checking dependencies...
-pip show aiohttp >nul 2>&1
+venv\Scripts\pip.exe show aiohttp >nul 2>&1
 if errorlevel 1 (
-    echo [INFO] Installing dependencies (this may take a while)...
-    pip install -r requirements.txt
+    echo [INFO] Installing dependencies - this may take 2-3 minutes...
+    venv\Scripts\pip.exe install -r requirements.txt
     if errorlevel 1 (
         echo [ERROR] Failed to install dependencies
         pause
@@ -54,10 +59,6 @@ if errorlevel 1 (
     echo [OK] All dependencies installed
 ) else (
     echo [OK] Dependencies already installed
-    
-    REM Check for updates
-    echo [INFO] Checking for updates...
-    pip install -r requirements.txt --quiet --upgrade 2>nul
 )
 echo.
 
@@ -66,18 +67,16 @@ if not exist ".env" (
     echo [WARNING] File .env not found!
     echo.
     echo Creating .env template...
-    (
-        echo # Binance API Keys ^(required for live trading^)
-        echo BINANCE_API_KEY=your_api_key_here
-        echo BINANCE_API_SECRET=your_secret_key_here
-        echo.
-        echo # Telegram Bot ^(optional^)
-        echo TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-        echo TELEGRAM_CHAT_ID=your_chat_id
-        echo.
-        echo # Session Secret
-        echo SESSION_SECRET=random_secret_string_here
-    ) > .env
+    echo # Binance API Keys > .env
+    echo BINANCE_API_KEY=your_api_key_here >> .env
+    echo BINANCE_API_SECRET=your_secret_key_here >> .env
+    echo. >> .env
+    echo # Telegram Bot >> .env
+    echo TELEGRAM_BOT_TOKEN=your_telegram_bot_token >> .env
+    echo TELEGRAM_CHAT_ID=your_chat_id >> .env
+    echo. >> .env
+    echo # Session Secret >> .env
+    echo SESSION_SECRET=random_secret_string_here >> .env
     echo.
     echo [ACTION REQUIRED] Open .env file and add your API keys!
     echo.
@@ -107,7 +106,7 @@ echo   Starting bot...
 echo ============================================================
 echo.
 
-REM Start bot (using python from venv)
+REM Start bot
 venv\Scripts\python.exe main.py
 
 REM If bot crashed
