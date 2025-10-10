@@ -1,6 +1,7 @@
 import asyncio
 import signal
 import sys
+from typing import List, Optional
 from src.utils.logger import logger
 from src.utils.config import config
 from src.binance.client import BinanceClient
@@ -10,9 +11,9 @@ from src.binance.data_loader import DataLoader
 class TradingBot:
     def __init__(self):
         self.running = False
-        self.client = None
-        self.data_loader = None
-        self.symbols = []
+        self.client: Optional[BinanceClient] = None
+        self.data_loader: Optional[DataLoader] = None
+        self.symbols: List[str] = []
     
     async def start(self):
         logger.info("=" * 60)
@@ -40,6 +41,9 @@ class TradingBot:
     async def _initialize(self):
         logger.info("Initializing bot...")
         
+        if not self.client:
+            raise Exception("Client not initialized")
+        
         rate_limit_status = self.client.get_rate_limit_status()
         logger.info(f"Rate limit status: {rate_limit_status['current_weight']}/{rate_limit_status['limit']}")
         
@@ -62,9 +66,10 @@ class TradingBot:
             logger.info(f"Using configured symbols: {self.symbols}")
         
         logger.info(f"Loading warm-up data for {len(self.symbols)} symbols...")
-        for symbol in self.symbols[:5]:
-            logger.info(f"Loading data for {symbol}...")
-            await self.data_loader.load_warm_up_data(symbol)
+        if self.data_loader:
+            for symbol in self.symbols[:5]:
+                logger.info(f"Loading data for {symbol}...")
+                await self.data_loader.load_warm_up_data(symbol)
             await asyncio.sleep(0.5)
         
         logger.info("Initialization complete")
@@ -76,7 +81,7 @@ class TradingBot:
         while self.running:
             iteration += 1
             
-            if iteration % 60 == 0:
+            if iteration % 60 == 0 and self.client:
                 rate_status = self.client.get_rate_limit_status()
                 logger.info(
                     f"Status: {len(self.symbols)} symbols tracked | "

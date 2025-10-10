@@ -39,6 +39,8 @@ class TelegramBot:
         logger.info("Telegram bot stopped")
     
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not update.message:
+            return
         welcome_text = (
             "🤖 *Торговый бот запущен*\n\n"
             "Доступные команды:\n"
@@ -51,6 +53,8 @@ class TelegramBot:
         await update.message.reply_text(welcome_text, parse_mode='Markdown')
     
     async def cmd_help(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not update.message:
+            return
         help_text = (
             "*Справка по командам:*\n\n"
             "/start - Начало работы\n"
@@ -62,10 +66,14 @@ class TelegramBot:
         await update.message.reply_text(help_text, parse_mode='Markdown')
     
     async def cmd_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not update.message:
+            return
         status_text = "✅ Бот работает\n\nСтатус: в процессе разработки"
         await update.message.reply_text(status_text)
     
     async def cmd_strategies(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not update.message:
+            return
         strategies_text = (
             "*Активные стратегии:*\n\n"
             "1. Donchian Breakout\n"
@@ -80,9 +88,13 @@ class TelegramBot:
         await update.message.reply_text(strategies_text, parse_mode='Markdown')
     
     async def cmd_latency(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not update.message:
+            return
         await update.message.reply_text("⏱ Latency: в процессе разработки")
     
     async def cmd_report(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not update.message:
+            return
         await update.message.reply_text("📊 Report: в процессе разработки")
     
     async def send_signal(self, signal_data: dict):

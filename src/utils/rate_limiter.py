@@ -1,13 +1,13 @@
 import asyncio
 import time
 from collections import deque
-from typing import Dict
+from typing import Dict, Optional, Any
 from src.utils.logger import logger
 from src.utils.config import config
 
 
 class RateLimiter:
-    def __init__(self, weight_limit: int = None, window_seconds: int = 60):
+    def __init__(self, weight_limit: Optional[int] = None, window_seconds: int = 60):
         self.weight_limit = weight_limit or config.get('binance.rest_weight_limit', 1100)
         self.window_seconds = window_seconds
         self.requests = deque()

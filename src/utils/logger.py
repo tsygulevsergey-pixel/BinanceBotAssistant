@@ -4,6 +4,7 @@ from pathlib import Path
 from logging.handlers import TimedRotatingFileHandler
 import pytz
 from datetime import datetime
+from typing import Optional
 from src.utils.config import config
 
 
@@ -20,7 +21,7 @@ class KyivFormatter(logging.Formatter):
         return dt.strftime('%Y-%m-%d %H:%M:%S %Z')
 
 
-def setup_logger(name: str = 'trading_bot', level: str = None) -> logging.Logger:
+def setup_logger(name: str = 'trading_bot', level: Optional[str] = None) -> logging.Logger:
     if level is None:
         level = config.log_level
     

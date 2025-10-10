@@ -36,7 +36,7 @@ class BinanceClient:
             hashlib.sha256
         ).hexdigest()
     
-    async def _request(self, method: str, endpoint: str, params: Dict = None, 
+    async def _request(self, method: str, endpoint: str, params: Optional[Dict] = None, 
                        signed: bool = False, weight: int = 1) -> Any:
         if params is None:
             params = {}
@@ -49,6 +49,8 @@ class BinanceClient:
         url = f"{self.BASE_URL}{endpoint}"
         
         async def _do_request():
+            if not self.session:
+                raise Exception("Session not initialized")
             async with self.session.request(method, url, params=params, headers=headers) as response:
                 if response.status == 429 or response.status == 418:
                     raise Exception(f"Rate limit error: {response.status}")
@@ -73,7 +75,7 @@ class BinanceClient:
         return pairs
     
     async def get_klines(self, symbol: str, interval: str, limit: int = 500,
-                         start_time: int = None, end_time: int = None) -> List[List]:
+                         start_time: Optional[int] = None, end_time: Optional[int] = None) -> List[List]:
         params = {
             'symbol': symbol,
             'interval': interval,
@@ -87,8 +89,8 @@ class BinanceClient:
         return await self._request('GET', '/fapi/v1/klines', params=params, weight=1)
     
     async def get_agg_trades(self, symbol: str, limit: int = 500,
-                             start_time: int = None, end_time: int = None,
-                             from_id: int = None) -> List[Dict]:
+                             start_time: Optional[int] = None, end_time: Optional[int] = None,
+                             from_id: Optional[int] = None) -> List[Dict]:
         params = {
             'symbol': symbol,
             'limit': limit
@@ -114,8 +116,8 @@ class BinanceClient:
         return await self._request('GET', '/fapi/v1/openInterest', params=params, weight=1)
     
     async def get_open_interest_hist(self, symbol: str, period: str = '5m',
-                                     limit: int = 30, start_time: int = None,
-                                     end_time: int = None) -> List[Dict]:
+                                     limit: int = 30, start_time: Optional[int] = None,
+                                     end_time: Optional[int] = None) -> List[Dict]:
         params = {
             'symbol': symbol,
             'period': period,
@@ -136,7 +138,7 @@ class BinanceClient:
         }
         return await self._request('GET', '/fapi/v1/fundingRate', params=params, weight=1)
     
-    async def get_24h_ticker(self, symbol: str = None) -> Dict | List[Dict]:
+    async def get_24h_ticker(self, symbol: Optional[str] = None) -> Dict | List[Dict]:
         params = {}
         if symbol:
             params['symbol'] = symbol

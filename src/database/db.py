@@ -2,13 +2,14 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 from pathlib import Path
+from typing import Optional
 from src.database.models import Base
 from src.utils.config import config
 from src.utils.logger import logger
 
 
 class Database:
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: Optional[str] = None):
         if db_path is None:
             db_path = config.database_path
         
