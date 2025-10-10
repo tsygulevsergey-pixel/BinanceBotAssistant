@@ -30,6 +30,12 @@ from src.strategies.cash_and_carry import CashAndCarryStrategy
 from src.strategies.market_making import MarketMakingStrategy
 from src.telegram.bot import TelegramBot
 from src.utils.symbol_load_coordinator import SymbolLoadCoordinator
+from src.utils.signal_lock import SignalLockManager
+from src.database import db
+from src.database.models import Signal
+import hashlib
+from datetime import datetime
+import pytz
 
 
 class TradingBot:
@@ -47,6 +53,7 @@ class TradingBot:
         self.btc_filter = BTCFilter(config._config)
         self.regime_detector = MarketRegimeDetector()
         self.telegram_bot = TelegramBot()
+        self.signal_lock_manager = SignalLockManager()
         
         self._register_strategies()
     
@@ -284,6 +291,20 @@ class TradingBot:
             
             # Проверить порог входа
             if self.signal_scorer.should_enter(final_score):
+                # Проверить блокировку символа (политика "1 сигнал на символ")
+                lock_acquired = self.signal_lock_manager.acquire_lock(
+                    symbol=signal.symbol,
+                    direction=signal.direction,
+                    strategy_name=signal.strategy_name
+                )
+                
+                if not lock_acquired:
+                    logger.warning(
+                        f"⏭️  Signal skipped (symbol locked): {signal.strategy_name} | "
+                        f"{signal.symbol} {signal.direction}"
+                    )
+                    continue
+                
                 logger.info(
                     f"✅ VALID SIGNAL: {signal.strategy_name} | "
                     f"{signal.symbol} {signal.direction} @ {signal.entry_price:.4f} | "
@@ -292,7 +313,7 @@ class TradingBot:
                 )
                 
                 # Отправить сигнал в Telegram
-                await self.telegram_bot.send_signal({
+                telegram_msg_id = await self.telegram_bot.send_signal({
                     'strategy_name': signal.strategy_name,
                     'symbol': signal.symbol,
                     'direction': signal.direction.upper(),
@@ -304,7 +325,13 @@ class TradingBot:
                     'regime': regime
                 })
                 
-                # TODO: Сохранить в БД / выполнить ордер
+                # Сохранить сигнал в БД
+                self._save_signal_to_db(
+                    signal=signal,
+                    final_score=final_score,
+                    regime=regime,
+                    telegram_msg_id=telegram_msg_id
+                )
             else:
                 logger.debug(
                     f"❌ Signal rejected (score {final_score:.1f} < {self.signal_scorer.enter_threshold}): "
@@ -390,6 +417,56 @@ class TradingBot:
             await asyncio.sleep(0.5)
         
         logger.info(f"Analyzer task stopped. {len(self.ready_symbols)} symbols ready for analysis")
+    
+    def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None):
+        """Сохранить сигнал в базу данных"""
+        session = db.get_session()
+        try:
+            # Генерировать уникальный context_hash для сигнала
+            context_str = f"{signal.symbol}_{signal.strategy_name}_{signal.direction}_{signal.entry_price}_{regime}"
+            context_hash = hashlib.sha256(context_str.encode()).hexdigest()[:64]
+            
+            # Генерировать стабильный strategy_id из имени (CRC32 always positive)
+            import zlib
+            strategy_id = zlib.crc32(signal.strategy_name.encode()) & 0x7FFFFFFF  # Ensure positive 31-bit int
+            
+            # Создать запись сигнала
+            db_signal = Signal(
+                context_hash=context_hash,
+                symbol=signal.symbol,
+                strategy_id=strategy_id,
+                strategy_name=signal.strategy_name,
+                direction=signal.direction,
+                entry_price=signal.entry_price,
+                stop_loss=signal.stop_loss,
+                take_profit_1=signal.take_profit_1,
+                take_profit_2=signal.take_profit_2 if signal.take_profit_2 else signal.take_profit_1,
+                score=final_score,
+                market_regime=regime,
+                timeframe=signal.timeframe,
+                created_at=datetime.now(pytz.UTC),
+                status='ACTIVE',
+                telegram_message_id=telegram_msg_id,
+                meta_data={
+                    'base_score': signal.base_score,
+                    'volume_ratio': signal.volume_ratio,
+                    'cvd_direction': signal.cvd_direction,
+                    'oi_delta_percent': signal.oi_delta_percent,
+                    'imbalance_detected': signal.imbalance_detected,
+                    'late_trend': signal.late_trend,
+                    'btc_against': signal.btc_against,
+                    'bias': signal.bias
+                }
+            )
+            
+            session.add(db_signal)
+            session.commit()
+            logger.info(f"💾 Signal saved to DB: {signal.symbol} {signal.direction} (ID: {db_signal.id}, Strategy ID: {strategy_id})")
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to save signal to DB: {e}", exc_info=True)
+        finally:
+            session.close()
     
     async def stop(self):
         logger.info("Stopping bot...")

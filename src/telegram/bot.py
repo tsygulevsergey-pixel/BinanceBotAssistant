@@ -138,17 +138,19 @@ class TelegramBot:
     
     async def send_signal(self, signal_data: dict):
         if not self.bot or not self.chat_id:
-            return
+            return None
         
         try:
             message = self._format_signal(signal_data)
-            await self.bot.send_message(
+            msg = await self.bot.send_message(
                 chat_id=self.chat_id,
                 text=message,
                 parse_mode='Markdown'
             )
+            return msg.message_id if msg else None
         except Exception as e:
             logger.error(f"Error sending signal: {e}")
+            return None
     
     def _format_signal(self, signal_data: dict) -> str:
         direction_emoji = "🟢" if signal_data['direction'] == 'LONG' else "🔴"

@@ -128,3 +128,17 @@ class MarketState(Base):
     __table_args__ = (
         Index('idx_market_state_symbol_timeframe_time', 'symbol', 'timeframe', 'timestamp'),
     )
+
+
+class SignalLock(Base):
+    __tablename__ = 'signal_locks'
+    
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String(20), nullable=False, index=True, unique=True)
+    direction = Column(String(10), nullable=False)
+    strategy_name = Column(String(50), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
+    
+    __table_args__ = (
+        Index('idx_signal_lock_created', 'created_at'),
+    )

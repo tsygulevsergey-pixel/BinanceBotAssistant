@@ -184,6 +184,13 @@ telegram:
   lock_per_symbol: true
   lock_ttl: 3600  # seconds
 
+# Redis (optional - fallback to SQLite if unavailable)
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null  # Set if Redis requires authentication
+
 # WebSocket Health
 websocket:
   stale_threshold_ms: 500
