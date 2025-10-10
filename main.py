@@ -529,8 +529,15 @@ class TradingBot:
             session.close()
     
     async def stop(self):
+        import traceback
         logger.info("Stopping bot...")
+        logger.debug(f"Stop called from: {''.join(traceback.format_stack()[-3:-1])}")
         self.running = False
+        
+        # Ждём завершения координатора если он ещё работает
+        if self.coordinator and not self.coordinator.is_loading_complete():
+            logger.info("Waiting for coordinator to finish loading...")
+            await asyncio.sleep(2)  # Даём время на graceful shutdown
         
         if self.coordinator:
             self.coordinator.signal_shutdown()
