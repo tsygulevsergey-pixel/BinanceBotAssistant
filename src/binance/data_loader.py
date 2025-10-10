@@ -100,7 +100,7 @@ class DataLoader:
             session.close()
     
     async def load_warm_up_data(self, symbol: str, silent: bool = False):
-        """Load historical data for a symbol
+        """Smart load - загружает ТОЛЬКО недостающие данные
         
         Args:
             symbol: Symbol to load data for
@@ -110,24 +110,49 @@ class DataLoader:
             bool: True if all timeframes loaded successfully, False otherwise
         """
         warm_up_days = config.get('database.warm_up_days', 90)
-        end_date = datetime.now(pytz.UTC)
-        start_date = end_date - timedelta(days=warm_up_days)
+        full_end_date = datetime.now(pytz.UTC)
+        full_start_date = full_end_date - timedelta(days=warm_up_days)
         
         timeframes = ['15m', '1h', '4h', '1d']
         total_tf = len(timeframes)
         
         try:
             for idx, interval in enumerate(timeframes, 1):
-                existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
-                expected_count = self._expected_candle_count(interval, warm_up_days)
-                
-                if existing_count < expected_count * 0.95:
-                    if not silent:
-                        logger.info(f"  [{idx}/{total_tf}] Loading {symbol} {interval} (have {existing_count}/{expected_count})")
-                    await self.download_historical_klines(symbol, interval, start_date, end_date)
-                else:
-                    if not silent:
-                        logger.info(f"  [{idx}/{total_tf}] ✓ {symbol} {interval} already complete ({existing_count} candles)")
+                session = db.get_session()
+                try:
+                    # Находим последнюю свечу в БД
+                    latest_candle = session.query(Candle).filter(
+                        Candle.symbol == symbol,
+                        Candle.timeframe == interval
+                    ).order_by(Candle.open_time.desc()).first()
+                    
+                    if latest_candle and latest_candle.open_time:
+                        # Есть данные - проверяем gap
+                        # SQLAlchemy возвращает datetime, но LSP не видит тип - явно приводим
+                        last_time: datetime = latest_candle.open_time  # type: ignore
+                        
+                        # Убеждаемся что last_time имеет timezone UTC
+                        if last_time.tzinfo is None:
+                            last_time = pytz.UTC.localize(last_time)
+                        
+                        gap_start = last_time + timedelta(minutes=1)
+                        gap_end = full_end_date
+                        gap_minutes = (gap_end - gap_start).total_seconds() / 60
+                        
+                        if gap_minutes > 5:  # Gap больше 5 минут
+                            if not silent:
+                                logger.info(f"  [{idx}/{total_tf}] 🔄 {symbol} {interval} - gap detected, updating from {gap_start.strftime('%Y-%m-%d %H:%M')}")
+                            await self.download_historical_klines(symbol, interval, gap_start, gap_end)
+                        else:
+                            if not silent:
+                                logger.info(f"  [{idx}/{total_tf}] ✓ {symbol} {interval} up-to-date")
+                    else:
+                        # Нет данных - загружаем все 90 дней
+                        if not silent:
+                            logger.info(f"  [{idx}/{total_tf}] 📥 {symbol} {interval} - loading {warm_up_days} days")
+                        await self.download_historical_klines(symbol, interval, full_start_date, full_end_date)
+                finally:
+                    session.close()
             
             return True
         except Exception as e:
@@ -188,8 +213,15 @@ class DataLoader:
                 Candle.timeframe == interval
             ).order_by(Candle.open_time.desc()).first()
             
-            if latest_candle:
-                start_date = latest_candle.open_time + timedelta(minutes=1)
+            if latest_candle and latest_candle.open_time:
+                # SQLAlchemy возвращает datetime, но LSP не видит тип - явно приводим
+                last_time: datetime = latest_candle.open_time  # type: ignore
+                
+                # Убеждаемся что last_time имеет timezone UTC
+                if last_time.tzinfo is None:
+                    last_time = pytz.UTC.localize(last_time)
+                
+                start_date = last_time + timedelta(minutes=1)
                 end_date = datetime.now(pytz.UTC)
                 
                 if (end_date - start_date).total_seconds() > 300:

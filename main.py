@@ -403,36 +403,34 @@ class TradingBot:
             try:
                 self.coordinator.increment_loading_count()
                 
-                if self.data_loader.is_symbol_data_complete(symbol):
-                    logger.info(f"[{idx}/{len(self.symbols)}] ✓ {symbol} data already complete")
+                # Всегда вызываем load_warm_up_data - она умная и сама решит что делать
+                # (догрузить gap или загрузить все данные)
+                logger.info(f"[{idx}/{len(self.symbols)}] Checking {symbol}... ({(idx/len(self.symbols))*100:.1f}%)")
+                
+                success = False
+                for attempt in range(max_retries):
+                    try:
+                        success = await self.data_loader.load_warm_up_data(symbol, silent=False)
+                        if success:
+                            break
+                        
+                        if attempt < max_retries - 1:
+                            delay = retry_delays[attempt]
+                            logger.warning(f"Retry {attempt + 1}/{max_retries} for {symbol} in {delay}s...")
+                            await asyncio.sleep(delay)
+                    except Exception as retry_error:
+                        if attempt < max_retries - 1:
+                            delay = retry_delays[attempt]
+                            logger.warning(f"Retry {attempt + 1}/{max_retries} for {symbol} after error: {retry_error}")
+                            await asyncio.sleep(delay)
+                        else:
+                            raise
+                
+                if success:
                     await self.coordinator.add_ready_symbol(symbol)
+                    logger.info(f"✓ {symbol} loaded and ready for analysis")
                 else:
-                    logger.info(f"[{idx}/{len(self.symbols)}] Loading {symbol}... ({(idx/len(self.symbols))*100:.1f}%)")
-                    
-                    success = False
-                    for attempt in range(max_retries):
-                        try:
-                            success = await self.data_loader.load_warm_up_data(symbol, silent=True)
-                            if success:
-                                break
-                            
-                            if attempt < max_retries - 1:
-                                delay = retry_delays[attempt]
-                                logger.warning(f"Retry {attempt + 1}/{max_retries} for {symbol} in {delay}s...")
-                                await asyncio.sleep(delay)
-                        except Exception as retry_error:
-                            if attempt < max_retries - 1:
-                                delay = retry_delays[attempt]
-                                logger.warning(f"Retry {attempt + 1}/{max_retries} for {symbol} after error: {retry_error}")
-                                await asyncio.sleep(delay)
-                            else:
-                                raise
-                    
-                    if success:
-                        await self.coordinator.add_ready_symbol(symbol)
-                        logger.info(f"✓ {symbol} loaded and ready for analysis")
-                    else:
-                        self.coordinator.mark_symbol_failed(symbol, f"Loading failed after {max_retries} attempts")
+                    self.coordinator.mark_symbol_failed(symbol, f"Loading failed after {max_retries} attempts")
                 
             except Exception as e:
                 logger.error(f"Error loading {symbol} after {max_retries} retries: {e}")
