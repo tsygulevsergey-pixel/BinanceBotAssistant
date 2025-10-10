@@ -77,3 +77,31 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 - **Exchange**: python-binance, ccxt.
 - **Scheduling**: APScheduler.
 - **Configuration**: pyyaml, python-dotenv.
+
+# Recent Changes (October 2025)
+
+## Latest Updates (October 10, 2025)
+1. ✅ **Implemented Reclaim Mechanism** - "Hold N bars" validation for mean reversion strategies
+   - New module `src/utils/reclaim_checker.py` with reusable reclaim functions
+   - check_value_area_reclaim(): verifies price was outside VA, returned and held N bars inside
+   - check_level_reclaim(): for VWAP/EMA levels with tolerance
+   - check_range_reclaim(): for range boundaries
+   - **VWAP Mean Reversion updated**: now requires 2-bar hold confirmation inside VAL/VAH or VWAP bands
+   - Reduces false signals from brief touches, improves signal quality
+2. ✅ **Implemented Signal Performance Tracking** - Real-time PnL monitoring and win rate analytics
+   - SignalPerformanceTracker runs as background task (60s check interval)
+   - Monitors active signals: checks TP/SL/time-stop via mark price API
+   - Calculates PnL: LONG (exit-entry)/entry×100, SHORT (entry-exit)/entry×100
+   - Updates signal status: WIN (TP hit), LOSS (SL hit), TIME_STOP (no progress)
+   - Auto-releases symbol lock when signal exits
+   - **Telegram commands**: /performance (overall stats), /stats (per-strategy breakdown)
+   - Provides: total signals, win rate, avg/total PnL, avg win/loss, closed/active counts
+3. ✅ **Implemented "1 signal per symbol" lock** - Redis-based + SQLite fallback
+   - SignalLockManager prevents duplicate signals on same symbol
+   - TTL-based expiration (3600s default)
+   - Automatic lock release on signal exit
+4. ✅ **Signal persistence to database** - All signals saved with metadata
+   - Stable strategy_id using CRC32 hash
+   - Context_hash for deduplication  
+   - Telegram message_id linking
+   - Timezone-aware timestamps (UTC)

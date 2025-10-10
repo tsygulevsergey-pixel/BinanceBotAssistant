@@ -5,6 +5,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.indicators.vwap import calculate_daily_vwap
 from src.indicators.volume_profile import calculate_volume_profile
+from src.utils.reclaim_checker import check_value_area_reclaim, check_level_reclaim
 
 
 class VWAPMeanReversionStrategy(BaseStrategy):
@@ -131,19 +132,32 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         if h4_swing_low is None or h4_swing_high is None:
             return None
         
-        # LONG: отклонение вниз от value + reclaim обратно
-        # Зона покупки: около VAL или VWAP-σ
-        if current_close < val or current_close < current_lower:
-            # CONFLUENCE проверка: VAL должен совпадать с H4 swing low
-            confluence_zone = abs(val - h4_swing_low) <= 0.3 * current_atr
-            if not confluence_zone:
-                return None
+        # LONG: RECLAIM механизм - цена была ниже зоны value, вернулась и удержалась
+        # CONFLUENCE проверка: VAL должен совпадать с H4 swing low
+        confluence_zone = abs(val - h4_swing_low) <= 0.3 * current_atr
+        if confluence_zone:
             
-            # Проверка: была ли свеча-отклонение и reclaim
-            prev_low = df['low'].iloc[-2]
+            # RECLAIM механизм: проверка что цена вернулась в value area и удержалась там
+            # Используем check_value_area_reclaim для VAL с удержанием self.reclaim_bars (по умолчанию 2 бара)
+            reclaim_confirmed = check_value_area_reclaim(
+                df=df,
+                val=val,
+                vah=vah,
+                direction='long',
+                hold_bars=self.reclaim_bars
+            )
             
-            # Свеча reclaim: low был ниже, но close выше зоны
-            if prev_low < current_lower and current_close > current_lower:
+            # Дополнительная проверка для VWAP lower band reclaim
+            vwap_reclaim = check_level_reclaim(
+                df=df,
+                level=current_lower,
+                direction='long',
+                hold_bars=self.reclaim_bars,
+                tolerance_pct=0.15
+            )
+            
+            # Требуется хотя бы одно подтверждение reclaim
+            if reclaim_confirmed or vwap_reclaim:
                 
                 entry = current_close
                 stop_loss = current_low - 0.25 * current_atr
@@ -178,16 +192,31 @@ class VWAPMeanReversionStrategy(BaseStrategy):
                 )
                 return signal
         
-        # SHORT: отклонение вверх от value + reclaim обратно
-        elif current_close > vah or current_close > current_upper:
-            # CONFLUENCE проверка: VAH должен совпадать с H4 swing high
-            confluence_zone = abs(vah - h4_swing_high) <= 0.3 * current_atr
-            if not confluence_zone:
-                return None
+        # SHORT: RECLAIM механизм - цена была выше зоны value, вернулась и удержалась
+        # CONFLUENCE проверка: VAH должен совпадать с H4 swing high
+        confluence_zone = abs(vah - h4_swing_high) <= 0.3 * current_atr
+        if confluence_zone:
             
-            prev_high = df['high'].iloc[-2]
+            # RECLAIM механизм: проверка что цена вернулась в value area и удержалась там
+            reclaim_confirmed = check_value_area_reclaim(
+                df=df,
+                val=val,
+                vah=vah,
+                direction='short',
+                hold_bars=self.reclaim_bars
+            )
             
-            if prev_high > current_upper and current_close < current_upper:
+            # Дополнительная проверка для VWAP upper band reclaim
+            vwap_reclaim = check_level_reclaim(
+                df=df,
+                level=current_upper,
+                direction='short',
+                hold_bars=self.reclaim_bars,
+                tolerance_pct=0.15
+            )
+            
+            # Требуется хотя бы одно подтверждение reclaim
+            if reclaim_confirmed or vwap_reclaim:
                 
                 entry = current_close
                 stop_loss = current_high + 0.25 * current_atr
