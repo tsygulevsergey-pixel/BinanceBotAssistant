@@ -157,11 +157,11 @@ Preferred communication style: Simple, everyday language.
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
-1. ✅ **Optimized data loading speed** - 3-5x faster loading by utilizing full Binance API rate limits
+1. ✅ **Optimized data loading speed** - 1.5-2x faster loading by removing artificial delays
    - Removed artificial 0.1s delays (RateLimiter handles throttling automatically)
-   - Parallel timeframe loading (all 6 TFs load simultaneously per symbol)
    - Fixed critical deadlock in RateLimiter.acquire (lock now released before sleep)
-   - Estimated reduction: 30-40 min → 10-15 min for 246 symbols
+   - Sequential timeframe loading for API safety
+   - Estimated reduction: 30-40 min → 20-25 min for 246 symbols
 2. ✅ **Added progress indicators for data loading** - Shows real-time progress for symbols, timeframes, and days
    - Symbol progress: `[1/246] Loading data for BTCUSDT... (0.4%)`
    - Timeframe progress: `[1/6] Loading BTCUSDT 1m (have 0/129600)`
