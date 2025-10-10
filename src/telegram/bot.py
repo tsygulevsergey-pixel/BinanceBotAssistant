@@ -11,6 +11,7 @@ class TelegramBot:
         self.chat_id = config.get_secret('telegram_chat_id')
         self.app = None
         self.bot = None
+        self.startup_message_sent = False
     
     async def start(self):
         if not self.token:
@@ -30,12 +31,22 @@ class TelegramBot:
         await self.app.initialize()
         await self.app.start()
         
-        logger.info("Telegram bot started")
+        # Запуск polling в фоновом режиме для получения команд
+        if self.app.updater:
+            asyncio.create_task(self.app.updater.start_polling(drop_pending_updates=True))
+            logger.info("Telegram bot started with polling")
+        else:
+            logger.warning("Telegram updater not available - commands will not work")
     
     async def stop(self):
         if self.app:
-            await self.app.stop()
-            await self.app.shutdown()
+            try:
+                if self.app.updater and self.app.updater.running:
+                    await self.app.updater.stop()
+                await self.app.stop()
+                await self.app.shutdown()
+            except Exception as e:
+                logger.error(f"Error stopping Telegram bot: {e}")
         logger.info("Telegram bot stopped")
     
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -102,6 +113,11 @@ class TelegramBot:
             logger.warning("Telegram bot not configured - skipping startup message")
             return
         
+        # Отправляем только один раз
+        if self.startup_message_sent:
+            logger.debug("Startup message already sent, skipping")
+            return
+        
         try:
             message = (
                 f"🤖 *Бот запущен!*\n\n"
@@ -115,6 +131,7 @@ class TelegramBot:
                 text=message,
                 parse_mode='Markdown'
             )
+            self.startup_message_sent = True
             logger.info("Startup message sent to Telegram")
         except Exception as e:
             logger.error(f"Error sending startup message: {e}")
