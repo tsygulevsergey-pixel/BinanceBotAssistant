@@ -75,13 +75,13 @@ class TradingBot:
         self.running = True
         
         try:
-            async with BinanceClient() as client:
-                self.client = client
-                self.data_loader = DataLoader(client)
-                
-                await self._initialize()
-                
-                await self._run_main_loop()
+            # Создаём клиента и не закрываем сессию автоматически
+            self.client = BinanceClient()
+            await self.client.__aenter__()  # Открываем сессию
+            self.data_loader = DataLoader(self.client)
+            
+            await self._initialize()
+            await self._run_main_loop()
         
         except KeyboardInterrupt:
             logger.info("Shutdown signal received")
@@ -527,6 +527,15 @@ class TradingBot:
             await self.performance_tracker.stop()
         
         await self.telegram_bot.stop()
+        
+        # Закрываем сессию BinanceClient
+        if self.client:
+            try:
+                await self.client.__aexit__(None, None, None)
+                logger.info("BinanceClient session closed")
+            except Exception as e:
+                logger.error(f"Error closing BinanceClient session: {e}")
+        
         logger.info("Bot stopped")
 
 
