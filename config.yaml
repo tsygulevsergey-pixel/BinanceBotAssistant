@@ -11,6 +11,8 @@ database:
 
 # Binance API
 binance:
+  use_testnet: true  # true = использовать Binance Testnet (для теста на Replit)
+  signals_only_mode: true  # true = только сигналы без торговли (не нужны API ключи)
   rest_weight_limit: 1100  # per minute
   ws_reconnect_delay: 5
   rate_limit_backoff_base: 2

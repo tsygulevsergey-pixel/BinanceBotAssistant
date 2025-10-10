@@ -13,10 +13,24 @@ from src.utils.rate_limiter import RateLimiter
 
 class BinanceClient:
     BASE_URL = "https://fapi.binance.com"
+    TESTNET_URL = "https://testnet.binancefuture.com"
     
     def __init__(self):
-        self.api_key = config.get_secret('binance_api_key')
-        self.api_secret = config.get_secret('binance_api_secret')
+        self.use_testnet = config.get('binance.use_testnet', False)
+        self.signals_only_mode = config.get('binance.signals_only_mode', False)
+        
+        # API ключи опциональны в режиме signals_only
+        if self.signals_only_mode:
+            self.api_key = None
+            self.api_secret = None
+            logger.warning("⚠️ Signals-Only Mode: API keys disabled, trading functions unavailable")
+        else:
+            self.api_key = config.get_secret('binance_api_key')
+            self.api_secret = config.get_secret('binance_api_secret')
+        
+        if self.use_testnet:
+            logger.warning("⚠️ Using Binance TESTNET - not real market data!")
+        
         self.session: Optional[aiohttp.ClientSession] = None
         self.rate_limiter = RateLimiter()
     
@@ -29,6 +43,8 @@ class BinanceClient:
             await self.session.close()
     
     def _generate_signature(self, params: Dict[str, Any]) -> str:
+        if not self.api_secret:
+            raise Exception("Cannot generate signature: API secret not configured (signals_only_mode enabled)")
         query_string = '&'.join([f"{k}={v}" for k, v in params.items()])
         return hmac.new(
             self.api_secret.encode('utf-8'),
@@ -41,12 +57,17 @@ class BinanceClient:
         if params is None:
             params = {}
         
+        # Запретить подписанные запросы в signals_only режиме
+        if signed and self.signals_only_mode:
+            raise Exception(f"Cannot execute signed request '{endpoint}' in signals_only_mode")
+        
         if signed:
             params['timestamp'] = int(time.time() * 1000)
             params['signature'] = self._generate_signature(params)
         
         headers = {'X-MBX-APIKEY': self.api_key} if self.api_key else {}
-        url = f"{self.BASE_URL}{endpoint}"
+        base_url = self.TESTNET_URL if self.use_testnet else self.BASE_URL
+        url = f"{base_url}{endpoint}"
         
         async def _do_request():
             if not self.session:

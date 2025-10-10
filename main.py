@@ -20,6 +20,12 @@ class TradingBot:
         logger.info("Trading Bot Starting...")
         logger.info("=" * 60)
         
+        # Проверка режима работы
+        signals_only = config.get('binance.signals_only_mode', False)
+        if signals_only:
+            logger.warning("🔔 SIGNALS-ONLY MODE: Bot will generate signals without real trading")
+            logger.warning("🔔 No API keys required in this mode")
+        
         self.running = True
         
         try:
