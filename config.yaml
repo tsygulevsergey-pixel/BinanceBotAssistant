@@ -62,7 +62,7 @@ scoring:
 
 # Scanning
 scanning:
-  check_interval_seconds: 10  # Проверять сигналы каждые 10 секунд
+  check_interval_seconds: 60  # Проверять сигналы каждые 60 секунд
 
 # Risk Management
 risk:

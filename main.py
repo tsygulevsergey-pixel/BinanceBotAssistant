@@ -286,16 +286,20 @@ class TradingBot:
                 timeframe_data[tf] = df
         
         if not timeframe_data:
+            logger.debug(f"❌ {symbol}: No timeframe data available")
             return
         
         # Определить режим рынка и bias
         h4_data = timeframe_data.get('4h')
         if h4_data is None or len(h4_data) < 50:
+            logger.debug(f"❌ {symbol}: Insufficient H4 data ({len(h4_data) if h4_data is not None else 0} bars)")
             return
         
         regime_data = self.regime_detector.detect_regime(h4_data)
         regime = regime_data['regime'].value  # Convert ENUM to string
         bias = self.regime_detector.get_h4_bias(h4_data)
+        
+        logger.debug(f"🔍 Analyzing {symbol} | Regime: {regime} | Bias: {bias}")
         
         # Рассчитать H4 swings для confluence проверки
         h4_swing_high = h4_data['high'].tail(20).max() if h4_data is not None and len(h4_data) >= 20 else None
@@ -328,6 +332,11 @@ class TradingBot:
             indicators=indicators
         )
         
+        if signals:
+            logger.debug(f"📊 {symbol}: {len(signals)} signals from strategies: {[s.strategy_name for s in signals]}")
+        else:
+            logger.debug(f"⚪ {symbol}: No signals from any strategy")
+        
         # Применить скоринг к каждому сигналу
         for signal in signals:
             final_score = self.signal_scorer.score_signal(
@@ -339,6 +348,8 @@ class TradingBot:
             
             # Проверить порог входа
             if self.signal_scorer.should_enter(final_score):
+                logger.debug(f"✅ {signal.strategy_name} | {symbol} {signal.direction} | Score: {final_score:.1f} PASSED threshold")
+                
                 # Проверить блокировку символа (политика "1 сигнал на символ")
                 lock_acquired = self.signal_lock_manager.acquire_lock(
                     symbol=signal.symbol,
@@ -352,6 +363,14 @@ class TradingBot:
                         f"{signal.symbol} {signal.direction}"
                     )
                     continue
+            else:
+                logger.debug(
+                    f"❌ {signal.strategy_name} | {symbol} {signal.direction} | "
+                    f"Score: {final_score:.1f} < threshold 2.0 | "
+                    f"Base: {signal.base_score:.1f}, Vol: {signal.volume_ratio:.1f}x, "
+                    f"CVD: {signal.cvd_direction}, Late: {signal.late_trend}, BTC: {signal.btc_against}"
+                )
+                continue
                 
                 logger.info(
                     f"✅ VALID SIGNAL: {signal.strategy_name} | "
@@ -379,11 +398,6 @@ class TradingBot:
                     final_score=final_score,
                     regime=regime,
                     telegram_msg_id=telegram_msg_id
-                )
-            else:
-                logger.debug(
-                    f"❌ Signal rejected (score {final_score:.1f} < {self.signal_scorer.enter_threshold}): "
-                    f"{signal.strategy_name} {signal.symbol} {signal.direction}"
                 )
     
     async def _symbol_loader_task(self):

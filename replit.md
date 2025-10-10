@@ -82,6 +82,14 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
+1. ✅ **Strategy Debug Logging** - Детальное логирование для отладки стратегий
+   - **Режим рынка**: показывает Regime (TREND/RANGE/SQUEEZE) и Bias (LONG/SHORT/NEUTRAL)
+   - **Какие стратегии проверялись**: логирует все стратегии которые сработали
+   - **Почему не прошли**: показывает Score, Base, Volume ratio, CVD, Late trend, BTC против
+   - **Пример**: `❌ Donchian Breakout | BTCUSDT LONG | Score: 1.5 < threshold 2.0 | Base: 2.0, Vol: 0.9x, CVD: neutral, Late: False, BTC: False`
+   - Логи видны в консоли бота каждые 60 секунд при проверке сигналов
+
+## Previous Updates
 1. ✅ **Smart Data Loading** - Умная докачка данных при запуске
    - **Интеллектуальная проверка**: при запуске анализирует КАЖДУЮ монету
    - **Gap detection**: находит последнюю свечу в БД и вычисляет разрыв
