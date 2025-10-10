@@ -170,7 +170,7 @@ class TradingBot:
         logger.debug("Checking signals for all symbols...")
         
         # Загрузить BTC данные для фильтра
-        btc_data = await self.data_loader.get_klines('BTCUSDT', '1h', limit=100)
+        btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
         # Проверяем несколько символов за раз
         for symbol in self.symbols[:10]:  # Лимит для тестирования
@@ -189,7 +189,7 @@ class TradingBot:
         # Загрузить данные для всех таймфреймов
         timeframe_data = {}
         for tf in ['15m', '1h', '4h']:
-            df = await self.data_loader.get_klines(symbol, tf, limit=200)
+            df = self.data_loader.get_candles(symbol, tf, limit=200)
             if df is not None and len(df) > 0:
                 timeframe_data[tf] = df
         
