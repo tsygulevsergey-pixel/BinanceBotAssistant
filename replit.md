@@ -81,13 +81,17 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
-1. ✅ **Implemented Reclaim Mechanism** - "Hold N bars" validation for mean reversion strategies
-   - New module `src/utils/reclaim_checker.py` with reusable reclaim functions
-   - check_value_area_reclaim(): verifies price was outside VA, returned and held N bars inside
-   - check_level_reclaim(): for VWAP/EMA levels with tolerance
-   - check_range_reclaim(): for range boundaries
-   - **VWAP Mean Reversion updated**: now requires 2-bar hold confirmation inside VAL/VAH or VWAP bands
-   - Reduces false signals from brief touches, improves signal quality
+1. ✅ **Implemented Reclaim Mechanism** - "Hold N bars" validation for ALL mean reversion strategies
+   - New module `src/utils/reclaim_checker.py` with reusable reclaim functions:
+     - check_value_area_reclaim(): verifies price was outside VA, returned and held N bars inside
+     - check_level_reclaim(): for VWAP/EMA levels with tolerance
+     - check_range_reclaim(): for range boundaries with hold confirmation
+   - **All 4 MR strategies updated** (default 2-bar hold):
+     - **VWAP Mean Reversion**: requires hold inside VAL/VAH or VWAP bands
+     - **Range Fade**: proximity check (0.3 ATR) + reclaim support/resistance with hold
+     - **Volume Profile**: VAH/VAL rejection requires value area reclaim with hold
+     - **RSI/Stoch MR**: oscillator signals + reclaim VAL/VWAP levels with hold
+   - Reduces false signals from brief touches, improves signal quality significantly
 2. ✅ **Implemented Signal Performance Tracking** - Real-time PnL monitoring and win rate analytics
    - SignalPerformanceTracker runs as background task (60s check interval)
    - Monitors active signals: checks TP/SL/time-stop via mark price API
