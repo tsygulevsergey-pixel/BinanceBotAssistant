@@ -1,0 +1,51 @@
+5. Режимы рынка
+- TREND, RANGE, SQUEEZE. Если условий TREND/RANGE нет — держим прошлый режим; при сомнении UNDECIDED и не торгуем.
+- Детект на M15/H1 с H4-bias. 1m — только триггеры/исполнение.
+
+6. Семейства стратегий
+- Включены: #1 Breakout, #2 Squeeze Breakout, #3 Momentum, #5 Break & Retest, #6 Trend-Continuation Pullback, #7/#8/#11 Mean-Reversion.
+- #4 Pullback к EMA/AVWAP — опционально (feature-flag).
+- #9 VAH/VAL/VPOC — утилита/рамка (не сигнал).
+
+7. Acceptance / Reclaim / ΔOI
+- Acceptance: (два закрытия) ИЛИ (одно закрытие ≥ 0.25 ATR) + объём > 1.5 × медианы 20.
+- Reclaim: закрытие внутрь value и удержание N баров, N=2 на 1m.
+- ΔOI: тренд +1…+3%; для альтов допускается +0.5…+1.0%.
+
+8. Скоринг и публикация
+- Порог скоринга ≥ +2.0.
+- Для TREND обязательно (acceptance ИЛИ ΔOI).
+- Профиль:
+  - Тренд — value-accept (вне value) даёт плюс.
+  - MR — требуется value-reclaim.
+- ToD:
+  - Пробои/моментум — только EU/US окна.
+  - Вне слотов публикуем только MR (флаг).
+- Политика «1 сигнал на символ» — Redis lock + TTL.
+
+9. RR и риск
+- Breakout/Momentum: 2.0–3.0R.
+- Retest/Pullback: 1.5–2.5R.
+- Mean-Reversion: 1.2–2.0R.
+- Риск/сделку: 0.5–1.0R; дневной/недельный стоп; max одновременных позиций; неттинг «1 символ = 1 идея».
+- Тайм-стоп: 6–8 баров 1m.
+- Исполнение (на будущее): OCO/Reduce-Only по умолчанию, лимит slippage и max orders/min per символ.
+
+10. BTC-фильтр
+- Не входить против H1-движения BTCUSDT (EMA-базис).
+- MR-блок при импульсе BTC 1m: |ret| ≥ 0.8% — блок MR на окно; снятие после окна без импульсов.
+
+11. Килл-свитчи и деградация
+- WS stale/seq-gap: stale > 500 мс или seqgaptotal > 0 — ресинк и пауза символа (warning); ≥3 события/5 мин — critical.
+- Реактивные сигналы: p95 > 300 мс (2–3 мин) warning; > 500 мс critical.
+- Close-зависимые: p95 > 0.8 с (5 мин) warning; > 1.5 с critical.
+- Loop-lag: p95 > 200 мс (1 мин) warning; > 400 мс critical.
+- CPU/RAM: > 85% (3 мин) warning; > 95% (1 мин) critical; RSS рост > 5%/мин 3 мин или swap > 0 — critical.
+- TG ошибки: > 0.5% (5 мин) warning; > 2% (5 мин) critical + circuit-breaker (fallback + DLQ + батчи).
+- Load-shedding: Step1 отключаем DOM по альтам; Step2 +0.5 к порогу, выключаем пробои вне EU/US; Step3 только BTC/ETH; Step4 MR вне слотов — freeze.
+- Recovery: любое состояние снимаем только после 10 мин «зелёного окна»; символ возвращаем после snapshot+replay и 2 мин без seqgap.
+
+12. Онлайн-гейты качества
+- Автопауза: если rolling-WR (200 сделок) < WRmin − 3 п.п.
+- FPR > лимита (на 500 сигналов) — поднимаем порог на +0.5 или отключаем саб-паттерн.
+- Error-budget (14 дней): > 50% — review; > 80% — freeze.
