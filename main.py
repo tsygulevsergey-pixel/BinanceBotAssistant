@@ -21,6 +21,8 @@ from src.strategies.atr_momentum import ATRMomentumStrategy
 from src.strategies.vwap_mean_reversion import VWAPMeanReversionStrategy
 from src.strategies.range_fade import RangeFadeStrategy
 from src.strategies.rsi_stoch_mr import RSIStochMRStrategy
+from src.strategies.volume_profile import VolumeProfileStrategy
+from src.strategies.liquidity_sweep import LiquiditySweepStrategy
 
 
 class TradingBot:
@@ -114,7 +116,9 @@ class TradingBot:
             ATRMomentumStrategy(),               # Стратегия #6
             VWAPMeanReversionStrategy(),         # Стратегия #7
             RangeFadeStrategy(),                 # Стратегия #8
+            VolumeProfileStrategy(),             # Стратегия #9
             RSIStochMRStrategy(),                # Стратегия #10
+            LiquiditySweepStrategy(),            # Стратегия #11
         ]
         
         self.strategy_manager.register_all(strategies)
