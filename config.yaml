@@ -60,6 +60,10 @@ scoring:
   funding_extreme_penalty: -1
   btc_against_penalty: -2
 
+# Scanning
+scanning:
+  check_interval_seconds: 10  # Проверять сигналы каждые 10 секунд
+
 # Risk Management
 risk:
   risk_per_trade: 0.01  # 1% of capital
