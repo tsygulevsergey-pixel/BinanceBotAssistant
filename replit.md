@@ -156,7 +156,17 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (October 2025)
 
-## Completed Implementation (Latest Update)
+## Latest Critical Fixes (October 10, 2025)
+1. ✅ **Fixed .env loading** - Added `load_dotenv()` to config.py, Telegram integration now working
+2. ✅ **Fixed Volume Profile key** - Returns both 'poc' and 'vpoc' keys for strategy compatibility
+3. ✅ **Fixed CVD Divergence** - Added zero-division protection in divergence calculation
+4. ✅ **Fixed symbol checking** - Now checks ALL 487 symbols (was limited to 10 for testing)
+5. ✅ **Implemented Telegram signal alerts** - Valid signals now sent to Telegram automatically
+6. ✅ **Fixed regime detection** - Properly extract 'regime' string from regime_data dict
+7. ✅ **Fixed late_trend indicator** - Now correctly populated from regime_data
+8. ✅ **All LSP errors resolved** - Clean codebase with no type errors
+
+## Completed Implementation
 1. ✅ **16 strategies fully implemented** - all core + advanced strategies operational
 2. ✅ H4 swing detection using real 4h candles (not pseudo-aggregation)
 3. ✅ VWAP Mean Reversion: expansion block check + VAL/VAH confluence with H4 swings
@@ -170,7 +180,7 @@ Preferred communication style: Simple, everyday language.
 11. ✅ Market Making (#26): DOM scalping framework (stub - requires HFT orderbook)
 12. ✅ Signal scoring system with threshold ≥+2.0 operational across all strategies
 13. ✅ BTC filter prevents MR during H1 impulses >0.8%
-14. ✅ Bot running successfully on Replit in signals-only mode with 487 pairs
+14. ✅ Bot running successfully with 487 pairs, Telegram notifications operational
 
 ## Implementation Details
 - **H4 Swings**: Calculated from timeframe_data['4h'] using tail(20) extrema, passed via indicators dict

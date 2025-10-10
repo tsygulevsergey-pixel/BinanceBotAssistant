@@ -187,14 +187,14 @@ class TradingBot:
         # Загрузить BTC данные для фильтра
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
-        # Проверяем несколько символов за раз
-        for symbol in self.symbols[:10]:  # Лимит для тестирования
+        # Проверяем все символы
+        for symbol in self.symbols:
             try:
                 await self._check_symbol_signals(symbol, btc_data)
             except Exception as e:
                 logger.error(f"Error checking {symbol}: {e}")
             
-            await asyncio.sleep(0.1)  # Небольшая пауза между символами
+            await asyncio.sleep(0.05)  # Небольшая пауза между символами
     
     async def _check_symbol_signals(self, symbol: str, btc_data):
         """Проверить сигналы для одного символа"""
@@ -216,7 +216,8 @@ class TradingBot:
         if h4_data is None or len(h4_data) < 50:
             return
         
-        regime = self.regime_detector.detect_regime(h4_data)
+        regime_data = self.regime_detector.detect_regime(h4_data)
+        regime = regime_data['regime'].value  # Convert ENUM to string
         bias = self.regime_detector.get_h4_bias(h4_data)
         
         # Рассчитать H4 swings для confluence проверки
@@ -228,7 +229,7 @@ class TradingBot:
             'cvd': 0.0,
             'doi_pct': 0.0,
             'depth_imbalance': 1.0,
-            'late_trend': False,
+            'late_trend': regime_data.get('late_trend', False),
             'funding_extreme': False,
             'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
             'h4_swing_high': h4_swing_high,
@@ -268,7 +269,20 @@ class TradingBot:
                     f"TP1: {signal.take_profit_1:.4f} | TP2: {signal.take_profit_2:.4f}"
                 )
                 
-                # TODO: Отправить в Telegram / сохранить в БД / выполнить ордер
+                # Отправить сигнал в Telegram
+                await self.telegram_bot.send_signal({
+                    'strategy_name': signal.strategy_name,
+                    'symbol': signal.symbol,
+                    'direction': signal.direction.upper(),
+                    'entry_price': signal.entry_price,
+                    'stop_loss': signal.stop_loss,
+                    'tp1': signal.take_profit_1,
+                    'tp2': signal.take_profit_2,
+                    'score': final_score,
+                    'regime': regime
+                })
+                
+                # TODO: Сохранить в БД / выполнить ордер
             else:
                 logger.debug(
                     f"❌ Signal rejected (score {final_score:.1f} < {self.signal_scorer.enter_threshold}): "
