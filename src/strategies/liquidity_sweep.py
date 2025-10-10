@@ -64,9 +64,9 @@ class LiquiditySweepStrategy(BaseStrategy):
         # Медианный объём
         median_volume = df['volume'].tail(20).median()
         
-        # Найти локальные экстремумы
-        recent_high = df['high'].tail(self.lookback_bars).max()
-        recent_low = df['low'].tail(self.lookback_bars).min()
+        # Найти локальные экстремумы (исключая текущий бар для обнаружения свипов)
+        recent_high = df['high'].iloc[-self.lookback_bars-1:-1].max()
+        recent_low = df['low'].iloc[-self.lookback_bars-1:-1].min()
         
         # --- ПРОВЕРКА SWEEP UP (прокол вверх) ---
         sweep_up_atr = current_high - recent_high
