@@ -1,0 +1,130 @@
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Text, Index, JSON
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+import pytz
+
+Base = declarative_base()
+
+
+class Candle(Base):
+    __tablename__ = 'candles'
+    
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String(20), nullable=False, index=True)
+    timeframe = Column(String(10), nullable=False, index=True)
+    open_time = Column(DateTime, nullable=False, index=True)
+    open = Column(Float, nullable=False)
+    high = Column(Float, nullable=False)
+    low = Column(Float, nullable=False)
+    close = Column(Float, nullable=False)
+    volume = Column(Float, nullable=False)
+    close_time = Column(DateTime, nullable=False)
+    quote_volume = Column(Float)
+    trades = Column(Integer)
+    taker_buy_base = Column(Float)
+    taker_buy_quote = Column(Float)
+    
+    __table_args__ = (
+        Index('idx_symbol_timeframe_time', 'symbol', 'timeframe', 'open_time'),
+    )
+
+
+class Trade(Base):
+    __tablename__ = 'trades'
+    
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String(20), nullable=False, index=True)
+    trade_id = Column(Integer, nullable=False)
+    price = Column(Float, nullable=False)
+    quantity = Column(Float, nullable=False)
+    quote_quantity = Column(Float, nullable=False)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    is_buyer_maker = Column(Boolean, nullable=False)
+    
+    __table_args__ = (
+        Index('idx_symbol_trade_id', 'symbol', 'trade_id', unique=True),
+        Index('idx_symbol_timestamp', 'symbol', 'timestamp'),
+    )
+
+
+class Signal(Base):
+    __tablename__ = 'signals'
+    
+    id = Column(Integer, primary_key=True)
+    context_hash = Column(String(64), unique=True, nullable=False, index=True)
+    symbol = Column(String(20), nullable=False, index=True)
+    strategy_id = Column(Integer, nullable=False, index=True)
+    strategy_name = Column(String(50), nullable=False)
+    direction = Column(String(10), nullable=False)
+    
+    entry_price = Column(Float, nullable=False)
+    stop_loss = Column(Float, nullable=False)
+    take_profit_1 = Column(Float)
+    take_profit_2 = Column(Float)
+    
+    score = Column(Float, nullable=False)
+    market_regime = Column(String(20), nullable=False)
+    timeframe = Column(String(10), nullable=False)
+    
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC))
+    status = Column(String(20), nullable=False, default='ACTIVE')
+    
+    telegram_message_id = Column(Integer)
+    exit_price = Column(Float)
+    exit_reason = Column(String(50))
+    pnl = Column(Float)
+    pnl_percent = Column(Float)
+    closed_at = Column(DateTime)
+    
+    metadata = Column(JSON)
+    
+    __table_args__ = (
+        Index('idx_status_symbol', 'status', 'symbol'),
+        Index('idx_created_at', 'created_at'),
+    )
+
+
+class Metric(Base):
+    __tablename__ = 'metrics'
+    
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(pytz.UTC))
+    metric_type = Column(String(50), nullable=False, index=True)
+    symbol = Column(String(20), index=True)
+    strategy_id = Column(Integer, index=True)
+    
+    value = Column(Float, nullable=False)
+    metadata = Column(JSON)
+    
+    __table_args__ = (
+        Index('idx_type_symbol_time', 'metric_type', 'symbol', 'timestamp'),
+    )
+
+
+class MarketState(Base):
+    __tablename__ = 'market_state'
+    
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String(20), nullable=False, index=True)
+    timestamp = Column(DateTime, nullable=False, index=True)
+    
+    regime = Column(String(20), nullable=False)
+    timeframe = Column(String(10), nullable=False)
+    
+    adx = Column(Float)
+    atr = Column(Float)
+    atr_percent = Column(Float)
+    bb_width = Column(Float)
+    bb_percentile = Column(Float)
+    
+    ema_20 = Column(Float)
+    ema_50 = Column(Float)
+    ema_200 = Column(Float)
+    
+    late_trend_flag = Column(Boolean, default=False)
+    
+    metadata = Column(JSON)
+    
+    __table_args__ = (
+        Index('idx_symbol_timeframe_time', 'symbol', 'timeframe', 'timestamp'),
+    )

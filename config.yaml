@@ -1,0 +1,239 @@
+# Trading Bot Configuration
+
+# Timezone
+timezone: "Europe/Kiev"
+
+# Database
+database:
+  path: "data/trading_bot.db"
+  warm_up_days: 90
+  history_days: 270
+
+# Binance API
+binance:
+  rest_weight_limit: 1100  # per minute
+  ws_reconnect_delay: 5
+  rate_limit_backoff_base: 2
+  rate_limit_max_retries: 5
+  orderbook_levels: 20
+  snapshot_interval: 60  # seconds
+
+# Market Detection
+market_detector:
+  timeframes:
+    signal: ["15m", "1h"]
+    context: ["4h", "1d"]
+    execution: ["1m"]
+  
+  trend:
+    adx_threshold: 20
+    ema_periods: [20, 50, 200]
+    late_trend_atr_multiplier: 1.8
+  
+  range:
+    adx_threshold: 20
+    bb_percentile: 30
+    atr_percentile: 40
+  
+  squeeze:
+    bb_percentile: 25
+    min_bars: 12
+
+# Scoring System
+scoring:
+  base_threshold: 2.0
+  
+  volume_multiplier: 1.5
+  volume_score: 1
+  
+  cvd_score: 1
+  delta_oi_score: 1
+  delta_oi_threshold: [1.0, 3.0]  # [min, max] %
+  delta_oi_alt_threshold: [0.5, 1.0]  # for altcoins
+  
+  imbalance_duration: [10, 30]  # seconds
+  imbalance_score: 1
+  
+  late_trend_penalty: -1
+  funding_extreme_penalty: -1
+  btc_against_penalty: -2
+
+# Risk Management
+risk:
+  risk_per_trade: 0.01  # 1% of capital
+  max_daily_loss: 0.03  # 3%
+  max_weekly_loss: 0.05  # 5%
+  max_concurrent_positions: 10
+  
+  stop_loss_atr_multiplier: [0.2, 0.3]
+  time_stop_bars: [6, 8]  # on 1m timeframe
+  
+  rr_targets:
+    breakout: [2.0, 3.0]
+    retest: [1.5, 2.5]
+    mean_reversion: [1.2, 2.0]
+
+# BTC Filter
+btc_filter:
+  timeframe: "1h"
+  impulse_threshold: 0.8  # % 1m return
+  impulse_cooldown: 30  # minutes
+  expansion_block_mr: true
+
+# Time of Day Gating
+tod_gating:
+  eu_session: ["07:00", "09:00"]
+  us_session: ["13:30", "15:30"]
+  asia_session: ["00:00", "02:00"]
+  
+  breakout_sessions: ["eu_session", "us_session"]
+  momentum_sessions: ["eu_session", "us_session"]
+  mr_sessions: ["eu_session", "us_session", "asia_session"]
+
+# Initial Balance (ORB/IRB)
+initial_balance:
+  duration: 60  # minutes
+  width_percentile: 30
+  atr_multiplier: 0.8
+
+# Strategy Parameters
+strategies:
+  enabled: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  
+  # #1 Donchian Breakout
+  donchian:
+    period: 20
+    timeframe: "1h"
+    context_timeframe: "4h"
+    min_close_distance_atr: 0.25
+    volume_threshold: 1.5
+  
+  # #2 Squeeze Breakout
+  squeeze:
+    lookback: 90
+    bb_percentile: 25
+    min_duration: 12
+    breakout_atr: 0.25
+    max_distance_ema20: 1.5
+  
+  # #3 ORB/IRB
+  orb:
+    slots: ["00:00-01:00", "07:00-08:00", "13:30-14:30"]
+    width_percentile: 30
+    atr_multiplier: 0.8
+    breakout_atr: 0.25
+  
+  # #4 MA/VWAP Pullback
+  pullback:
+    ma_periods: [20, 50]
+    fib_levels: [0.382, 0.618]
+    retest_atr: 0.3
+    volume_threshold: 1.2
+  
+  # #5 Break & Retest
+  retest:
+    breakout_atr: 0.25
+    zone_atr: [0.2, 0.3]
+    volume_threshold: 1.5
+    split_ratio: 0.5  # 50% limit, 50% confirm
+  
+  # #6 ATR Momentum
+  momentum:
+    impulse_atr: 1.4
+    close_percentile: 20  # top 20%
+    min_distance_resistance: 1.5
+    pullback_ema: [9, 20]
+  
+  # #7 VWAP Mean Reversion
+  vwap_mr:
+    sigma_bands: [1, 2]
+    reclaim_bars: 2
+    time_stop: [6, 8]
+  
+  # #8 Range Fade
+  range_fade:
+    min_tests: 2
+    time_stop: [6, 8]
+  
+  # #9 Volume Profile
+  volume_profile:
+    bin_size_percent: 0.1
+    acceptance_close_atr: 0.25
+    acceptance_closes: 2
+  
+  # #10 RSI/Stochastic MR
+  oscillator_mr:
+    rsi_period: 14
+    stoch_period: 14
+    oversold_percentile: 20
+    overbought_percentile: 80
+    lookback: 90
+  
+  # #11 Funding Arbitrage (monitoring only for MVP)
+  funding:
+    enabled: false
+    extreme_threshold: 0.1
+
+# Telegram
+telegram:
+  language: "ru"
+  edit_updates: true
+  compact_cards: true
+  lock_per_symbol: true
+  lock_ttl: 3600  # seconds
+
+# WebSocket Health
+websocket:
+  stale_threshold_ms: 500
+  stale_warning_count: 3
+  stale_window_minutes: 5
+  sequence_gap_critical: true
+  resync_cooldown: 120  # seconds
+
+# Kill Switch
+kill_switch:
+  event_loop_lag_warning_ms: 200
+  event_loop_lag_critical_ms: 400
+  rss_growth_percent: 5
+  rss_growth_window_minutes: 3
+  recovery_green_window_minutes: 10
+
+# Load Shedding
+load_shedding:
+  step1:
+    disable_dom_altcoins: true
+    disable_imbalance_altcoins: true
+  step2:
+    increase_threshold: 0.5
+  step3:
+    symbols_only: ["BTCUSDT", "ETHUSDT"]
+  step4:
+    freeze_mr_outside_slots: true
+
+# Logging
+logging:
+  level: "INFO"
+  console: true
+  file: "logs/bot.log"
+  rotation: "1 day"
+  retention: "30 days"
+  
+  levels:
+    websocket: "DEBUG"
+    strategies: "INFO"
+    scoring: "INFO"
+    telegram: "INFO"
+
+# Data Sources
+data_sources:
+  binance_vision_url: "https://data.binance.vision"
+  cache_directory: "data/cache"
+  incremental_update: true
+
+# Universe
+universe:
+  initial_symbols: ["BTCUSDT", "ETHUSDT"]
+  expand_after_stable: false
+  fetch_all_pairs: true  # Fetch all USDT-M pairs from Binance
+  filter_quote: "USDT"
+  min_volume_24h: 10000000  # $10M minimum
