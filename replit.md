@@ -25,7 +25,7 @@ Preferred communication style: Simple, everyday language.
 - **BaseStrategy**: Abstract base class for strategy definition.
 - **StrategyManager**: Orchestrates multiple strategies across timeframes.
 - **Signal Dataclass**: Standardized signal output.
-- **Implemented Strategies**: 16 strategies are implemented, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
+- **Implemented Strategies**: 16 strategies are implemented (15 active), including Donchian Breakout (1h), Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. Market Making is disabled (requires HFT orderbook). All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
 
 ### 4. Market Analysis System
 - **MarketRegimeDetector**: Classifies market into TREND/RANGE/SQUEEZE/UNDECIDED using multi-factor confirmation.

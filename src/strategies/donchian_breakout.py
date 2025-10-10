@@ -22,7 +22,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
         super().__init__("Donchian Breakout", strategy_config)
         
         self.period = strategy_config.get('period', 20)
-        self.timeframe = 'H1'  # Фиксированный H1 по мануалу
+        self.timeframe = '1h'  # H1 таймфрейм (формат Binance API)
         self.context_tf = '4h'  # H4 контекст
         self.min_close_distance_atr = 0.25  # Точно по мануалу
         self.volume_threshold = 1.5  # >1.5× медианы 20

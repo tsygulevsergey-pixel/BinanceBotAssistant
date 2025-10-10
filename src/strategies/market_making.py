@@ -21,7 +21,8 @@ class MarketMakingStrategy(BaseStrategy):
         strategy_config = config.get('strategies.market_making', {})
         super().__init__("Market Making", strategy_config)
         
-        self.timeframe = '1m'  # Скальпинг на минутках
+        self.enabled = False  # Отключена: требует HFT orderbook (не реализован)
+        self.timeframe = '15m'  # Изменено с 1m (данные недоступны)
         self.min_spread_bp = 4  # Минимальный спред 4 б.п. (2× комиссии)
         self.max_inventory = 5  # Максимальный инвентарь в лотах
         self.max_volatility_pct = 0.5  # Макс волатильность 0.5%
