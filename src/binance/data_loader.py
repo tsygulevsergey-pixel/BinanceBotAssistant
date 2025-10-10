@@ -99,7 +99,16 @@ class DataLoader:
         finally:
             session.close()
     
-    async def load_warm_up_data(self, symbol: str):
+    async def load_warm_up_data(self, symbol: str, silent: bool = False):
+        """Load historical data for a symbol
+        
+        Args:
+            symbol: Symbol to load data for
+            silent: If True, suppress progress logging (for batch loading)
+        
+        Returns:
+            bool: True if all timeframes loaded successfully, False otherwise
+        """
         warm_up_days = config.get('database.warm_up_days', 90)
         end_date = datetime.now(pytz.UTC)
         start_date = end_date - timedelta(days=warm_up_days)
@@ -107,15 +116,44 @@ class DataLoader:
         timeframes = ['15m', '1h', '4h', '1d']
         total_tf = len(timeframes)
         
-        for idx, interval in enumerate(timeframes, 1):
+        try:
+            for idx, interval in enumerate(timeframes, 1):
+                existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
+                expected_count = self._expected_candle_count(interval, warm_up_days)
+                
+                if existing_count < expected_count * 0.95:
+                    if not silent:
+                        logger.info(f"  [{idx}/{total_tf}] Loading {symbol} {interval} (have {existing_count}/{expected_count})")
+                    await self.download_historical_klines(symbol, interval, start_date, end_date)
+                else:
+                    if not silent:
+                        logger.info(f"  [{idx}/{total_tf}] ✓ {symbol} {interval} already complete ({existing_count} candles)")
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to load warm-up data for {symbol}: {e}")
+            return False
+    
+    def is_symbol_data_complete(self, symbol: str) -> bool:
+        """Check if symbol has complete data for all required timeframes
+        
+        Returns:
+            bool: True if all timeframes are loaded with >=95% expected data
+        """
+        warm_up_days = config.get('database.warm_up_days', 90)
+        end_date = datetime.now(pytz.UTC)
+        start_date = end_date - timedelta(days=warm_up_days)
+        
+        timeframes = ['15m', '1h', '4h', '1d']
+        
+        for interval in timeframes:
             existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
             expected_count = self._expected_candle_count(interval, warm_up_days)
             
             if existing_count < expected_count * 0.95:
-                logger.info(f"  [{idx}/{total_tf}] Loading {symbol} {interval} (have {existing_count}/{expected_count})")
-                await self.download_historical_klines(symbol, interval, start_date, end_date)
-            else:
-                logger.info(f"  [{idx}/{total_tf}] ✓ {symbol} {interval} already complete ({existing_count} candles)")
+                return False
+        
+        return True
     
     def _count_existing_candles(self, symbol: str, interval: str, 
                                 start_date: datetime, end_date: datetime) -> int:

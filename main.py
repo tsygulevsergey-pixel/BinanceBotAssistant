@@ -29,6 +29,7 @@ from src.strategies.order_flow import OrderFlowStrategy
 from src.strategies.cash_and_carry import CashAndCarryStrategy
 from src.strategies.market_making import MarketMakingStrategy
 from src.telegram.bot import TelegramBot
+from src.utils.symbol_load_coordinator import SymbolLoadCoordinator
 
 
 class TradingBot:
@@ -37,6 +38,8 @@ class TradingBot:
         self.client: Optional[BinanceClient] = None
         self.data_loader: Optional[DataLoader] = None
         self.symbols: List[str] = []
+        self.ready_symbols: List[str] = []  # Symbols with loaded data, ready for analysis
+        self.coordinator: Optional[SymbolLoadCoordinator] = None
         
         # Компоненты бота
         self.strategy_manager = StrategyManager()
@@ -103,13 +106,15 @@ class TradingBot:
             self.symbols = config.get('universe.initial_symbols', ['BTCUSDT', 'ETHUSDT'])
             logger.info(f"Using configured symbols: {self.symbols}")
         
-        logger.info(f"Loading warm-up data for {len(self.symbols)} symbols...")
-        if self.data_loader:
-            total_symbols = len(self.symbols)
-            for idx, symbol in enumerate(self.symbols, 1):
-                logger.info(f"[{idx}/{total_symbols}] Loading data for {symbol}... ({(idx/total_symbols)*100:.1f}%)")
-                await self.data_loader.load_warm_up_data(symbol)
-            await asyncio.sleep(0.5)
+        logger.info(f"Starting parallel data loading for {len(self.symbols)} symbols...")
+        
+        self.coordinator = SymbolLoadCoordinator(total_symbols=len(self.symbols), queue_max_size=50)
+        
+        loader_task = asyncio.create_task(self._symbol_loader_task())
+        analyzer_task = asyncio.create_task(self._symbol_analyzer_task())
+        
+        logger.info("Background tasks started (loader + analyzer running in parallel)")
+        logger.info("Bot will start analyzing symbols as soon as their data is loaded")
         
         # Запуск Telegram бота
         await self.telegram_bot.start()
@@ -162,34 +167,50 @@ class TradingBot:
             iteration += 1
             
             # Каждые check_interval секунд проверяем сигналы
-            if iteration % check_interval == 0:
+            if iteration % check_interval == 0 and len(self.ready_symbols) > 0:
                 await self._check_signals()
             
-            # Статус каждую минуту
-            if iteration % 60 == 0 and self.client:
+            # Статус каждую минуту или каждые 10 сек если загрузка идёт
+            status_interval = 10 if self.coordinator and not self.coordinator.is_loading_complete() else 60
+            if iteration % status_interval == 0 and self.client:
                 rate_status = self.client.get_rate_limit_status()
                 total_signals = self.strategy_manager.get_total_signals_count()
-                logger.info(
-                    f"Status: {len(self.symbols)} symbols | "
-                    f"{self.strategy_manager.get_enabled_count()} strategies active | "
-                    f"{total_signals} total signals | "
-                    f"Rate limit: {rate_status['percent_used']:.1f}%"
-                )
+                
+                if self.coordinator:
+                    coord_status = self.coordinator.get_status_summary()
+                    logger.info(
+                        f"📊 {coord_status} | "
+                        f"{self.strategy_manager.get_enabled_count()} strategies | "
+                        f"{total_signals} signals | "
+                        f"Rate: {rate_status['percent_used']:.1f}%"
+                    )
+                else:
+                    logger.info(
+                        f"Status: {len(self.symbols)} symbols | "
+                        f"{self.strategy_manager.get_enabled_count()} strategies active | "
+                        f"{total_signals} total signals | "
+                        f"Rate limit: {rate_status['percent_used']:.1f}%"
+                    )
             
             await asyncio.sleep(1)
     
     async def _check_signals(self):
-        """Проверить сигналы для всех символов"""
+        """Проверить сигналы для всех готовых символов"""
         if not self.data_loader:
             return
         
-        logger.debug("Checking signals for all symbols...")
+        symbols_to_check = self.ready_symbols.copy()
+        if not symbols_to_check:
+            logger.debug("No symbols ready for analysis yet...")
+            return
+        
+        logger.debug(f"Checking signals for {len(symbols_to_check)} ready symbols...")
         
         # Загрузить BTC данные для фильтра
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
-        # Проверяем все символы
-        for symbol in self.symbols:
+        # Проверяем все готовые символы
+        for symbol in symbols_to_check:
             try:
                 await self._check_symbol_signals(symbol, btc_data)
             except Exception as e:
@@ -290,9 +311,73 @@ class TradingBot:
                     f"{signal.strategy_name} {signal.symbol} {signal.direction}"
                 )
     
+    async def _symbol_loader_task(self):
+        """Background task to load symbol data and add to ready queue"""
+        if not self.coordinator or not self.data_loader:
+            return
+        
+        logger.info("Symbol loader task started")
+        
+        for idx, symbol in enumerate(self.symbols, 1):
+            if self.coordinator.is_shutdown_requested():
+                logger.info("Loader task shutting down...")
+                break
+            
+            try:
+                self.coordinator.increment_loading_count()
+                
+                if self.data_loader.is_symbol_data_complete(symbol):
+                    logger.info(f"[{idx}/{len(self.symbols)}] ✓ {symbol} data already complete")
+                    await self.coordinator.add_ready_symbol(symbol)
+                else:
+                    logger.info(f"[{idx}/{len(self.symbols)}] Loading {symbol}... ({(idx/len(self.symbols))*100:.1f}%)")
+                    success = await self.data_loader.load_warm_up_data(symbol, silent=True)
+                    
+                    if success:
+                        await self.coordinator.add_ready_symbol(symbol)
+                        logger.info(f"✓ {symbol} loaded and ready for analysis")
+                    else:
+                        self.coordinator.mark_symbol_failed(symbol, "Loading failed")
+                
+            except Exception as e:
+                logger.error(f"Error loading {symbol}: {e}")
+                self.coordinator.mark_symbol_failed(symbol, str(e))
+            finally:
+                self.coordinator.decrement_loading_count()
+            
+            await asyncio.sleep(0.1)
+        
+        logger.info(f"Loader task complete. Loaded {self.coordinator.get_progress().loaded_count}/{len(self.symbols)} symbols")
+    
+    async def _symbol_analyzer_task(self):
+        """Background task to consume ready symbols and add them to analysis list"""
+        if not self.coordinator:
+            return
+        
+        logger.info("Symbol analyzer task started")
+        
+        while not self.coordinator.is_shutdown_requested() or not self.coordinator.ready_queue.empty():
+            symbol = await self.coordinator.get_next_symbol()
+            
+            if symbol:
+                self.ready_symbols.append(symbol)
+                logger.info(f"✅ {symbol} ready for analysis ({len(self.ready_symbols)} symbols analyzing)")
+                self.coordinator.mark_symbol_analyzed(symbol)
+            elif self.coordinator.is_loading_complete():
+                logger.info("All symbols processed, analyzer task complete")
+                break
+            
+            await asyncio.sleep(0.5)
+        
+        logger.info(f"Analyzer task stopped. {len(self.ready_symbols)} symbols ready for analysis")
+    
     async def stop(self):
         logger.info("Stopping bot...")
         self.running = False
+        
+        if self.coordinator:
+            self.coordinator.signal_shutdown()
+        
         await self.telegram_bot.stop()
         logger.info("Bot stopped")
 
