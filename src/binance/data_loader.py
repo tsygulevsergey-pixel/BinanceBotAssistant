@@ -24,10 +24,12 @@ class DataLoader:
     
     async def download_historical_klines(self, symbol: str, interval: str, 
                                         start_date: datetime, end_date: datetime):
-        logger.info(f"Downloading historical klines for {symbol} {interval} from {start_date} to {end_date}")
+        total_days = max(1, int((end_date - start_date).total_seconds() / 86400))
+        logger.info(f"Downloading historical klines for {symbol} {interval} from {start_date} to {end_date} ({total_days} days)")
         
         current_date = start_date
         all_klines = []
+        day_counter = 0
         
         while current_date < end_date:
             start_ms = int(current_date.timestamp() * 1000)
@@ -43,7 +45,11 @@ class DataLoader:
                 )
                 
                 all_klines.extend(klines)
-                logger.debug(f"Downloaded {len(klines)} klines for {symbol} {interval} on {current_date.date()}")
+                day_counter += 1
+                
+                if day_counter % 10 == 0 or current_date >= end_date - timedelta(days=1):
+                    progress = (day_counter / total_days) * 100
+                    logger.info(f"  Progress: {progress:.1f}% ({day_counter}/{total_days} days) - {symbol} {interval}")
                 
                 await asyncio.sleep(0.1)
             
@@ -101,16 +107,17 @@ class DataLoader:
         start_date = end_date - timedelta(days=warm_up_days)
         
         timeframes = ['1m', '5m', '15m', '1h', '4h', '1d']
+        total_tf = len(timeframes)
         
-        for interval in timeframes:
+        for idx, interval in enumerate(timeframes, 1):
             existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
             expected_count = self._expected_candle_count(interval, warm_up_days)
             
             if existing_count < expected_count * 0.95:
-                logger.info(f"Loading warm-up data for {symbol} {interval} (have {existing_count}/{expected_count})")
+                logger.info(f"  [{idx}/{total_tf}] Loading {symbol} {interval} (have {existing_count}/{expected_count})")
                 await self.download_historical_klines(symbol, interval, start_date, end_date)
             else:
-                logger.info(f"Warm-up data already complete for {symbol} {interval} ({existing_count} candles)")
+                logger.info(f"  [{idx}/{total_tf}] ✓ {symbol} {interval} already complete ({existing_count} candles)")
     
     def _count_existing_candles(self, symbol: str, interval: str, 
                                 start_date: datetime, end_date: datetime) -> int:

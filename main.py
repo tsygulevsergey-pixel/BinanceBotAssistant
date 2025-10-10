@@ -105,8 +105,9 @@ class TradingBot:
         
         logger.info(f"Loading warm-up data for {len(self.symbols)} symbols...")
         if self.data_loader:
-            for symbol in self.symbols[:5]:
-                logger.info(f"Loading data for {symbol}...")
+            total_symbols = len(self.symbols)
+            for idx, symbol in enumerate(self.symbols, 1):
+                logger.info(f"[{idx}/{total_symbols}] Loading data for {symbol}... ({(idx/total_symbols)*100:.1f}%)")
                 await self.data_loader.load_warm_up_data(symbol)
             await asyncio.sleep(0.5)
         
