@@ -1,78 +1,77 @@
 @echo off
-chcp 65001 >nul
 echo ============================================================
-echo   Trading Bot - Автоматический запуск
+echo   Trading Bot - Auto Start
 echo ============================================================
 echo.
 
-REM Проверка Python
+REM Check Python
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] Python не установлен!
-    echo Скачайте Python 3.11+ с https://www.python.org/downloads/
+    echo [ERROR] Python is not installed!
+    echo Download Python 3.11+ from https://www.python.org/downloads/
     pause
     exit /b 1
 )
 
-echo [OK] Python установлен
+echo [OK] Python is installed
 echo.
 
-REM Проверка виртуального окружения
+REM Check virtual environment
 if not exist "venv" (
-    echo [INFO] Создаю виртуальное окружение...
+    echo [INFO] Creating virtual environment...
     python -m venv venv
     if errorlevel 1 (
-        echo [ERROR] Не удалось создать виртуальное окружение
+        echo [ERROR] Failed to create virtual environment
         pause
         exit /b 1
     )
-    echo [OK] Виртуальное окружение создано
+    echo [OK] Virtual environment created
     echo.
 )
 
-REM Активация виртуального окружения
-echo [INFO] Активирую виртуальное окружение...
+REM Activate virtual environment
+echo [INFO] Activating virtual environment...
 call venv\Scripts\activate.bat
 
-REM Проверка requirements.txt
+REM Check requirements.txt
 if not exist "requirements.txt" (
-    echo [ERROR] Файл requirements.txt не найден!
+    echo [ERROR] File requirements.txt not found!
     pause
     exit /b 1
 )
 
-REM Проверка установленных пакетов
-echo [INFO] Проверяю зависимости...
+REM Check installed packages
+echo [INFO] Checking dependencies...
 pip show aiohttp >nul 2>&1
 if errorlevel 1 (
-    echo [INFO] Устанавливаю зависимости (это может занять время)...
+    echo [INFO] Installing dependencies (this may take a while)...
     pip install -r requirements.txt
     if errorlevel 1 (
-        echo [ERROR] Не удалось установить зависимости
+        echo [ERROR] Failed to install dependencies
         pause
         exit /b 1
     )
-    echo [OK] Все зависимости установлены
+    echo [OK] All dependencies installed
 ) else (
-    echo [OK] Зависимости уже установлены
+    echo [OK] Dependencies already installed
     
-    REM Проверяем, нужно ли обновить
-    echo [INFO] Проверяю обновления...
+    REM Check for updates
+    echo [INFO] Checking for updates...
     pip install -r requirements.txt --quiet --upgrade 2>nul
 )
 echo.
 
-REM Проверка .env файла
+REM Check .env file
 if not exist ".env" (
-    echo [WARNING] Файл .env не найден!
+    echo [WARNING] File .env not found!
     echo.
-    echo Создаю шаблон .env файла...
+    echo Creating .env template...
     (
-        echo # Binance API Keys ^(обязательно для live торговли^)
+        echo # Binance API Keys ^(required for live trading^)
         echo BINANCE_API_KEY=your_api_key_here
         echo BINANCE_API_SECRET=your_secret_key_here
         echo.
-        echo # Telegram Bot ^(опционально^)
+        echo # Telegram Bot ^(optional^)
         echo TELEGRAM_BOT_TOKEN=your_telegram_bot_token
         echo TELEGRAM_CHAT_ID=your_chat_id
         echo.
@@ -80,41 +79,41 @@ if not exist ".env" (
         echo SESSION_SECRET=random_secret_string_here
     ) > .env
     echo.
-    echo [ACTION REQUIRED] Откройте файл .env и добавьте ваши API ключи!
+    echo [ACTION REQUIRED] Open .env file and add your API keys!
     echo.
     pause
 )
 
-REM Проверка config.yaml
+REM Check config.yaml
 if not exist "config.yaml" (
-    echo [ERROR] Файл config.yaml не найден!
+    echo [ERROR] File config.yaml not found!
     pause
     exit /b 1
 )
 
-REM Создание папки для данных
+REM Create data folder
 if not exist "data" mkdir data
 
+REM Check main.py
+if not exist "main.py" (
+    echo [ERROR] File main.py not found!
+    echo Make sure you are in the project root folder
+    pause
+    exit /b 1
+)
+
 echo ============================================================
-echo   Запуск бота...
+echo   Starting bot...
 echo ============================================================
 echo.
 
-REM Проверка main.py
-if not exist "main.py" (
-    echo [ERROR] Файл main.py не найден!
-    echo Убедитесь что вы находитесь в корневой папке проекта
-    pause
-    exit /b 1
-)
-
-REM Запуск бота (используем python из venv)
+REM Start bot (using python from venv)
 venv\Scripts\python.exe main.py
 
-REM Если бот упал
+REM If bot crashed
 if errorlevel 1 (
     echo.
-    echo [ERROR] Бот завершился с ошибкой
-    echo Проверьте логи выше для деталей
+    echo [ERROR] Bot terminated with error
+    echo Check logs above for details
     pause
 )
