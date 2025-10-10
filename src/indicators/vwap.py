@@ -24,7 +24,7 @@ class VWAPCalculator:
         
         df['date'] = df.index.tz_localize('UTC').tz_convert(tz).date if df.index.tz is None else df.index.tz_convert(tz).date
         
-        daily_vwap = df.groupby('date', include_groups=False).apply(
+        daily_vwap = df.groupby('date').apply(
             lambda x: (x['tp_volume'].cumsum() / x['volume'].cumsum()).values
         )
         
