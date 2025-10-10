@@ -22,10 +22,13 @@ class DonchianBreakoutStrategy(BaseStrategy):
         super().__init__("Donchian Breakout", strategy_config)
         
         self.period = strategy_config.get('period', 20)
-        self.timeframe = strategy_config.get('timeframe', '1h')
-        self.context_tf = strategy_config.get('context_timeframe', '4h')
-        self.min_close_distance_atr = strategy_config.get('min_close_distance_atr', 0.25)
-        self.volume_threshold = strategy_config.get('volume_threshold', 1.5)
+        self.timeframe = 'H1'  # Фиксированный H1 по мануалу
+        self.context_tf = '4h'  # H4 контекст
+        self.min_close_distance_atr = 0.25  # Точно по мануалу
+        self.volume_threshold = 1.5  # >1.5× медианы 20
+        self.bbw_percentile_low = 30  # BB width должен быть в p30-40 до пробоя
+        self.bbw_percentile_high = 40
+        self.lookback_days = 60  # Для перцентилей
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -42,12 +45,21 @@ class DonchianBreakoutStrategy(BaseStrategy):
             return None
         
         # Проверка достаточности данных
-        if len(df) < self.period + 1:
+        lookback_bars = self.lookback_days * 24  # Для H1
+        if len(df) < max(self.period, lookback_bars) + 1:
             return None
         
         # Рассчитать Donchian Channel
         upper, lower = calculate_donchian(df['high'], df['low'], self.period)
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
+        
+        # BB width для проверки сжатия ДО пробоя
+        bb_upper, bb_middle, bb_lower = calculate_bollinger_bands(df['close'], period=20, std=2.0)
+        bb_width = (bb_upper - bb_lower) / bb_middle
+        
+        # Перцентили BB width (для проверки что было сжатие p30-40)
+        bb_width_p30 = bb_width.rolling(lookback_bars).quantile(0.30)
+        bb_width_p40 = bb_width.rolling(lookback_bars).quantile(0.40)
         
         # Текущие значения
         current_close = df['close'].iloc[-1]
@@ -56,6 +68,15 @@ class DonchianBreakoutStrategy(BaseStrategy):
         current_upper = upper.iloc[-1]
         current_lower = lower.iloc[-1]
         current_atr = atr.iloc[-1]
+        
+        # BB width ДО текущего бара (проверяем -2 бар чтобы было "до пробоя")
+        prev_bb_width = bb_width.iloc[-2]
+        prev_bb_width_p30 = bb_width_p30.iloc[-2]
+        prev_bb_width_p40 = bb_width_p40.iloc[-2]
+        
+        # Проверка: BB width был низким (p30-40) до пробоя
+        if not (prev_bb_width_p30 <= prev_bb_width <= prev_bb_width_p40):
+            return None
         
         # Средний объём за 20 периодов
         avg_volume = df['volume'].rolling(20).mean().iloc[-1]
