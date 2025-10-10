@@ -28,6 +28,7 @@ from src.strategies.time_of_day import TimeOfDayStrategy
 from src.strategies.order_flow import OrderFlowStrategy
 from src.strategies.cash_and_carry import CashAndCarryStrategy
 from src.strategies.market_making import MarketMakingStrategy
+from src.telegram.bot import TelegramBot
 
 
 class TradingBot:
@@ -42,6 +43,7 @@ class TradingBot:
         self.signal_scorer = SignalScorer(config._config)  # Передаём внутренний словарь config
         self.btc_filter = BTCFilter(config._config)
         self.regime_detector = MarketRegimeDetector()
+        self.telegram_bot = TelegramBot()
         
         self._register_strategies()
     
@@ -107,6 +109,19 @@ class TradingBot:
                 logger.info(f"Loading data for {symbol}...")
                 await self.data_loader.load_warm_up_data(symbol)
             await asyncio.sleep(0.5)
+        
+        # Запуск Telegram бота
+        await self.telegram_bot.start()
+        
+        # Отправка приветственного сообщения
+        signals_only = config.get('binance.signals_only_mode', False)
+        mode = "Signals-Only" if signals_only else "Live Trading"
+        strategies_count = len(self.strategy_manager.strategies)
+        await self.telegram_bot.send_startup_message(
+            pairs_count=len(self.symbols),
+            strategies_count=strategies_count,
+            mode=mode
+        )
         
         logger.info("Initialization complete")
     
@@ -202,7 +217,7 @@ class TradingBot:
             return
         
         regime = self.regime_detector.detect_regime(h4_data)
-        bias = self.regime_detector.detect_bias(h4_data)
+        bias = self.regime_detector.get_h4_bias(h4_data)
         
         # Рассчитать H4 swings для confluence проверки
         h4_swing_high = h4_data['high'].tail(20).max() if h4_data is not None and len(h4_data) >= 20 else None
@@ -263,6 +278,7 @@ class TradingBot:
     async def stop(self):
         logger.info("Stopping bot...")
         self.running = False
+        await self.telegram_bot.stop()
         logger.info("Bot stopped")
 
 

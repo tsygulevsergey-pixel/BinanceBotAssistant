@@ -97,6 +97,28 @@ class TelegramBot:
             return
         await update.message.reply_text("📊 Report: в процессе разработки")
     
+    async def send_startup_message(self, pairs_count: int, strategies_count: int, mode: str = "Signals-Only"):
+        if not self.bot or not self.chat_id:
+            logger.warning("Telegram bot not configured - skipping startup message")
+            return
+        
+        try:
+            message = (
+                f"🤖 *Бот запущен!*\n\n"
+                f"📊 *В работе:* {pairs_count} пар\n"
+                f"🎯 *Активных стратегий:* {strategies_count}\n"
+                f"⚙️ *Режим:* {mode}\n\n"
+                f"Используйте /help для списка команд"
+            )
+            await self.bot.send_message(
+                chat_id=self.chat_id,
+                text=message,
+                parse_mode='Markdown'
+            )
+            logger.info("Startup message sent to Telegram")
+        except Exception as e:
+            logger.error(f"Error sending startup message: {e}")
+    
     async def send_signal(self, signal_data: dict):
         if not self.bot or not self.chat_id:
             return
