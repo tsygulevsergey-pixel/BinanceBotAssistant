@@ -119,6 +119,6 @@ class SymbolLoadCoordinator:
         return (
             f"Loading: {progress.loaded_count}/{progress.total_symbols} ({loaded_pct:.1f}%) | "
             f"Queue: {progress.loading_queue_size} ready | "
-            f"Analyzing: {progress.analyzing_count} symbols | "
+            f"Ready: {self._analyzed_count} symbols | "
             f"Failed: {len(progress.failed_symbols)}"
         )

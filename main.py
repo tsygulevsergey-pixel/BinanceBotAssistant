@@ -317,6 +317,8 @@ class TradingBot:
             return
         
         logger.info("Symbol loader task started")
+        max_retries = 3
+        retry_delays = [5, 15, 30]
         
         for idx, symbol in enumerate(self.symbols, 1):
             if self.coordinator.is_shutdown_requested():
@@ -331,16 +333,34 @@ class TradingBot:
                     await self.coordinator.add_ready_symbol(symbol)
                 else:
                     logger.info(f"[{idx}/{len(self.symbols)}] Loading {symbol}... ({(idx/len(self.symbols))*100:.1f}%)")
-                    success = await self.data_loader.load_warm_up_data(symbol, silent=True)
+                    
+                    success = False
+                    for attempt in range(max_retries):
+                        try:
+                            success = await self.data_loader.load_warm_up_data(symbol, silent=True)
+                            if success:
+                                break
+                            
+                            if attempt < max_retries - 1:
+                                delay = retry_delays[attempt]
+                                logger.warning(f"Retry {attempt + 1}/{max_retries} for {symbol} in {delay}s...")
+                                await asyncio.sleep(delay)
+                        except Exception as retry_error:
+                            if attempt < max_retries - 1:
+                                delay = retry_delays[attempt]
+                                logger.warning(f"Retry {attempt + 1}/{max_retries} for {symbol} after error: {retry_error}")
+                                await asyncio.sleep(delay)
+                            else:
+                                raise
                     
                     if success:
                         await self.coordinator.add_ready_symbol(symbol)
                         logger.info(f"✓ {symbol} loaded and ready for analysis")
                     else:
-                        self.coordinator.mark_symbol_failed(symbol, "Loading failed")
+                        self.coordinator.mark_symbol_failed(symbol, f"Loading failed after {max_retries} attempts")
                 
             except Exception as e:
-                logger.error(f"Error loading {symbol}: {e}")
+                logger.error(f"Error loading {symbol} after {max_retries} retries: {e}")
                 self.coordinator.mark_symbol_failed(symbol, str(e))
             finally:
                 self.coordinator.decrement_loading_count()
