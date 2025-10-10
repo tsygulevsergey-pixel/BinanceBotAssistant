@@ -33,6 +33,7 @@ from src.utils.symbol_load_coordinator import SymbolLoadCoordinator
 from src.utils.signal_lock import SignalLockManager
 from src.utils.signal_tracker import SignalPerformanceTracker
 from src.utils.strategy_validator import StrategyValidator
+from src.utils.timeframe_sync import TimeframeSync
 from src.database.db import db
 from src.database.models import Signal
 import hashlib
@@ -191,6 +192,13 @@ class TradingBot:
         logger.info("Starting main loop...")
         logger.info(f"All {len(self.strategy_manager.strategies)} strategies will run simultaneously")
         
+        # Показать расписание обновлений
+        now = datetime.now(pytz.UTC)
+        logger.info(f"📅 Current time: {now.strftime('%H:%M:%S UTC')}")
+        logger.info(f"📅 Next 15m update: {TimeframeSync.get_next_update_time('15m', now).strftime('%H:%M UTC')}")
+        logger.info(f"📅 Next 1h update: {TimeframeSync.get_next_update_time('1h', now).strftime('%H:%M UTC')}")
+        logger.info(f"📅 Next 4h update: {TimeframeSync.get_next_update_time('4h', now).strftime('%H:%M UTC')}")
+        
         iteration = 0
         check_interval = config.get('scanning.check_interval_seconds', 60)
         
@@ -237,11 +245,14 @@ class TradingBot:
         
         logger.debug(f"Checking signals for {len(symbols_to_check)} ready symbols...")
         
-        # Обновить и загрузить BTC данные для фильтра
-        try:
-            await self.data_loader.update_missing_candles('BTCUSDT', '1h')
-        except Exception as e:
-            logger.debug(f"Could not update BTCUSDT: {e}")
+        # Обновить BTC данные только если свеча закрылась
+        now = datetime.now(pytz.UTC)
+        if TimeframeSync.should_update_timeframe('1h'):
+            try:
+                await self.data_loader.update_missing_candles('BTCUSDT', '1h')
+                logger.info(f"✅ Updated BTCUSDT 1h data (candle closed at {now.strftime('%H:%M UTC')})")
+            except Exception as e:
+                logger.debug(f"Could not update BTCUSDT: {e}")
         
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
@@ -259,12 +270,13 @@ class TradingBot:
         if not self.data_loader:
             return
         
-        # Обновить актуальные свечи перед анализом
+        # Обновить актуальные свечи ТОЛЬКО если свеча закрылась
         for tf in ['15m', '1h', '4h']:
-            try:
-                await self.data_loader.update_missing_candles(symbol, tf)
-            except Exception as e:
-                logger.debug(f"Could not update {symbol} {tf}: {e}")
+            if TimeframeSync.should_update_timeframe(tf):
+                try:
+                    await self.data_loader.update_missing_candles(symbol, tf)
+                except Exception as e:
+                    logger.debug(f"Could not update {symbol} {tf}: {e}")
         
         # Загрузить данные для всех таймфреймов
         timeframe_data = {}

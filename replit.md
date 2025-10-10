@@ -82,11 +82,15 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
-1. ✅ **Real-time Data Updates** - Актуальная докачка данных с Binance
-   - Перед каждым анализом обновляются свежие свечи для всех таймфреймов (15m, 1h, 4h)
+1. ✅ **Smart Timeframe Synchronization** - Умная докачка данных с Binance
+   - **Оптимизированное обновление**: свечи обновляются ТОЛЬКО когда закрываются
+     - 15m свечи: каждые 15 минут (00, 15, 30, 45)
+     - 1h свечи: каждый час (00:00)
+     - 4h свечи: каждые 4 часа (00, 04, 08, 12, 16, 20)
+   - TimeframeSync кэширует обновления (избегает дублирующих запросов)
    - Автоматическая докачка gap'ов в данных (если разница >5 минут)
-   - BTC данные также обновляются перед фильтрацией
-   - Стратегии анализируют АКТУАЛЬНЫЕ рыночные данные
+   - Расписание обновлений отображается при запуске бота
+   - **Экономия API лимитов**: обновления только когда нужно (не каждую минуту)
 
 ## Previous Updates
 1. ✅ **Implemented Reclaim Mechanism** - "Hold N bars" validation for ALL mean reversion strategies
