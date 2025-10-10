@@ -32,6 +32,7 @@ from src.telegram.bot import TelegramBot
 from src.utils.symbol_load_coordinator import SymbolLoadCoordinator
 from src.utils.signal_lock import SignalLockManager
 from src.utils.signal_tracker import SignalPerformanceTracker
+from src.utils.strategy_validator import StrategyValidator
 from src.database.db import db
 from src.database.models import Signal
 import hashlib
@@ -136,11 +137,18 @@ class TradingBot:
         asyncio.create_task(self.performance_tracker.start())
         logger.info(f"📊 Signal Performance Tracker started (check interval: {check_interval}s)")
         
+        # Создание валидатора стратегий
+        strategy_validator = StrategyValidator(
+            strategy_manager=self.strategy_manager,
+            data_loader=self.data_loader
+        )
+        
         # Запуск Telegram бота
         await self.telegram_bot.start()
         
-        # Связываем трекер с Telegram ботом для команд /performance и /stats
+        # Связываем компоненты с Telegram ботом для команд
         self.telegram_bot.set_performance_tracker(self.performance_tracker)
+        self.telegram_bot.set_validator(strategy_validator)
         
         # Отправка приветственного сообщения
         signals_only = config.get('binance.signals_only_mode', False)

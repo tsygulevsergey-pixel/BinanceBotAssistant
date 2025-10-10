@@ -13,6 +13,7 @@ class TelegramBot:
         self.bot = None
         self.startup_message_sent = False
         self.performance_tracker = None
+        self.strategy_validator = None
     
     async def start(self):
         if not self.token:
@@ -30,6 +31,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("report", self.cmd_report))
         self.app.add_handler(CommandHandler("performance", self.cmd_performance))
         self.app.add_handler(CommandHandler("stats", self.cmd_stats))
+        self.app.add_handler(CommandHandler("validate", self.cmd_validate))
         
         await self.app.initialize()
         await self.app.start()
@@ -63,6 +65,7 @@ class TelegramBot:
             "/strategies - Список стратегий\n"
             "/performance - Производительность (7 дней)\n"
             "/stats - Статистика по стратегиям\n"
+            "/validate - Проверка стратегий\n"
             "/latency - Задержки системы\n"
             "/report - Статистика сигналов\n"
         )
@@ -78,6 +81,7 @@ class TelegramBot:
             "/strategies - Активные стратегии\n"
             "/performance - Win rate, PnL за 7 дней\n"
             "/stats - Детали по стратегиям\n"
+            "/validate - Проверка корректности стратегий\n"
             "/latency - Задержки WebSocket\n"
             "/report - Статистика за период\n"
         )
@@ -178,6 +182,60 @@ class TelegramBot:
         except Exception as e:
             logger.error(f"Error getting stats: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_validate(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Проверить корректность работы стратегий"""
+        if not update.message:
+            return
+        
+        if not self.strategy_validator:
+            await update.message.reply_text("⚠️ Валидатор стратегий не запущен")
+            return
+        
+        await update.message.reply_text("🔍 Запускаю валидацию стратегий...\n\nЭто займет 10-20 секунд")
+        
+        try:
+            # Можно передать символ как аргумент: /validate BTCUSDT
+            symbol = context.args[0] if context.args else 'BTCUSDT'
+            
+            results = self.strategy_validator.validate_all_strategies(symbol)
+            
+            # Форматирование результатов
+            passed = results['strategies_passed']
+            failed = results['strategies_failed']
+            total = results['strategies_tested']
+            
+            text = (
+                f"✅ *Результаты валидации ({symbol})*\n\n"
+                f"📊 Всего стратегий: {total}\n"
+                f"✅ Прошли проверку: {passed}\n"
+                f"❌ Провалили проверку: {failed}\n\n"
+            )
+            
+            # Показываем проблемные стратегии
+            for detail in results['details']:
+                if detail['status'] == 'FAIL':
+                    text += f"\n❌ *{detail['strategy']}* ({detail['timeframe']})\n"
+                    for issue in detail.get('issues', [])[:2]:  # Первые 2 проблемы
+                        text += f"   • {issue}\n"
+                elif detail.get('warnings'):
+                    text += f"\n⚡ *{detail['strategy']}* ({detail['timeframe']})\n"
+                    text += f"   • {detail['warnings'][0]}\n"
+            
+            # Успешные стратегии (только count)
+            passed_list = [d['strategy'] for d in results['details'] if d['status'] == 'PASS']
+            if passed_list:
+                text += f"\n✅ *Успешно:* {len(passed_list)} стратегий"
+            
+            await update.message.reply_text(text, parse_mode='Markdown')
+            
+        except Exception as e:
+            logger.error(f"Error validating strategies: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    def set_validator(self, validator):
+        """Установить валидатор стратегий для доступа из команд"""
+        self.strategy_validator = validator
     
     def set_performance_tracker(self, tracker):
         """Установить трекер производительности для доступа из команд"""

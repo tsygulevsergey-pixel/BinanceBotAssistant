@@ -43,7 +43,8 @@ Preferred communication style: Simple, everyday language.
 - **Time Stops**: Exits trades if no progress within 6-8 bars.
 
 ### 7. Telegram Integration
-- Provides commands (/start, /help, /status, /strategies, /latency, /report, /export, /snooze, /digest) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
+- Provides commands (/start, /help, /status, /strategies, /performance, /stats, /validate, /latency, /report) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
+- **/validate** - Validates all strategies: checks data availability, OHLCV integrity, price logic, signal generation, and entry/SL/TP correctness across different market regimes.
 
 ### 8. Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
