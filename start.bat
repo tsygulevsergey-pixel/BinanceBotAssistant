@@ -100,12 +100,21 @@ echo   Запуск бота...
 echo ============================================================
 echo.
 
-REM Запуск бота
-python main.py
+REM Проверка main.py
+if not exist "main.py" (
+    echo [ERROR] Файл main.py не найден!
+    echo Убедитесь что вы находитесь в корневой папке проекта
+    pause
+    exit /b 1
+)
+
+REM Запуск бота (используем python из venv)
+venv\Scripts\python.exe main.py
 
 REM Если бот упал
 if errorlevel 1 (
     echo.
     echo [ERROR] Бот завершился с ошибкой
+    echo Проверьте логи выше для деталей
     pause
 )
