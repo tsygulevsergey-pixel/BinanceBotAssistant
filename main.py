@@ -237,7 +237,12 @@ class TradingBot:
         
         logger.debug(f"Checking signals for {len(symbols_to_check)} ready symbols...")
         
-        # Загрузить BTC данные для фильтра
+        # Обновить и загрузить BTC данные для фильтра
+        try:
+            await self.data_loader.update_missing_candles('BTCUSDT', '1h')
+        except Exception as e:
+            logger.debug(f"Could not update BTCUSDT: {e}")
+        
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
         # Проверяем все готовые символы
@@ -253,6 +258,13 @@ class TradingBot:
         """Проверить сигналы для одного символа"""
         if not self.data_loader:
             return
+        
+        # Обновить актуальные свечи перед анализом
+        for tf in ['15m', '1h', '4h']:
+            try:
+                await self.data_loader.update_missing_candles(symbol, tf)
+            except Exception as e:
+                logger.debug(f"Could not update {symbol} {tf}: {e}")
         
         # Загрузить данные для всех таймфреймов
         timeframe_data = {}

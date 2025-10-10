@@ -82,6 +82,13 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 10, 2025)
+1. ✅ **Real-time Data Updates** - Актуальная докачка данных с Binance
+   - Перед каждым анализом обновляются свежие свечи для всех таймфреймов (15m, 1h, 4h)
+   - Автоматическая докачка gap'ов в данных (если разница >5 минут)
+   - BTC данные также обновляются перед фильтрацией
+   - Стратегии анализируют АКТУАЛЬНЫЕ рыночные данные
+
+## Previous Updates
 1. ✅ **Implemented Reclaim Mechanism** - "Hold N bars" validation for ALL mean reversion strategies
    - New module `src/utils/reclaim_checker.py` with reusable reclaim functions:
      - check_value_area_reclaim(): verifies price was outside VA, returned and held N bars inside
