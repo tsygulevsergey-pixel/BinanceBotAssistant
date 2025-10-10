@@ -31,7 +31,8 @@ from src.strategies.market_making import MarketMakingStrategy
 from src.telegram.bot import TelegramBot
 from src.utils.symbol_load_coordinator import SymbolLoadCoordinator
 from src.utils.signal_lock import SignalLockManager
-from src.database import db
+from src.utils.signal_tracker import SignalPerformanceTracker
+from src.database.db import db
 from src.database.models import Signal
 import hashlib
 from datetime import datetime
@@ -46,6 +47,7 @@ class TradingBot:
         self.symbols: List[str] = []
         self.ready_symbols: List[str] = []  # Symbols with loaded data, ready for analysis
         self.coordinator: Optional[SymbolLoadCoordinator] = None
+        self.performance_tracker: Optional[SignalPerformanceTracker] = None
         
         # Компоненты бота
         self.strategy_manager = StrategyManager()
@@ -123,8 +125,22 @@ class TradingBot:
         logger.info("Background tasks started (loader + analyzer running in parallel)")
         logger.info("Bot will start analyzing symbols as soon as their data is loaded")
         
+        # Запуск системы трекинга производительности
+        check_interval = config.get('performance.tracking_interval_seconds', 60)
+        self.performance_tracker = SignalPerformanceTracker(
+            binance_client=self.client,
+            db=db,
+            lock_manager=self.signal_lock_manager,
+            check_interval=check_interval
+        )
+        asyncio.create_task(self.performance_tracker.start())
+        logger.info(f"📊 Signal Performance Tracker started (check interval: {check_interval}s)")
+        
         # Запуск Telegram бота
         await self.telegram_bot.start()
+        
+        # Связываем трекер с Telegram ботом для команд /performance и /stats
+        self.telegram_bot.set_performance_tracker(self.performance_tracker)
         
         # Отправка приветственного сообщения
         signals_only = config.get('binance.signals_only_mode', False)
@@ -474,6 +490,9 @@ class TradingBot:
         
         if self.coordinator:
             self.coordinator.signal_shutdown()
+        
+        if self.performance_tracker:
+            await self.performance_tracker.stop()
         
         await self.telegram_bot.stop()
         logger.info("Bot stopped")

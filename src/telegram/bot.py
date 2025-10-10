@@ -12,6 +12,7 @@ class TelegramBot:
         self.app = None
         self.bot = None
         self.startup_message_sent = False
+        self.performance_tracker = None
     
     async def start(self):
         if not self.token:
@@ -27,6 +28,8 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("strategies", self.cmd_strategies))
         self.app.add_handler(CommandHandler("latency", self.cmd_latency))
         self.app.add_handler(CommandHandler("report", self.cmd_report))
+        self.app.add_handler(CommandHandler("performance", self.cmd_performance))
+        self.app.add_handler(CommandHandler("stats", self.cmd_stats))
         
         await self.app.initialize()
         await self.app.start()
@@ -58,6 +61,8 @@ class TelegramBot:
             "/help - Справка\n"
             "/status - Статус бота\n"
             "/strategies - Список стратегий\n"
+            "/performance - Производительность (7 дней)\n"
+            "/stats - Статистика по стратегиям\n"
             "/latency - Задержки системы\n"
             "/report - Статистика сигналов\n"
         )
@@ -71,6 +76,8 @@ class TelegramBot:
             "/start - Начало работы\n"
             "/status - Состояние бота и рынков\n"
             "/strategies - Активные стратегии\n"
+            "/performance - Win rate, PnL за 7 дней\n"
+            "/stats - Детали по стратегиям\n"
             "/latency - Задержки WebSocket\n"
             "/report - Статистика за период\n"
         )
@@ -107,6 +114,74 @@ class TelegramBot:
         if not update.message:
             return
         await update.message.reply_text("📊 Report: в процессе разработки")
+    
+    async def cmd_performance(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать общую производительность за 7 дней"""
+        if not update.message:
+            return
+        
+        if not self.performance_tracker:
+            await update.message.reply_text("⚠️ Трекер производительности не запущен")
+            return
+        
+        try:
+            perf = await self.performance_tracker.get_strategy_performance(days=7)
+            
+            text = (
+                f"📊 *Производительность (7 дней)*\n\n"
+                f"📈 Всего сигналов: {perf['total_signals']}\n"
+                f"✅ Закрыто: {perf['closed_signals']}\n"
+                f"🔄 Активных: {perf['active_signals']}\n\n"
+                f"🏆 Побед: {perf['wins']}\n"
+                f"❌ Поражений: {perf['losses']}\n"
+                f"📊 Win Rate: *{perf['win_rate']}%*\n\n"
+                f"💰 Средний PnL: *{perf['avg_pnl']:+.2f}%*\n"
+                f"💵 Общий PnL: *{perf['total_pnl']:+.2f}%*\n\n"
+                f"🟢 Средняя победа: {perf['avg_win']:+.2f}%\n"
+                f"🔴 Среднее поражение: {perf['avg_loss']:+.2f}%\n"
+            )
+            await update.message.reply_text(text, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Error getting performance: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать статистику по стратегиям"""
+        if not update.message:
+            return
+        
+        if not self.performance_tracker:
+            await update.message.reply_text("⚠️ Трекер производительности не запущен")
+            return
+        
+        try:
+            stats = await self.performance_tracker.get_all_strategies_performance(days=7)
+            
+            if not stats:
+                await update.message.reply_text("📊 Пока нет данных по стратегиям")
+                return
+            
+            text = "*📊 Статистика по стратегиям (7 дней):*\n\n"
+            
+            for i, s in enumerate(stats[:10], 1):
+                text += (
+                    f"{i}. *{s['strategy_name']}*\n"
+                    f"   Сигналов: {s['total_signals']} | "
+                    f"WR: {s['win_rate']}% | "
+                    f"PnL: {s['avg_pnl']:+.2f}%\n\n"
+                )
+            
+            if len(stats) > 10:
+                text += f"... и еще {len(stats) - 10} стратегий"
+            
+            await update.message.reply_text(text, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Error getting stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    def set_performance_tracker(self, tracker):
+        """Установить трекер производительности для доступа из команд"""
+        self.performance_tracker = tracker
     
     async def send_startup_message(self, pairs_count: int, strategies_count: int, mode: str = "Signals-Only"):
         if not self.bot or not self.chat_id:

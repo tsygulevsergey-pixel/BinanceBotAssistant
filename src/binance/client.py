@@ -165,5 +165,10 @@ class BinanceClient:
             params['symbol'] = symbol
         return await self._request('GET', '/fapi/v1/ticker/24hr', params=params, weight=1)
     
+    async def get_mark_price(self, symbol: str) -> Dict:
+        """Получить текущую mark price для символа"""
+        params = {'symbol': symbol}
+        return await self._request('GET', '/fapi/v1/premiumIndex', params=params, weight=1)
+    
     def get_rate_limit_status(self) -> Dict:
         return self.rate_limiter.get_current_usage()

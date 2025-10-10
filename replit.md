@@ -1,19 +1,8 @@
 # Overview
 
-This is a comprehensive **Binance USDT-M Futures Trading Bot** that generates trading signals based on technical analysis and market regime detection. The bot implements 9 core strategies (with 8+ additional strategies planned) across breakout, pullback, and mean reversion categories. All strategies are **architect-validated** and comply with the detailed manual specifications (Мануал_Для_Разработчика). The bot features real-time market data synchronization via REST and WebSocket, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
+This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates 9 core strategies (with plans for 8+ more) spanning breakout, pullback, and mean reversion categories, all architect-validated against detailed specifications. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
-The bot supports two operational modes:
-1. **Signals-Only Mode**: Generates trading signals without placing real orders (no API keys required)
-2. **Live Trading Mode**: Full trading capabilities with API authentication
-
-Key features include:
-- Local orderbook engine with WebSocket differential updates
-- Historical data loading from Binance Vision
-- Multi-timeframe analysis (15m, 1h, 4h)
-- Market regime detection (TREND/RANGE/SQUEEZE)
-- BTC correlation filtering
-- Advanced scoring system with volume, CVD, OI delta, and depth imbalance
-- Risk management with stop-loss, take-profit, and time-stop mechanisms
+The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/RANGE/SQUEEZE), BTC correlation filtering, an advanced scoring system (volume, CVD, OI delta, depth imbalance), and robust risk management with stop-loss, take-profit, and time-stop mechanisms.
 
 # User Preferences
 
@@ -24,206 +13,67 @@ Preferred communication style: Simple, everyday language.
 ## Core Components
 
 ### 1. Market Data Infrastructure
-- **BinanceClient**: REST API client with rate limiting and exponential backoff
-- **DataLoader**: Historical data fetching from data.binance.vision with caching
-- **OrderBook**: Local orderbook engine synchronized via REST snapshots and WebSocket differential updates
-- **BinanceWebSocket**: Real-time market data streaming (klines, trades, depth updates)
-
-**Design Decision**: Local orderbook maintenance reduces API calls and provides sub-second depth imbalance detection. Snapshots resync on sequence gaps to prevent drift.
+- **BinanceClient**: REST API client with rate limiting and exponential backoff.
+- **DataLoader**: Fetches historical data from data.binance.vision with caching.
+- **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates for sub-second depth imbalance detection.
+- **BinanceWebSocket**: Real-time market data streaming (klines, trades, depth updates).
 
 ### 2. Database Layer
-- **Technology**: SQLAlchemy ORM with SQLite backend
-- **Models**: Candle, Trade, Signal entities
-- **Optimizations**: WAL mode, indexed queries on (symbol, timeframe, timestamp)
-
-**Design Decision**: SQLite chosen for simplicity and zero-configuration deployment. WAL mode enables concurrent reads during writes.
+- **Technology**: SQLAlchemy ORM with SQLite backend (WAL mode, indexed queries on (symbol, timeframe, timestamp)) for simplicity and concurrent reads.
 
 ### 3. Strategy Framework
-- **BaseStrategy**: Abstract base class defining strategy interface
-- **StrategyManager**: Orchestrates multiple strategies, handles timeframe routing
-- **Signal Dataclass**: Structured signal output with entry/exit parameters
-
-**Implemented Strategies (16/18 Complete)**:
-1. **Donchian Breakout** - Channel breakout with volume confirmation
-2. **Squeeze Breakout** - Bollinger/Keltner compression + expansion
-3. **ORB/IRB** - Opening/Initial Range Breakout with session filtering
-4. **MA/VWAP Pullback** - Mean reversion to moving averages in trends
-5. **Break & Retest** - Structure break with retest confirmation
-6. **ATR Momentum** - Volatility expansion + directional bias
-7. **VWAP Mean Reversion** - Deviation from VWAP with expansion block check
-8. **Range Fade** - Dual confluence range boundaries (VA/VWAP/H4 swing)
-9. **Volume Profile** - VAH/VAL rejection vs acceptance with POC shifts
-10. **RSI/Stochastic MR** - Oversold/overbought mean reversion
-11. **Liquidity Sweep** - Stop-hunt detection with fade/continuation switch
-12. **Order Flow/Imbalance** - Depth imbalance + CVD + price confirmation
-13. **CVD Divergence** - Price/CVD divergence for reversals + breakout confirmation
-14. **Time-of-Day** - Session-based patterns (EU/US active, Asia quiet)
-19. **Cash-and-Carry** - Funding rate arbitrage (stub - requires funding data)
-26. **Market Making** - DOM scalping with toxicity filters (stub - requires HFT orderbook)
-
-**All active strategies validated by architect** - compliance confirmed with manual requirements including:
-- H4 swing confluence from real 4h candles
-- Mandatory filters (ADX, ATR%, BBW, expansion block)
-- Dual confluence requirements for range boundaries
-- BTC directional filtering
-- Signal scoring threshold ≥+2.0 with multi-factor confirmation
-
-**Design Decision**: Strategy pattern allows independent strategy development and A/B testing without core logic changes.
+- **BaseStrategy**: Abstract base class for strategy definition.
+- **StrategyManager**: Orchestrates multiple strategies across timeframes.
+- **Signal Dataclass**: Standardized signal output.
+- **Implemented Strategies**: 16 strategies are implemented, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
 
 ### 4. Market Analysis System
-- **MarketRegimeDetector**: Classifies market into TREND/RANGE/SQUEEZE/UNDECIDED
-- **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels
-- **CVDCalculator**: Cumulative Volume Delta from tick trades and candle data
-- **VWAPCalculator**: Daily, anchored, and session-based VWAP
-- **VolumeProfile**: POC, VAH/VAL calculation with configurable binning
-
-**Design Decision**: Regime detection uses ADX + BB width percentiles + EMA alignment for multi-factor confirmation, reducing false signals.
+- **MarketRegimeDetector**: Classifies market into TREND/RANGE/SQUEEZE/UNDECIDED using multi-factor confirmation.
+- **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
+- **CVDCalculator**: Cumulative Volume Delta.
+- **VWAPCalculator**: Daily, anchored, and session-based VWAP.
+- **VolumeProfile**: POC, VAH/VAL calculation.
 
 ### 5. Signal Scoring System
-- **Base Score**: Strategy-specific logic (±1 to ±3)
-- **Volume Modifier**: +1 if >1.5× median
-- **CVD Modifier**: +1 if directional alignment or divergence (MR)
-- **OI Delta**: +1 if ΔOI ≥1-3% over 30-90 min
-- **Depth Imbalance**: +1 if sustained 10-30s in direction
-- **Penalty Modifiers**: -1 for late trend/funding extreme, -2 if BTC opposing (H1)
-
-**Entry Threshold**: Signal executed only if final score ≥ +2.0
-
-**Design Decision**: Multi-factor scoring reduces overtrading and improves win rate by requiring confluence of multiple confirmation signals.
+- Combines a base strategy score with modifiers for volume, CVD, OI Delta, and Depth Imbalance. Penalties apply for late trends, extreme funding, or opposing BTC direction. An entry threshold of ≥ +2.0 is required for execution.
 
 ### 6. Filtering & Risk Management
-- **BTCFilter**: Blocks mean reversion during BTC H1 impulses >0.8%, applies directional penalty for trend strategies
-- **Risk Calculator**: Position sizing, stop-loss (swing extreme + 0.2-0.3 ATR), take-profit (1.5-3.0 RR)
-- **Time Stops**: Exit if no progress (0.5 ATR) within 6-8 bars
-
-**Design Decision**: BTC filtering prevents counter-trend trades during major market moves, critical for correlated altcoin futures.
+- **BTCFilter**: Prevents mean reversion during significant BTC impulses and applies directional penalties for trend strategies.
+- **Risk Calculator**: Manages position sizing, stop-loss (swing extreme + 0.2-0.3 ATR), and take-profit (1.5-3.0 RR).
+- **Time Stops**: Exits trades if no progress within 6-8 bars.
 
 ### 7. Telegram Integration
-- **Commands**: /start, /help, /status, /strategies, /latency, /report, /export, /snooze, /digest
-- **Notifications**: Russian language signal alerts with entry/exit levels, regime context, score breakdown
-
-**Design Decision**: Telegram chosen for mobile accessibility and low latency push notifications.
+- Provides commands (/start, /help, /status, /strategies, /latency, /report, /export, /snooze, /digest) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
 
 ### 8. Configuration Management
-- **YAML Config**: Strategy parameters, thresholds, timeframes, risk limits
-- **Environment Secrets**: API keys, tokens stored in .env
-- **Signals-Only Mode**: Configurable via `binance.signals_only_mode` flag
-
-**Design Decision**: Separating configuration from code enables parameter tuning without redeployment.
+- Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
 
 ### 9. Parallel Data Loading Architecture
-- **SymbolLoadCoordinator**: Thread-safe coordination of loader and analyzer tasks
-  - `ready_queue`: asyncio.Queue for passing loaded symbols (max size: 50)
-  - State tracking: loaded_count, ready_symbols, failed_symbols
-  - Shutdown signaling via asyncio.Event for graceful termination
-- **Loader Task**: Background async task that loads symbol data
-  - Checks database for already-complete data (restart-safe)
-  - Retry logic: 3 attempts with exponential backoff (5s, 15s, 30s)
-  - Pushes ready symbols to coordinator queue
-- **Analyzer Task**: Consumes symbols from queue and adds to ready_symbols list
-  - Main loop analyzes ready_symbols incrementally as they load
-  - No waiting for full dataset - bot operational immediately
-- **Progress Tracking**: Real-time status updates every 10s during loading
-  - Format: "Loading: 50/272 (18.4%) | Queue: 5 ready | Ready: 45 symbols | Failed: 0"
-
-**Design Decision**: Producer-consumer pattern enables immediate signal detection on early-loaded symbols while background loading continues, reducing time-to-first-signal from hours to seconds.
+- **SymbolLoadCoordinator**: Manages thread-safe coordination for parallel loading and analysis.
+- **Loader Task**: Loads historical data with retry logic and pushes symbols to a queue.
+- **Analyzer Task**: Consumes symbols from the queue, allowing immediate analysis of loaded data while background loading continues.
 
 ## Data Flow
-
-1. **Initialization**: Load config → Connect to Binance → Start parallel loader/analyzer tasks → Launch Telegram bot
-2. **Parallel Loading**: Loader fetches data → Pushes to queue → Analyzer adds to ready_symbols → Main loop begins analysis immediately
-3. **Real-Time Loop**: WebSocket updates → Update orderbook/candles → Calculate indicators → Run strategies (ready_symbols only) → Score signals → Apply filters → Send Telegram alerts
-4. **Persistence**: Store candles/trades to SQLite → Cache historical data → Log signals with metadata
+The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis of available symbols. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-- **Rate Limiting**: Token bucket with exponential backoff on 429/418 errors
-- **WebSocket Reconnection**: Auto-reconnect with configurable delay on disconnect
-- **Orderbook Resync**: Snapshot refresh on sequence gap or staleness (>500ms no updates)
-- **Kill-Switch**: Graceful shutdown on SIGINT/SIGTERM with resource cleanup
+Features include rate limiting with exponential backoff, auto-reconnection for WebSockets, orderbook resynchronization on sequence gaps, and a graceful shutdown mechanism.
 
 # External Dependencies
 
 ## Exchange Integration
-- **Binance Futures API**: REST endpoints for candles, depth, trades, account data
-- **Binance WebSocket**: Streams for klines@1m, depth@100ms, aggTrade
-- **Binance Vision**: Historical data archive (data.binance.vision)
-
-**API Key Requirements**: Optional in signals-only mode, required for live trading
+- **Binance Futures API**: REST endpoints for market and account data.
+- **Binance WebSocket**: Real-time market data streams.
+- **Binance Vision**: Historical data archive.
 
 ## Third-Party Services
-- **Telegram Bot API**: Message delivery via python-telegram-bot library
-- **Timezone**: pytz for Europe/Kiev localization
+- **Telegram Bot API**: For message delivery.
+- **pytz**: For timezone localization (Europe/Kiev).
 
 ## Python Libraries
-- **Data Processing**: pandas, numpy, pandas-ta
-- **Network**: aiohttp, websockets (async I/O)
-- **Database**: SQLAlchemy, Alembic (migrations)
-- **Exchange**: python-binance, ccxt
-- **Scheduling**: APScheduler
-- **Configuration**: pyyaml, python-dotenv
-
-## Known Limitations
-- **Replit Deployment**: Binance blocks US/Canada IPs (HTTP 451 error) - requires local execution or VPS in allowed regions
-- **SQLite Concurrency**: Single-writer limitation, mitigated by WAL mode
-- **Memory Constraints**: 60-90 day historical data requires ~500MB+ RAM per symbol
-
-## Deployment Environments
-- **Local**: Recommended for Windows/Linux with Python 3.12+
-- **VPS**: DigitalOcean, AWS, GCP in EU/Asia regions
-- **Replit**: Only signals-only mode functional (API access blocked)
-
-# Recent Changes (October 2025)
-
-## Latest Updates (October 10, 2025)
-1. ✅ **Implemented parallel data loading and analysis** - Bot now starts analyzing symbols immediately as data loads
-   - Producer-consumer architecture: loader task + analyzer task run in parallel
-   - SymbolLoadCoordinator manages thread-safe queue and state tracking
-   - Bot analyzes ready symbols while others are still loading (no more waiting!)
-   - Progress tracking: "Loading: 50/272 | Queue: 5 ready | Ready: 45 symbols"
-   - Retry logic: 3 attempts with exponential backoff (5s, 15s, 30s) for failed loads
-   - Graceful shutdown: coordinator signals tasks to stop cleanly
-   - Restart-safe: checks database for already-loaded data
-   - **Result**: Bot operational in seconds, not hours!
-2. ✅ **Optimized data loading speed** - 4-5x faster by removing unused timeframes
-   - Removed 1m and 5m timeframes (not used in strategies, only for entry execution)
-   - Load only essential timeframes: 15m, 1h, 4h, 1d (reduced from 6 to 4 TFs)
-   - Removed artificial 0.1s delays (RateLimiter handles throttling automatically)
-   - Fixed critical deadlock in RateLimiter.acquire (lock now released before sleep)
-   - Entry points use real-time price via API (no history needed)
-   - Estimated reduction: 30-40 min → 10-12 min for 246 symbols
-   - Database size reduction: ~40M fewer records
-3. ✅ **Fixed zero-division bug** - Data loader now handles short time spans correctly
-4. ✅ **GitHub integration configured** - Project successfully uploaded to GitHub
-5. ✅ **Windows deployment tested** - Bot runs successfully on local Windows machines
-
-## Previous Critical Fixes (October 10, 2025)
-1. ✅ **Fixed .env loading** - Added `load_dotenv()` to config.py, Telegram integration now working
-2. ✅ **Fixed Volume Profile key** - Returns both 'poc' and 'vpoc' keys for strategy compatibility
-3. ✅ **Fixed CVD Divergence** - Added zero-division protection in divergence calculation
-4. ✅ **Fixed symbol checking** - Now checks ALL 487 symbols (was limited to 10 for testing)
-5. ✅ **Implemented Telegram signal alerts** - Valid signals now sent to Telegram automatically
-6. ✅ **Fixed regime detection** - Properly extract 'regime' string from regime_data dict
-7. ✅ **Fixed late_trend indicator** - Now correctly populated from regime_data
-8. ✅ **All LSP errors resolved** - Clean codebase with no type errors
-
-## Completed Implementation
-1. ✅ **16 strategies fully implemented** - all core + advanced strategies operational
-2. ✅ H4 swing detection using real 4h candles (not pseudo-aggregation)
-3. ✅ VWAP Mean Reversion: expansion block check + VAL/VAH confluence with H4 swings
-4. ✅ Range Fade: dual confluence requirement (≥2 sources: VA/VWAP/H4) for boundaries
-5. ✅ Volume Profile (#9): VAH/VAL rejection vs acceptance with POC shift detection
-6. ✅ Liquidity Sweep (#11): Stop-hunt fade/continuation with CVD + imbalance flip
-7. ✅ Order Flow (#12): Depth imbalance + CVD alignment + price confirmation
-8. ✅ CVD Divergence (#13): Price/volume divergence for reversals + breakout confirmation
-9. ✅ Time-of-Day (#14): Session-based patterns (EU/US active windows, Asia quiet MR)
-10. ✅ Cash-and-Carry (#19): Funding arbitrage framework (stub - requires funding data integration)
-11. ✅ Market Making (#26): DOM scalping framework (stub - requires HFT orderbook)
-12. ✅ Signal scoring system with threshold ≥+2.0 operational across all strategies
-13. ✅ BTC filter prevents MR during H1 impulses >0.8%
-14. ✅ Bot running successfully with 487 pairs, Telegram notifications operational
-
-## Implementation Details
-- **H4 Swings**: Calculated from timeframe_data['4h'] using tail(20) extrema, passed via indicators dict
-- **Confluence Tolerances**: ±0.3 ATR for VWAP MR, ±0.2 ATR for Range Fade boundaries
-- **Expansion Block**: Verifies current range <70% previous range (compression after expansion)
-- **IB Width Check**: Range Fade rejects if initial balance >1.5 ATR
+- **Data Processing**: pandas, numpy, pandas-ta.
+- **Network**: aiohttp, websockets.
+- **Database**: SQLAlchemy, Alembic.
+- **Exchange**: python-binance, ccxt.
+- **Scheduling**: APScheduler.
+- **Configuration**: pyyaml, python-dotenv.
