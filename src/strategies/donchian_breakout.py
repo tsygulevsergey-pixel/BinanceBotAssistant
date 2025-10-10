@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
-from src.indicators.technical import calculate_donchian, calculate_atr
+from src.indicators.technical import calculate_donchian, calculate_atr, calculate_bollinger_bands
 
 
 class DonchianBreakoutStrategy(BaseStrategy):
