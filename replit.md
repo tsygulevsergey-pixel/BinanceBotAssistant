@@ -1,97 +1,8 @@
 # Overview
 
-This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories, architect-validated against detailed specifications. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
+This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
 The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
-
-## Recent Updates (October 11, 2025)
-
-### ✅ Real-Time Mark Price for MARKET Orders (NEW)
-Eliminated slippage by fetching current market price for MARKET orders instead of using stale candle close:
-
-**Implementation:**
-- **API Integration**: `BinanceClient.get_mark_price()` fetches real-time mark price (weight=1, very cheap!)
-- **Smart Usage**: Only called after signal passes all filters (5-20 times/min, not for all symbols)
-- **Price Accuracy**: MARKET orders use fresh mark_price; LIMIT orders keep using close price (intended)
-- **R:R Preservation**: SL/TP recalculated using offsets to maintain risk-reward ratios
-- **TP2 Handling**: Conditional check ensures single-target strategies keep TP2=None correctly
-
-**Flow:**
-1. Strategy generates signal with entry=close_price
-2. If entry_type="MARKET" → fetch mark_price from Binance
-3. Update entry_price to mark_price
-4. Recalculate SL/TP using offsets (preserves R:R)
-5. LIMIT orders continue using close price for target levels
-
-**Benefits:**
-- Eliminates slippage from stale candle prices
-- Rate limit safe: only 1 weight per signal (2-5% total usage)
-- Architect-validated implementation
-- Proper async/await flow throughout
-
-### ✅ Stop Distance Validation
-Added max_stop_distance_atr protection to prevent breakout strategies from taking excessive risk on wide structural levels:
-
-**Implementation:**
-- **Global Limit**: `risk.max_stop_distance_atr: 3.0` in config.yaml (default)
-- **Per-Strategy Override**: Can set `max_stop_distance_atr` in individual strategy config
-- **Validation Method**: `BaseStrategy.validate_stop_distance()` checks stop distance before signal creation
-- **Config Hierarchy**: Per-strategy override → Global config → Default 3.0 ATR
-
-**Protected Strategies:**
-- Donchian Breakout: Rejects signals if dc_low/dc_high too far from entry
-- Squeeze Breakout: Rejects signals if BB bands too wide
-- ORB/IRB: Rejects signals if IB range exceeds max distance
-
-**Benefits:**
-- Prevents unrealistic risk from wide structural stops (e.g., 5-8 ATR)
-- Maintains dynamic, adaptive stops based on market structure
-- Configurable globally or per-strategy for flexibility
-- Architect-validated implementation with proper config hierarchy
-
-### ✅ Hybrid Entry System with R:R Preservation
-Adaptive MARKET/LIMIT execution based on strategy category with **critical R:R fix**:
-
-**Entry Logic:**
-- **Breakout strategies** (Donchian, Squeeze, ORB/IRB, ATR Momentum) → **MARKET** entry for immediate execution
-- **Pullback strategies** (Break & Retest, MA/VWAP Pullback) → **LIMIT** entry with 6-bar timeout
-- **Mean Reversion strategies** (VWAP MR, Range Fade, RSI/Stoch MR, Volume Profile) → **LIMIT** entry with 4-bar timeout
-- **Order Flow/CVD** → **MARKET** entry (aggressive signals)
-
-**Key Components:**
-- `EntryManager`: Tracks pending LIMIT orders with timeout logic and intrabar fill detection (checks candle low/high, not just close)
-- `Signal`: Extended with offset fields (stop_offset, tp1_offset, tp2_offset) to preserve R:R when entry changes
-- `BaseStrategy.calculate_risk_offsets()`: Computes relative distances from entry to SL/TP
-- `StrategyManager`: Recalculates SL/TP from target_entry_price using offsets for LIMIT orders
-- Database status support: `PENDING` for LIMIT orders → `ACTIVE` after fill
-- Telegram notifications differentiate MARKET/LIMIT/FILLED with emoji indicators
-
-**Critical R:R Fix:**
-Previously, changing entry_price for LIMIT orders broke Risk:Reward ratios because SL/TP levels remained fixed. Now:
-1. Strategy calculates entry=100, SL=98, TP1=104
-2. calculate_risk_offsets() stores: stop_offset=2, tp1_offset=4
-3. For LIMIT: recalculate SL=target-2=98, TP1=target+4=104
-4. R:R preserved regardless of entry price changes ✅
-
-**Expected Benefits:**
-- +10-15% improved R:R on pullback/MR strategies through better entry prices
-- Breakout strategies maintain speed advantage with MARKET execution
-- Accurate R:R ratios maintained across all entry types
-- Low risk implementation with timeout protection
-
-### Previous Fixes
-- **ADX Configuration Standardization**: Fixed MA/VWAP Pullback strategy to use `config.get('market_detector.trend.adx_threshold')` instead of hardcoded value 20, ensuring consistency across all strategies.
-- **Late Trend Blocking Removal**: Removed late_trend flag check from ATR Momentum strategy that was blocking signals. The late_trend flag is still calculated in market_regime.py but no longer blocks strategy execution, aligning with removal of late_trend penalty from scoring system.
-- **H4 ADX Propagation Fix**: Fixed ORB/IRB strategy receiving h4_adx=0 by adding `'h4_adx': regime_data.get('details', {}).get('adx', 0)` to indicators dictionary in main.py, and increased H4 data requirement from 50 to 200 bars to match MarketRegimeDetector's validation threshold.
-
-## Future Enhancements
-
-### PRO Adaptive Entry (Deferred)
-Volume spike-based adaptive entry for future implementation:
-- Strong impulse (volume_ratio > 2.0, momentum > 0.5) → MARKET entry
-- Normal conditions → LIMIT entry for better price
-- Benefits: +20-30% improved R:R with proper tuning, adaptive to market volatility
-- Requirements: Backtesting, A/B testing, fill rate monitoring
 
 # User Preferences
 
@@ -104,51 +15,49 @@ Preferred communication style: Simple, everyday language.
 ### Market Data Infrastructure
 - **BinanceClient**: REST API client with rate limiting and exponential backoff.
 - **DataLoader**: Fetches historical data with caching.
-- **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates for sub-second depth imbalance detection.
-- **BinanceWebSocket**: Real-time market data streaming (klines, trades, depth updates).
+- **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates.
+- **BinanceWebSocket**: Real-time market data streaming.
 
 ### Database Layer
-- **Technology**: SQLAlchemy ORM with SQLite backend (WAL mode, indexed queries on (symbol, timeframe, timestamp)) for simplicity and concurrent reads.
+- **Technology**: SQLAlchemy ORM with SQLite backend (WAL mode, indexed queries on (symbol, timeframe, timestamp)).
 
 ### Strategy Framework
 - **BaseStrategy**: Abstract base class for strategy definition.
 - **StrategyManager**: Orchestrates multiple strategies across timeframes.
 - **Signal Dataclass**: Standardized signal output.
-- **Implemented Strategies**: 15 active strategies, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
+- **Implemented Strategies**: 15 active strategies, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies include mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold.
 
 ### Market Analysis System
-- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED using multi-factor confirmation with priority-based detection (TREND → SQUEEZE → RANGE/CHOP). Uses percent-normalized EMA slopes (0.05% threshold) to distinguish RANGE (flat EMA) from CHOP (erratic EMA), ensuring accurate detection across all price ranges.
+- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED using multi-factor confirmation and priority-based detection.
 - **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
 - **CVDCalculator**: Cumulative Volume Delta.
 - **VWAPCalculator**: Daily, anchored, and session-based VWAP.
 - **VolumeProfile**: POC, VAH/VAL calculation.
-- **IndicatorCache**: High-performance caching system with timestamp-based invalidation - eliminates 1,500+ redundant calculations per analysis cycle by storing pre-computed indicators per (symbol, timeframe, last_bar_time). Provides 15x speed improvement for multi-strategy analysis.
+- **IndicatorCache**: High-performance caching system with timestamp-based invalidation for pre-computed indicators.
 
 ### Signal Scoring System
-- **Scoring Formula**: Base strategy score (1-3) + volume modifier (+1) + CVD alignment (+1) + OI Delta (+1) + Depth Imbalance (+1) - Funding Extreme (-1) - BTC Opposition (-2)
-- **BTC Filter**: Uses 3-bar (2-hour) lookback on H1 with 0.3% threshold to filter noise - applies -2 penalty only for real BTC trends opposing signal direction
-- **Entry Threshold**: Signals require final_score ≥ +2.0 for execution
-- **Late Trend Removed**: Previous late_trend penalty (based on 4H timeframe) removed as it created false negatives on lower timeframes. Other filters (ADX, BBW, expansion block) provide sufficient protection.
+- **Scoring Formula**: Base strategy score + volume modifier + CVD alignment + OI Delta + Depth Imbalance - Funding Extreme - BTC Opposition.
+- **BTC Filter**: Uses 3-bar (2-hour) lookback on H1 with 0.3% threshold to filter noise, applying a penalty for opposing BTC trends.
+- **Entry Threshold**: Signals require a final_score ≥ +2.0 for execution.
 
 ### Signal Aggregation & Conflict Resolution
-- **Score-Based Prioritization**: All signals are scored first, then sorted by final_score (descending) before processing. This ensures the highest quality signal is selected.
-- **Direction-Aware Locks**: Lock key format `signal_lock:{symbol}:{direction}` allows simultaneous LONG and SHORT signals for the same symbol (different strategies/approaches).
-- **Best Signal Selection**: For each direction, the highest-scoring signal acquires the lock; subsequent lower-scoring signals are rejected.
-- **Threshold Gating**: Only signals with final_score ≥ 2.0 proceed to lock acquisition. Sub-threshold signals are immediately discarded.
-- **Conflict Policy**: 
-  - Multiple LONG signals → Best score wins
-  - Multiple SHORT signals → Best score wins
-  - LONG + SHORT signals → Both can execute (independent locks)
-- **Lock TTL**: Redis/SQLite locks expire after configurable TTL (default 3600s) to prevent stale locks.
+- **Score-Based Prioritization**: Signals are scored and sorted by final_score (descending) before processing.
+- **Direction-Aware Locks**: Lock key format `signal_lock:{symbol}:{direction}` allows simultaneous LONG and SHORT signals.
+- **Best Signal Selection**: For each direction, the highest-scoring signal acquires the lock; lower-scoring signals are rejected.
+- **Threshold Gating**: Only signals with final_score ≥ 2.0 proceed to lock acquisition.
+- **Conflict Policy**: Multiple signals of the same direction result in the best score winning; opposing directional signals can both execute.
+- **Lock TTL**: Redis/SQLite locks expire after a configurable TTL.
 
 ### Filtering & Risk Management
-- **BTCFilter**: Prevents mean reversion during significant BTC impulses and applies directional penalties for trend strategies.
+- **Stop Distance Validation**: Prevents excessive risk by validating stop distance based on ATR.
+- **Hybrid Entry System**: Adaptive MARKET/LIMIT execution based on strategy category (Breakout strategies use MARKET, Pullback/Mean Reversion use LIMIT) with R:R preservation using offset calculations.
+- **BTCFilter**: Prevents mean reversion during significant BTC impulses and applies directional penalties.
 - **Risk Calculator**: Manages position sizing, stop-loss (swing extreme + 0.2-0.3 ATR), and take-profit (1.5-3.0 RR).
 - **Time Stops**: Exits trades if no progress within 6-8 bars.
 
 ### Telegram Integration
 - Provides commands (/start, /help, /status, /strategies, /performance, /stats, /validate, /latency, /report) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
-- **/validate** - Validates all strategies: checks data availability, OHLCV integrity, price logic, signal generation, and entry/SL/TP correctness across different market regimes.
+- **/validate** - Validates all strategies for data availability, OHLCV integrity, price logic, signal generation, and entry/SL/TP correctness across different market regimes.
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
@@ -156,9 +65,9 @@ Preferred communication style: Simple, everyday language.
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe coordination for parallel loading and analysis.
 - **Loader Task**: Loads historical data with retry logic and pushes symbols to a queue.
-- **Analyzer Task**: Consumes symbols from the queue, allowing immediate analysis of loaded data while background loading continues.
-- **Symbol Auto-Update Task**: Automatically updates the symbol list every hour based on 24h volume criteria, adding new high-volume pairs and removing low-volume pairs dynamically.
-- **Data Integrity System**: Comprehensive data validation with a 99% threshold, including gap detection, auto-fix capabilities, and Telegram alerts for unfixed issues.
+- **Analyzer Task**: Consumes symbols from the queue for immediate analysis.
+- **Symbol Auto-Update Task**: Automatically updates the symbol list based on 24h volume criteria.
+- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix capabilities, and Telegram alerts.
 
 ## Data Flow
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis of available symbols. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
@@ -175,7 +84,7 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 
 ## Third-Party Services
 - **Telegram Bot API**: For message delivery.
-- **pytz**: For timezone localization (Europe/Kiev).
+- **pytz**: For timezone localization.
 
 ## Python Libraries
 - **Data Processing**: pandas, numpy, pandas-ta.
