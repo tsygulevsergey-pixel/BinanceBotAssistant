@@ -205,13 +205,15 @@ class CVDDivergenceStrategy(BaseStrategy):
             
             return Signal(
                 symbol=symbol,
-                direction='long',
+                strategy_name=self.name,
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.5,
-                strategy_name=self.name,
+                base_score=2.5,
                 metadata={
                     'type': 'cvd_divergence',
                     'divergence': 'bullish'
@@ -225,13 +227,15 @@ class CVDDivergenceStrategy(BaseStrategy):
             
             return Signal(
                 symbol=symbol,
-                direction='short',
+                strategy_name=self.name,
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.5,
-                strategy_name=self.name,
+                base_score=2.5,
                 metadata={
                     'type': 'cvd_divergence',
                     'divergence': 'bearish'
@@ -253,13 +257,15 @@ class CVDDivergenceStrategy(BaseStrategy):
             
             return Signal(
                 symbol=symbol,
-                direction='long',
+                strategy_name=self.name,
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
-                strategy_name=self.name,
+                base_score=2.0,
                 metadata={
                     'type': 'cvd_confirmation',
                     'confirmation': 'breakout_up'
@@ -273,13 +279,15 @@ class CVDDivergenceStrategy(BaseStrategy):
             
             return Signal(
                 symbol=symbol,
-                direction='short',
+                strategy_name=self.name,
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
-                strategy_name=self.name,
+                base_score=2.0,
                 metadata={
                     'type': 'cvd_confirmation',
                     'confirmation': 'breakout_down'
