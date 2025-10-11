@@ -191,7 +191,7 @@ class SignalScorer:
         from src.filters.btc_filter import BTCFilter
         from src.utils.config import config
         
-        btc_filter = BTCFilter(config.config)
+        btc_filter = BTCFilter(config)
         penalty = btc_filter.get_direction_penalty(signal.direction, btc_data)
         
         if penalty < 0:
