@@ -64,6 +64,9 @@ class StrategyManager:
                 
                 signal = strategy.check_signal(symbol, df, regime, bias, indicators)
                 if signal:
+                    # ВАЖНО: Сначала рассчитать offset'ы от начальной entry_price
+                    signal = strategy.calculate_risk_offsets(signal)
+                    
                     # Применить гибридную логику входа на основе категории стратегии
                     entry_type, target_price, timeout = strategy.determine_entry_type(
                         signal.entry_price, df
@@ -71,13 +74,30 @@ class StrategyManager:
                     signal.entry_type = entry_type
                     signal.entry_timeout = timeout
                     
-                    # Для LIMIT orders: сохранить целевую цену, обновить entry_price на current
+                    # Для LIMIT orders: сохранить целевую цену и пересчитать SL/TP
                     if entry_type == "LIMIT":
                         signal.target_entry_price = signal.entry_price  # Целевой уровень
-                        signal.entry_price = float(df['close'].iloc[-1])  # Текущая цена
+                        current_price = float(df['close'].iloc[-1])
+                        
+                        # Пересчитать SL/TP от target_entry_price используя offset'ы
+                        # Это сохраняет R:R при изменении entry
+                        if signal.direction == "LONG":
+                            signal.stop_loss = signal.target_entry_price - (signal.stop_offset or 0)
+                            signal.take_profit_1 = signal.target_entry_price + (signal.tp1_offset or 0)
+                            if signal.tp2_offset:
+                                signal.take_profit_2 = signal.target_entry_price + signal.tp2_offset
+                        else:  # SHORT
+                            signal.stop_loss = signal.target_entry_price + (signal.stop_offset or 0)
+                            signal.take_profit_1 = signal.target_entry_price - (signal.tp1_offset or 0)
+                            if signal.tp2_offset:
+                                signal.take_profit_2 = signal.target_entry_price - signal.tp2_offset
+                        
+                        signal.entry_price = current_price  # Текущая цена для отображения
+                        
                         strategy_logger.info(
                             f"  📍 LIMIT entry: target={signal.target_entry_price:.4f}, "
-                            f"current={signal.entry_price:.4f}, timeout={timeout} bars"
+                            f"current={signal.entry_price:.4f}, SL={signal.stop_loss:.4f}, "
+                            f"TP1={signal.take_profit_1:.4f}, timeout={timeout} bars"
                         )
                     
                     strategy.increment_signal_count()

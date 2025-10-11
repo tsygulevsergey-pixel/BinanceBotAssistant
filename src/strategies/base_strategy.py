@@ -26,6 +26,11 @@ class Signal:
     target_entry_price: Optional[float] = None  # For LIMIT orders
     entry_timeout: int = 6  # Bars to wait for LIMIT fill
     
+    # Risk offsets for SL/TP recalculation (preserves R:R when entry changes)
+    stop_offset: Optional[float] = None  # Distance from entry to SL
+    tp1_offset: Optional[float] = None   # Distance from entry to TP1
+    tp2_offset: Optional[float] = None   # Distance from entry to TP2
+    
     # Market context
     regime: str = ""  # TREND/RANGE/SQUEEZE
     bias: str = ""  # Bullish/Bearish/Neutral
@@ -127,6 +132,24 @@ class BaseStrategy(ABC):
             'category': self.get_category(),
             'timeframe': self.get_timeframe()
         }
+    
+    def calculate_risk_offsets(self, signal: Signal) -> Signal:
+        """
+        Рассчитать и сохранить offset'ы для SL/TP
+        Это позволяет корректно пересчитать уровни при изменении entry_price
+        """
+        if signal.direction == "LONG":
+            signal.stop_offset = signal.entry_price - signal.stop_loss  # Положительное
+            signal.tp1_offset = signal.take_profit_1 - signal.entry_price  # Положительное
+            if signal.take_profit_2:
+                signal.tp2_offset = signal.take_profit_2 - signal.entry_price
+        else:  # SHORT
+            signal.stop_offset = signal.stop_loss - signal.entry_price  # Положительное
+            signal.tp1_offset = signal.entry_price - signal.take_profit_1  # Положительное
+            if signal.take_profit_2:
+                signal.tp2_offset = signal.entry_price - signal.take_profit_2
+        
+        return signal
     
     def determine_entry_type(self, entry_price: float, df: pd.DataFrame) -> tuple:
         """
