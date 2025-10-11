@@ -53,8 +53,8 @@ class TradingBot:
         
         # Компоненты бота
         self.strategy_manager = StrategyManager()
-        self.signal_scorer = SignalScorer(config._config)  # Передаём внутренний словарь config
-        self.btc_filter = BTCFilter(config._config)
+        self.signal_scorer = SignalScorer(config)  # Config object supports dot notation
+        self.btc_filter = BTCFilter(config)  # Config object supports dot notation
         self.regime_detector = MarketRegimeDetector()
         self.telegram_bot = TelegramBot()
         self.signal_lock_manager = SignalLockManager()

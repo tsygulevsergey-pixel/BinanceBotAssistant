@@ -4,6 +4,19 @@ This project is a sophisticated Binance USDT-M Futures Trading Bot designed to g
 
 The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/RANGE/SQUEEZE), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
 
+# Recent Changes
+
+## 2025-10-11: Configuration Synchronization Fix
+- **Fixed 8 critical config parameter mismatches** between code and config.yaml:
+  - BTCFilter: Added missing `expansion_atr_mult: 1.5`, `lookback_bars: 10`
+  - BTCFilter: Fixed `impulse_threshold` now correctly reads 1.5% from config (was using 0.8% default)
+  - SignalScorer: Added missing `volume_mult: 1.5`, `enter_threshold: 2.0`
+  - SignalScorer: Added missing `doi_min_pct: 1.0`, `doi_max_pct: 3.0`
+  - SignalScorer: Added missing `depth_imbalance_ratio` section with long_max: 0.90, short_min: 1.10
+  - SignalScorer: Added missing `btc_filter_tf: "1h"`
+- **All parameters now correctly loaded from config.yaml** instead of hardcoded defaults
+- Python module cache cleared to ensure fresh configuration loading
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
