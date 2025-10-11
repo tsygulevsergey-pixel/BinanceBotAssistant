@@ -35,10 +35,14 @@ from src.utils.signal_lock import SignalLockManager
 from src.utils.signal_tracker import SignalPerformanceTracker
 from src.utils.strategy_validator import StrategyValidator
 from src.utils.timeframe_sync import TimeframeSync
+from src.utils.indicator_validator import IndicatorValidator
 from src.database.db import db
 from src.database.models import Signal
 from src.indicators.cache import IndicatorCache
 from src.indicators.common import calculate_common_indicators
+from src.indicators.swing_levels import calculate_swing_levels
+from src.indicators.open_interest import OpenInterestCalculator
+from src.indicators.orderbook import OrderbookAnalyzer
 import hashlib
 from datetime import datetime
 import pytz
@@ -327,8 +331,9 @@ class TradingBot:
         strategy_logger.info(f"🔍 АНАЛИЗ: {symbol} | Режим: {regime} | Bias: {bias}")
         
         # Рассчитать H4 swings для confluence проверки
-        h4_swing_high = h4_data['high'].tail(20).max() if h4_data is not None and len(h4_data) >= 20 else None
-        h4_swing_low = h4_data['low'].tail(20).min() if h4_data is not None and len(h4_data) >= 20 else None
+        # Используем fractal patterns (локальные экстремумы) вместо простого max/min
+        # lookback=5 означает 5 баров с каждой стороны для подтверждения swing
+        h4_swing_high, h4_swing_low = calculate_swing_levels(h4_data, lookback=5) if h4_data is not None and len(h4_data) >= 20 else (None, None)
         
         # Рассчитать общие индикаторы (с кешированием)
         # Проверяем кеш для каждого таймфрейма
@@ -346,18 +351,46 @@ class TradingBot:
                 # Используем закешированные индикаторы
                 cached_indicators[tf] = cached
         
+        # Получить реальные данные Open Interest из API
+        oi_metrics = await OpenInterestCalculator.fetch_and_calculate_oi(
+            client=self.client,
+            symbol=symbol,
+            period='5m',
+            limit=30,
+            lookback=5
+        )
+        
+        # Получить реальные данные Orderbook Depth из API
+        depth_metrics = await OrderbookAnalyzer.fetch_and_calculate_depth(
+            client=self.client,
+            symbol=symbol,
+            limit=20,
+            use_weighted=True  # Используем взвешенный расчёт
+        )
+        
         # Indicators для стратегий (объединяем кешированные + дополнительные)
         # NOTE: CVD теперь берется из indicators[self.timeframe]['cvd'] в каждой стратегии
         indicators = {
             **cached_indicators,  # Все закешированные индикаторы по таймфреймам (включая CVD)
-            'doi_pct': 0.0,  # TODO: Рассчитать из API Open Interest
-            'depth_imbalance': 1.0,  # TODO: Рассчитать из API Orderbook depth
+            'doi_pct': oi_metrics['doi_pct'],  # Реальные данные Open Interest Delta %
+            'oi_delta': oi_metrics['oi_delta'],  # Абсолютное изменение OI
+            'oi_data_valid': oi_metrics.get('data_valid', False),  # Флаг валидности OI данных
+            'depth_imbalance': depth_metrics['depth_imbalance'],  # Реальный дисбаланс orderbook
+            'bid_volume': depth_metrics['bid_volume'],  # Bid ликвидность
+            'ask_volume': depth_metrics['ask_volume'],  # Ask ликвидность
+            'spread_pct': depth_metrics['spread_pct'],  # Спред в %
+            'depth_data_valid': depth_metrics.get('data_valid', False),  # Флаг валидности depth данных
             'late_trend': regime_data.get('late_trend', False),
             'funding_extreme': False,  # TODO: Рассчитать из API Funding Rate
             'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
             'h4_swing_high': h4_swing_high,
             'h4_swing_low': h4_swing_low
         }
+        
+        # Валидация индикаторов (только для первого символа или периодически)
+        if symbol == self.ready_symbols[0] if self.ready_symbols else True:
+            validation = IndicatorValidator.validate_indicators(indicators, symbol=symbol)
+            IndicatorValidator.log_validation_results(validation, symbol=symbol)
         
         # Проверка MR блокировки по BTC
         btc_block_mr = False

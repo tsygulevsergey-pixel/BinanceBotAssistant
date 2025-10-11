@@ -1,19 +1,51 @@
 import pandas as pd
 import numpy as np
 from typing import Optional
+from src.utils.logger import logger
 
 
 class CVDCalculator:
     @staticmethod
     def calculate_bar_cvd(df: pd.DataFrame) -> pd.Series:
-        if 'taker_buy_base' not in df.columns:
+        """
+        Рассчитать CVD из bar/kline данных
+        Требуется колонка с taker buy volume для точного расчёта
+        
+        Проверяет разные варианты названий колонок:
+        - taker_buy_base (стандартное название)
+        - takerBuyBaseAssetVolume (Binance API naming)
+        
+        Если данных нет, возвращает Series из нулей с предупреждением
+        """
+        # Проверяем разные варианты названий колонок
+        taker_buy_col = None
+        
+        if 'taker_buy_base' in df.columns:
+            taker_buy_col = 'taker_buy_base'
+        elif 'takerBuyBaseAssetVolume' in df.columns:
+            taker_buy_col = 'takerBuyBaseAssetVolume'
+        elif 'taker_buy_base_asset_volume' in df.columns:
+            taker_buy_col = 'taker_buy_base_asset_volume'
+        
+        if taker_buy_col is None:
+            logger.warning(
+                "⚠️  CVD: Нет данных taker buy volume! CVD будет нулевым. "
+                f"Доступные колонки: {list(df.columns)}"
+            )
             return pd.Series(0, index=df.index)
         
-        buy_volume = df['taker_buy_base']
-        sell_volume = df['volume'] - df['taker_buy_base']
+        # Рассчитываем CVD
+        buy_volume = df[taker_buy_col]
+        sell_volume = df['volume'] - df[taker_buy_col]
         
         delta = buy_volume - sell_volume
         cvd = delta.cumsum()
+        
+        # Проверяем что CVD не все нули (качество данных)
+        if cvd.sum() == 0:
+            logger.warning(
+                f"⚠️  CVD: Все значения равны нулю - возможно некачественные данные в колонке '{taker_buy_col}'"
+            )
         
         return cvd
     
