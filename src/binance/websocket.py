@@ -10,12 +10,14 @@ from src.utils.config import config
 
 class BinanceWebSocket:
     WS_BASE_URL = "wss://fstream.binance.com"
+    WS_TESTNET_URL = "wss://stream.binancefuture.com"
     
     def __init__(self, symbol: str):
         self.symbol = symbol.lower()
         self.ws: Optional[websockets.WebSocketClientProtocol] = None
         self.running = False
         self.callbacks: Dict[str, List[Callable]] = {}
+        self.use_testnet = config.get('binance.use_testnet', False)
         self.reconnect_delay = config.get('binance.ws_reconnect_delay', 5)
         self.last_message_time = datetime.now(pytz.UTC)
         self.stale_threshold = timedelta(
@@ -50,10 +52,12 @@ class BinanceWebSocket:
     
     async def _connect(self, streams: List[str]):
         stream_names = '/'.join([f"{self.symbol}@{s}" for s in streams])
-        url = f"{self.WS_BASE_URL}/stream?streams={stream_names}"
+        base_url = self.WS_TESTNET_URL if self.use_testnet else self.WS_BASE_URL
+        url = f"{base_url}/stream?streams={stream_names}"
         
         self.ws = await websockets.connect(url)
-        logger.info(f"WebSocket connected for {self.symbol} with streams: {streams}")
+        env = "TESTNET" if self.use_testnet else "PRODUCTION"
+        logger.info(f"WebSocket connected [{env}] for {self.symbol} with streams: {streams}")
     
     async def start(self, streams: List[str]):
         self.running = True

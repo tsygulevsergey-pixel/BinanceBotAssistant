@@ -82,7 +82,16 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 
 # Recent Changes (October 2025)
 
-## Latest Updates (October 10, 2025)
+## Latest Updates (October 11, 2025)
+1. ✅ **WebSocket Testnet Fix** - Исправлен критический баг переключения на testnet
+   - **Проблема**: WebSocket всегда подключался к production (`wss://fstream.binance.com`), даже при `use_testnet: true`
+   - **Решение**: Добавлен `WS_TESTNET_URL = wss://stream.binancefuture.com` и правильное переключение
+   - **Логирование**: WebSocket теперь показывает `[TESTNET]` или `[PRODUCTION]` при подключении
+   - **Влияние**: REST API и WebSocket теперь используют одинаковый environment (testnet/production)
+   - **До исправления**: REST → testnet, WebSocket → production (данные не совпадали!)
+   - **После исправления**: Оба используют testnet при `use_testnet: true`
+
+## Previous Updates (October 10, 2025)
 1. ✅ **Symbol Auto-Update System** - Автоматическое обновление списка монет
    - **Периодическое обновление**: каждый час бот проверяет объемы и обновляет список монет
    - **Динамическое добавление**: новые монеты с высоким объемом автоматически добавляются и загружаются
