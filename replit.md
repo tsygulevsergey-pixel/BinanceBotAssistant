@@ -9,6 +9,26 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 - **Late Trend Blocking Removal**: Removed late_trend flag check from ATR Momentum strategy that was blocking signals. The late_trend flag is still calculated in market_regime.py but no longer blocks strategy execution, aligning with removal of late_trend penalty from scoring system.
 - **H4 ADX Propagation Fix**: Fixed ORB/IRB strategy receiving h4_adx=0 by adding `'h4_adx': regime_data.get('details', {}).get('adx', 0)` to indicators dictionary in main.py, and increased H4 data requirement from 50 to 200 bars to match MarketRegimeDetector's validation threshold.
 
+## Planned Improvements
+
+### Entry Logic Evolution (In Progress)
+Two approaches documented for future optimization of entry points:
+
+**ГИБРИДНЫЙ подход (Current Implementation Target):**
+- Breakout strategies (Donchian, Squeeze, ORB, ATR Momentum) → MARKET entry for speed
+- Pullback strategies (Break & Retest, MA/VWAP Pullback) → LIMIT entry on retest levels
+- Mean Reversion strategies (VWAP MR, Range Fade, RSI/Stoch MR, Volume Profile) → LIMIT entry at target zones
+- Order Flow/CVD → MARKET (aggressive signals)
+- Benefits: +10-15% improved R:R on pullback/MR strategies, simple logic, low risk
+- Implementation: Entry type determined by strategy.get_category(), timeout 6 bars for limit orders
+
+**PRO Adaptive подход (Future Enhancement):**
+- Dynamic entry type based on market conditions (volume spike, momentum, depth imbalance)
+- Strong impulse (volume_ratio > 2.0, momentum > 0.5) → MARKET entry
+- Normal conditions → LIMIT entry for better price
+- Benefits: +20-30% improved R:R with proper tuning, adaptive to market volatility
+- Requirements: Backtesting, A/B testing, fill rate monitoring
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

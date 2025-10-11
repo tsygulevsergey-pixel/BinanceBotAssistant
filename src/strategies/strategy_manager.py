@@ -64,11 +64,28 @@ class StrategyManager:
                 
                 signal = strategy.check_signal(symbol, df, regime, bias, indicators)
                 if signal:
+                    # Применить гибридную логику входа на основе категории стратегии
+                    entry_type, target_price, timeout = strategy.determine_entry_type(
+                        signal.entry_price, df
+                    )
+                    signal.entry_type = entry_type
+                    signal.entry_timeout = timeout
+                    
+                    # Для LIMIT orders: сохранить целевую цену, обновить entry_price на current
+                    if entry_type == "LIMIT":
+                        signal.target_entry_price = signal.entry_price  # Целевой уровень
+                        signal.entry_price = float(df['close'].iloc[-1])  # Текущая цена
+                        strategy_logger.info(
+                            f"  📍 LIMIT entry: target={signal.target_entry_price:.4f}, "
+                            f"current={signal.entry_price:.4f}, timeout={timeout} bars"
+                        )
+                    
                     strategy.increment_signal_count()
                     signals.append(signal)
                     logger.info(
                         f"Signal generated: {signal.strategy_name} | "
-                        f"{signal.symbol} {signal.direction} | Score: {signal.base_score}"
+                        f"{signal.symbol} {signal.direction} | Score: {signal.base_score} | "
+                        f"Entry: {entry_type}"
                     )
                     strategy_logger.info(
                         f"  ✅ {strategy.name} → СИГНАЛ! {signal.direction} | "

@@ -21,6 +21,11 @@ class Signal:
     take_profit_1: float
     take_profit_2: Optional[float] = None
     
+    # Entry execution (hybrid approach)
+    entry_type: str = "MARKET"  # MARKET or LIMIT
+    target_entry_price: Optional[float] = None  # For LIMIT orders
+    entry_timeout: int = 6  # Bars to wait for LIMIT fill
+    
     # Market context
     regime: str = ""  # TREND/RANGE/SQUEEZE
     bias: str = ""  # Bullish/Bearish/Neutral
@@ -122,3 +127,30 @@ class BaseStrategy(ABC):
             'category': self.get_category(),
             'timeframe': self.get_timeframe()
         }
+    
+    def determine_entry_type(self, entry_price: float, df: pd.DataFrame) -> tuple:
+        """
+        Определить тип входа на основе категории стратегии (ГИБРИДНЫЙ подход)
+        
+        Returns:
+            (entry_type, target_entry_price, entry_timeout)
+        """
+        category = self.get_category()
+        
+        # BREAKOUT → MARKET entry для скорости
+        if category == "breakout":
+            return ("MARKET", None, 6)
+        
+        # PULLBACK → LIMIT entry на уровень отката
+        elif category == "pullback":
+            # Для pullback стратегий entry_price уже содержит целевой уровень
+            return ("LIMIT", entry_price, 6)
+        
+        # MEAN REVERSION → LIMIT entry в зону интереса
+        elif category == "mean_reversion":
+            # Для MR стратегий entry_price - это целевая зона
+            return ("LIMIT", entry_price, 4)  # Меньший timeout для MR
+        
+        # ORDER FLOW, CVD и другие → MARKET (агрессивный вход)
+        else:
+            return ("MARKET", None, 6)

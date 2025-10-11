@@ -33,6 +33,7 @@ from src.telegram.bot import TelegramBot
 from src.utils.symbol_load_coordinator import SymbolLoadCoordinator
 from src.utils.signal_lock import SignalLockManager
 from src.utils.signal_tracker import SignalPerformanceTracker
+from src.utils.entry_manager import EntryManager
 from src.utils.strategy_validator import StrategyValidator
 from src.utils.timeframe_sync import TimeframeSync
 from src.utils.indicator_validator import IndicatorValidator
@@ -65,6 +66,7 @@ class TradingBot:
         self.regime_detector = MarketRegimeDetector()
         self.telegram_bot = TelegramBot()
         self.signal_lock_manager = SignalLockManager()
+        self.entry_manager = EntryManager()  # Управление MARKET/LIMIT входами
         self.indicator_cache = IndicatorCache()  # Кеш для индикаторов
         
         self._register_strategies()
@@ -312,6 +314,28 @@ class TradingBot:
             if df is not None and len(df) > 0:
                 timeframe_data[tf] = df
         
+        # Проверить pending LIMIT orders для этого символа
+        if '15m' in timeframe_data:
+            executed_limits = self.entry_manager.check_pending_limits(symbol, timeframe_data['15m'])
+            for limit_signal in executed_limits:
+                strategy_logger.info(
+                    f"✅ LIMIT FILLED: {limit_signal.symbol} {limit_signal.direction} @ "
+                    f"{limit_signal.entry_price:.4f} (target was {limit_signal.target_entry_price:.4f})"
+                )
+                # Отправить уведомление об исполнении
+                await self.telegram_bot.send_signal({
+                    'strategy_name': limit_signal.strategy_name,
+                    'symbol': limit_signal.symbol,
+                    'direction': limit_signal.direction.upper(),
+                    'entry_price': limit_signal.entry_price,  # Фактическая цена
+                    'stop_loss': limit_signal.stop_loss,
+                    'tp1': limit_signal.take_profit_1,
+                    'tp2': limit_signal.take_profit_2,
+                    'score': limit_signal.final_score,
+                    'regime': limit_signal.regime,
+                    'entry_type': 'LIMIT FILLED'
+                })
+        
         if not timeframe_data:
             logger.debug(f"❌ {symbol}: No timeframe data available")
             return
@@ -480,29 +504,71 @@ class TradingBot:
                     f"✅ VALID SIGNAL: {signal.strategy_name} | "
                     f"{signal.symbol} {signal.direction} @ {signal.entry_price:.4f} | "
                     f"Score: {final_score:.1f} | SL: {signal.stop_loss:.4f} | "
-                    f"TP1: {signal.take_profit_1:.4f} | TP2: {signal.take_profit_2:.4f}"
+                    f"TP1: {signal.take_profit_1:.4f} | TP2: {signal.take_profit_2:.4f} | "
+                    f"Entry Type: {signal.entry_type}"
                 )
                 
-                # Отправить сигнал в Telegram
-                telegram_msg_id = await self.telegram_bot.send_signal({
-                    'strategy_name': signal.strategy_name,
-                    'symbol': signal.symbol,
-                    'direction': signal.direction.upper(),
-                    'entry_price': signal.entry_price,
-                    'stop_loss': signal.stop_loss,
-                    'tp1': signal.take_profit_1,
-                    'tp2': signal.take_profit_2,
-                    'score': final_score,
-                    'regime': regime
-                })
+                # Обработать гибридный вход через EntryManager
+                action, processed_signal = self.entry_manager.process_signal(signal)
                 
-                # Сохранить сигнал в БД
-                self._save_signal_to_db(
-                    signal=signal,
-                    final_score=final_score,
-                    regime=regime,
-                    telegram_msg_id=telegram_msg_id
-                )
+                if action == "EXECUTE":
+                    # MARKET entry → немедленное исполнение
+                    # Отправить сигнал в Telegram
+                    telegram_msg_id = await self.telegram_bot.send_signal({
+                        'strategy_name': signal.strategy_name,
+                        'symbol': signal.symbol,
+                        'direction': signal.direction.upper(),
+                        'entry_price': signal.entry_price,
+                        'stop_loss': signal.stop_loss,
+                        'tp1': signal.take_profit_1,
+                        'tp2': signal.take_profit_2,
+                        'score': final_score,
+                        'regime': regime,
+                        'entry_type': 'MARKET'
+                    })
+                    
+                    # Сохранить сигнал в БД
+                    self._save_signal_to_db(
+                        signal=signal,
+                        final_score=final_score,
+                        regime=regime,
+                        telegram_msg_id=telegram_msg_id
+                    )
+                
+                elif action == "PENDING":
+                    # LIMIT entry → отложенный ордер
+                    strategy_logger.info(
+                        f"⏳ LIMIT order pending: {signal.symbol} {signal.direction} | "
+                        f"Target: {signal.target_entry_price:.4f}, Timeout: {signal.entry_timeout} bars"
+                    )
+                    
+                    # Отправить уведомление о LIMIT ордере
+                    telegram_msg_id = await self.telegram_bot.send_signal({
+                        'strategy_name': signal.strategy_name,
+                        'symbol': signal.symbol,
+                        'direction': signal.direction.upper(),
+                        'entry_price': signal.target_entry_price,  # Целевая цена
+                        'stop_loss': signal.stop_loss,
+                        'tp1': signal.take_profit_1,
+                        'tp2': signal.take_profit_2,
+                        'score': final_score,
+                        'regime': regime,
+                        'entry_type': 'LIMIT (pending)',
+                        'current_price': signal.entry_price
+                    })
+                    
+                    # Сохранить как pending в БД
+                    self._save_signal_to_db(
+                        signal=signal,
+                        final_score=final_score,
+                        regime=regime,
+                        telegram_msg_id=telegram_msg_id,
+                        status='PENDING'
+                    )
+                
+                else:
+                    # SKIP - уже есть активный LIMIT ордер
+                    strategy_logger.debug(f"⏭️  Signal skipped - duplicate LIMIT order")
             else:
                 logger.debug(
                     f"❌ {signal.strategy_name} | {symbol} {signal.direction} | "
@@ -651,7 +717,7 @@ class TradingBot:
         
         logger.info("Symbol auto-update task stopped")
     
-    def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None):
+    def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None, status: str = 'ACTIVE'):
         """Сохранить сигнал в базу данных"""
         session = db.get_session()
         try:
@@ -678,7 +744,7 @@ class TradingBot:
                 market_regime=regime,
                 timeframe=signal.timeframe,
                 created_at=datetime.now(pytz.UTC),
-                status='ACTIVE',
+                status=status,  # ACTIVE или PENDING
                 telegram_message_id=telegram_msg_id,
                 meta_data={
                     'base_score': signal.base_score,

@@ -323,12 +323,33 @@ class TelegramBot:
     
     def _format_signal(self, signal_data: dict) -> str:
         direction_emoji = "🟢" if signal_data['direction'] == 'LONG' else "🔴"
+        entry_type = signal_data.get('entry_type', 'MARKET')
+        
+        # Определить эмодзи для entry_type
+        if 'LIMIT' in entry_type:
+            entry_emoji = "⏳" if 'pending' in entry_type.lower() else "✅"
+        elif 'FILLED' in entry_type:
+            entry_emoji = "✅"
+        else:
+            entry_emoji = "⚡"
         
         message = (
             f"{direction_emoji} *{signal_data['strategy_name']}*\n\n"
             f"📊 Символ: `{signal_data['symbol']}`\n"
             f"📈 Направление: *{signal_data['direction']}*\n"
-            f"💰 Вход: `{signal_data['entry_price']:.4f}`\n"
+            f"{entry_emoji} Тип входа: `{entry_type}`\n"
+        )
+        
+        # Для LIMIT pending показать целевую и текущую цену
+        if 'pending' in entry_type.lower() and 'current_price' in signal_data:
+            message += (
+                f"🎯 Целевая цена: `{signal_data['entry_price']:.4f}`\n"
+                f"💰 Текущая цена: `{signal_data['current_price']:.4f}`\n"
+            )
+        else:
+            message += f"💰 Вход: `{signal_data['entry_price']:.4f}`\n"
+        
+        message += (
             f"🛑 Стоп: `{signal_data['stop_loss']:.4f}`\n"
             f"🎯 TP1: `{signal_data.get('tp1', 'N/A')}`\n"
             f"🎯 TP2: `{signal_data.get('tp2', 'N/A')}`\n\n"
