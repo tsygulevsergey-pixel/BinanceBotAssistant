@@ -116,7 +116,7 @@ class OrderbookAnalyzer:
         """
         try:
             # Получаем orderbook
-            orderbook = await client.get_orderbook(symbol=symbol, limit=limit)
+            orderbook = await client.get_depth(symbol=symbol, limit=limit)
             
             if not orderbook or 'bids' not in orderbook or 'asks' not in orderbook:
                 logger.debug(f"No orderbook data for {symbol}")
