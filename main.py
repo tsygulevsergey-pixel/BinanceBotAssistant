@@ -318,8 +318,8 @@ class TradingBot:
         
         # Определить режим рынка и bias
         h4_data = timeframe_data.get('4h')
-        if h4_data is None or len(h4_data) < 50:
-            logger.debug(f"❌ {symbol}: Insufficient H4 data ({len(h4_data) if h4_data is not None else 0} bars)")
+        if h4_data is None or len(h4_data) < 200:
+            logger.debug(f"❌ {symbol}: Insufficient H4 data ({len(h4_data) if h4_data is not None else 0} bars, требуется 200)")
             return
         
         regime_data = self.regime_detector.detect_regime(h4_data)
@@ -381,6 +381,7 @@ class TradingBot:
             'spread_pct': depth_metrics['spread_pct'],  # Спред в %
             'depth_data_valid': depth_metrics.get('data_valid', False),  # Флаг валидности depth данных
             'late_trend': regime_data.get('late_trend', False),
+            'h4_adx': regime_data.get('details', {}).get('adx', 0),  # H4 ADX для ORB стратегии
             'funding_extreme': False,  # TODO: Рассчитать из API Funding Rate
             'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
             'h4_swing_high': h4_swing_high,

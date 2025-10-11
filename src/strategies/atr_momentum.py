@@ -14,7 +14,6 @@ class ATRMomentumStrategy(BaseStrategy):
     Логика по мануалу:
     - Импульс-бар ≥1.4× ATR, close в верхн.20%
     - Follow-through; H4 тренд; до сопротивления ≥1.5 ATR
-    - Не LATE_TREND
     - Триггер: пробой high импульса/флага ≥0.2–0.3 ATR или micro-pullback к EMA9/20
     - Подтверждения: объём>2×, CVD dir, ΔOI +1…+3%
     - Тайм-стоп: 6–8 баров без 0.5 ATR прогресса
@@ -43,15 +42,9 @@ class ATRMomentumStrategy(BaseStrategy):
                      regime: str, bias: str, 
                      indicators: Dict) -> Optional[Signal]:
         
-        # Работает в TREND режиме, но не LATE_TREND
+        # Работает в TREND режиме
         if regime != 'TREND':
             strategy_logger.debug(f"    ❌ Режим {regime}, требуется TREND")
-            return None
-        
-        # Проверка на LATE_TREND (это должен передать детектор)
-        late_trend = indicators.get('late_trend', False)
-        if late_trend:
-            strategy_logger.debug(f"    ❌ Режим LATE_TREND, стратегия не работает")
             return None
         
         if len(df) < 100:

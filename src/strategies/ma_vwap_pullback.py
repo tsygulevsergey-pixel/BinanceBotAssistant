@@ -29,7 +29,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         self.retest_atr = strategy_config.get('retest_atr', 0.3)
         self.volume_threshold = strategy_config.get('volume_threshold', 1.2)
         self.timeframe = '4h'  # H4 pullback по мануалу
-        self.adx_threshold = 20
+        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
     
     def get_timeframe(self) -> str:
         return self.timeframe
