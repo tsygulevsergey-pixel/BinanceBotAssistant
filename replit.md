@@ -63,6 +63,7 @@ Preferred communication style: Simple, everyday language.
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals and calculates exit conditions using exact SL/TP levels.
 - **Exit Logic**: Uses precise SL/TP levels (not current price) for exit_price and pnl_percent to ensure accurate statistics.
+- **LIMIT Order Handling**: When LIMIT order fills, entry_price is updated in DB from target to actual fill price, ensuring accurate PnL calculations. Status transitions from PENDING to ACTIVE.
 - **Performance Metrics Explained**:
   - **Средний PnL (Average PnL)**: Average profit/loss across ALL closed trades (wins + losses). Formula: (Total PnL) / (Number of trades). Shows average earnings per trade.
   - **Средняя победа (Average Win)**: Average profit on WINNING trades only. Formula: (Sum of wins) / (Number of wins). Shows typical profit when winning.
