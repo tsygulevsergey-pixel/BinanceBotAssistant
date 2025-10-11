@@ -114,8 +114,8 @@ class VolumeProfileStrategy(BaseStrategy):
         current_close = df['close'].iloc[-1]
         prev_close = df['close'].iloc[-2]
         
-        # CVD и depth indicators
-        cvd = indicators.get('cvd', 0)
+        # CVD из своего timeframe, fallback к верхнеуровневому или 0
+        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
         depth_imbalance = indicators.get('depth_imbalance', 1.0)
         doi_pct = indicators.get('doi_pct', 0)
         

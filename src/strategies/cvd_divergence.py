@@ -40,8 +40,8 @@ class CVDDivergenceStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars + 10}")
             return None
         
-        # CVD из indicators
-        cvd = indicators.get('cvd', 0)
+        # CVD из своего timeframe, fallback к верхнеуровневому или 0
+        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
         
         # Рассчитываем барную CVD из klines если нет тиковой
         if cvd == 0:

@@ -44,7 +44,8 @@ class OrderFlowStrategy(BaseStrategy):
         
         # Получаем depth imbalance и CVD из indicators
         depth_imbalance = indicators.get('depth_imbalance', 1.0)
-        cvd = indicators.get('cvd', 0)
+        # CVD из своего timeframe, fallback к верхнеуровневому или 0
+        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
         
         # ATR
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)

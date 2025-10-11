@@ -347,13 +347,13 @@ class TradingBot:
                 cached_indicators[tf] = cached
         
         # Indicators для стратегий (объединяем кешированные + дополнительные)
+        # NOTE: CVD теперь берется из indicators[self.timeframe]['cvd'] в каждой стратегии
         indicators = {
-            **cached_indicators,  # Все закешированные индикаторы по таймфреймам
-            'cvd': 0.0,
-            'doi_pct': 0.0,
-            'depth_imbalance': 1.0,
+            **cached_indicators,  # Все закешированные индикаторы по таймфреймам (включая CVD)
+            'doi_pct': 0.0,  # TODO: Рассчитать из API Open Interest
+            'depth_imbalance': 1.0,  # TODO: Рассчитать из API Orderbook depth
             'late_trend': regime_data.get('late_trend', False),
-            'funding_extreme': False,
+            'funding_extreme': False,  # TODO: Рассчитать из API Funding Rate
             'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
             'h4_swing_high': h4_swing_high,
             'h4_swing_low': h4_swing_low
