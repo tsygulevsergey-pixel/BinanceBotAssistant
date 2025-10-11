@@ -134,14 +134,18 @@ class OrderFlowStrategy(BaseStrategy):
             take_profit_2 = level + 1.5 * atr
             
             return Signal(
+                strategy_name=self.name,
                 symbol=symbol,
-                direction='long',
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.5,
-                strategy_name=self.name,
+                regime=indicators.get('regime', ''),
+                bias=indicators.get('bias', ''),
+                base_score=2.5,
                 metadata={
                     'type': 'order_flow',
                     'level': level,
@@ -155,14 +159,18 @@ class OrderFlowStrategy(BaseStrategy):
             take_profit_2 = level - 1.5 * atr
             
             return Signal(
+                strategy_name=self.name,
                 symbol=symbol,
-                direction='short',
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.5,
-                strategy_name=self.name,
+                regime=indicators.get('regime', ''),
+                bias=indicators.get('bias', ''),
+                base_score=2.5,
                 metadata={
                     'type': 'order_flow',
                     'level': level,

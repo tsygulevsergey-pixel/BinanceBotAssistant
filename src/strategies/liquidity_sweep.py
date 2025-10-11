@@ -274,14 +274,18 @@ class LiquiditySweepStrategy(BaseStrategy):
             take_profit_2 = sweep_level + 1.5 * atr  # TP2 дальше
             
             return Signal(
+                strategy_name=self.name,
                 symbol=symbol,
-                direction='long',
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.5,
-                strategy_name=self.name,
+                regime=indicators.get('regime', ''),
+                bias=indicators.get('bias', ''),
+                base_score=2.5,
                 metadata={
                     'type': 'liquidity_sweep_fade',
                     'sweep_level': sweep_level,
@@ -297,14 +301,18 @@ class LiquiditySweepStrategy(BaseStrategy):
             take_profit_2 = sweep_level - 1.5 * atr
             
             return Signal(
+                strategy_name=self.name,
                 symbol=symbol,
-                direction='short',
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.5,
-                strategy_name=self.name,
+                regime=indicators.get('regime', ''),
+                bias=indicators.get('bias', ''),
+                base_score=2.5,
                 metadata={
                     'type': 'liquidity_sweep_fade',
                     'sweep_level': sweep_level,
@@ -328,14 +336,18 @@ class LiquiditySweepStrategy(BaseStrategy):
             take_profit_2 = entry + 3.0 * atr
             
             return Signal(
+                strategy_name=self.name,
                 symbol=symbol,
-                direction='long',
+                direction='LONG',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
-                strategy_name=self.name,
+                regime=indicators.get('regime', ''),
+                bias=indicators.get('bias', ''),
+                base_score=2.0,
                 metadata={
                     'type': 'liquidity_sweep_continuation',
                     'sweep_level': sweep_level,
@@ -350,14 +362,18 @@ class LiquiditySweepStrategy(BaseStrategy):
             take_profit_2 = entry - 3.0 * atr
             
             return Signal(
+                strategy_name=self.name,
                 symbol=symbol,
-                direction='short',
+                direction='SHORT',
+                timestamp=pd.Timestamp.now(),
+                timeframe=self.timeframe,
                 entry_price=entry,
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
-                strategy_name=self.name,
+                regime=indicators.get('regime', ''),
+                bias=indicators.get('bias', ''),
+                base_score=2.0,
                 metadata={
                     'type': 'liquidity_sweep_continuation',
                     'sweep_level': sweep_level,
