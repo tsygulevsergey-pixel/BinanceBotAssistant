@@ -49,16 +49,34 @@ class VolumeProfile:
         total_volume = volume_by_price.sum()
         value_area_volume = total_volume * 0.70
         
-        sorted_indices = np.argsort(volume_by_price)[::-1]
-        cumulative_volume = 0
-        value_area_indices = []
+        # Строим Value Area НЕПРЕРЫВНО вокруг VPOC
+        # Начинаем с VPOC bin и расширяемся в обе стороны
+        value_area_indices = {vpoc_idx}
+        cumulative_volume = volume_by_price[vpoc_idx]
         
-        for idx in sorted_indices:
-            cumulative_volume += volume_by_price[idx]
-            value_area_indices.append(idx)
-            if cumulative_volume >= value_area_volume:
+        left_idx = vpoc_idx - 1
+        right_idx = vpoc_idx + 1
+        
+        # Расширяемся, добавляя bin с большим объемом (левый или правый)
+        while cumulative_volume < value_area_volume:
+            left_vol = volume_by_price[left_idx] if left_idx >= 0 else 0
+            right_vol = volume_by_price[right_idx] if right_idx < num_bins else 0
+            
+            # Если оба края закончились, прерываем
+            if left_vol == 0 and right_vol == 0:
                 break
+            
+            # Добавляем bin с большим объемом
+            if left_vol >= right_vol and left_idx >= 0:
+                value_area_indices.add(left_idx)
+                cumulative_volume += left_vol
+                left_idx -= 1
+            elif right_idx < num_bins:
+                value_area_indices.add(right_idx)
+                cumulative_volume += right_vol
+                right_idx += 1
         
+        # VAH/VAL = края непрерывной зоны
         vah = bin_centers[max(value_area_indices)]
         val = bin_centers[min(value_area_indices)]
         
