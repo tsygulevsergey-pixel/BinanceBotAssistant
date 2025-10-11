@@ -68,8 +68,8 @@ class BreakRetestStrategy(BaseStrategy):
                 swing_high_idx = i
         
         # Ищем swing low (впадина с buffer баров с каждой стороны)
-        for i in range(end_idx - lookback, end_idx - buffer):
-            if i - buffer < 0 or i + buffer >= len(df):
+        for i in range(start_pos, end_pos - buffer):
+            if i < buffer or i + buffer >= len(df):
                 continue
             
             low_val = df['low'].iloc[i]
