@@ -31,6 +31,7 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         self.reclaim_bars = strategy_config.get('reclaim_bars', 2)
         self.time_stop = strategy_config.get('time_stop', [6, 8])
         self.timeframe = '15m'
+        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -67,9 +68,9 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         current_adx = adx.iloc[-1]
         current_atr_pct = atr_pct.iloc[-1]
         
-        # ADX<20 (должен быть низкий)
-        if current_adx >= 20:
-            strategy_logger.debug(f"    ❌ ADX слишком высокий: {current_adx:.1f} >= 20")
+        # ADX < threshold (должен быть низкий)
+        if current_adx >= self.adx_threshold:
+            strategy_logger.debug(f"    ❌ ADX слишком высокий: {current_adx:.1f} >= {self.adx_threshold}")
             return None
         
         # ATR% < p40 (проверка низкой волатильности)

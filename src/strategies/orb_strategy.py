@@ -37,6 +37,7 @@ class ORBStrategy(BaseStrategy):
         self.breakout_atr = 0.25  # ≥0.25 ATR
         self.volume_threshold = 1.5
         self.timeframe = '15m'  # Для отслеживания IB используем 15m
+        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -85,9 +86,9 @@ class ORBStrategy(BaseStrategy):
         h4_trend = indicators.get('h4_trend', 'Neutral')
         h4_adx = indicators.get('h4_adx', 0)
         
-        # Проверка наличия тренда на H4 (ADX>20)
-        if h4_adx <= 20:
-            strategy_logger.debug(f"    ❌ H4 ADX слабый: {h4_adx:.1f} <= 20")
+        # Проверка наличия тренда на H4 (ADX > threshold)
+        if h4_adx <= self.adx_threshold:
+            strategy_logger.debug(f"    ❌ H4 ADX слабый: {h4_adx:.1f} <= {self.adx_threshold}")
             return None
         
         # BTC directional filter

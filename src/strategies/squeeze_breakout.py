@@ -28,6 +28,7 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         self.breakout_atr = strategy_config.get('breakout_atr', 0.25)
         self.max_distance_ema20 = strategy_config.get('max_distance_ema20', 1.5)
         self.timeframe = '1h'
+        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -83,9 +84,9 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         current_bb_lower = bb_lower.iloc[-1]
         current_adx = adx.iloc[-1] if adx is not None and not pd.isna(adx.iloc[-1]) else 0
         
-        # ADX фильтр: ADX > 20 для breakout
-        if current_adx <= 20:
-            strategy_logger.debug(f"    ❌ ADX слабый для breakout: {current_adx:.1f} <= 20")
+        # ADX фильтр: ADX > threshold для breakout
+        if current_adx <= self.adx_threshold:
+            strategy_logger.debug(f"    ❌ ADX слабый для breakout: {current_adx:.1f} <= {self.adx_threshold}")
             return None
         
         # Расстояние от EMA20

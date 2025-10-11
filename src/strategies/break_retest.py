@@ -29,6 +29,7 @@ class BreakRetestStrategy(BaseStrategy):
         self.split_ratio = strategy_config.get('split_ratio', 0.5)  # 50/50
         self.timeframe = '15m'
         self.breakout_lookback = 20  # Ищем пробои за последние 20 баров
+        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -123,9 +124,9 @@ class BreakRetestStrategy(BaseStrategy):
             avg_vol = df['volume'].iloc[i-20:i].mean()
             vol_ratio = bar_volume / avg_vol if avg_vol > 0 else 0
             
-            # ADX фильтр: ADX > 20 для валидного breakout
-            if bar_adx < 20:
-                strategy_logger.debug(f"    ⚠️ Пропуск пробоя на баре {i}: ADX слишком слабый ({bar_adx:.1f} < 20)")
+            # ADX фильтр: ADX > threshold для валидного breakout
+            if bar_adx < self.adx_threshold:
+                strategy_logger.debug(f"    ⚠️ Пропуск пробоя на баре {i}: ADX слишком слабый ({bar_adx:.1f} < {self.adx_threshold})")
                 continue
             
             # Пробой вверх (через swing high)
