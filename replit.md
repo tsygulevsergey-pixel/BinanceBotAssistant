@@ -36,7 +36,10 @@ Preferred communication style: Simple, everyday language.
 - **IndicatorCache**: High-performance caching system with timestamp-based invalidation - eliminates 1,500+ redundant calculations per analysis cycle by storing pre-computed indicators per (symbol, timeframe, last_bar_time). Provides 15x speed improvement for multi-strategy analysis.
 
 ### Signal Scoring System
-- Combines a base strategy score with modifiers for volume, CVD, OI Delta, and Depth Imbalance. Penalties apply for late trends, extreme funding, or opposing BTC direction. An entry threshold of ≥ +2.0 is required for execution.
+- **Scoring Formula**: Base strategy score (1-3) + volume modifier (+1) + CVD alignment (+1) + OI Delta (+1) + Depth Imbalance (+1) - Funding Extreme (-1) - BTC Opposition (-2)
+- **BTC Filter**: Uses 3-bar (2-hour) lookback on H1 with 0.3% threshold to filter noise - applies -2 penalty only for real BTC trends opposing signal direction
+- **Entry Threshold**: Signals require final_score ≥ +2.0 for execution
+- **Late Trend Removed**: Previous late_trend penalty (based on 4H timeframe) removed as it created false negatives on lower timeframes. Other filters (ADX, BBW, expansion block) provide sufficient protection.
 
 ### Signal Aggregation & Conflict Resolution
 - **Score-Based Prioritization**: All signals are scored first, then sorted by final_score (descending) before processing. This ensures the highest quality signal is selected.

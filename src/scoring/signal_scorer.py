@@ -6,8 +6,8 @@
 - +1 CVD в сторону (или дивергенция для MR)
 - +1 ΔOI ≥ +1…+3% за 30–90 мин
 - +1 устойчивый depth-imbalance 10–30с в сторону
-- −1 LATE_TREND / funding-экстрем
-- −2 BTC идёт против (на H1)
+- −1 funding-экстрем (z-score > 2.5)
+- −2 BTC идёт против (3-bar lookback, 0.3% threshold)
 """
 
 import pandas as pd
@@ -71,9 +71,9 @@ class SignalScorer:
         imbalance_score = self._score_imbalance(signal, indicators)
         score += imbalance_score
         
-        # −1: LATE_TREND / funding-экстрем
-        late_trend_penalty = self._score_late_trend(signal, indicators)
-        score += late_trend_penalty
+        # −1: Funding-экстрем
+        funding_penalty = self._score_funding_extreme(signal, indicators)
+        score += funding_penalty
         
         # −2: BTC идёт против (на H1)
         btc_penalty = self._score_btc_filter(signal, btc_data)
@@ -160,18 +160,12 @@ class SignalScorer:
         
         return 0.0
     
-    def _score_late_trend(self, signal: Signal, indicators: Dict) -> float:
+    def _score_funding_extreme(self, signal: Signal, indicators: Dict) -> float:
         """
-        Пенальти за LATE_TREND или funding экстрем
-        −1 если условия выполнены
+        Пенальти за funding экстрем
+        −1 если funding rate z-score > 2.5
         """
         penalty = 0.0
-        
-        # LATE_TREND: цена слишком далеко от EMA20 (>1.5-1.8 ATR)
-        late_trend = indicators.get('late_trend', False)
-        if late_trend:
-            logger.debug(f"{signal.symbol} -1 LATE_TREND")
-            penalty -= 1.0
         
         # Funding экстрем (z-score > 2.5)
         funding_extreme = indicators.get('funding_extreme', False)
