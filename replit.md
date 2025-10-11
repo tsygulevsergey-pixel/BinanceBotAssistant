@@ -6,25 +6,35 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 ## Recent Updates (October 11, 2025)
 
-### ✅ Hybrid Entry System Implemented
-Adaptive MARKET/LIMIT execution based on strategy category:
+### ✅ Hybrid Entry System with R:R Preservation
+Adaptive MARKET/LIMIT execution based on strategy category with **critical R:R fix**:
+
+**Entry Logic:**
 - **Breakout strategies** (Donchian, Squeeze, ORB/IRB, ATR Momentum) → **MARKET** entry for immediate execution
 - **Pullback strategies** (Break & Retest, MA/VWAP Pullback) → **LIMIT** entry with 6-bar timeout
 - **Mean Reversion strategies** (VWAP MR, Range Fade, RSI/Stoch MR, Volume Profile) → **LIMIT** entry with 4-bar timeout
 - **Order Flow/CVD** → **MARKET** entry (aggressive signals)
 
 **Key Components:**
-- `EntryManager`: Tracks pending LIMIT orders with timeout logic and intrabar fill detection
-- `Signal.determine_entry_type()`: Automatic entry type determination based on strategy category
-- `StrategyManager`: Applies hybrid logic after signal generation
-- **Critical Fix**: LIMIT fill detection uses candle low/high (not just close) for realistic execution
+- `EntryManager`: Tracks pending LIMIT orders with timeout logic and intrabar fill detection (checks candle low/high, not just close)
+- `Signal`: Extended with offset fields (stop_offset, tp1_offset, tp2_offset) to preserve R:R when entry changes
+- `BaseStrategy.calculate_risk_offsets()`: Computes relative distances from entry to SL/TP
+- `StrategyManager`: Recalculates SL/TP from target_entry_price using offsets for LIMIT orders
 - Database status support: `PENDING` for LIMIT orders → `ACTIVE` after fill
 - Telegram notifications differentiate MARKET/LIMIT/FILLED with emoji indicators
+
+**Critical R:R Fix:**
+Previously, changing entry_price for LIMIT orders broke Risk:Reward ratios because SL/TP levels remained fixed. Now:
+1. Strategy calculates entry=100, SL=98, TP1=104
+2. calculate_risk_offsets() stores: stop_offset=2, tp1_offset=4
+3. For LIMIT: recalculate SL=target-2=98, TP1=target+4=104
+4. R:R preserved regardless of entry price changes ✅
 
 **Expected Benefits:**
 - +10-15% improved R:R on pullback/MR strategies through better entry prices
 - Breakout strategies maintain speed advantage with MARKET execution
-- Low risk implementation with timeout protection (6 bars pullback, 4 bars MR)
+- Accurate R:R ratios maintained across all entry types
+- Low risk implementation with timeout protection
 
 ### Previous Fixes
 - **ADX Configuration Standardization**: Fixed MA/VWAP Pullback strategy to use `config.get('market_detector.trend.adx_threshold')` instead of hardcoded value 20, ensuring consistency across all strategies.
