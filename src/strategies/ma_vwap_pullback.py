@@ -27,7 +27,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         self.fib_levels = strategy_config.get('fib_levels', [0.382, 0.618])
         self.retest_atr = strategy_config.get('retest_atr', 0.3)
         self.volume_threshold = strategy_config.get('volume_threshold', 1.2)
-        self.timeframe = '1h'
+        self.timeframe = '4h'  # H4 pullback по мануалу
         self.adx_threshold = 20
     
     def get_timeframe(self) -> str:
