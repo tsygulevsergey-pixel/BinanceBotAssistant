@@ -17,7 +17,7 @@ class BTCFilter:
     """BTC фильтр для стратегий"""
     
     def __init__(self, config: Dict):
-        self.impulse_threshold = config.get('btc_filter.impulse_threshold_pct', 0.8)
+        self.impulse_threshold = config.get('btc_filter.impulse_threshold', 0.8)
         self.expansion_atr_mult = config.get('btc_filter.expansion_atr_mult', 1.5)
         self.lookback_bars = config.get('btc_filter.lookback_bars', 10)
     

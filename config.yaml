@@ -82,7 +82,7 @@ risk:
 # BTC Filter
 btc_filter:
   timeframe: "1h"
-  impulse_threshold: 0.8  # % 1m return
+  impulse_threshold: 1.5  # % H1 bar range (high-low)
   impulse_cooldown: 30  # minutes
   expansion_block_mr: true
 
