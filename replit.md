@@ -58,6 +58,17 @@ Preferred communication style: Simple, everyday language.
 ### Telegram Integration
 - Provides commands (/start, /help, /status, /strategies, /performance, /stats, /validate, /latency, /report) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
 - **/validate** - Validates all strategies for data availability, OHLCV integrity, price logic, signal generation, and entry/SL/TP correctness across different market regimes.
+- **/performance** - Shows performance metrics with accurate PnL calculations.
+
+### Performance Tracking System
+- **SignalPerformanceTracker**: Monitors active signals and calculates exit conditions using exact SL/TP levels.
+- **Exit Logic**: Uses precise SL/TP levels (not current price) for exit_price and pnl_percent to ensure accurate statistics.
+- **Performance Metrics Explained**:
+  - **Средний PnL (Average PnL)**: Average profit/loss across ALL closed trades (wins + losses). Formula: (Total PnL) / (Number of trades). Shows average earnings per trade.
+  - **Средняя победа (Average Win)**: Average profit on WINNING trades only. Formula: (Sum of wins) / (Number of wins). Shows typical profit when winning.
+  - **Среднее поражение (Average Loss)**: Average loss on LOSING trades only. Formula: (Sum of losses) / (Number of losses). Shows typical loss when losing.
+  - **Example**: 5 wins = +13% total (avg +2.60%), 7 losses = -11.7% total (avg -1.67%) → Average PnL = +1.3% / 12 = +0.11%
+- **Exit Price Accuracy**: For LONG SL hit at 98 when price drops to 97.5, records exit=98 and PnL=-2% (not -2.5%). For SHORT TP hit at 96 when price drops to 95.8, records exit=96 and PnL=+4% (not +4.2%).
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
