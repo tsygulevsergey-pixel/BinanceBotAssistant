@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_rsi, calculate_stochastic, calculate_atr
 from src.utils.reclaim_checker import check_level_reclaim
 
@@ -43,10 +44,12 @@ class RSIStochMRStrategy(BaseStrategy):
         
         # Работает только в RANGE режиме
         if regime not in ['RANGE', 'CHOP']:
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется RANGE или CHOP")
             return None
         
         lookback_bars = self.lookback * 24 * 4  # 90 дней * 24 часа * 4 (15m bars)
         if len(df) < lookback_bars:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {lookback_bars}")
             return None
         
         # Рассчитать осцилляторы
@@ -109,6 +112,7 @@ class RSIStochMRStrategy(BaseStrategy):
                 
                 # Хотя бы одно подтверждение reclaim
                 if not (val_reclaim or vwap_reclaim):
+                    strategy_logger.debug(f"    ❌ LONG: нет reclaim подтверждения VAL или VWAP lower")
                     return None
                 
                 entry = current_close
@@ -175,6 +179,7 @@ class RSIStochMRStrategy(BaseStrategy):
                 
                 # Хотя бы одно подтверждение reclaim
                 if not (vah_reclaim or vwap_upper_reclaim):
+                    strategy_logger.debug(f"    ❌ SHORT: нет reclaim подтверждения VAH или VWAP upper")
                     return None
                 
                 entry = current_close
@@ -211,4 +216,5 @@ class RSIStochMRStrategy(BaseStrategy):
                 )
                 return signal
         
+        strategy_logger.debug(f"    ❌ RSI не в зоне перекупленности/перепроданности или нет stoch кросса")
         return None

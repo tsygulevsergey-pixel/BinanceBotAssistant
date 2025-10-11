@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 from src.indicators.volume_profile import calculate_volume_profile
 from src.utils.reclaim_checker import check_value_area_reclaim
@@ -44,6 +45,7 @@ class VolumeProfileStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < self.lookback_bars:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars}")
             return None
         
         # Рассчитать Volume Profile
@@ -67,6 +69,7 @@ class VolumeProfileStrategy(BaseStrategy):
         near_val = abs(current_close - val) <= 0.3 * current_atr
         
         if not (near_vah or near_val):
+            strategy_logger.debug(f"    ❌ Цена не около VAH/VAL (расстояние > 0.3 ATR)")
             return None
         
         # Определяем: rejection или acceptance
@@ -75,6 +78,7 @@ class VolumeProfileStrategy(BaseStrategy):
         )
         
         if signal_type is None:
+            strategy_logger.debug(f"    ❌ Нет четкого rejection или acceptance паттерна")
             return None
         
         # Генерация сигнала в зависимости от типа
@@ -99,6 +103,7 @@ class VolumeProfileStrategy(BaseStrategy):
                 symbol, df, 'short', val, current_atr, indicators
             )
         
+        strategy_logger.debug(f"    ❌ Неопределенный тип сигнала")
         return None
     
     def _detect_rejection_or_acceptance(self, df: pd.DataFrame, vah: float, val: float, 

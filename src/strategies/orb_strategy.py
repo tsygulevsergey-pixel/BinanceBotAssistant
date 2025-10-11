@@ -4,6 +4,7 @@ import numpy as np
 from datetime import time
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 
 
@@ -69,12 +70,14 @@ class ORBStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < self.lookback_days * 24 * 4:  # 60 дней по 15m
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_days * 24 * 4}")
             return None
         
         current_timestamp = df.index[-1]
         
         # Проверка: находимся ли мы в одном из слотов
         if not self._is_in_slot(current_timestamp):
+            strategy_logger.debug(f"    ❌ Не в торговом слоте: текущее время {current_timestamp.time()}")
             return None
         
         # Рассчитать IB range
@@ -86,6 +89,7 @@ class ORBStrategy(BaseStrategy):
         
         # Проверка: IB_width < 0.8·ATR
         if ib_width >= self.atr_multiplier * current_atr:
+            strategy_logger.debug(f"    ❌ IB_width слишком широкий: {ib_width:.6f} >= {self.atr_multiplier}·ATR ({self.atr_multiplier * current_atr:.6f})")
             return None
         
         # Проверка: IB_width < p30 (60 дней)
@@ -102,6 +106,7 @@ class ORBStrategy(BaseStrategy):
         if historical_widths:
             width_p30 = np.percentile(historical_widths, 30)
             if ib_width >= width_p30:
+                strategy_logger.debug(f"    ❌ IB_width не ниже p30: {ib_width:.6f} >= p30 ({width_p30:.6f})")
                 return None
         
         # Текущие значения
@@ -116,6 +121,7 @@ class ORBStrategy(BaseStrategy):
         
         # Проверка объёма
         if volume_ratio < self.volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
             return None
         
         # LONG: пробой IB вверх
@@ -125,6 +131,7 @@ class ORBStrategy(BaseStrategy):
             
             # Фильтр по H4 bias
             if bias == 'Bearish':
+                strategy_logger.debug(f"    ❌ LONG пробой есть, но H4 bias {bias}")
                 return None
             
             entry = current_close
@@ -166,6 +173,7 @@ class ORBStrategy(BaseStrategy):
             
             # Фильтр по H4 bias
             if bias == 'Bullish':
+                strategy_logger.debug(f"    ❌ SHORT пробой есть, но H4 bias {bias}")
                 return None
             
             entry = current_close
@@ -200,4 +208,5 @@ class ORBStrategy(BaseStrategy):
             )
             return signal
         
+        strategy_logger.debug(f"    ❌ Нет пробоя IB границ")
         return None

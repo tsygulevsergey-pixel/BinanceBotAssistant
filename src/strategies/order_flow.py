@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 from src.indicators.volume_profile import calculate_volume_profile
 
@@ -38,6 +39,7 @@ class OrderFlowStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < self.lookback_bars:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars}")
             return None
         
         # Получаем depth imbalance и CVD из indicators
@@ -62,6 +64,7 @@ class OrderFlowStrategy(BaseStrategy):
         near_poc = abs(current_close - poc) <= 0.3 * current_atr
         
         if not (near_vah or near_val or near_poc):
+            strategy_logger.debug(f"    ❌ Цена не около ключевого уровня VAH/VAL/POC (расстояние > 0.3 ATR)")
             return None
         
         # Определяем направление по imbalance
@@ -70,6 +73,7 @@ class OrderFlowStrategy(BaseStrategy):
         )
         
         if signal_type is None:
+            strategy_logger.debug(f"    ❌ Нет подтверждения order flow: imbalance или CVD не совпадают с ценовым движением")
             return None
         
         # Генерация сигнала
@@ -84,6 +88,7 @@ class OrderFlowStrategy(BaseStrategy):
                 level=vah if near_vah else (poc if near_poc else val)
             )
         
+        strategy_logger.debug(f"    ❌ Неопределенный тип order flow сигнала")
         return None
     
     def _check_order_flow(self, df: pd.DataFrame, depth_imbalance: float,

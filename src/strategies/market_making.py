@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 
 
 class MarketMakingStrategy(BaseStrategy):
@@ -49,6 +50,7 @@ class MarketMakingStrategy(BaseStrategy):
         # 5. Проверить BTC импульс
         # 6. Разместить post-only лимитные ордера вокруг mid
         
+        strategy_logger.debug(f"    ❌ Стратегия отключена: требует HFT orderbook данные")
         return None
         
         # Пример логики (закомментирован):

@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 
 
@@ -49,6 +50,7 @@ class TimeOfDayStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < 100:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 100")
             return None
         
         # Текущее время в UTC
@@ -67,6 +69,7 @@ class TimeOfDayStrategy(BaseStrategy):
         window_type = self._get_window_type(current_hour)
         
         if window_type is None:
+            strategy_logger.debug(f"    ❌ Час {current_hour} не в активных окнах торговли")
             return None
         
         # Проверка объёма и волатильности
@@ -74,6 +77,7 @@ class TimeOfDayStrategy(BaseStrategy):
         median_volume = df['volume'].tail(100).median()
         
         if current_volume < self.volume_threshold * median_volume:
+            strategy_logger.debug(f"    ❌ Объем низкий: {current_volume / median_volume:.2f}x < {self.volume_threshold}x")
             return None
         
         # Волатильность (ATR%)
@@ -88,6 +92,7 @@ class TimeOfDayStrategy(BaseStrategy):
         atr_pct_median = atr_pct_series.median()
         
         if atr_pct < atr_pct_median:
+            strategy_logger.debug(f"    ❌ Волатильность низкая: ATR% {atr_pct:.3f}% < медиана {atr_pct_median:.3f}%")
             return None
         
         # Генерация сигнала в зависимости от окна
@@ -100,6 +105,7 @@ class TimeOfDayStrategy(BaseStrategy):
                 symbol, df, current_atr, indicators
             )
         
+        strategy_logger.debug(f"    ❌ Неопределенный тип временного окна")
         return None
     
     def _get_window_type(self, hour: int) -> Optional[str]:
@@ -125,6 +131,7 @@ class TimeOfDayStrategy(BaseStrategy):
         """
         # Пробой только в TREND/EXPANSION режиме
         if regime not in ['TREND', 'EXPANSION']:
+            strategy_logger.debug(f"    ❌ Breakout окно: режим {regime}, требуется TREND или EXPANSION")
             return None
         
         current_close = df['close'].iloc[-1]
@@ -136,6 +143,7 @@ class TimeOfDayStrategy(BaseStrategy):
         elif bias == 'Bearish' or current_close < prev_close:
             direction = 'short'
         else:
+            strategy_logger.debug(f"    ❌ Breakout окно: нет четкого направления bias или движения цены")
             return None
         
         if direction == 'long':
@@ -236,4 +244,5 @@ class TimeOfDayStrategy(BaseStrategy):
                 }
             )
         
+        strategy_logger.debug(f"    ❌ MR окно: цена не около экстремумов (расстояние > 0.3 ATR)")
         return None

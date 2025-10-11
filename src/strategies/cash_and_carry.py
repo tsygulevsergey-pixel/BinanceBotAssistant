@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 
 
 class CashAndCarryStrategy(BaseStrategy):
@@ -47,6 +48,7 @@ class CashAndCarryStrategy(BaseStrategy):
         # 3. Если funding >= min_funding_bp → открыть позицию
         
         # Пока возвращаем None (стратегия не активна без funding данных)
+        strategy_logger.debug(f"    ❌ Стратегия отключена: нет данных funding rate")
         return None
         
         # Пример логики (закомментирован):

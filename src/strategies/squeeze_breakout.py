@@ -4,6 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.indicators.technical import calculate_bollinger_bands, calculate_atr, calculate_ema
+from src.utils.strategy_logger import strategy_logger
 
 
 class SqueezeBreakoutStrategy(BaseStrategy):
@@ -40,9 +41,11 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         
         # Работает только в SQUEEZE режиме
         if regime != 'SQUEEZE':
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется SQUEEZE")
             return None
         
         if len(df) < self.lookback:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback}")
             return None
         
         # Рассчитать индикаторы
@@ -65,6 +68,7 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         
         # Минимальная длительность squeeze
         if squeeze_bars < self.min_duration:
+            strategy_logger.debug(f"    ❌ Squeeze слишком короткий: {squeeze_bars} баров < {self.min_duration}")
             return None
         
         # Текущие значения
@@ -79,6 +83,7 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         
         # Фильтр: не слишком далеко от EMA20
         if distance_from_ema20 > self.max_distance_ema20:
+            strategy_logger.debug(f"    ❌ Слишком далеко от EMA20: {distance_from_ema20:.2f} ATR > {self.max_distance_ema20} ATR")
             return None
         
         # Средний объём
@@ -89,6 +94,7 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         # LONG: пробой вверх
         if current_close > current_ema20 + self.breakout_atr * current_atr:
             if bias == 'Bearish':
+                strategy_logger.debug(f"    ❌ LONG пробой есть, но H4 bias {bias}")
                 return None
             
             entry = current_close
@@ -125,6 +131,7 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         # SHORT: пробой вниз
         elif current_close < current_ema20 - self.breakout_atr * current_atr:
             if bias == 'Bullish':
+                strategy_logger.debug(f"    ❌ SHORT пробой есть, но H4 bias {bias}")
                 return None
             
             entry = current_close
@@ -158,4 +165,5 @@ class SqueezeBreakoutStrategy(BaseStrategy):
             )
             return signal
         
+        strategy_logger.debug(f"    ❌ Нет пробоя: цена в пределах EMA20 ± {self.breakout_atr} ATR")
         return None

@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr, calculate_ema
 
 
@@ -44,14 +45,17 @@ class ATRMomentumStrategy(BaseStrategy):
         
         # Работает в TREND режиме, но не LATE_TREND
         if regime != 'TREND':
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется TREND")
             return None
         
         # Проверка на LATE_TREND (это должен передать детектор)
         late_trend = indicators.get('late_trend', False)
         if late_trend:
+            strategy_logger.debug(f"    ❌ Режим LATE_TREND, стратегия не работает")
             return None
         
         if len(df) < 100:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 100")
             return None
         
         # Рассчитать индикаторы
@@ -82,6 +86,7 @@ class ATRMomentumStrategy(BaseStrategy):
                     break
         
         if impulse_bar_idx is None:
+            strategy_logger.debug(f"    ❌ Нет импульс-бара ≥{self.impulse_atr}× ATR с close в верхн.20%")
             return None
         
         impulse_high = df['high'].iloc[impulse_bar_idx]
@@ -94,6 +99,7 @@ class ATRMomentumStrategy(BaseStrategy):
         
         # Проверка объёма
         if volume_ratio < self.volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
             return None
         
         # Проверка расстояния до сопротивления (упрощённо - проверяем есть ли место)
@@ -102,6 +108,7 @@ class ATRMomentumStrategy(BaseStrategy):
         distance_to_resistance = (resistance - current_close) / current_atr
         
         if distance_to_resistance < self.min_distance_resistance:
+            strategy_logger.debug(f"    ❌ Слишком близко к сопротивлению: {distance_to_resistance:.2f} ATR < {self.min_distance_resistance} ATR")
             return None
         
         # LONG: пробой high импульса или pullback к EMA9/20
@@ -179,4 +186,5 @@ class ATRMomentumStrategy(BaseStrategy):
                 )
                 return signal
         
+        strategy_logger.debug(f"    ❌ Нет пробоя high импульса или pullback к EMA9/20 при подходящем bias")
         return None

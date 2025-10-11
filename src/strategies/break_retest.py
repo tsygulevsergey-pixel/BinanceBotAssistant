@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 
 
@@ -87,6 +88,7 @@ class BreakRetestStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < 50:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 50")
             return None
         
         # Рассчитать ATR
@@ -96,6 +98,7 @@ class BreakRetestStrategy(BaseStrategy):
         # Найти недавний пробой
         breakout = self._find_recent_breakout(df, atr)
         if breakout is None:
+            strategy_logger.debug(f"    ❌ Нет недавнего пробоя с объемом >{self.volume_threshold}x и расстоянием ≥{self.breakout_atr} ATR")
             return None
         
         # Текущие значения
@@ -118,6 +121,7 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     # Фильтр по H4 bias
                     if bias == 'Bearish':
+                        strategy_logger.debug(f"    ❌ LONG ретест есть, но H4 bias {bias}")
                         return None
                     
                     entry = current_close
@@ -157,6 +161,7 @@ class BreakRetestStrategy(BaseStrategy):
                 if current_high >= breakout_level and current_close < breakout_level:
                     
                     if bias == 'Bullish':
+                        strategy_logger.debug(f"    ❌ SHORT ретест есть, но H4 bias {bias}")
                         return None
                     
                     entry = current_close
@@ -189,4 +194,5 @@ class BreakRetestStrategy(BaseStrategy):
                     )
                     return signal
         
+        strategy_logger.debug(f"    ❌ Цена не в зоне ретеста или нет отскока от уровня пробоя")
         return None

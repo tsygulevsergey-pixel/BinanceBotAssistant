@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 from src.utils.reclaim_checker import check_range_reclaim
 
@@ -112,9 +113,11 @@ class RangeFadeStrategy(BaseStrategy):
         
         # Работает только в RANGE режиме
         if regime not in ['RANGE', 'CHOP']:
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется RANGE или CHOP")
             return None
         
         if len(df) < self.lookback_bars:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars}")
             return None
         
         # Получить VA/VWAP для confluence проверки
@@ -131,11 +134,13 @@ class RangeFadeStrategy(BaseStrategy):
         h4_swing_low = indicators.get('h4_swing_low')
         
         if h4_swing_high is None or h4_swing_low is None:
+            strategy_logger.debug(f"    ❌ Нет H4 swing данных")
             return None
         
         # Найти границы рейнджа с confluence проверкой (передаём реальные H4 swings)
         range_bounds = self._find_range_boundaries_with_h4(df, vah, val, vwap.iloc[-1], h4_swing_high, h4_swing_low)
         if range_bounds is None:
+            strategy_logger.debug(f"    ❌ Нет качественных границ рейнджа с ≥{self.min_tests} теста и confluence с VA/H4")
             return None
         
         # Проверка IB width (не чрезмерно широкий)
@@ -150,6 +155,7 @@ class RangeFadeStrategy(BaseStrategy):
         
         # IB не должен быть >1.5 ATR (чрезмерно широкий)
         if ib_width > 1.5 * current_atr:
+            strategy_logger.debug(f"    ❌ IB чрезмерно широкий: {ib_width:.6f} > 1.5·ATR ({1.5 * current_atr:.6f})")
             return None
         
         resistance = range_bounds['resistance']
@@ -257,4 +263,5 @@ class RangeFadeStrategy(BaseStrategy):
                 )
                 return signal
         
+        strategy_logger.debug(f"    ❌ Цена не около границ рейнджа или нет reclaim подтверждения")
         return None

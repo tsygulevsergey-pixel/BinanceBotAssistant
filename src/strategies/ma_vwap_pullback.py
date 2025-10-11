@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_ema, calculate_atr, calculate_adx
 
 
@@ -41,9 +42,11 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         
         # Работает в TREND режиме
         if regime != 'TREND':
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется TREND")
             return None
         
         if len(df) < 200:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 200")
             return None
         
         # Рассчитать индикаторы
@@ -61,6 +64,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         
         # Проверка H4 тренда (ADX>20)
         if current_adx <= self.adx_threshold:
+            strategy_logger.debug(f"    ❌ ADX слабый: {current_adx:.1f} <= {self.adx_threshold}")
             return None
         
         # Определить тренд по EMA50
@@ -73,6 +77,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         
         # Проверка объёма
         if volume_ratio < self.volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
             return None
         
         # Зона отката: EMA20 ± 0.3 ATR
@@ -162,4 +167,5 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                     )
                     return signal
         
+        strategy_logger.debug(f"    ❌ Нет подтверждения отката: цена не в зоне EMA20±{self.retest_atr} ATR или нет закрытия нужной стороны")
         return None

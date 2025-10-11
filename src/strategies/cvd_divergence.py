@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 
 
@@ -36,6 +37,7 @@ class CVDDivergenceStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < self.lookback_bars + 10:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars + 10}")
             return None
         
         # CVD из indicators
@@ -55,6 +57,7 @@ class CVDDivergenceStrategy(BaseStrategy):
         divergence_type = self._detect_divergence(df, cvd_series)
         
         if divergence_type is None:
+            strategy_logger.debug(f"    ❌ Нет дивергенции или подтверждения CVD по цене")
             return None
         
         # ATR для стопов
@@ -83,6 +86,7 @@ class CVDDivergenceStrategy(BaseStrategy):
                 symbol, df, 'short', current_atr, indicators
             )
         
+        strategy_logger.debug(f"    ❌ Неопределенный тип CVD сигнала")
         return None
     
     def _detect_divergence(self, df: pd.DataFrame, cvd_series: pd.Series) -> Optional[str]:

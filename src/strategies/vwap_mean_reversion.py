@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.vwap import calculate_daily_vwap
 from src.indicators.volume_profile import calculate_volume_profile
 from src.utils.reclaim_checker import check_value_area_reclaim, check_level_reclaim
@@ -43,14 +44,17 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         
         # Работает только в RANGE режиме
         if regime not in ['RANGE', 'CHOP']:
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется RANGE или CHOP")
             return None
         
         # BTC должен быть нейтральным (из indicators)
         btc_bias = indicators.get('btc_bias', 'Neutral')
         if btc_bias != 'Neutral':
+            strategy_logger.debug(f"    ❌ BTC bias {btc_bias}, требуется Neutral")
             return None
         
         if len(df) < 100:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 100")
             return None
         
         # ОБЯЗАТЕЛЬНЫЕ проверки по мануалу: ADX<20, ATR%<p40, BBw<p30
@@ -65,11 +69,13 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         
         # ADX<20 (должен быть низкий)
         if current_adx >= 20:
+            strategy_logger.debug(f"    ❌ ADX слишком высокий: {current_adx:.1f} >= 20")
             return None
         
         # ATR% < p40 (проверка низкой волатильности)
         atr_pct_p40 = atr_pct.rolling(60*24).quantile(0.40).iloc[-1] if len(atr_pct) > 60*24 else atr_pct.quantile(0.40)
         if current_atr_pct >= atr_pct_p40:
+            strategy_logger.debug(f"    ❌ ATR% слишком высокий: {current_atr_pct:.3f}% >= p40 ({atr_pct_p40:.3f}%)")
             return None
         
         # BB width < p30
@@ -79,6 +85,7 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         bb_width_p30 = bb_width.rolling(90).quantile(0.30).iloc[-1] if len(bb_width) > 90 else bb_width.quantile(0.30)
         
         if current_bb_width >= bb_width_p30:
+            strategy_logger.debug(f"    ❌ BB width слишком широкий: {current_bb_width:.6f} >= p30 ({bb_width_p30:.6f})")
             return None
         
         # EMA20/50 должны быть плоскими
@@ -88,6 +95,7 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         ema50_slope = abs((ema50.iloc[-1] - ema50.iloc[-10]) / ema50.iloc[-10])
         
         if ema20_slope > 0.02 or ema50_slope > 0.02:  # Наклон >2% = не плоские
+            strategy_logger.debug(f"    ❌ EMA не плоские: EMA20 slope {ema20_slope:.4f}, EMA50 slope {ema50_slope:.4f}")
             return None
         
         # EXPANSION BLOCK проверка: был ли недавний импульс/compression
@@ -101,6 +109,7 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         
         # Текущий range должен быть существенно меньше предыдущего (compression после expansion)
         if recent_range >= prev_range * 0.7:  # Если сжатие < 30%, это не compression
+            strategy_logger.debug(f"    ❌ Нет compression: текущий range {recent_range:.2f} >= 70% от предыдущего ({prev_range * 0.7:.2f})")
             return None
         
         # Рассчитать VWAP и ленты
@@ -130,6 +139,7 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         h4_swing_high = indicators.get('h4_swing_high')
         
         if h4_swing_low is None or h4_swing_high is None:
+            strategy_logger.debug(f"    ❌ Нет H4 swing данных")
             return None
         
         # LONG: RECLAIM механизм - цена была ниже зоны value, вернулась и удержалась
@@ -249,4 +259,5 @@ class VWAPMeanReversionStrategy(BaseStrategy):
                 )
                 return signal
         
+        strategy_logger.debug(f"    ❌ Нет confluence VAH/VAL с H4 swing или нет reclaim подтверждения")
         return None

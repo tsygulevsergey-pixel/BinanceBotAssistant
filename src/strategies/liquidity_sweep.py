@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 
 
@@ -45,6 +46,7 @@ class LiquiditySweepStrategy(BaseStrategy):
                      indicators: Dict) -> Optional[Signal]:
         
         if len(df) < self.lookback_bars:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars}")
             return None
         
         # ATR для измерений
@@ -114,6 +116,7 @@ class LiquiditySweepStrategy(BaseStrategy):
                         symbol, df, 'short', recent_low, current_atr, indicators
                     )
         
+        strategy_logger.debug(f"    ❌ Нет sweep с объемом >{self.volume_threshold}x или нет подтверждения fade/continuation")
         return None
     
     def _check_fade_or_continuation(self, df: pd.DataFrame, sweep_direction: str,
