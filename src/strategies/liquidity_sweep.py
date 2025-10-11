@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
@@ -46,6 +46,38 @@ class LiquiditySweepStrategy(BaseStrategy):
     def get_category(self) -> str:
         return "mean_reversion"  # Fade базово MR, continuation - breakout
     
+    def _cleanup_old_sweeps(self, current_timestamp: pd.Timestamp, max_age_minutes: int = 60):
+        """
+        Очищает старые sweep контексты (старше max_age_minutes)
+        Предотвращает memory leak
+        """
+        if not self.active_sweeps:
+            return
+        
+        symbols_to_remove = []
+        for symbol, sweep_ctx in self.active_sweeps.items():
+            sweep_time = sweep_ctx.get('timestamp')
+            if sweep_time and isinstance(sweep_time, pd.Timestamp):
+                age_minutes = (current_timestamp - sweep_time).total_seconds() / 60
+                if age_minutes > max_age_minutes:
+                    symbols_to_remove.append(symbol)
+                    strategy_logger.debug(f"    🧹 Очистка старого sweep для {symbol} (возраст {age_minutes:.1f} мин)")
+        
+        for symbol in symbols_to_remove:
+            del self.active_sweeps[symbol]
+        
+        # Дополнительная защита: ограничение на размер словаря
+        if len(self.active_sweeps) > 100:
+            strategy_logger.warning(f"    ⚠️ active_sweeps превысил 100 записей ({len(self.active_sweeps)}), очищаем старейшие")
+            # Сортируем по timestamp и удаляем старейшие
+            sorted_sweeps = sorted(
+                self.active_sweeps.items(),
+                key=lambda x: x[1].get('timestamp', pd.Timestamp.min)
+            )
+            # Удаляем старейшие 50%
+            for symbol, _ in sorted_sweeps[:len(sorted_sweeps)//2]:
+                del self.active_sweeps[symbol]
+    
     def check_signal(self, symbol: str, df: pd.DataFrame, 
                      regime: str, bias: str, 
                      indicators: Dict) -> Optional[Signal]:
@@ -58,6 +90,9 @@ class LiquiditySweepStrategy(BaseStrategy):
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
         current_timestamp = df.index[-1]
+        
+        # Периодическая очистка старых sweeps (предотвращает memory leak)
+        self._cleanup_old_sweeps(current_timestamp, max_age_minutes=60)
         
         # Текущая и предыдущая свеча
         current_high = df['high'].iloc[-1]
