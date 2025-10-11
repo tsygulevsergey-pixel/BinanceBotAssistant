@@ -6,23 +6,31 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 # Recent Changes
 
-## 2025-10-11: Dedicated Strategy Logging with Failure Reasons
-- **Created separate strategy logging for deep analysis**:
-  - New `logs/strategies.log` file dedicated to strategy analysis (separate from main `bot.log`)
-  - Added `src/utils/strategy_logger.py` with dedicated logger configuration
-  - **Per-symbol logging**: Shows regime (TREND/RANGE/SQUEEZE), bias (bullish/bearish), which strategies checked, and results
-  - **Per-strategy details**: Displays which of 16 strategies were checked/skipped/generated signals with entry/SL/TP prices
-  - **Failure reasons logging**: Each strategy now logs WHY it didn't generate a signal:
-    - "❌ Режим SQUEEZE, требуется TREND" - wrong market regime
-    - "❌ Недостаточно данных: 120 баров" - insufficient data
-    - "❌ BB width не в диапазоне p30-40" - volatility filter failed
-    - "❌ объем низкий: 1.2x < 1.5x" - volume requirement not met
-    - "❌ нет пробоя границ" - breakout conditions not met
-    - And more detailed diagnostics per strategy
-  - **Scoring breakdown**: Detailed score components (Base, Volume, CVD, Late Trend, BTC) when signals are generated
-  - **Filter logging**: Shows why signals passed/failed threshold (≥2.0) and symbol lock status
-  - **Statistics**: Summary counts (checked/skipped/signals) for each analysis cycle
-- **Cleaned up BTC filter spam**: Changed impulse/expansion detection from INFO to DEBUG level to reduce log noise
+## 2025-10-11: Comprehensive Strategy Failure Logging (ALL 15 Strategies)
+- **Implemented detailed failure reason logging across all 15 active strategies**:
+  - Added `strategy_logger.debug()` before EVERY `return None` statement in all strategy check_signal() methods
+  - **68 new logging statements** added across 15 strategy files
+  - Each rejection now logs the EXACT reason with ❌ prefix in Russian
+  - **Categories of logged failures**:
+    - **Regime mismatches**: "❌ Режим SQUEEZE, требуется TREND"
+    - **Data insufficiency**: "❌ Недостаточно данных: 200 баров, требуется 5760"
+    - **Volatility filters**: "❌ BB width не в диапазоне p30-40", "❌ Squeeze слишком короткий: 0 баров < 12"
+    - **Volume filters**: "❌ объем низкий: 1.2x < 1.5x"
+    - **Price conditions**: "❌ Цена не около VAH/VAL (расстояние > 0.3 ATR)"
+    - **H4 bias conflicts**: "❌ LONG пробой есть, но H4 bias Bearish"
+    - **Pattern confirmations**: "❌ Нет недавнего пробоя с объемом >1.5x", "❌ Нет дивергенции"
+    - **Disabled strategies**: "❌ Стратегия отключена: нет данных funding rate"
+  - **Logging infrastructure**:
+    - Separate `logs/strategies.log` file (DEBUG level, 7-day rotation)
+    - `src/utils/strategy_logger.py` with timezone-aware formatter (Europe/Kiev)
+    - DEBUG to file (all details), WARNING+ to console (critical only)
+  - **Per-symbol analysis flow**:
+    1. 🔍 АНАЛИЗ: symbol | Режим: regime | Bias: bias
+    2. 📋 Проверка 16 стратегий...
+    3. For each strategy: 🔍 Проверка → ❌ Reason (if failed) → ⚪ Result
+    4. 📈 Итого: checked/skipped/signals statistics
+  - **Architect validated**: No logic changes, only logging added, negligible performance impact
+- **Cleaned up BTC filter spam**: Changed impulse/expansion detection from INFO to DEBUG level
 
 ## 2025-10-11: High-Performance Indicator Caching System
 - **Implemented indicator caching for 15x speed improvement**:
