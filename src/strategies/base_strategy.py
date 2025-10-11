@@ -200,7 +200,15 @@ class BaseStrategy(ABC):
         # MEAN REVERSION → LIMIT entry с небольшим pullback offset
         elif category == "mean_reversion":
             # Используем ATR для расчета offset (небольшой pullback для лучшей цены)
-            atr = df['atr'].iloc[-1]
+            # Проверяем наличие колонки 'atr' или рассчитываем
+            if 'atr' in df.columns:
+                atr = df['atr'].iloc[-1]
+            else:
+                # Рассчитываем ATR если его нет в DataFrame
+                from src.indicators.technical import calculate_atr
+                atr_series = calculate_atr(df['high'], df['low'], df['close'], period=14)
+                atr = atr_series.iloc[-1]
+            
             pullback_offset = 0.15 * atr  # 15% ATR для mean reversion entry
             
             # Определяем direction если не указан

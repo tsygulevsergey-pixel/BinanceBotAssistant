@@ -196,9 +196,10 @@ class VWAPMeanReversionStrategy(BaseStrategy):
                 entry = current_close
                 stop_loss = current_low - 0.25 * current_atr
                 
-                # TP1 = VWAP/POC
-                tp1 = max(current_vwap, vpoc)
-                # TP2 = противоположная лента
+                # TP1 = VWAP/POC (ближайшая цель)
+                # Выбираем ближайший уровень как TP1
+                tp1 = min(current_vwap, vpoc) if abs(entry - min(current_vwap, vpoc)) < abs(entry - max(current_vwap, vpoc)) else max(current_vwap, vpoc)
+                # TP2 = противоположная лента (дальняя цель)
                 tp2 = current_upper
                 
                 signal = Signal(
@@ -268,7 +269,10 @@ class VWAPMeanReversionStrategy(BaseStrategy):
                 entry = current_close
                 stop_loss = current_high + 0.25 * current_atr
                 
-                tp1 = min(current_vwap, vpoc)
+                # TP1 = VWAP/POC (ближайшая цель)
+                # Выбираем ближайший уровень как TP1
+                tp1 = max(current_vwap, vpoc) if abs(entry - max(current_vwap, vpoc)) < abs(entry - min(current_vwap, vpoc)) else min(current_vwap, vpoc)
+                # TP2 = противоположная лента (дальняя цель)
                 tp2 = current_lower
                 
                 signal = Signal(
