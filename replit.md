@@ -4,26 +4,37 @@ This project is a sophisticated Binance USDT-M Futures Trading Bot designed to g
 
 The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
 
-## Recent Fixes (October 11, 2025)
+## Recent Updates (October 11, 2025)
+
+### ✅ Hybrid Entry System Implemented
+Adaptive MARKET/LIMIT execution based on strategy category:
+- **Breakout strategies** (Donchian, Squeeze, ORB/IRB, ATR Momentum) → **MARKET** entry for immediate execution
+- **Pullback strategies** (Break & Retest, MA/VWAP Pullback) → **LIMIT** entry with 6-bar timeout
+- **Mean Reversion strategies** (VWAP MR, Range Fade, RSI/Stoch MR, Volume Profile) → **LIMIT** entry with 4-bar timeout
+- **Order Flow/CVD** → **MARKET** entry (aggressive signals)
+
+**Key Components:**
+- `EntryManager`: Tracks pending LIMIT orders with timeout logic and intrabar fill detection
+- `Signal.determine_entry_type()`: Automatic entry type determination based on strategy category
+- `StrategyManager`: Applies hybrid logic after signal generation
+- **Critical Fix**: LIMIT fill detection uses candle low/high (not just close) for realistic execution
+- Database status support: `PENDING` for LIMIT orders → `ACTIVE` after fill
+- Telegram notifications differentiate MARKET/LIMIT/FILLED with emoji indicators
+
+**Expected Benefits:**
+- +10-15% improved R:R on pullback/MR strategies through better entry prices
+- Breakout strategies maintain speed advantage with MARKET execution
+- Low risk implementation with timeout protection (6 bars pullback, 4 bars MR)
+
+### Previous Fixes
 - **ADX Configuration Standardization**: Fixed MA/VWAP Pullback strategy to use `config.get('market_detector.trend.adx_threshold')` instead of hardcoded value 20, ensuring consistency across all strategies.
 - **Late Trend Blocking Removal**: Removed late_trend flag check from ATR Momentum strategy that was blocking signals. The late_trend flag is still calculated in market_regime.py but no longer blocks strategy execution, aligning with removal of late_trend penalty from scoring system.
 - **H4 ADX Propagation Fix**: Fixed ORB/IRB strategy receiving h4_adx=0 by adding `'h4_adx': regime_data.get('details', {}).get('adx', 0)` to indicators dictionary in main.py, and increased H4 data requirement from 50 to 200 bars to match MarketRegimeDetector's validation threshold.
 
-## Planned Improvements
+## Future Enhancements
 
-### Entry Logic Evolution (In Progress)
-Two approaches documented for future optimization of entry points:
-
-**ГИБРИДНЫЙ подход (Current Implementation Target):**
-- Breakout strategies (Donchian, Squeeze, ORB, ATR Momentum) → MARKET entry for speed
-- Pullback strategies (Break & Retest, MA/VWAP Pullback) → LIMIT entry on retest levels
-- Mean Reversion strategies (VWAP MR, Range Fade, RSI/Stoch MR, Volume Profile) → LIMIT entry at target zones
-- Order Flow/CVD → MARKET (aggressive signals)
-- Benefits: +10-15% improved R:R on pullback/MR strategies, simple logic, low risk
-- Implementation: Entry type determined by strategy.get_category(), timeout 6 bars for limit orders
-
-**PRO Adaptive подход (Future Enhancement):**
-- Dynamic entry type based on market conditions (volume spike, momentum, depth imbalance)
+### PRO Adaptive Entry (Deferred)
+Volume spike-based adaptive entry for future implementation:
 - Strong impulse (volume_ratio > 2.0, momentum > 0.5) → MARKET entry
 - Normal conditions → LIMIT entry for better price
 - Benefits: +20-30% improved R:R with proper tuning, adaptive to market volatility
