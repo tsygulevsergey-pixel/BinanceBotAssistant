@@ -151,7 +151,6 @@ class TimeOfDayStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
                 strategy_name=self.name,
                 metadata={
                     'type': 'time_of_day_breakout',
@@ -172,7 +171,6 @@ class TimeOfDayStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
                 strategy_name=self.name,
                 metadata={
                     'type': 'time_of_day_breakout',
@@ -208,7 +206,6 @@ class TimeOfDayStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
                 strategy_name=self.name,
                 metadata={
                     'type': 'time_of_day_mr',
@@ -231,7 +228,6 @@ class TimeOfDayStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                confidence=2.0,
                 strategy_name=self.name,
                 metadata={
                     'type': 'time_of_day_mr',
