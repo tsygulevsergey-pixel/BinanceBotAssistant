@@ -73,7 +73,7 @@ class StrategyManager:
                     strategy_logger.info(
                         f"  ✅ {strategy.name} → СИГНАЛ! {signal.direction} | "
                         f"Entry: {signal.entry_price:.4f} | SL: {signal.stop_loss:.4f} | "
-                        f"TP: {signal.take_profit:.4f}"
+                        f"TP1: {signal.take_profit_1:.4f}"
                     )
                 else:
                     strategy_logger.debug(f"  ⚪ {strategy.name} → нет сигнала")
