@@ -2,9 +2,24 @@
 
 This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories, architect-validated against detailed specifications. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
-The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/RANGE/SQUEEZE), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
+The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
 
 # Recent Changes
+
+## 2025-10-11: Market Regime Detection Fixed (CHOP режим добавлен)
+- **Добавлен новый режим CHOP** (choppy/беспорядочное движение):
+  - MarketRegime enum теперь содержит 5 режимов: TREND/SQUEEZE/RANGE/CHOP/UNDECIDED
+  - CHOP = низкий ADX + волатильность + EMA не плоские (беспорядочное движение)
+  - RANGE = низкий ADX + волатильность + EMA плоские (чистая консолидация)
+- **Исправлен приоритет определения режима**:
+  - **ПРИОРИТЕТ 1**: TREND (ADX > 20 + EMA выровнены) - сильный тренд
+  - **ПРИОРИТЕТ 2**: SQUEEZE (BB width < p25 + длительность ≥12 баров) - узкая консолидация
+  - **ПРИОРИТЕТ 3**: RANGE/CHOP (ADX < 20 + BB width < p30) - боковое движение
+  - Раньше: SQUEEZE → TREND → RANGE (неправильный порядок, все было SQUEEZE)
+  - Теперь: TREND → SQUEEZE → RANGE/CHOP (правильный порядок)
+- **Добавлено детальное debug логирование** для каждого определенного режима
+- **Architect validated**: Логика корректна, SQUEEZE не конфликтует с RANGE/CHOP, все стратегии получают правильные режимы
+- **Результат**: Стратегии теперь получают корректные режимы рынка, позволяя mean-reversion стратегиям работать в CHOP
 
 ## 2025-10-11: Исправлена нехватка данных для стратегий
 - **Увеличены лимиты загрузки данных для стратегий**:
@@ -99,7 +114,7 @@ Preferred communication style: Simple, everyday language.
 - **Implemented Strategies**: 15 active strategies, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
 
 ### 4. Market Analysis System
-- **MarketRegimeDetector**: Classifies market into TREND/RANGE/SQUEEZE/UNDECIDED using multi-factor confirmation.
+- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED using multi-factor confirmation with priority-based detection (TREND → SQUEEZE → RANGE/CHOP).
 - **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
 - **CVDCalculator**: Cumulative Volume Delta.
 - **VWAPCalculator**: Daily, anchored, and session-based VWAP.
