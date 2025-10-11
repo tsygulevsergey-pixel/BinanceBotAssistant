@@ -5,7 +5,7 @@ from datetime import time
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
-from src.indicators.technical import calculate_atr
+from src.indicators.technical import calculate_atr, calculate_ema, calculate_adx
 
 
 class ORBStrategy(BaseStrategy):
@@ -80,6 +80,20 @@ class ORBStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Не в торговом слоте: текущее время {current_timestamp.time()}")
             return None
         
+        # Проверка H4 тренда (требуется по мануалу)
+        # Получаем H4 данные из индикаторов (передаются от анализатора)
+        h4_trend = indicators.get('h4_trend', 'Neutral')
+        h4_adx = indicators.get('h4_adx', 0)
+        
+        # Проверка наличия тренда на H4 (ADX>20)
+        if h4_adx <= 20:
+            strategy_logger.debug(f"    ❌ H4 ADX слабый: {h4_adx:.1f} <= 20")
+            return None
+        
+        # BTC directional filter
+        btc_direction = indicators.get('btc_direction', 'Neutral')
+        btc_pct_change = indicators.get('btc_pct_change', 0)
+        
         # Рассчитать IB range
         ib_high, ib_low, ib_width = self._calculate_ib_range(df)
         
@@ -129,9 +143,19 @@ class ORBStrategy(BaseStrategy):
             current_close > ib_high and
             (current_close - ib_high) >= self.breakout_atr * current_atr):
             
+            # Фильтр по H4 тренду (должен быть Bullish или Neutral, но не Bearish)
+            if h4_trend == 'Bearish':
+                strategy_logger.debug(f"    ❌ LONG пробой есть, но H4 тренд {h4_trend}")
+                return None
+            
             # Фильтр по H4 bias
             if bias == 'Bearish':
                 strategy_logger.debug(f"    ❌ LONG пробой есть, но H4 bias {bias}")
+                return None
+            
+            # BTC directional filter: если BTC сильно вниз, штраф
+            if btc_direction == 'DOWN' and abs(btc_pct_change) > 1.0:
+                strategy_logger.debug(f"    ❌ LONG пробой есть, но BTC {btc_direction} {btc_pct_change:.2f}%")
                 return None
             
             entry = current_close
@@ -171,9 +195,19 @@ class ORBStrategy(BaseStrategy):
               current_close < ib_low and
               (ib_low - current_close) >= self.breakout_atr * current_atr):
             
+            # Фильтр по H4 тренду (должен быть Bearish или Neutral, но не Bullish)
+            if h4_trend == 'Bullish':
+                strategy_logger.debug(f"    ❌ SHORT пробой есть, но H4 тренд {h4_trend}")
+                return None
+            
             # Фильтр по H4 bias
             if bias == 'Bullish':
                 strategy_logger.debug(f"    ❌ SHORT пробой есть, но H4 bias {bias}")
+                return None
+            
+            # BTC directional filter: если BTC сильно вверх, штраф
+            if btc_direction == 'UP' and abs(btc_pct_change) > 1.0:
+                strategy_logger.debug(f"    ❌ SHORT пробой есть, но BTC {btc_direction} {btc_pct_change:.2f}%")
                 return None
             
             entry = current_close
