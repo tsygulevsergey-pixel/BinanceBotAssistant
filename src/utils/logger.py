@@ -1,7 +1,6 @@
 import logging
 import sys
 from pathlib import Path
-from logging.handlers import TimedRotatingFileHandler
 import pytz
 from datetime import datetime
 from typing import Optional
@@ -39,14 +38,14 @@ def setup_logger(name: str = 'trading_bot', level: Optional[str] = None) -> logg
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     
-    log_file = Path(config.log_file)
-    log_file.parent.mkdir(parents=True, exist_ok=True)
+    # Создать имя файла с датой/временем запуска
+    timestamp = datetime.now(tz=pytz.timezone(config.timezone)).strftime('%Y-%m-%d_%H-%M-%S')
+    log_dir = Path("logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"bot_{timestamp}.log"
     
-    file_handler = TimedRotatingFileHandler(
+    file_handler = logging.FileHandler(
         log_file,
-        when='D',
-        interval=1,
-        backupCount=30,
         encoding='utf-8'
     )
     file_handler.setLevel(logging.DEBUG)

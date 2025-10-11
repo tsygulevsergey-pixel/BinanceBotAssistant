@@ -1,7 +1,6 @@
 import logging
 import sys
 from pathlib import Path
-from logging.handlers import TimedRotatingFileHandler
 import pytz
 from datetime import datetime
 
@@ -31,15 +30,14 @@ def setup_strategy_logger() -> logging.Logger:
     log_format = '%(asctime)s | %(levelname)-8s | %(message)s'
     formatter = KyivFormatter(log_format)
     
-    # Файловый handler - записывает ВСЁ
-    log_file = Path("logs/strategies.log")
-    log_file.parent.mkdir(parents=True, exist_ok=True)
+    # Создать имя файла с датой/временем запуска
+    timestamp = datetime.now(tz=pytz.timezone('Europe/Kiev')).strftime('%Y-%m-%d_%H-%M-%S')
+    log_dir = Path("logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"strategies_{timestamp}.log"
     
-    file_handler = TimedRotatingFileHandler(
+    file_handler = logging.FileHandler(
         log_file,
-        when='D',
-        interval=1,
-        backupCount=7,  # Хранить 7 дней логов
         encoding='utf-8'
     )
     file_handler.setLevel(logging.DEBUG)

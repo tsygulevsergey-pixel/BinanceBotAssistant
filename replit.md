@@ -6,6 +6,15 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 # Recent Changes
 
+## 2025-10-11: Логи с датой/временем запуска
+- **Изменена система логирования для создания новых файлов при каждом запуске**:
+  - Формат имени: `bot_2025-10-11_11-58-56.log` (дата_время-запуска.log)
+  - Формат имени: `strategies_2025-10-11_11-58-56.log` (дата_время-запуска.log)
+  - Заменен TimedRotatingFileHandler на обычный FileHandler с timestamp в имени
+  - Каждый запуск бота создает новую пару файлов логов
+  - Легко отследить логи конкретного запуска
+  - Старые логи сохраняются и не перезаписываются
+
 ## 2025-10-11: Pandas FutureWarning Fix
 - **Fixed VWAP calculation pandas deprecation warning**:
   - Added `include_groups=False` parameter to `groupby().apply()` in `src/indicators/vwap.py`
