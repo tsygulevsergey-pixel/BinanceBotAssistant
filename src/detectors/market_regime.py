@@ -77,19 +77,26 @@ class MarketRegimeDetector:
         
         # ПРИОРИТЕТ 3: RANGE/CHOP - низкий ADX и низкая волатильность (но не squeeze)
         elif adx < self.adx_threshold and bb_width_percentile < self.bb_percentile_threshold:
-            ema_20_slope = abs(TechnicalIndicators.calculate_ema_slope(df, 20).iloc[-1])
-            ema_50_slope = abs(TechnicalIndicators.calculate_ema_slope(df, 50).iloc[-1])
+            ema_20_slope_raw = abs(TechnicalIndicators.calculate_ema_slope(df, 20).iloc[-1])
+            ema_50_slope_raw = abs(TechnicalIndicators.calculate_ema_slope(df, 50).iloc[-1])
+            
+            # Нормализация slope в процентах от цены (чтобы работало для любых активов)
+            ema_20_slope_pct = (ema_20_slope_raw / ema_20 * 100) if ema_20 > 0 else 0
+            ema_50_slope_pct = (ema_50_slope_raw / ema_50 * 100) if ema_50 > 0 else 0
+            
+            # Threshold: 0.05% для различия CHOP vs RANGE (0.05% slope за бар)
+            slope_threshold_pct = 0.05
             
             # CHOP - беспорядочное движение (EMA не плоские, но ADX низкий)
-            if ema_20_slope >= 0.1 or ema_50_slope >= 0.1:
+            if ema_20_slope_pct >= slope_threshold_pct or ema_50_slope_pct >= slope_threshold_pct:
                 regime = MarketRegime.CHOP
                 confidence = 1.0 - (adx / self.adx_threshold)
-                logger.debug(f"Regime: CHOP | ADX={adx:.1f} < {self.adx_threshold}, BB%ile={bb_width_percentile:.1f} < {self.bb_percentile_threshold}, EMA slope не плоские")
+                logger.debug(f"Regime: CHOP | ADX={adx:.1f} < {self.adx_threshold}, BB%ile={bb_width_percentile:.1f} < {self.bb_percentile_threshold}, EMA20 slope={ema_20_slope_pct:.3f}%, EMA50 slope={ema_50_slope_pct:.3f}%")
             # RANGE - чистый боковик (EMA плоские, ADX низкий)
             else:
                 regime = MarketRegime.RANGE
                 confidence = 1.0 - (adx / self.adx_threshold)
-                logger.debug(f"Regime: RANGE | ADX={adx:.1f} < {self.adx_threshold}, BB%ile={bb_width_percentile:.1f} < {self.bb_percentile_threshold}, EMA плоские")
+                logger.debug(f"Regime: RANGE | ADX={adx:.1f} < {self.adx_threshold}, BB%ile={bb_width_percentile:.1f} < {self.bb_percentile_threshold}, EMA20 slope={ema_20_slope_pct:.3f}%, EMA50 slope={ema_50_slope_pct:.3f}%")
         
         details = {
             'adx': adx,

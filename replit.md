@@ -28,7 +28,7 @@ Preferred communication style: Simple, everyday language.
 - **Implemented Strategies**: 15 active strategies, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
 
 ### Market Analysis System
-- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED using multi-factor confirmation with priority-based detection (TREND → SQUEEZE → RANGE/CHOP).
+- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED using multi-factor confirmation with priority-based detection (TREND → SQUEEZE → RANGE/CHOP). Uses percent-normalized EMA slopes (0.05% threshold) to distinguish RANGE (flat EMA) from CHOP (erratic EMA), ensuring accurate detection across all price ranges.
 - **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
 - **CVDCalculator**: Cumulative Volume Delta.
 - **VWAPCalculator**: Daily, anchored, and session-based VWAP.
