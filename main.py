@@ -36,6 +36,8 @@ from src.utils.strategy_validator import StrategyValidator
 from src.utils.timeframe_sync import TimeframeSync
 from src.database.db import db
 from src.database.models import Signal
+from src.indicators.cache import IndicatorCache
+from src.indicators.common import calculate_common_indicators
 import hashlib
 from datetime import datetime
 import pytz
@@ -58,6 +60,7 @@ class TradingBot:
         self.regime_detector = MarketRegimeDetector()
         self.telegram_bot = TelegramBot()
         self.signal_lock_manager = SignalLockManager()
+        self.indicator_cache = IndicatorCache()  # Кеш для индикаторов
         
         self._register_strategies()
     
@@ -313,8 +316,25 @@ class TradingBot:
         h4_swing_high = h4_data['high'].tail(20).max() if h4_data is not None and len(h4_data) >= 20 else None
         h4_swing_low = h4_data['low'].tail(20).min() if h4_data is not None and len(h4_data) >= 20 else None
         
-        # Indicators для стратегий
+        # Рассчитать общие индикаторы (с кешированием)
+        # Проверяем кеш для каждого таймфрейма
+        cached_indicators = {}
+        for tf, df in timeframe_data.items():
+            last_bar_time = df.index[-1]
+            cached = self.indicator_cache.get(symbol, tf, last_bar_time)
+            
+            if cached is None:
+                # Кеша нет или устарел - рассчитываем заново
+                common_indicators = calculate_common_indicators(df, tf)
+                self.indicator_cache.set(symbol, tf, last_bar_time, common_indicators)
+                cached_indicators[tf] = common_indicators
+            else:
+                # Используем закешированные индикаторы
+                cached_indicators[tf] = cached
+        
+        # Indicators для стратегий (объединяем кешированные + дополнительные)
         indicators = {
+            **cached_indicators,  # Все закешированные индикаторы по таймфреймам
             'cvd': 0.0,
             'doi_pct': 0.0,
             'depth_imbalance': 1.0,
