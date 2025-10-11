@@ -110,30 +110,36 @@ class SignalPerformanceTracker:
         direction = str(signal.direction)  # type: ignore
         
         if direction == "LONG":
+            # Проверка SL (используем точный уровень SL для exit_price)
             if current_price <= sl:
-                pnl_percent = ((current_price - entry) / entry) * 100
-                return ("LOSS", current_price, pnl_percent)
+                pnl_percent = ((sl - entry) / entry) * 100
+                return ("LOSS", sl, pnl_percent)
             
+            # Проверка TP2 (используем точный уровень TP2)
             if tp2 and current_price >= tp2:
-                pnl_percent = ((current_price - entry) / entry) * 100
-                return ("WIN", current_price, pnl_percent)
+                pnl_percent = ((tp2 - entry) / entry) * 100
+                return ("WIN", tp2, pnl_percent)
             
+            # Проверка TP1 (используем точный уровень TP1)
             if tp1 and current_price >= tp1:
-                pnl_percent = ((current_price - entry) / entry) * 100
-                return ("WIN", current_price, pnl_percent)
+                pnl_percent = ((tp1 - entry) / entry) * 100
+                return ("WIN", tp1, pnl_percent)
         
         elif direction == "SHORT":
+            # Проверка SL (используем точный уровень SL для exit_price)
             if current_price >= sl:
-                pnl_percent = ((entry - current_price) / entry) * 100
-                return ("LOSS", current_price, pnl_percent)
+                pnl_percent = ((entry - sl) / entry) * 100
+                return ("LOSS", sl, pnl_percent)
             
+            # Проверка TP2 (используем точный уровень TP2)
             if tp2 and current_price <= tp2:
-                pnl_percent = ((entry - current_price) / entry) * 100
-                return ("WIN", current_price, pnl_percent)
+                pnl_percent = ((entry - tp2) / entry) * 100
+                return ("WIN", tp2, pnl_percent)
             
+            # Проверка TP1 (используем точный уровень TP1)
             if tp1 and current_price <= tp1:
-                pnl_percent = ((entry - current_price) / entry) * 100
-                return ("WIN", current_price, pnl_percent)
+                pnl_percent = ((entry - tp1) / entry) * 100
+                return ("WIN", tp1, pnl_percent)
         
         time_stop_result = self._check_time_stop(signal, current_price)
         if time_stop_result:
