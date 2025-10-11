@@ -64,7 +64,7 @@ class TradingBot:
         self.signal_scorer = SignalScorer(config)  # Config object supports dot notation
         self.btc_filter = BTCFilter(config)  # Config object supports dot notation
         self.regime_detector = MarketRegimeDetector()
-        self.telegram_bot = TelegramBot()
+        self.telegram_bot = TelegramBot(binance_client=None)  # Will be set after client init
         self.signal_lock_manager = SignalLockManager()
         self.entry_manager = EntryManager()  # Управление MARKET/LIMIT входами
         self.indicator_cache = IndicatorCache()  # Кеш для индикаторов
@@ -88,10 +88,15 @@ class TradingBot:
             # Создаём клиента и не закрываем сессию автоматически
             self.client = BinanceClient()
             await self.client.__aenter__()  # Открываем сессию
+            
+            # Загрузить информацию о символах (precision) для правильного форматирования цен
+            await self.client.load_symbols_info()
+            
             self.data_loader = DataLoader(self.client, self.telegram_bot)
             
-            # Передаем binance_client в StrategyManager для получения актуальных цен
+            # Передаем binance_client в StrategyManager и TelegramBot
             self.strategy_manager.binance_client = self.client
+            self.telegram_bot.binance_client = self.client
             
             await self._initialize()
             await self._run_main_loop()

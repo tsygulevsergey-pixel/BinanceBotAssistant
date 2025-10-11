@@ -6,7 +6,7 @@ from src.utils.logger import logger
 
 
 class TelegramBot:
-    def __init__(self):
+    def __init__(self, binance_client=None):
         self.token = config.get_secret('telegram_bot_token')
         self.chat_id = config.get_secret('telegram_chat_id')
         self.app = None
@@ -14,6 +14,7 @@ class TelegramBot:
         self.startup_message_sent = False
         self.performance_tracker = None
         self.strategy_validator = None
+        self.binance_client = binance_client
     
     async def start(self):
         if not self.token:
@@ -324,6 +325,7 @@ class TelegramBot:
     def _format_signal(self, signal_data: dict) -> str:
         direction_emoji = "🟢" if signal_data['direction'] == 'LONG' else "🔴"
         entry_type = signal_data.get('entry_type', 'MARKET')
+        symbol = signal_data['symbol']
         
         # Определить эмодзи для entry_type
         if 'LIMIT' in entry_type:
@@ -335,24 +337,35 @@ class TelegramBot:
         
         message = (
             f"{direction_emoji} *{signal_data['strategy_name']}*\n\n"
-            f"📊 Символ: `{signal_data['symbol']}`\n"
+            f"📊 Символ: `{symbol}`\n"
             f"📈 Направление: *{signal_data['direction']}*\n"
             f"{entry_emoji} Тип входа: `{entry_type}`\n"
         )
         
+        # Форматировать цены с правильной точностью
+        def format_price(price):
+            if self.binance_client:
+                return self.binance_client.format_price(symbol, price)
+            return f"{price:.8f}".rstrip('0').rstrip('.')
+        
         # Для LIMIT pending показать целевую и текущую цену
         if 'pending' in entry_type.lower() and 'current_price' in signal_data:
             message += (
-                f"🎯 Целевая цена: `{signal_data['entry_price']:.4f}`\n"
-                f"💰 Текущая цена: `{signal_data['current_price']:.4f}`\n"
+                f"🎯 Целевая цена: `{format_price(signal_data['entry_price'])}`\n"
+                f"💰 Текущая цена: `{format_price(signal_data['current_price'])}`\n"
             )
         else:
-            message += f"💰 Вход: `{signal_data['entry_price']:.4f}`\n"
+            message += f"💰 Вход: `{format_price(signal_data['entry_price'])}`\n"
+        
+        # Форматировать SL и TP
+        stop_loss = format_price(signal_data['stop_loss'])
+        tp1 = format_price(signal_data['tp1']) if signal_data.get('tp1') else 'N/A'
+        tp2 = format_price(signal_data['tp2']) if signal_data.get('tp2') else 'N/A'
         
         message += (
-            f"🛑 Стоп: `{signal_data['stop_loss']:.4f}`\n"
-            f"🎯 TP1: `{signal_data.get('tp1', 'N/A')}`\n"
-            f"🎯 TP2: `{signal_data.get('tp2', 'N/A')}`\n\n"
+            f"🛑 Стоп: `{stop_loss}`\n"
+            f"🎯 TP1: `{tp1}`\n"
+            f"🎯 TP2: `{tp2}`\n\n"
             f"⭐️ Скор: `{signal_data['score']:.1f}`\n"
             f"🔄 Режим: `{signal_data['regime']}`\n"
         )
