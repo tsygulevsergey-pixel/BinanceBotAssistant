@@ -861,9 +861,12 @@ class TradingBot:
     
     def _unblock_symbol(self, symbol: str):
         """Разблокировать символ для анализа (сигнал закрыт)"""
-        if symbol in self.symbols_with_active_signals:
-            self.symbols_with_active_signals.remove(symbol)
-            logger.info(f"🔓 {symbol} unblocked for analysis (signal closed)")
+        try:
+            if symbol in self.symbols_with_active_signals:
+                self.symbols_with_active_signals.remove(symbol)
+                logger.info(f"🔓 {symbol} unblocked for analysis (signal closed)")
+        except Exception as e:
+            logger.error(f"Error unblocking symbol {symbol}: {e}", exc_info=True)
     
     async def stop(self):
         import traceback
