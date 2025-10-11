@@ -68,7 +68,7 @@ class BTCFilter:
         has_impulse = bar_range_pct >= self.impulse_threshold
         
         if has_impulse:
-            logger.info(f"BTC H1 impulse detected: {bar_range_pct:.2f}% (>{self.impulse_threshold}%)")
+            logger.debug(f"BTC H1 impulse detected: {bar_range_pct:.2f}% (>{self.impulse_threshold}%)")
         
         return {
             'has_impulse': has_impulse,
@@ -96,7 +96,7 @@ class BTCFilter:
         is_expansion = current_atr > self.expansion_atr_mult * avg_atr
         
         if is_expansion:
-            logger.info(f"BTC expansion detected: ATR={current_atr:.2f} (avg={avg_atr:.2f})")
+            logger.debug(f"BTC expansion detected: ATR={current_atr:.2f} (avg={avg_atr:.2f})")
         
         return is_expansion
     

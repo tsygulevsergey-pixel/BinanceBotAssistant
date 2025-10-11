@@ -6,6 +6,17 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 # Recent Changes
 
+## 2025-10-11: Dedicated Strategy Logging System
+- **Created separate strategy logging for deep analysis**:
+  - New `logs/strategies.log` file dedicated to strategy analysis (separate from main `bot.log`)
+  - Added `src/utils/strategy_logger.py` with dedicated logger configuration
+  - **Per-symbol logging**: Shows regime (TREND/RANGE/SQUEEZE), bias (bullish/bearish), which strategies checked, and results
+  - **Per-strategy details**: Displays which of 16 strategies were checked/skipped/generated signals with entry/SL/TP prices
+  - **Scoring breakdown**: Detailed score components (Base, Volume, CVD, Late Trend, BTC) when signals are generated
+  - **Filter logging**: Shows why signals passed/failed threshold (≥2.0) and symbol lock status
+  - **Statistics**: Summary counts (checked/skipped/signals) for each analysis cycle
+- **Cleaned up BTC filter spam**: Changed impulse/expansion detection from INFO to DEBUG level to reduce log noise
+
 ## 2025-10-11: High-Performance Indicator Caching System
 - **Implemented indicator caching for 15x speed improvement**:
   - Created `IndicatorCache` class with timestamp-based invalidation per (symbol, timeframe, last_bar_time)
