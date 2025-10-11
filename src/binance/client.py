@@ -167,6 +167,12 @@ class BinanceClient:
     async def get_open_interest_hist(self, symbol: str, period: str = '5m',
                                      limit: int = 30, start_time: Optional[int] = None,
                                      end_time: Optional[int] = None) -> List[Dict]:
+        # Open Interest History - это публичный data endpoint
+        # Testnet НЕ ПОДДЕРЖИВАЕТ этот endpoint
+        if self.use_testnet:
+            logger.debug(f"OI History not available on testnet for {symbol}, returning empty data")
+            return []
+        
         params = {
             'symbol': symbol,
             'period': period,
@@ -177,8 +183,20 @@ class BinanceClient:
         if end_time:
             params['endTime'] = end_time
         
-        return await self._request('GET', '/futures/data/openInterestHist', 
-                                   params=params, weight=1)
+        # Для OI History используем специальный URL (не FAPI endpoint)
+        # Этот endpoint работает только на production
+        oi_url = f"https://fapi.binance.com/futures/data/openInterestHist"
+        
+        async def _do_request():
+            if not self.session:
+                raise Exception("Session not initialized")
+            async with self.session.request('GET', oi_url, params=params) as response:
+                if response.status == 429 or response.status == 418:
+                    raise Exception(f"Rate limit error: {response.status}")
+                response.raise_for_status()
+                return await response.json()
+        
+        return await self.rate_limiter.execute_with_backoff(_do_request, weight=1)
     
     async def get_funding_rate(self, symbol: str, limit: int = 100) -> List[Dict]:
         params = {
