@@ -327,7 +327,10 @@ class BreakRetestStrategy(BaseStrategy):
         if not touched_zone:
             strategy_logger.debug(f"    ❌ Цена НЕ касалась зоны ретеста [{retest_zone_lower:.4f}, {retest_zone_upper:.4f}] за последние {lookback_retest} баров")
         elif not reclaimed_level:
-            strategy_logger.debug(f"    ❌ Зона касалась, но НЕТ рекламирования уровня {breakout_level:.4f} (close {'выше' if breakout['direction'] == 'LONG' else 'ниже'} уровня)")
+            if breakout['direction'] == 'LONG':
+                strategy_logger.debug(f"    ❌ Зона касалась, но НЕТ rejection: нужен close ВЫШЕ {breakout_level:.4f} после касания снизу")
+            else:
+                strategy_logger.debug(f"    ❌ Зона касалась, но НЕТ rejection: нужен close НИЖЕ {breakout_level:.4f} после касания сверху")
         else:
             strategy_logger.debug(f"    ❌ Текущая цена {current_close:.4f} не {'выше' if breakout['direction'] == 'LONG' else 'ниже'} уровня пробоя {breakout_level:.4f}")
         return None
