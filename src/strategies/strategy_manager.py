@@ -10,9 +10,10 @@ from src.utils.config import config
 class StrategyManager:
     """Менеджер для управления всеми стратегиями"""
     
-    def __init__(self):
+    def __init__(self, binance_client=None):
         self.strategies: List[BaseStrategy] = []
         self.enabled_strategy_ids = config.get('strategies.enabled', [])
+        self.binance_client = binance_client
         
     def register_strategy(self, strategy: BaseStrategy):
         """Зарегистрировать стратегию"""
@@ -24,7 +25,7 @@ class StrategyManager:
         for strategy in strategies:
             self.register_strategy(strategy)
     
-    def check_all_signals(self, symbol: str, timeframe_data: Dict[str, pd.DataFrame],
+    async def check_all_signals(self, symbol: str, timeframe_data: Dict[str, pd.DataFrame],
                          regime: str, bias: str, indicators: Dict) -> List[Signal]:
         """
         Проверить все стратегии на сигналы
@@ -73,6 +74,33 @@ class StrategyManager:
                     )
                     signal.entry_type = entry_type
                     signal.entry_timeout = timeout
+                    
+                    # Для MARKET ордеров: получить актуальную рыночную цену
+                    if entry_type == "MARKET" and self.binance_client:
+                        try:
+                            mark_data = await self.binance_client.get_mark_price(symbol)
+                            current_mark_price = float(mark_data.get('markPrice', signal.entry_price))
+                            
+                            # Обновить entry_price на актуальную mark price
+                            strategy_logger.debug(
+                                f"    💹 Updated entry: {signal.entry_price:.4f} → {current_mark_price:.4f} "
+                                f"(mark price)"
+                            )
+                            signal.entry_price = current_mark_price
+                            
+                            # Пересчитать SL/TP с актуальной ценой используя offset'ы
+                            if signal.direction == "LONG":
+                                signal.stop_loss = current_mark_price - (signal.stop_offset or 0)
+                                signal.take_profit_1 = current_mark_price + (signal.tp1_offset or 0)
+                                if signal.tp2_offset:
+                                    signal.take_profit_2 = current_mark_price + signal.tp2_offset
+                            else:  # SHORT
+                                signal.stop_loss = current_mark_price + (signal.stop_offset or 0)
+                                signal.take_profit_1 = current_mark_price - (signal.tp1_offset or 0)
+                                if signal.tp2_offset:
+                                    signal.take_profit_2 = current_mark_price - signal.tp2_offset
+                        except Exception as e:
+                            strategy_logger.warning(f"    ⚠️  Could not get mark price: {e}, using close price")
                     
                     # Для LIMIT orders: сохранить целевую цену и пересчитать SL/TP
                     if entry_type == "LIMIT":

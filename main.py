@@ -60,7 +60,7 @@ class TradingBot:
         self.performance_tracker: Optional[SignalPerformanceTracker] = None
         
         # Компоненты бота
-        self.strategy_manager = StrategyManager()
+        self.strategy_manager = StrategyManager(binance_client=None)  # Will be set after client init
         self.signal_scorer = SignalScorer(config)  # Config object supports dot notation
         self.btc_filter = BTCFilter(config)  # Config object supports dot notation
         self.regime_detector = MarketRegimeDetector()
@@ -89,6 +89,9 @@ class TradingBot:
             self.client = BinanceClient()
             await self.client.__aenter__()  # Открываем сессию
             self.data_loader = DataLoader(self.client, self.telegram_bot)
+            
+            # Передаем binance_client в StrategyManager для получения актуальных цен
+            self.strategy_manager.binance_client = self.client
             
             await self._initialize()
             await self._run_main_loop()
@@ -428,7 +431,7 @@ class TradingBot:
         # Получить сигналы от всех стратегий
         strategy_logger.info(f"📋 Проверка {len(self.strategy_manager.strategies)} стратегий...")
         
-        signals = self.strategy_manager.check_all_signals(
+        signals = await self.strategy_manager.check_all_signals(
             symbol=symbol,
             timeframe_data=timeframe_data,
             regime=regime,
