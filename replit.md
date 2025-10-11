@@ -6,6 +6,26 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 ## Recent Updates (October 11, 2025)
 
+### ✅ Stop Distance Validation (NEW)
+Added max_stop_distance_atr protection to prevent breakout strategies from taking excessive risk on wide structural levels:
+
+**Implementation:**
+- **Global Limit**: `risk.max_stop_distance_atr: 3.0` in config.yaml (default)
+- **Per-Strategy Override**: Can set `max_stop_distance_atr` in individual strategy config
+- **Validation Method**: `BaseStrategy.validate_stop_distance()` checks stop distance before signal creation
+- **Config Hierarchy**: Per-strategy override → Global config → Default 3.0 ATR
+
+**Protected Strategies:**
+- Donchian Breakout: Rejects signals if dc_low/dc_high too far from entry
+- Squeeze Breakout: Rejects signals if BB bands too wide
+- ORB/IRB: Rejects signals if IB range exceeds max distance
+
+**Benefits:**
+- Prevents unrealistic risk from wide structural stops (e.g., 5-8 ATR)
+- Maintains dynamic, adaptive stops based on market structure
+- Configurable globally or per-strategy for flexibility
+- Architect-validated implementation with proper config hierarchy
+
 ### ✅ Hybrid Entry System with R:R Preservation
 Adaptive MARKET/LIMIT execution based on strategy category with **critical R:R fix**:
 
