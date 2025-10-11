@@ -33,6 +33,7 @@ class VolumeProfileStrategy(BaseStrategy):
         self.min_closes_outside = 2  # Минимум 2 close за VA для acceptance
         self.poc_shift_threshold = 0.1  # Порог смещения POC (% от range)
         self.reclaim_bars = strategy_config.get('reclaim_bars', 2)  # Hold N bars для reclaim
+        self.poc_history = {}  # История POC по символам для отслеживания shift
         
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -74,7 +75,7 @@ class VolumeProfileStrategy(BaseStrategy):
         
         # Определяем: rejection или acceptance
         signal_type = self._detect_rejection_or_acceptance(
-            df, vah, val, poc, current_atr, indicators
+            symbol, df, vah, val, poc, current_atr, indicators
         )
         
         if signal_type is None:
@@ -106,10 +107,34 @@ class VolumeProfileStrategy(BaseStrategy):
         strategy_logger.debug(f"    ❌ Неопределенный тип сигнала")
         return None
     
-    def _detect_rejection_or_acceptance(self, df: pd.DataFrame, vah: float, val: float, 
+    def _check_poc_shift(self, symbol: str, current_poc: float, price_range: float) -> dict:
+        """
+        Проверяет, сдвинулся ли POC
+        Возвращает: {'shifted': bool, 'direction': str, 'shift_pct': float}
+        """
+        if symbol not in self.poc_history:
+            # Первый раз для этого символа - сохраняем и возвращаем "не сдвинулся"
+            self.poc_history[symbol] = current_poc
+            return {'shifted': False, 'direction': 'none', 'shift_pct': 0.0}
+        
+        prev_poc = self.poc_history[symbol]
+        poc_diff = current_poc - prev_poc
+        shift_pct = abs(poc_diff) / price_range if price_range > 0 else 0
+        
+        # Обновляем историю
+        self.poc_history[symbol] = current_poc
+        
+        # Порог смещения (по умолчанию 0.1 = 10% от range)
+        if shift_pct >= self.poc_shift_threshold:
+            direction = 'up' if poc_diff > 0 else 'down'
+            return {'shifted': True, 'direction': direction, 'shift_pct': shift_pct}
+        else:
+            return {'shifted': False, 'direction': 'none', 'shift_pct': shift_pct}
+    
+    def _detect_rejection_or_acceptance(self, symbol: str, df: pd.DataFrame, vah: float, val: float, 
                                         poc: float, atr: float, indicators: Dict) -> Optional[str]:
         """
-        Определяет rejection vs acceptance
+        Определяет rejection vs acceptance с POC shift detection
         """
         current_close = df['close'].iloc[-1]
         prev_close = df['close'].iloc[-2]
@@ -122,6 +147,10 @@ class VolumeProfileStrategy(BaseStrategy):
         # История closes за последние 3 бара
         recent_closes = df['close'].tail(3).values
         
+        # Проверка POC shift
+        price_range = vah - val if vah > val else atr * 2  # Range для расчета shift %
+        poc_shift = self._check_poc_shift(symbol, poc, price_range)
+        
         # --- ПРОВЕРКА ACCEPTANCE ---
         # Acceptance выше VAH
         if current_close > vah:
@@ -130,8 +159,9 @@ class VolumeProfileStrategy(BaseStrategy):
             
             # ≥2 close за VA ИЛИ ≥0.25 ATR
             if closes_above >= self.min_closes_outside or distance_above >= self.atr_threshold * atr:
-                # Подтверждения: CVD/OI по направлению (вверх)
-                if cvd > 0 or doi_pct > 1.0:
+                # Подтверждения: CVD/OI по направлению (вверх) + POC shift вверх
+                if (cvd > 0 or doi_pct > 1.0) and (poc_shift['shifted'] and poc_shift['direction'] == 'up'):
+                    strategy_logger.debug(f"    ✅ Acceptance LONG: POC shift {poc_shift['direction']} {poc_shift['shift_pct']:.1%}")
                     return 'acceptance_long'
         
         # Acceptance ниже VAL
@@ -140,8 +170,9 @@ class VolumeProfileStrategy(BaseStrategy):
             distance_below = val - current_close
             
             if closes_below >= self.min_closes_outside or distance_below >= self.atr_threshold * atr:
-                # Подтверждения: CVD/OI вниз
-                if cvd < 0 or doi_pct < -1.0:
+                # Подтверждения: CVD/OI вниз + POC shift вниз
+                if (cvd < 0 or doi_pct < -1.0) and (poc_shift['shifted'] and poc_shift['direction'] == 'down'):
+                    strategy_logger.debug(f"    ✅ Acceptance SHORT: POC shift {poc_shift['direction']} {poc_shift['shift_pct']:.1%}")
                     return 'acceptance_short'
         
         # --- ПРОВЕРКА REJECTION с RECLAIM механизмом ---
@@ -159,8 +190,9 @@ class VolumeProfileStrategy(BaseStrategy):
             if cvd < 0:
                 # Imbalance flip (depth показывает давление вниз)
                 if depth_imbalance > 1.1:  # Больше ask = давление продаж
-                    # OI не растёт сильно
-                    if doi_pct < 2.0:
+                    # OI не растёт сильно + POC НЕ сдвигается (rejection признак)
+                    if doi_pct < 2.0 and not poc_shift['shifted']:
+                        strategy_logger.debug(f"    ✅ Rejection LONG: POC не сдвинулся (shift {poc_shift['shift_pct']:.1%})")
                         return 'rejection_long'  # Rejection вниз = fade short (но вход long при откате)
         
         # Rejection от VAL: RECLAIM - цена была ниже VAL, вернулась в value area и удержалась
@@ -177,7 +209,9 @@ class VolumeProfileStrategy(BaseStrategy):
             if cvd > 0:
                 # Imbalance flip вверх
                 if depth_imbalance < 0.9:  # Больше bid = давление покупок
-                    if doi_pct < 2.0:
+                    # OI не растёт + POC НЕ сдвигается
+                    if doi_pct < 2.0 and not poc_shift['shifted']:
+                        strategy_logger.debug(f"    ✅ Rejection SHORT: POC не сдвинулся (shift {poc_shift['shift_pct']:.1%})")
                         return 'rejection_short'  # Rejection вверх = fade long
         
         return None
@@ -254,6 +288,14 @@ class VolumeProfileStrategy(BaseStrategy):
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         
+        # Получаем POC shift info
+        vp_result = calculate_volume_profile(df, num_bins=50)
+        poc = vp_result['poc']
+        vah = vp_result['vah']
+        val = vp_result['val']
+        price_range = vah - val if vah > val else atr * 2
+        poc_shift = self._check_poc_shift(symbol, poc, price_range)
+        
         if direction == 'long':
             entry = current_close
             stop_loss = level - 0.3 * atr  # Стоп за уровень пробоя
@@ -275,7 +317,10 @@ class VolumeProfileStrategy(BaseStrategy):
                 base_score=2.0,
                 metadata={
                     'type': 'acceptance_breakout',
-                    'level': float(level)
+                    'level': float(level),
+                    'poc_shifted': poc_shift['shifted'],
+                    'poc_shift_direction': poc_shift['direction'],
+                    'poc_shift_pct': float(poc_shift['shift_pct'])
                 }
             )
         else:
@@ -299,6 +344,9 @@ class VolumeProfileStrategy(BaseStrategy):
                 base_score=2.0,
                 metadata={
                     'type': 'acceptance_breakout',
-                    'level': float(level)
+                    'level': float(level),
+                    'poc_shifted': poc_shift['shifted'],
+                    'poc_shift_direction': poc_shift['direction'],
+                    'poc_shift_pct': float(poc_shift['shift_pct'])
                 }
             )
