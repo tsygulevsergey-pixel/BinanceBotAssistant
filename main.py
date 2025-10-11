@@ -141,6 +141,9 @@ class TradingBot:
         rate_limit_status = self.client.get_rate_limit_status()
         logger.info(f"Rate limit status: {rate_limit_status['current_weight']}/{rate_limit_status['limit']}")
         
+        # Загрузить активные сигналы из БД и заблокировать символы
+        self._load_active_signals_on_startup()
+        
         # Получаем начальный список символов
         self.symbols = await self._fetch_symbols_by_volume()
         
@@ -821,6 +824,33 @@ class TradingBot:
         except Exception as e:
             session.rollback()
             logger.error(f"Failed to update LIMIT entry in DB: {e}", exc_info=True)
+        finally:
+            session.close()
+    
+    def _load_active_signals_on_startup(self):
+        """Загрузить активные сигналы из БД при старте и заблокировать символы"""
+        session = db.get_session()
+        try:
+            # Получить все активные и pending сигналы
+            active_signals = session.query(Signal).filter(
+                Signal.status.in_(['ACTIVE', 'PENDING'])
+            ).all()
+            
+            if active_signals:
+                # Добавить уникальные символы в блокировку
+                for signal in active_signals:
+                    self.symbols_with_active_signals.add(str(signal.symbol))
+                
+                logger.info(
+                    f"🔒 Loaded {len(active_signals)} active signals, "
+                    f"blocked {len(self.symbols_with_active_signals)} symbols from analysis"
+                )
+                logger.debug(f"Blocked symbols: {', '.join(sorted(self.symbols_with_active_signals))}")
+            else:
+                logger.info("✅ No active signals in DB - all symbols available for analysis")
+                
+        except Exception as e:
+            logger.error(f"Error loading active signals on startup: {e}", exc_info=True)
         finally:
             session.close()
     
