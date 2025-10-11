@@ -188,24 +188,22 @@ class SignalScorer:
     ) -> float:
         """
         BTC фильтр: −2 если BTC идёт против (на H1)
+        Использует btc_filter.get_direction_penalty() с порогом 0.3%
         """
-        if btc_data is None or len(btc_data) < 2:
+        if btc_data is None or len(btc_data) < 3:
             return 0.0
         
-        # Определить направление BTC
-        btc_close_current = btc_data['close'].iloc[-1]
-        btc_close_prev = btc_data['close'].iloc[-2]
-        btc_direction = 'up' if btc_close_current > btc_close_prev else 'down'
+        # Используем btc_filter для определения направления с порогом
+        from src.filters.btc_filter import BTCFilter
+        from src.utils.config import config
         
-        # Пенальти если BTC против сигнала
-        if signal.direction == 'LONG' and btc_direction == 'down':
-            logger.debug(f"{signal.symbol} -2 BTC against (BTC down, signal LONG)")
-            return -2.0
-        elif signal.direction == 'SHORT' and btc_direction == 'up':
-            logger.debug(f"{signal.symbol} -2 BTC against (BTC up, signal SHORT)")
-            return -2.0
+        btc_filter = BTCFilter(config.config)
+        penalty = btc_filter.get_direction_penalty(signal.direction, btc_data)
         
-        return 0.0
+        if penalty < 0:
+            logger.debug(f"{signal.symbol} {penalty:.1f} BTC against (signal {signal.direction})")
+        
+        return penalty
     
     def should_enter(self, score: float) -> bool:
         """Проверить, достаточен ли score для входа"""
