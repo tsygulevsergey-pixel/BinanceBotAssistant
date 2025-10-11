@@ -39,6 +39,7 @@ from src.utils.timeframe_sync import TimeframeSync
 from src.utils.indicator_validator import IndicatorValidator
 from src.database.db import db
 from src.database.models import Signal
+from sqlalchemy import and_
 from src.indicators.cache import IndicatorCache
 from src.indicators.common import calculate_common_indicators
 from src.indicators.swing_levels import calculate_swing_levels
@@ -330,6 +331,10 @@ class TradingBot:
                     f"✅ LIMIT FILLED: {limit_signal.symbol} {limit_signal.direction} @ "
                     f"{limit_signal.entry_price:.4f} (target was {limit_signal.target_entry_price:.4f})"
                 )
+                
+                # Обновить entry_price в БД (PENDING → ACTIVE)
+                self._update_limit_entry_in_db(limit_signal)
+                
                 # Отправить уведомление об исполнении
                 await self.telegram_bot.send_signal({
                     'strategy_name': limit_signal.strategy_name,
@@ -772,6 +777,37 @@ class TradingBot:
         except Exception as e:
             session.rollback()
             logger.error(f"Failed to save signal to DB: {e}", exc_info=True)
+        finally:
+            session.close()
+    
+    def _update_limit_entry_in_db(self, signal):
+        """Обновить entry_price в БД после исполнения LIMIT ордера"""
+        session = db.get_session()
+        try:
+            db_signal = session.query(Signal).filter(
+                and_(
+                    Signal.symbol == signal.symbol,
+                    Signal.direction == signal.direction,
+                    Signal.strategy_name == signal.strategy_name,
+                    Signal.status == 'PENDING'
+                )
+            ).first()
+            
+            if db_signal:
+                db_signal.entry_price = signal.entry_price
+                db_signal.status = 'ACTIVE'
+                session.commit()
+                logger.info(
+                    f"💾 Updated LIMIT entry in DB: {signal.symbol} {signal.direction} "
+                    f"entry_price={signal.entry_price:.4f}"
+                )
+            else:
+                logger.warning(
+                    f"⚠️  Could not find PENDING signal in DB for {signal.symbol} {signal.direction}"
+                )
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Failed to update LIMIT entry in DB: {e}", exc_info=True)
         finally:
             session.close()
     
