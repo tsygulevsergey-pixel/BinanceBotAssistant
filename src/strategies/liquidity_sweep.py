@@ -6,6 +6,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
+from src.indicators.swing_levels import SwingLevels
 
 
 class LiquiditySweepStrategy(BaseStrategy):
@@ -146,9 +147,16 @@ class LiquiditySweepStrategy(BaseStrategy):
                     strategy_logger.debug(f"    ⏳ Ждём подтверждения (бар {self.active_sweeps[symbol]['bars_count']} из {self.max_bars_after_sweep})")
         
         # ШАГ 2: Ищем НОВЫЙ sweep на текущем баре
-        # Найти локальные экстремумы (исключая текущий бар)
-        recent_high = df['high'].iloc[-self.lookback_bars-1:-1].max()
-        recent_low = df['low'].iloc[-self.lookback_bars-1:-1].min()
+        # Используем fractal pattern detection для swing highs/lows
+        swing_high = SwingLevels.find_swing_high(df, lookback=5, position=-2)
+        swing_low = SwingLevels.find_swing_low(df, lookback=5, position=-2)
+        
+        if swing_high is None or swing_low is None:
+            strategy_logger.debug(f"    ❌ Не найдены swing levels (swing_high={swing_high}, swing_low={swing_low})")
+            return None
+        
+        recent_high = swing_high
+        recent_low = swing_low
         
         # --- ПРОВЕРКА SWEEP UP (прокол вверх) ---
         sweep_up_atr = current_high - recent_high

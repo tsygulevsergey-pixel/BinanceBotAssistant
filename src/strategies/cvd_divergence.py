@@ -62,8 +62,17 @@ class CVDDivergenceStrategy(BaseStrategy):
             sell_volume = df['volume'] - buy_volume
             cvd_series = (buy_volume - sell_volume).cumsum()
         
-        # Поиск дивергенции
-        divergence_type = self._detect_divergence(df, cvd_series)
+        # Regime фильтр: дивергенции лучше работают в RANGE/SQUEEZE, хуже в TREND
+        regime_score_multiplier = 1.0
+        if regime == 'TREND':
+            strategy_logger.debug(f"    ⚠️ Режим TREND - дивергенции менее надежны, уменьшаем score")
+            regime_score_multiplier = 0.5  # Снижаем score в 2 раза
+        elif regime in ['RANGE', 'SQUEEZE', 'CHOP']:
+            strategy_logger.debug(f"    ✅ Режим {regime} - оптимален для дивергенций")
+            regime_score_multiplier = 1.0
+        
+        # Поиск дивергенции с volume проверкой
+        divergence_type = self._detect_divergence(df, cvd_series, regime_score_multiplier)
         
         if divergence_type is None:
             strategy_logger.debug(f"    ❌ Нет дивергенции или подтверждения CVD по цене")
@@ -73,39 +82,44 @@ class CVDDivergenceStrategy(BaseStrategy):
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
         
-        # Генерация сигнала
+        # Генерация сигнала с учетом regime score multiplier
         if divergence_type == 'bearish':
             # Медвежья дивергенция: цена вверх, CVD вниз → short
             return self._create_divergence_signal(
-                symbol, df, 'short', current_atr, indicators
+                symbol, df, 'short', current_atr, indicators, regime_score_multiplier
             )
         elif divergence_type == 'bullish':
             # Бычья дивергенция: цена вниз, CVD вверх → long
             return self._create_divergence_signal(
-                symbol, df, 'long', current_atr, indicators
+                symbol, df, 'long', current_atr, indicators, regime_score_multiplier
             )
         elif divergence_type == 'confirmation_long':
             # Подтверждение пробоя вверх
             return self._create_confirmation_signal(
-                symbol, df, 'long', current_atr, indicators
+                symbol, df, 'long', current_atr, indicators, regime_score_multiplier
             )
         elif divergence_type == 'confirmation_short':
             # Подтверждение пробоя вниз
             return self._create_confirmation_signal(
-                symbol, df, 'short', current_atr, indicators
+                symbol, df, 'short', current_atr, indicators, regime_score_multiplier
             )
         
         strategy_logger.debug(f"    ❌ Неопределенный тип CVD сигнала")
         return None
     
-    def _detect_divergence(self, df: pd.DataFrame, cvd_series: pd.Series) -> Optional[str]:
+    def _detect_divergence(self, df: pd.DataFrame, cvd_series: pd.Series, regime_score_multiplier: float = 1.0) -> Optional[str]:
         """
         Определяет дивергенции и подтверждения по CVD
         Правильная логика: сравнивает ДВА последних пика/минимума
+        Добавлена volume проверка в точках дивергенции
         """
         # Последние N баров для анализа
         price_tail = df['close'].tail(self.lookback_bars).reset_index(drop=True)
         cvd_tail = cvd_series.tail(self.lookback_bars).reset_index(drop=True)
+        volume_tail = df['volume'].tail(self.lookback_bars).reset_index(drop=True)
+        
+        # Медиана объема для фильтрации
+        median_volume = volume_tail.median()
         
         # Находим локальные максимумы и минимумы (с минимальным расстоянием 3 бара)
         price_highs = self._find_local_peaks(price_tail, order=3)
@@ -122,6 +136,12 @@ class CVDDivergenceStrategy(BaseStrategy):
             last_price_high = price_tail[last_price_high_idx]
             prev_price_high = price_tail[prev_price_high_idx]
             
+            # Volume проверка в точке дивергенции
+            last_volume = volume_tail[last_price_high_idx]
+            if last_volume < median_volume:
+                strategy_logger.debug(f"    ⚠️ Объем в точке дивергенции низкий: {last_volume:.0f} < median {median_volume:.0f}")
+                # Не возвращаем None, но снижаем вероятность прохождения threshold
+            
             # Проверяем что цена делает Higher High
             if last_price_high > prev_price_high:
                 # Получаем CVD в этих точках
@@ -131,9 +151,12 @@ class CVDDivergenceStrategy(BaseStrategy):
                 # Проверяем что CVD делает Lower High (дивергенция!)
                 if last_cvd_at_price_high < prev_cvd_at_price_high:
                     cvd_drop = (prev_cvd_at_price_high - last_cvd_at_price_high) / (abs(prev_cvd_at_price_high) + 1e-8)
-                    if cvd_drop > self.divergence_threshold:
-                        strategy_logger.debug(f"    ✅ Медвежья дивергенция: HH цены {prev_price_high:.4f} → {last_price_high:.4f}, но LH CVD {prev_cvd_at_price_high:.2f} → {last_cvd_at_price_high:.2f}")
+                    if cvd_drop > self.divergence_threshold and last_volume >= median_volume:
+                        strategy_logger.debug(f"    ✅ Медвежья дивергенция: HH цены {prev_price_high:.4f} → {last_price_high:.4f}, но LH CVD {prev_cvd_at_price_high:.2f} → {last_cvd_at_price_high:.2f}, volume {last_volume:.0f} >= median")
                         return 'bearish'
+                    elif cvd_drop > self.divergence_threshold:
+                        strategy_logger.debug(f"    ❌ Медвежья дивергенция найдена, но volume низкий: {last_volume:.0f} < {median_volume:.0f}")
+                        return None
         
         # БЫЧЬЯ ДИВЕРГЕНЦИЯ: цена делает Lower Low, но CVD делает Higher Low
         if len(price_lows) >= 2:
@@ -144,6 +167,11 @@ class CVDDivergenceStrategy(BaseStrategy):
             last_price_low = price_tail[last_price_low_idx]
             prev_price_low = price_tail[prev_price_low_idx]
             
+            # Volume проверка в точке дивергенции
+            last_volume = volume_tail[last_price_low_idx]
+            if last_volume < median_volume:
+                strategy_logger.debug(f"    ⚠️ Объем в точке дивергенции низкий: {last_volume:.0f} < median {median_volume:.0f}")
+            
             # Проверяем что цена делает Lower Low
             if last_price_low < prev_price_low:
                 # Получаем CVD в этих точках
@@ -153,9 +181,12 @@ class CVDDivergenceStrategy(BaseStrategy):
                 # Проверяем что CVD делает Higher Low (дивергенция!)
                 if last_cvd_at_price_low > prev_cvd_at_price_low:
                     cvd_rise = (last_cvd_at_price_low - prev_cvd_at_price_low) / (abs(prev_cvd_at_price_low) + 1e-8)
-                    if cvd_rise > self.divergence_threshold:
-                        strategy_logger.debug(f"    ✅ Бычья дивергенция: LL цены {prev_price_low:.4f} → {last_price_low:.4f}, но HL CVD {prev_cvd_at_price_low:.2f} → {last_cvd_at_price_low:.2f}")
+                    if cvd_rise > self.divergence_threshold and last_volume >= median_volume:
+                        strategy_logger.debug(f"    ✅ Бычья дивергенция: LL цены {prev_price_low:.4f} → {last_price_low:.4f}, но HL CVD {prev_cvd_at_price_low:.2f} → {last_cvd_at_price_low:.2f}, volume {last_volume:.0f} >= median")
                         return 'bullish'
+                    elif cvd_rise > self.divergence_threshold:
+                        strategy_logger.debug(f"    ❌ Бычья дивергенция найдена, но volume низкий: {last_volume:.0f} < {median_volume:.0f}")
+                        return None
         
         # ПОДТВЕРЖДЕНИЕ ПРОБОЯ: CVD в направлении движения
         # Если цена пробивает вверх И CVD также растет
@@ -198,7 +229,7 @@ class CVDDivergenceStrategy(BaseStrategy):
         return troughs
     
     def _create_divergence_signal(self, symbol: str, df: pd.DataFrame, direction: str,
-                                  atr: float, indicators: Dict) -> Signal:
+                                  atr: float, indicators: Dict, regime_score_multiplier: float = 1.0) -> Signal:
         """
         Создать сигнал по дивергенции (mean reversion)
         """
@@ -222,10 +253,11 @@ class CVDDivergenceStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                base_score=2.5,
+                base_score=2.5 * regime_score_multiplier,
                 metadata={
                     'type': 'cvd_divergence',
-                    'divergence': 'bullish'
+                    'divergence': 'bullish',
+                    'regime_multiplier': regime_score_multiplier
                 }
             )
         else:
@@ -244,15 +276,16 @@ class CVDDivergenceStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                base_score=2.5,
+                base_score=2.5 * regime_score_multiplier,
                 metadata={
                     'type': 'cvd_divergence',
-                    'divergence': 'bearish'
+                    'divergence': 'bearish',
+                    'regime_multiplier': regime_score_multiplier
                 }
             )
     
     def _create_confirmation_signal(self, symbol: str, df: pd.DataFrame, direction: str,
-                                   atr: float, indicators: Dict) -> Signal:
+                                   atr: float, indicators: Dict, regime_score_multiplier: float = 1.0) -> Signal:
         """
         Создать сигнал подтверждения пробоя (breakout confirmation)
         """
@@ -274,10 +307,11 @@ class CVDDivergenceStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                base_score=2.0,
+                base_score=2.0 * regime_score_multiplier,
                 metadata={
                     'type': 'cvd_confirmation',
-                    'confirmation': 'breakout_up'
+                    'confirmation': 'breakout_up',
+                    'regime_multiplier': regime_score_multiplier
                 }
             )
         else:
@@ -296,9 +330,10 @@ class CVDDivergenceStrategy(BaseStrategy):
                 stop_loss=stop_loss,
                 take_profit_1=take_profit_1,
                 take_profit_2=take_profit_2,
-                base_score=2.0,
+                base_score=2.0 * regime_score_multiplier,
                 metadata={
                     'type': 'cvd_confirmation',
-                    'confirmation': 'breakout_down'
+                    'confirmation': 'breakout_down',
+                    'regime_multiplier': regime_score_multiplier
                 }
             )

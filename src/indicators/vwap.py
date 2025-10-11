@@ -68,7 +68,7 @@ class VWAPCalculator:
 def calculate_daily_vwap(df: pd.DataFrame, tz: str = 'Europe/Kiev') -> tuple:
     """Calculate daily VWAP with bands"""
     vwap = VWAPCalculator.calculate_daily_vwap(df, tz)
-    upper, lower = VWAPCalculator.calculate_vwap_bands(df, vwap, std_mult=1.0)
+    upper, lower = VWAPCalculator.calculate_vwap_bands(df, vwap, std_mult=2.0)
     return vwap, upper, lower
 
 def calculate_anchored_vwap(df: pd.DataFrame, anchor_index: int) -> pd.Series:

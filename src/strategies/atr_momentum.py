@@ -4,7 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
-from src.indicators.technical import calculate_atr, calculate_ema
+from src.indicators.technical import calculate_atr, calculate_ema, calculate_adx
 
 
 class ATRMomentumStrategy(BaseStrategy):
@@ -62,12 +62,24 @@ class ATRMomentumStrategy(BaseStrategy):
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         ema9 = calculate_ema(df['close'], period=9)
         ema20 = calculate_ema(df['close'], period=20)
+        ema200 = calculate_ema(df['close'], period=200)
+        adx = calculate_adx(df['high'], df['low'], df['close'], period=14)
+        
+        # Rolling median ATR для expansion сравнения
+        atr_median = atr.rolling(window=20).median().iloc[-1]
         
         # Текущие и предыдущие значения
         current_close = df['close'].iloc[-1]
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         current_atr = atr.iloc[-1]
+        current_ema200 = ema200.iloc[-1] if ema200 is not None and not pd.isna(ema200.iloc[-1]) else current_close
+        current_adx = adx.iloc[-1] if adx is not None and not pd.isna(adx.iloc[-1]) else 0
+        
+        # ADX фильтр: ADX > 25 для momentum
+        if current_adx <= 25:
+            strategy_logger.debug(f"    ❌ ADX слабый для momentum: {current_adx:.1f} <= 25")
+            return None
         
         # Найти импульс-бар (проверяем последние 5 баров)
         impulse_bar_idx = None
@@ -76,9 +88,10 @@ class ATRMomentumStrategy(BaseStrategy):
             bar_close = df['close'].iloc[i]
             bar_low = df['low'].iloc[i]
             bar_high = df['high'].iloc[i]
+            bar_atr_median = atr.rolling(window=20).median().iloc[i]
             
-            # Проверка: бар ≥1.4× ATR
-            if bar_range >= self.impulse_atr * atr.iloc[i]:
+            # Проверка: бар ≥1.4× median ATR (не current ATR)
+            if bar_range >= self.impulse_atr * bar_atr_median:
                 # Проверка: close в верхн.20% (для LONG)
                 bar_position = (bar_close - bar_low) / bar_range if bar_range > 0 else 0
                 if bar_position >= 0.80:  # top 20% = > 80% от low
@@ -86,7 +99,7 @@ class ATRMomentumStrategy(BaseStrategy):
                     break
         
         if impulse_bar_idx is None:
-            strategy_logger.debug(f"    ❌ Нет импульс-бара ≥{self.impulse_atr}× ATR с close в верхн.20%")
+            strategy_logger.debug(f"    ❌ Нет импульс-бара ≥{self.impulse_atr}× median ATR с close в верхн.20%")
             return None
         
         impulse_high = df['high'].iloc[impulse_bar_idx]
@@ -165,6 +178,9 @@ class ATRMomentumStrategy(BaseStrategy):
                         'impulse_high': float(impulse_high),
                         'impulse_low': float(impulse_low),
                         'impulse_bar_index': int(impulse_bar_idx),
+                        'ema200': float(current_ema200),
+                        'adx': float(current_adx),
+                        'atr_median': float(atr_median),
                         'distance_to_resistance_atr': float(distance_to_resistance),
                         'entry_type': 'breakout',
                         'confirmations': confirmations,
@@ -229,6 +245,9 @@ class ATRMomentumStrategy(BaseStrategy):
                         'impulse_low': float(impulse_low),
                         'ema9': float(ema9_val),
                         'ema20': float(ema20_val),
+                        'ema200': float(current_ema200),
+                        'adx': float(current_adx),
+                        'atr_median': float(atr_median),
                         'entry_type': 'pullback',
                         'confirmations': confirmations,
                         'cvd_change': float(cvd_change) if cvd_change is not None else None,

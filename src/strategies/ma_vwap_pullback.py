@@ -5,6 +5,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_ema, calculate_atr, calculate_adx
+from src.indicators.vwap import calculate_daily_vwap
 
 
 class MAVWAPPullbackStrategy(BaseStrategy):
@@ -54,13 +55,15 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         ema50 = calculate_ema(df['close'], period=50)
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         adx = calculate_adx(df['high'], df['low'], df['close'], period=14)
+        vwap, vwap_upper, vwap_lower = calculate_daily_vwap(df)
         
         # Текущие значения
         current_close = df['close'].iloc[-1]
         current_ema20 = ema20.iloc[-1]
         current_ema50 = ema50.iloc[-1]
         current_atr = atr.iloc[-1]
-        current_adx = adx.iloc[-1]
+        current_adx = adx.iloc[-1] if adx is not None and not pd.isna(adx.iloc[-1]) else 0
+        current_vwap = vwap.iloc[-1] if vwap is not None and not pd.isna(vwap.iloc[-1]) else current_close
         
         # Проверка H4 тренда (ADX>20)
         if current_adx <= self.adx_threshold:
@@ -80,14 +83,32 @@ class MAVWAPPullbackStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
             return None
         
-        # Зона отката: EMA20 ± 0.3 ATR
+        # Зона отката: EMA20 ± 0.3 ATR или VWAP ± 0.3 ATR
         pullback_zone_upper = current_ema20 + self.retest_atr * current_atr
         pullback_zone_lower = current_ema20 - self.retest_atr * current_atr
+        vwap_zone_upper = current_vwap + self.retest_atr * current_atr
+        vwap_zone_lower = current_vwap - self.retest_atr * current_atr
+        
+        # Fibonacci retracement расчет
+        recent_swing_high = df['high'].tail(50).max()
+        recent_swing_low = df['low'].tail(50).min()
+        fib_range = recent_swing_high - recent_swing_low
+        fib_382 = recent_swing_high - (fib_range * 0.382)
+        fib_618 = recent_swing_high - (fib_range * 0.618)
         
         # LONG pullback (восходящий тренд)
         if ema50_slope > 0 and bias != 'Bearish':
-            # Проверка: находимся ли в зоне отката
-            if pullback_zone_lower <= current_close <= pullback_zone_upper:
+            # Проверка Fibonacci: pullback в зоне 38.2%-61.8%
+            in_fib_zone = fib_618 <= current_close <= fib_382
+            if not in_fib_zone:
+                strategy_logger.debug(f"    ❌ LONG: цена не в Фибо зоне 38.2%-61.8%: {current_close:.2f} вне [{fib_618:.2f}, {fib_382:.2f}]")
+                return None
+            
+            # Проверка: находимся ли в зоне отката (EMA20 или VWAP)
+            in_ema_zone = pullback_zone_lower <= current_close <= pullback_zone_upper
+            in_vwap_zone = vwap_zone_lower <= current_close <= vwap_zone_upper
+            
+            if in_ema_zone or in_vwap_zone:
                 # Проверка: свеча закрылась над EMA20 (подтверждение)
                 if current_close > current_ema20:
                     
@@ -134,10 +155,16 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                         metadata={
                             'ema20': float(current_ema20),
                             'ema50': float(current_ema50),
+                            'vwap': float(current_vwap),
                             'adx': float(current_adx),
                             'swing_low': float(swing_low),
+                            'fib_382': float(fib_382),
+                            'fib_618': float(fib_618),
+                            'in_fib_zone': in_fib_zone,
                             'pullback_zone_upper': float(pullback_zone_upper),
                             'pullback_zone_lower': float(pullback_zone_lower),
+                            'in_ema_zone': in_ema_zone,
+                            'in_vwap_zone': in_vwap_zone,
                             'confirmations': confirmations,
                             'cvd_change': float(cvd_change) if cvd_change is not None else None,
                             'doi_pct': float(doi_pct) if doi_pct is not None else None
@@ -147,7 +174,16 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         
         # SHORT pullback (нисходящий тренд)
         elif ema50_slope < 0 and bias != 'Bullish':
-            if pullback_zone_lower <= current_close <= pullback_zone_upper:
+            # Проверка Fibonacci: pullback в зоне 38.2%-61.8% (для SHORT используем те же уровни)
+            in_fib_zone = fib_618 <= current_close <= fib_382
+            if not in_fib_zone:
+                strategy_logger.debug(f"    ❌ SHORT: цена не в Фибо зоне 38.2%-61.8%: {current_close:.2f} вне [{fib_618:.2f}, {fib_382:.2f}]")
+                return None
+            
+            in_ema_zone = pullback_zone_lower <= current_close <= pullback_zone_upper
+            in_vwap_zone = vwap_zone_lower <= current_close <= vwap_zone_upper
+            
+            if in_ema_zone or in_vwap_zone:
                 # Проверка: свеча закрылась под EMA20
                 if current_close < current_ema20:
                     
@@ -194,10 +230,16 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                         metadata={
                             'ema20': float(current_ema20),
                             'ema50': float(current_ema50),
+                            'vwap': float(current_vwap),
                             'adx': float(current_adx),
                             'swing_high': float(swing_high),
+                            'fib_382': float(fib_382),
+                            'fib_618': float(fib_618),
+                            'in_fib_zone': in_fib_zone,
                             'pullback_zone_upper': float(pullback_zone_upper),
                             'pullback_zone_lower': float(pullback_zone_lower),
+                            'in_ema_zone': in_ema_zone,
+                            'in_vwap_zone': in_vwap_zone,
                             'confirmations': confirmations,
                             'cvd_change': float(cvd_change) if cvd_change is not None else None,
                             'doi_pct': float(doi_pct) if doi_pct is not None else None

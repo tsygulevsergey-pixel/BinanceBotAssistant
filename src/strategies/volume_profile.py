@@ -134,13 +134,26 @@ class VolumeProfileStrategy(BaseStrategy):
     def _detect_rejection_or_acceptance(self, symbol: str, df: pd.DataFrame, vah: float, val: float, 
                                         poc: float, atr: float, indicators: Dict) -> Optional[str]:
         """
-        Определяет rejection vs acceptance с POC shift detection
+        Определяет rejection vs acceptance с POC shift detection и volume spike проверкой
         """
         current_close = df['close'].iloc[-1]
         prev_close = df['close'].iloc[-2]
+        current_volume = df['volume'].iloc[-1]
+        
+        # Volume spike проверка: медиана за последние 50 баров
+        median_volume = df['volume'].tail(50).median()
+        volume_ratio = current_volume / median_volume if median_volume > 0 else 0
+        has_volume_spike = volume_ratio >= 1.5
         
         # CVD из своего timeframe, fallback к верхнеуровневому или 0
         cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
+        
+        # Безопасное извлечение скаляра из CVD (если Series)
+        if isinstance(cvd, pd.Series):
+            cvd_value = cvd.iloc[-1] if len(cvd) > 0 else 0
+        else:
+            cvd_value = cvd
+        
         depth_imbalance = indicators.get('depth_imbalance', 1.0)
         doi_pct = indicators.get('doi_pct', 0)
         
@@ -152,6 +165,9 @@ class VolumeProfileStrategy(BaseStrategy):
         poc_shift = self._check_poc_shift(symbol, poc, price_range)
         
         # --- ПРОВЕРКА ACCEPTANCE ---
+        # Acceptance требует: volume > 1.5× median + POC shift
+        # Без volume spike = только rejection signals
+        
         # Acceptance выше VAH
         if current_close > vah:
             closes_above = sum(c > vah for c in recent_closes)
@@ -159,10 +175,15 @@ class VolumeProfileStrategy(BaseStrategy):
             
             # ≥2 close за VA ИЛИ ≥0.25 ATR
             if closes_above >= self.min_closes_outside or distance_above >= self.atr_threshold * atr:
-                # Подтверждения: CVD/OI по направлению (вверх) + POC shift вверх
-                if (cvd > 0 or doi_pct > 1.0) and (poc_shift['shifted'] and poc_shift['direction'] == 'up'):
-                    strategy_logger.debug(f"    ✅ Acceptance LONG: POC shift {poc_shift['direction']} {poc_shift['shift_pct']:.1%}")
+                # Проверка volume spike
+                if not has_volume_spike:
+                    strategy_logger.debug(f"    ❌ Acceptance LONG отклонен: нет volume spike (volume {volume_ratio:.2f}x < 1.5x median)")
+                    # Без volume spike - только rejection signals, не acceptance
+                elif (cvd_value > 0 or doi_pct > 1.0) and (poc_shift['shifted'] and poc_shift['direction'] == 'up'):
+                    strategy_logger.debug(f"    ✅ Acceptance LONG: POC shift {poc_shift['direction']} {poc_shift['shift_pct']:.1%}, volume spike {volume_ratio:.2f}x")
                     return 'acceptance_long'
+                else:
+                    strategy_logger.debug(f"    ❌ Acceptance LONG: есть volume spike ({volume_ratio:.2f}x), но нет POC shift или CVD/OI подтверждения")
         
         # Acceptance ниже VAL
         if current_close < val:
@@ -170,10 +191,15 @@ class VolumeProfileStrategy(BaseStrategy):
             distance_below = val - current_close
             
             if closes_below >= self.min_closes_outside or distance_below >= self.atr_threshold * atr:
-                # Подтверждения: CVD/OI вниз + POC shift вниз
-                if (cvd < 0 or doi_pct < -1.0) and (poc_shift['shifted'] and poc_shift['direction'] == 'down'):
-                    strategy_logger.debug(f"    ✅ Acceptance SHORT: POC shift {poc_shift['direction']} {poc_shift['shift_pct']:.1%}")
+                # Проверка volume spike
+                if not has_volume_spike:
+                    strategy_logger.debug(f"    ❌ Acceptance SHORT отклонен: нет volume spike (volume {volume_ratio:.2f}x < 1.5x median)")
+                    # Без volume spike - только rejection signals
+                elif (cvd_value < 0 or doi_pct < -1.0) and (poc_shift['shifted'] and poc_shift['direction'] == 'down'):
+                    strategy_logger.debug(f"    ✅ Acceptance SHORT: POC shift {poc_shift['direction']} {poc_shift['shift_pct']:.1%}, volume spike {volume_ratio:.2f}x")
                     return 'acceptance_short'
+                else:
+                    strategy_logger.debug(f"    ❌ Acceptance SHORT: есть volume spike ({volume_ratio:.2f}x), но нет POC shift или CVD/OI подтверждения")
         
         # --- ПРОВЕРКА REJECTION с RECLAIM механизмом ---
         # Rejection от VAH: RECLAIM - цена была выше VAH, вернулась в value area и удержалась
@@ -187,12 +213,12 @@ class VolumeProfileStrategy(BaseStrategy):
         
         if vah_reclaim:
             # CVD flip (было покупки, стали продажи)
-            if cvd < 0:
+            if cvd_value < 0:
                 # Imbalance flip (depth показывает давление вниз)
                 if depth_imbalance > 1.1:  # Больше ask = давление продаж
                     # OI не растёт сильно + POC НЕ сдвигается (rejection признак)
                     if doi_pct < 2.0 and not poc_shift['shifted']:
-                        strategy_logger.debug(f"    ✅ Rejection LONG: POC не сдвинулся (shift {poc_shift['shift_pct']:.1%})")
+                        strategy_logger.debug(f"    ✅ Rejection LONG: POC не сдвинулся (shift {poc_shift['shift_pct']:.1%}), volume {volume_ratio:.2f}x")
                         return 'rejection_long'  # Rejection вниз = fade short (но вход long при откате)
         
         # Rejection от VAL: RECLAIM - цена была ниже VAL, вернулась в value area и удержалась
@@ -206,12 +232,12 @@ class VolumeProfileStrategy(BaseStrategy):
         
         if val_reclaim:
             # CVD flip вверх
-            if cvd > 0:
+            if cvd_value > 0:
                 # Imbalance flip вверх
                 if depth_imbalance < 0.9:  # Больше bid = давление покупок
                     # OI не растёт + POC НЕ сдвигается
                     if doi_pct < 2.0 and not poc_shift['shifted']:
-                        strategy_logger.debug(f"    ✅ Rejection SHORT: POC не сдвинулся (shift {poc_shift['shift_pct']:.1%})")
+                        strategy_logger.debug(f"    ✅ Rejection SHORT: POC не сдвинулся (shift {poc_shift['shift_pct']:.1%}), volume {volume_ratio:.2f}x")
                         return 'rejection_short'  # Rejection вверх = fade long
         
         return None

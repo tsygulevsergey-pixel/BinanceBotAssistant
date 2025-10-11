@@ -4,7 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
-from src.indicators.technical import calculate_atr
+from src.indicators.technical import calculate_atr, calculate_adx
 
 
 class BreakRetestStrategy(BaseStrategy):
@@ -92,8 +92,8 @@ class BreakRetestStrategy(BaseStrategy):
             'swing_low_idx': swing_low_idx
         }
     
-    def _find_recent_breakout(self, df: pd.DataFrame, atr: pd.Series, vwap: pd.Series) -> Optional[Dict]:
-        """Найти недавний пробой с использованием swing levels"""
+    def _find_recent_breakout(self, df: pd.DataFrame, atr: pd.Series, vwap: pd.Series, adx: pd.Series) -> Optional[Dict]:
+        """Найти недавний пробой с использованием swing levels и ADX фильтром"""
         df_len = len(df)
         
         for i in range(-self.breakout_lookback, -1):  # До -1, чтобы не включать текущий бар
@@ -109,6 +109,7 @@ class BreakRetestStrategy(BaseStrategy):
             bar_volume = df['volume'].iloc[i]
             bar_atr = atr.iloc[i]
             bar_vwap = vwap.iloc[i] if vwap is not None and i < len(vwap) else None
+            bar_adx = adx.iloc[i]
             
             # Найти swing high/low перед этим баром (передаем ПОЛОЖИТЕЛЬНЫЙ индекс!)
             swings = self._find_swing_high_low(df, pos_idx, lookback=20, buffer=3)
@@ -122,17 +123,24 @@ class BreakRetestStrategy(BaseStrategy):
             avg_vol = df['volume'].iloc[i-20:i].mean()
             vol_ratio = bar_volume / avg_vol if avg_vol > 0 else 0
             
+            # ADX фильтр: ADX > 20 для валидного breakout
+            if bar_adx < 20:
+                strategy_logger.debug(f"    ⚠️ Пропуск пробоя на баре {i}: ADX слишком слабый ({bar_adx:.1f} < 20)")
+                continue
+            
             # Пробой вверх (через swing high)
             if (swings['swing_high'] is not None and 
                 bar_close > swings['swing_high'] and 
                 (bar_close - swings['swing_high']) >= self.breakout_atr * bar_atr and
                 vol_ratio >= self.volume_threshold):
+                strategy_logger.debug(f"    ✅ Пробой LONG найден на баре {i}: ADX={bar_adx:.1f}, volume {vol_ratio:.1f}x")
                 return {
                     'direction': 'LONG',
                     'level': swings['swing_high'],
                     'bar_index': i,
                     'atr': bar_atr,
-                    'vwap': bar_vwap
+                    'vwap': bar_vwap,
+                    'adx': bar_adx
                 }
             
             # Пробой вниз (через swing low)
@@ -140,12 +148,14 @@ class BreakRetestStrategy(BaseStrategy):
                   bar_close < swings['swing_low'] and 
                   (swings['swing_low'] - bar_close) >= self.breakout_atr * bar_atr and
                   vol_ratio >= self.volume_threshold):
+                strategy_logger.debug(f"    ✅ Пробой SHORT найден на баре {i}: ADX={bar_adx:.1f}, volume {vol_ratio:.1f}x")
                 return {
                     'direction': 'SHORT',
                     'level': swings['swing_low'],
                     'bar_index': i,
                     'atr': bar_atr,
-                    'vwap': bar_vwap
+                    'vwap': bar_vwap,
+                    'adx': bar_adx
                 }
         
         return None
@@ -158,18 +168,24 @@ class BreakRetestStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 50")
             return None
         
-        # Рассчитать ATR и VWAP
+        # Рассчитать ATR, ADX и VWAP
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
+        
+        adx = calculate_adx(df['high'], df['low'], df['close'], period=14)
+        current_adx = adx.iloc[-1]
         
         # Получить VWAP из indicators или рассчитать
         vwap = indicators.get('vwap', None)
         
-        # Найти недавний пробой
-        breakout = self._find_recent_breakout(df, atr, vwap)
+        # Найти недавний пробой с ADX фильтром
+        breakout = self._find_recent_breakout(df, atr, vwap, adx)
         if breakout is None:
-            strategy_logger.debug(f"    ❌ Нет недавнего пробоя swing level с объемом >{self.volume_threshold}x и расстоянием ≥{self.breakout_atr} ATR")
+            strategy_logger.debug(f"    ❌ Нет недавнего пробоя swing level с объемом >{self.volume_threshold}x, расстоянием ≥{self.breakout_atr} ATR и ADX > 20")
             return None
+        
+        # Логирование найденного пробоя
+        strategy_logger.debug(f"    📊 Пробой {breakout['direction']} с ADX={breakout.get('adx', 0):.1f}, уровень {breakout['level']:.4f}")
         
         # Текущие значения
         current_close = df['close'].iloc[-1]

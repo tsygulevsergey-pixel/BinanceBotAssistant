@@ -112,7 +112,7 @@ class VWAPMeanReversionStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Нет compression: текущий range {recent_range:.2f} >= 70% от предыдущего ({prev_range * 0.7:.2f})")
             return None
         
-        # Рассчитать VWAP и ленты
+        # Рассчитать VWAP и ленты (±2σ)
         vwap, vwap_upper, vwap_lower = calculate_daily_vwap(df)
         
         # Рассчитать Volume Profile для VAH/VAL/POC
@@ -128,11 +128,21 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         current_vwap = vwap.iloc[-1]
         current_upper = vwap_upper.iloc[-1]
         current_lower = vwap_lower.iloc[-1]
+        current_volume = df['volume'].iloc[-1]
         
         # ATR для стопов
         from src.indicators.technical import calculate_atr
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
+        
+        # Рассчитать стандартное отклонение VWAP
+        typical_price = (df['high'] + df['low'] + df['close']) / 3
+        variance = ((typical_price - vwap) ** 2 * df['volume']).cumsum() / df['volume'].cumsum()
+        std_dev = np.sqrt(variance.iloc[-1])
+        
+        # Volume confirmation: median volume за последние 50 баров
+        median_volume = df['volume'].tail(50).median()
+        volume_ratio = current_volume / median_volume if median_volume > 0 else 0
         
         # H4 swing для confluence (получаем из indicators - реальные H4 данные)
         h4_swing_low = indicators.get('h4_swing_low')
@@ -146,6 +156,17 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         # CONFLUENCE проверка: VAL должен совпадать с H4 swing low
         confluence_zone = abs(val - h4_swing_low) <= 0.3 * current_atr
         if confluence_zone:
+            
+            # Проверка отклонения >2σ перед входом
+            distance_from_vwap = abs(current_close - current_vwap)
+            if distance_from_vwap <= 2.0 * std_dev:
+                strategy_logger.debug(f"    ❌ Отклонение от VWAP недостаточное: {distance_from_vwap:.4f} <= 2σ ({2.0 * std_dev:.4f})")
+                return None
+            
+            # Volume confirmation: volume > 1.5× median
+            if volume_ratio < 1.5:
+                strategy_logger.debug(f"    ❌ Объем недостаточный: {volume_ratio:.2f}x < 1.5x median")
+                return None
             
             # RECLAIM механизм: проверка что цена вернулась в value area и удержалась там
             # Используем check_value_area_reclaim для VAL с удержанием self.reclaim_bars (по умолчанию 2 бара)
@@ -168,6 +189,8 @@ class VWAPMeanReversionStrategy(BaseStrategy):
             
             # Требуется хотя бы одно подтверждение reclaim
             if reclaim_confirmed or vwap_reclaim:
+                
+                strategy_logger.debug(f"    ✅ LONG: отклонение {distance_from_vwap:.4f} > 2σ ({2.0 * std_dev:.4f}), volume {volume_ratio:.2f}x > 1.5x")
                 
                 entry = current_close
                 stop_loss = current_low - 0.25 * current_atr
@@ -207,6 +230,17 @@ class VWAPMeanReversionStrategy(BaseStrategy):
         confluence_zone = abs(vah - h4_swing_high) <= 0.3 * current_atr
         if confluence_zone:
             
+            # Проверка отклонения >2σ перед входом
+            distance_from_vwap = abs(current_close - current_vwap)
+            if distance_from_vwap <= 2.0 * std_dev:
+                strategy_logger.debug(f"    ❌ Отклонение от VWAP недостаточное: {distance_from_vwap:.4f} <= 2σ ({2.0 * std_dev:.4f})")
+                return None
+            
+            # Volume confirmation: volume > 1.5× median
+            if volume_ratio < 1.5:
+                strategy_logger.debug(f"    ❌ Объем недостаточный: {volume_ratio:.2f}x < 1.5x median")
+                return None
+            
             # RECLAIM механизм: проверка что цена вернулась в value area и удержалась там
             reclaim_confirmed = check_value_area_reclaim(
                 df=df,
@@ -227,6 +261,8 @@ class VWAPMeanReversionStrategy(BaseStrategy):
             
             # Требуется хотя бы одно подтверждение reclaim
             if reclaim_confirmed or vwap_reclaim:
+                
+                strategy_logger.debug(f"    ✅ SHORT: отклонение {distance_from_vwap:.4f} > 2σ ({2.0 * std_dev:.4f}), volume {volume_ratio:.2f}x > 1.5x")
                 
                 entry = current_close
                 stop_loss = current_high + 0.25 * current_atr

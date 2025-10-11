@@ -146,3 +146,10 @@ def calculate_stochastic(high: pd.Series, low: pd.Series, close: pd.Series,
     d = stoch[d_col] if d_col in stoch.columns else pd.Series(index=high.index, dtype=float)
     
     return k, d
+
+def calculate_keltner_channels(close: pd.Series, atr: pd.Series, period: int = 20, atr_mult: float = 1.5) -> Tuple[pd.Series, pd.Series, pd.Series]:
+    """Calculate Keltner Channels"""
+    middle = close.rolling(window=period).mean()
+    upper = middle + (atr * atr_mult)
+    lower = middle - (atr * atr_mult)
+    return upper, middle, lower

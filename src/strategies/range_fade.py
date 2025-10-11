@@ -4,7 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
-from src.indicators.technical import calculate_atr
+from src.indicators.technical import calculate_atr, calculate_rsi
 from src.utils.reclaim_checker import check_range_reclaim
 
 
@@ -161,20 +161,69 @@ class RangeFadeStrategy(BaseStrategy):
         resistance = range_bounds['resistance']
         support = range_bounds['support']
         
-        # ATR для стопов
+        # ATR для стопов и RSI для divergence
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
+        rsi = calculate_rsi(df['close'], period=14)
         current_atr = atr.iloc[-1]
         
         # Текущие значения
         current_close = df['close'].iloc[-1]
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
+        current_rsi = rsi.iloc[-1] if rsi is not None and not pd.isna(rsi.iloc[-1]) else 50
+        
+        # Вспомогательная функция для RSI divergence detection
+        def detect_rsi_divergence(df, rsi, lookback=10):
+            """Обнаружить RSI дивергенцию"""
+            if len(df) < lookback:
+                return None, None
+            
+            # Для LONG: price makes new low, RSI не делает new low (bullish divergence)
+            recent_price_low = df['low'].tail(lookback).min()
+            recent_rsi_low = rsi.tail(lookback).min()
+            current_price = df['close'].iloc[-1]
+            current_rsi_val = rsi.iloc[-1]
+            
+            # Bullish divergence: цена делает lower low, RSI делает higher low
+            price_idx_min = df['low'].tail(lookback).idxmin()
+            rsi_idx_min = rsi.tail(lookback).idxmin()
+            
+            bullish_div = False
+            if price_idx_min != rsi_idx_min:
+                # Проверяем: есть ли второй минимум цены ниже первого, но RSI выше
+                price_lows = df['low'].tail(lookback).nsmallest(2)
+                rsi_at_lows = rsi.loc[price_lows.index]
+                if len(price_lows) >= 2 and price_lows.iloc[0] < price_lows.iloc[1]:
+                    if rsi_at_lows.iloc[0] > rsi_at_lows.iloc[1]:
+                        bullish_div = True
+            
+            # Для SHORT: price makes new high, RSI не делает new high (bearish divergence)
+            recent_price_high = df['high'].tail(lookback).max()
+            recent_rsi_high = rsi.tail(lookback).max()
+            
+            price_idx_max = df['high'].tail(lookback).idxmax()
+            rsi_idx_max = rsi.tail(lookback).idxmax()
+            
+            bearish_div = False
+            if price_idx_max != rsi_idx_max:
+                price_highs = df['high'].tail(lookback).nlargest(2)
+                rsi_at_highs = rsi.loc[price_highs.index]
+                if len(price_highs) >= 2 and price_highs.iloc[0] > price_highs.iloc[1]:
+                    if rsi_at_highs.iloc[0] < rsi_at_highs.iloc[1]:
+                        bearish_div = True
+            
+            return bullish_div, bearish_div
+        
+        bullish_rsi_div, bearish_rsi_div = detect_rsi_divergence(df, rsi, lookback=10)
         
         # LONG fade: цена ОКОЛО support + RECLAIM механизм
         # 1. Proximity check: цена около support (в пределах 0.3 ATR)
         near_support = current_close <= support + 0.3 * current_atr
         
-        if near_support:
+        # 2. RSI extreme zone: RSI < 30 для LONG
+        rsi_oversold = current_rsi < 30
+        
+        if near_support and rsi_oversold:
             # 2. RECLAIM проверка: цена была ниже support, вернулась и удержалась
             long_reclaim = check_range_reclaim(
                 df=df,
@@ -200,6 +249,11 @@ class RangeFadeStrategy(BaseStrategy):
                 depth_imbalance = indicators.get('depth_imbalance')
                 cvd_valid = indicators.get('cvd_valid', False)
                 depth_valid = indicators.get('depth_valid', False)
+                
+                # RSI divergence добавляет +0.5 score
+                if bullish_rsi_div:
+                    base_score += 0.5
+                    confirmations.append('rsi_bullish_divergence')
                 
                 if cvd_valid and cvd_change is not None and cvd_change < 0:
                     base_score += 0.5
@@ -227,6 +281,9 @@ class RangeFadeStrategy(BaseStrategy):
                         'support': float(support),
                         'resistance_tests': int(range_bounds['resistance_tests']),
                         'support_tests': int(range_bounds['support_tests']),
+                        'rsi': float(current_rsi),
+                        'rsi_oversold': rsi_oversold,
+                        'bullish_rsi_div': bullish_rsi_div,
                         'fade_from': 'support',
                         'reclaim_bars': self.reclaim_bars,
                         'confirmations': confirmations,
@@ -240,7 +297,10 @@ class RangeFadeStrategy(BaseStrategy):
         # 1. Proximity check: цена около resistance (в пределах 0.3 ATR)
         near_resistance = current_close >= resistance - 0.3 * current_atr
         
-        if near_resistance:
+        # 2. RSI extreme zone: RSI > 70 для SHORT
+        rsi_overbought = current_rsi > 70
+        
+        if near_resistance and rsi_overbought:
             # 2. RECLAIM проверка: цена была выше resistance, вернулась и удержалась
             short_reclaim = check_range_reclaim(
                 df=df,
@@ -265,6 +325,11 @@ class RangeFadeStrategy(BaseStrategy):
                 depth_imbalance = indicators.get('depth_imbalance')
                 cvd_valid = indicators.get('cvd_valid', False)
                 depth_valid = indicators.get('depth_valid', False)
+                
+                # RSI divergence добавляет +0.5 score
+                if bearish_rsi_div:
+                    base_score += 0.5
+                    confirmations.append('rsi_bearish_divergence')
                 
                 if cvd_valid and cvd_change is not None and cvd_change > 0:
                     base_score += 0.5
@@ -292,6 +357,9 @@ class RangeFadeStrategy(BaseStrategy):
                         'support': float(support),
                         'resistance_tests': int(range_bounds['resistance_tests']),
                         'support_tests': int(range_bounds['support_tests']),
+                        'rsi': float(current_rsi),
+                        'rsi_overbought': rsi_overbought,
+                        'bearish_rsi_div': bearish_rsi_div,
                         'fade_from': 'resistance',
                         'reclaim_bars': self.reclaim_bars,
                         'confirmations': confirmations,

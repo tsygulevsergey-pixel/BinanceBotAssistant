@@ -4,7 +4,7 @@ import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
-from src.indicators.technical import calculate_rsi, calculate_stochastic, calculate_atr
+from src.indicators.technical import calculate_rsi, calculate_stochastic, calculate_atr, calculate_adx
 from src.utils.reclaim_checker import check_level_reclaim
 
 
@@ -59,6 +59,7 @@ class RSIStochMRStrategy(BaseStrategy):
             period=self.stoch_period
         )
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
+        adx = calculate_adx(df['high'], df['low'], df['close'], period=14)
         
         # Адаптивные пороги RSI (перцентили за lookback)
         rsi_history = rsi.tail(lookback_bars)
@@ -66,16 +67,22 @@ class RSIStochMRStrategy(BaseStrategy):
         rsi_overbought = rsi_history.quantile(self.overbought_percentile / 100.0)
         
         # Текущие значения
-        current_rsi = rsi.iloc[-1]
-        current_stoch_k = stoch_k.iloc[-1]
-        current_stoch_d = stoch_d.iloc[-1]
-        prev_stoch_k = stoch_k.iloc[-2]
-        prev_stoch_d = stoch_d.iloc[-2]
+        current_rsi = rsi.iloc[-1] if rsi is not None and not pd.isna(rsi.iloc[-1]) else 50
+        current_stoch_k = stoch_k.iloc[-1] if stoch_k is not None and not pd.isna(stoch_k.iloc[-1]) else 50
+        current_stoch_d = stoch_d.iloc[-1] if stoch_d is not None and not pd.isna(stoch_d.iloc[-1]) else 50
+        prev_stoch_k = stoch_k.iloc[-2] if stoch_k is not None and not pd.isna(stoch_k.iloc[-2]) else 50
+        prev_stoch_d = stoch_d.iloc[-2] if stoch_d is not None and not pd.isna(stoch_d.iloc[-2]) else 50
+        current_adx = adx.iloc[-1] if adx is not None and not pd.isna(adx.iloc[-1]) else 0
         
         current_close = df['close'].iloc[-1]
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         current_atr = atr.iloc[-1]
+        
+        # ADX фильтр: ADX < 25 для mean reversion
+        if current_adx >= 25:
+            strategy_logger.debug(f"    ❌ ADX слишком сильный для MR: {current_adx:.1f} >= 25")
+            return None
         
         # Получаем VWAP/VA для reclaim проверки (зона = край рейнджа ∩ VWAP/VA)
         from src.indicators.vwap import calculate_daily_vwap
@@ -87,6 +94,42 @@ class RSIStochMRStrategy(BaseStrategy):
         
         current_vwap = vwap.iloc[-1]
         current_vwap_lower = vwap_lower.iloc[-1]
+        
+        # Divergence detection helper
+        def detect_divergence(df, rsi, stoch_k, lookback=10):
+            """Обнаружить дивергенцию RSI/Stoch"""
+            if len(df) < lookback:
+                return False, False
+            
+            # Bullish divergence: price lower low, RSI/Stoch higher low
+            price_lows = df['low'].tail(lookback).nsmallest(2)
+            if len(price_lows) >= 2 and price_lows.iloc[0] < price_lows.iloc[1]:
+                rsi_at_lows = rsi.loc[price_lows.index]
+                stoch_at_lows = stoch_k.loc[price_lows.index]
+                
+                rsi_bull_div = rsi_at_lows.iloc[0] > rsi_at_lows.iloc[1]
+                stoch_bull_div = stoch_at_lows.iloc[0] > stoch_at_lows.iloc[1]
+                
+                bullish_div = rsi_bull_div or stoch_bull_div
+            else:
+                bullish_div = False
+            
+            # Bearish divergence: price higher high, RSI/Stoch lower high
+            price_highs = df['high'].tail(lookback).nlargest(2)
+            if len(price_highs) >= 2 and price_highs.iloc[0] > price_highs.iloc[1]:
+                rsi_at_highs = rsi.loc[price_highs.index]
+                stoch_at_highs = stoch_k.loc[price_highs.index]
+                
+                rsi_bear_div = rsi_at_highs.iloc[0] < rsi_at_highs.iloc[1]
+                stoch_bear_div = stoch_at_highs.iloc[0] < stoch_at_highs.iloc[1]
+                
+                bearish_div = rsi_bear_div or stoch_bear_div
+            else:
+                bearish_div = False
+            
+            return bullish_div, bearish_div
+        
+        bullish_div, bearish_div = detect_divergence(df, rsi, stoch_k, lookback=10)
         
         # LONG: RSI в oversold + stoch крест вверх + RECLAIM механизм
         if current_rsi <= rsi_oversold:
@@ -132,6 +175,11 @@ class RSIStochMRStrategy(BaseStrategy):
                 cvd_valid = indicators.get('cvd_valid', False)
                 depth_valid = indicators.get('depth_valid', False)
                 
+                # Divergence добавляет +0.5 score
+                if bullish_div:
+                    base_score += 0.5
+                    confirmations.append('bullish_divergence')
+                
                 if cvd_valid and cvd_change is not None and cvd_change > 0:
                     base_score += 0.5
                     confirmations.append('cvd_flip_up')
@@ -159,6 +207,8 @@ class RSIStochMRStrategy(BaseStrategy):
                         'rsi_overbought': float(rsi_overbought),
                         'stoch_k': float(current_stoch_k),
                         'stoch_d': float(current_stoch_d),
+                        'adx': float(current_adx),
+                        'bullish_divergence': bullish_div,
                         'cross_type': 'bullish',
                         'reclaim_bars': self.reclaim_bars,
                         'val_reclaim': val_reclaim,
@@ -216,6 +266,11 @@ class RSIStochMRStrategy(BaseStrategy):
                 cvd_valid = indicators.get('cvd_valid', False)
                 depth_valid = indicators.get('depth_valid', False)
                 
+                # Divergence добавляет +0.5 score
+                if bearish_div:
+                    base_score += 0.5
+                    confirmations.append('bearish_divergence')
+                
                 if cvd_valid and cvd_change is not None and cvd_change < 0:
                     base_score += 0.5
                     confirmations.append('cvd_flip_down')
@@ -243,6 +298,8 @@ class RSIStochMRStrategy(BaseStrategy):
                         'rsi_overbought': float(rsi_overbought),
                         'stoch_k': float(current_stoch_k),
                         'stoch_d': float(current_stoch_d),
+                        'adx': float(current_adx),
+                        'bearish_divergence': bearish_div,
                         'cross_type': 'bearish',
                         'reclaim_bars': self.reclaim_bars,
                         'vah_reclaim': vah_reclaim,

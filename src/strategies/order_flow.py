@@ -25,7 +25,9 @@ class OrderFlowStrategy(BaseStrategy):
         
         self.timeframe = '15m'
         self.lookback_bars = 50
-        self.imbalance_threshold = 1.2  # Порог имбаланса bid/ask
+        self.imbalance_threshold = 0.6  # Depth imbalance threshold (>0.6 сильный, <-0.6 слабый)
+        self.oi_delta_threshold = 5.0  # ΔOI threshold в %
+        self.volume_threshold = 1.5  # Множитель среднего объема
         self.refill_check_window = 5   # Баров для проверки refill
         
     def get_timeframe(self) -> str:
@@ -43,9 +45,11 @@ class OrderFlowStrategy(BaseStrategy):
             return None
         
         # Получаем depth imbalance и CVD из indicators
-        depth_imbalance = indicators.get('depth_imbalance', 1.0)
-        # CVD из своего timeframe, fallback к верхнеуровневому или 0
-        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
+        depth_imbalance = indicators.get('depth_imbalance', 0.0)  # -1..+1 format
+        # CVD из своего timeframe, fallback к верхнеуровневому
+        cvd_series = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd'))
+        # ΔOI из indicators
+        oi_delta = indicators.get('oi_delta_pct', 0.0)
         
         # ATR
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
@@ -59,6 +63,15 @@ class OrderFlowStrategy(BaseStrategy):
         
         current_close = df['close'].iloc[-1]
         
+        # Volume check
+        avg_volume = df['volume'].rolling(20).mean().iloc[-1]
+        current_volume = df['volume'].iloc[-1]
+        volume_ratio = current_volume / avg_volume if avg_volume > 0 else 0
+        
+        if volume_ratio < self.volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
+            return None
+        
         # Проверка близости к ключевому уровню
         near_vah = abs(current_close - vah) <= 0.3 * current_atr
         near_val = abs(current_close - val) <= 0.3 * current_atr
@@ -70,7 +83,7 @@ class OrderFlowStrategy(BaseStrategy):
         
         # Определяем направление по imbalance
         signal_type = self._check_order_flow(
-            df, depth_imbalance, cvd, current_atr, indicators
+            df, depth_imbalance, cvd_series, oi_delta, current_atr, indicators
         )
         
         if signal_type is None:
@@ -93,28 +106,44 @@ class OrderFlowStrategy(BaseStrategy):
         return None
     
     def _check_order_flow(self, df: pd.DataFrame, depth_imbalance: float,
-                          cvd: float, atr: float, indicators: Dict) -> Optional[str]:
+                          cvd_series, oi_delta: float, atr: float, indicators: Dict) -> Optional[str]:
         """
         Проверка order flow для подтверждения
+        depth_imbalance: -1..+1 формат (>0.6 = сильный buy, <-0.6 = сильный sell)
         """
         current_close = df['close'].iloc[-1]
         prev_close = df['close'].iloc[-2]
         
-        # BULLISH ORDER FLOW: depth_imbalance < 0.9 (больше bid = покупки)
-        if depth_imbalance < 1.0 / self.imbalance_threshold:
-            # CVD подтверждает покупки
-            if cvd > 0:
-                # Ценовое подтверждение: reclaim или acceptance
-                if current_close > prev_close:
-                    return 'long'
+        # CVD delta (изменение между барами)
+        cvd_delta = 0.0
+        if cvd_series is not None and len(cvd_series) >= 2:
+            if isinstance(cvd_series, pd.Series):
+                cvd_delta = cvd_series.iloc[-1] - cvd_series.iloc[-2]
+            elif isinstance(cvd_series, (int, float)):
+                # Если это скаляр, используем как есть (fallback)
+                cvd_delta = cvd_series
         
-        # BEARISH ORDER FLOW: depth_imbalance > 1.2 (больше ask = продажи)
+        # BULLISH ORDER FLOW
+        # depth_imbalance > 0.6 (сильное давление покупателей)
         if depth_imbalance > self.imbalance_threshold:
-            # CVD подтверждает продажи
-            if cvd < 0:
-                # Ценовое подтверждение
-                if current_close < prev_close:
-                    return 'short'
+            # CVD delta положительная (больше покупок)
+            if cvd_delta > 0:
+                # ΔOI положительная (приток новых лонгов)
+                if oi_delta > self.oi_delta_threshold:
+                    # Ценовое подтверждение: reclaim или acceptance
+                    if current_close > prev_close:
+                        return 'long'
+        
+        # BEARISH ORDER FLOW
+        # depth_imbalance < -0.6 (сильное давление продавцов)
+        if depth_imbalance < -self.imbalance_threshold:
+            # CVD delta отрицательная (больше продаж)
+            if cvd_delta < 0:
+                # ΔOI положительная (приток новых шортов)
+                if oi_delta > self.oi_delta_threshold:
+                    # Ценовое подтверждение
+                    if current_close < prev_close:
+                        return 'short'
         
         return None
     

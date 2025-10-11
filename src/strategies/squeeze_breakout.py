@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
-from src.indicators.technical import calculate_bollinger_bands, calculate_atr, calculate_ema
+from src.indicators.technical import calculate_bollinger_bands, calculate_atr, calculate_ema, calculate_keltner_channels, calculate_adx
 from src.utils.strategy_logger import strategy_logger
 
 
@@ -53,10 +53,14 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         bb_width = bb_upper - bb_lower
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         ema20 = calculate_ema(df['close'], period=20)
+        adx = calculate_adx(df['high'], df['low'], df['close'], period=14)
         
-        # Проверка squeeze: BB width в нижнем 25-м перцентиле
-        bb_width_percentile = bb_width.rolling(self.lookback).quantile(self.bb_percentile / 100.0)
-        is_squeeze = bb_width <= bb_width_percentile
+        # Keltner Channels для TTM Squeeze
+        kc_upper, kc_middle, kc_lower = calculate_keltner_channels(df['close'], atr, period=20, atr_mult=1.5)
+        kc_width = kc_upper - kc_lower
+        
+        # TTM Squeeze logic: squeeze когда BB width < KC width
+        is_squeeze = bb_width < kc_width
         
         # Подсчёт баров сжатия
         squeeze_bars = 0
@@ -77,6 +81,12 @@ class SqueezeBreakoutStrategy(BaseStrategy):
         current_atr = atr.iloc[-1]
         current_bb_upper = bb_upper.iloc[-1]
         current_bb_lower = bb_lower.iloc[-1]
+        current_adx = adx.iloc[-1] if adx is not None and not pd.isna(adx.iloc[-1]) else 0
+        
+        # ADX фильтр: ADX > 20 для breakout
+        if current_adx <= 20:
+            strategy_logger.debug(f"    ❌ ADX слабый для breakout: {current_adx:.1f} <= 20")
+            return None
         
         # Расстояние от EMA20
         distance_from_ema20 = abs(current_close - current_ema20) / current_atr
@@ -122,8 +132,11 @@ class SqueezeBreakoutStrategy(BaseStrategy):
                 metadata={
                     'squeeze_bars': squeeze_bars,
                     'bb_width': float(bb_width.iloc[-1]),
+                    'kc_width': float(kc_width.iloc[-1]),
                     'ema20': float(current_ema20),
-                    'distance_from_ema20_atr': float(distance_from_ema20)
+                    'adx': float(current_adx),
+                    'distance_from_ema20_atr': float(distance_from_ema20),
+                    'squeeze_type': 'TTM'
                 }
             )
             return signal
@@ -159,8 +172,11 @@ class SqueezeBreakoutStrategy(BaseStrategy):
                 metadata={
                     'squeeze_bars': squeeze_bars,
                     'bb_width': float(bb_width.iloc[-1]),
+                    'kc_width': float(kc_width.iloc[-1]),
                     'ema20': float(current_ema20),
-                    'distance_from_ema20_atr': float(distance_from_ema20)
+                    'adx': float(current_adx),
+                    'distance_from_ema20_atr': float(distance_from_ema20),
+                    'squeeze_type': 'TTM'
                 }
             )
             return signal
