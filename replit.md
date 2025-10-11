@@ -71,6 +71,15 @@ Preferred communication style: Simple, everyday language.
   - **Example**: 5 wins = +13% total (avg +2.60%), 7 losses = -11.7% total (avg -1.67%) → Average PnL = +1.3% / 12 = +0.11%
 - **Exit Price Accuracy**: For LONG SL hit at 98 when price drops to 97.5, records exit=98 and PnL=-2% (not -2.5%). For SHORT TP hit at 96 when price drops to 95.8, records exit=96 and PnL=+4% (not +4.2%).
 
+### Symbol Blocking System
+- **Purpose**: Prevents multiple signals on the same symbol while an active signal exists.
+- **Startup Loading**: On bot start, queries DB for all ACTIVE/PENDING signals and populates `symbols_with_active_signals` set before analysis begins.
+- **Block on Signal Creation**: When MARKET or LIMIT signal is saved to DB, symbol is added to blocked set.
+- **Skip Analysis**: Analysis loop checks if symbol is blocked before running strategies. Blocked symbols are skipped entirely.
+- **Unblock on Closure**: When Performance Tracker closes a signal (SL/TP/TIME_STOP hit), callback removes symbol from blocked set.
+- **DB Persistence**: Blocking state survives bot restarts by reloading active signals from database.
+- **Logs**: "🔒 Loaded 6 active signals, blocked 6 symbols" on startup, "⏭️ {symbol} skipped - has active signal" during analysis.
+
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
 
