@@ -291,9 +291,20 @@ class TradingBot:
                     logger.debug(f"Could not update {symbol} {tf}: {e}")
         
         # Загрузить данные для всех таймфреймов
+        # Лимиты рассчитаны на основе максимальных требований стратегий:
+        # - 15m: RSI/Stoch MR требует 90 дней × 24 × 4 = 8,640 баров
+        # - 1h: Donchian требует 60 дней × 24 = 1,440 баров
+        # - 4h: 60 дней × 6 = 360 баров
+        tf_limits = {
+            '15m': 8640,  # 90 дней для RSI/Stoch MR
+            '1h': 1440,   # 60 дней для Donchian
+            '4h': 360     # 60 дней
+        }
+        
         timeframe_data = {}
         for tf in ['15m', '1h', '4h']:
-            df = self.data_loader.get_candles(symbol, tf, limit=200)
+            limit = tf_limits.get(tf, 200)
+            df = self.data_loader.get_candles(symbol, tf, limit=limit)
             if df is not None and len(df) > 0:
                 timeframe_data[tf] = df
         
