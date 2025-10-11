@@ -83,7 +83,14 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 # Recent Changes (October 2025)
 
 ## Latest Updates (October 11, 2025)
-1. ✅ **WebSocket Testnet Fix** - Исправлен критический баг переключения на testnet
+1. ✅ **Dependencies Synchronized** - Синхронизированы версии зависимостей
+   - **Проблема**: requirements.txt и pyproject.toml имели разные версии пакетов (python-telegram-bot 20.7 vs 22.5, numpy 1.26 vs 2.2.6, etc.)
+   - **Решение**: requirements.txt обновлен под версии из pyproject.toml
+   - **Влияние**: Теперь одинаковые версии на Replit (uv) и Windows (pip)
+   - **Источник истины**: pyproject.toml (используется uv)
+   - **Совместимость**: requirements.txt для pip на Windows/других системах
+   
+2. ✅ **WebSocket Testnet Fix** - Исправлен критический баг переключения на testnet
    - **Проблема**: WebSocket всегда подключался к production (`wss://fstream.binance.com`), даже при `use_testnet: true`
    - **Решение**: Добавлен `WS_TESTNET_URL = wss://stream.binancefuture.com` и правильное переключение
    - **Логирование**: WebSocket теперь показывает `[TESTNET]` или `[PRODUCTION]` при подключении
