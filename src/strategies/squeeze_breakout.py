@@ -110,6 +110,14 @@ class SqueezeBreakoutStrategy(BaseStrategy):
             
             entry = current_close
             stop_loss = current_bb_lower
+            
+            # Проверить расстояние до стопа (защита от чрезмерного риска)
+            is_valid, stop_distance_atr = self.validate_stop_distance(
+                entry, stop_loss, current_atr, 'LONG'
+            )
+            if not is_valid:
+                return None
+            
             atr_distance = entry - stop_loss
             
             rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
@@ -150,6 +158,14 @@ class SqueezeBreakoutStrategy(BaseStrategy):
             
             entry = current_close
             stop_loss = current_bb_upper
+            
+            # Проверить расстояние до стопа (защита от чрезмерного риска)
+            is_valid, stop_distance_atr = self.validate_stop_distance(
+                entry, stop_loss, current_atr, 'SHORT'
+            )
+            if not is_valid:
+                return None
+            
             atr_distance = stop_loss - entry
             
             rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])

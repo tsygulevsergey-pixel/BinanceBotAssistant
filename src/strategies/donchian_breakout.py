@@ -101,6 +101,17 @@ class DonchianBreakoutStrategy(BaseStrategy):
             # Расчёт уровней
             entry = current_close
             stop_loss = current_lower
+            
+            # ВАЖНО: Проверить расстояние до стопа (защита от чрезмерного риска)
+            is_valid, stop_distance_atr = self.validate_stop_distance(
+                entry, stop_loss, current_atr, 'LONG'
+            )
+            if not is_valid:
+                strategy_logger.debug(
+                    f"    ❌ LONG стоп слишком широкий: {stop_distance_atr:.2f} ATR"
+                )
+                return None
+            
             atr_distance = entry - stop_loss
             
             # R:R targets
@@ -145,6 +156,17 @@ class DonchianBreakoutStrategy(BaseStrategy):
             # Расчёт уровней
             entry = current_close
             stop_loss = current_upper
+            
+            # ВАЖНО: Проверить расстояние до стопа (защита от чрезмерного риска)
+            is_valid, stop_distance_atr = self.validate_stop_distance(
+                entry, stop_loss, current_atr, 'SHORT'
+            )
+            if not is_valid:
+                strategy_logger.debug(
+                    f"    ❌ SHORT стоп слишком широкий: {stop_distance_atr:.2f} ATR"
+                )
+                return None
+            
             atr_distance = stop_loss - entry
             
             # R:R targets

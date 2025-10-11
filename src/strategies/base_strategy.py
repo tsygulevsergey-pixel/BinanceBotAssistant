@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 import pandas as pd
 from src.utils.logger import logger
+from src.utils.config import config
 
 
 @dataclass
@@ -132,6 +133,33 @@ class BaseStrategy(ABC):
             'category': self.get_category(),
             'timeframe': self.get_timeframe()
         }
+    
+    def validate_stop_distance(self, entry: float, stop_loss: float, 
+                                current_atr: float, direction: str) -> Tuple[bool, float]:
+        """
+        Проверить расстояние до стопа (защита от чрезмерного риска)
+        
+        Returns:
+            (is_valid, stop_distance_atr)
+        """
+        # Рассчитать расстояние в ATR
+        stop_distance = abs(entry - stop_loss)
+        stop_distance_atr = stop_distance / current_atr if current_atr > 0 else 999
+        
+        # Получить максимально допустимое расстояние
+        # Приоритет: per-strategy override → global config → default 3.0
+        max_stop_atr = self.config.get('max_stop_distance_atr') or \
+                       config.get('risk.max_stop_distance_atr', 3.0)
+        
+        # Проверка
+        if stop_distance_atr > max_stop_atr:
+            logger.warning(
+                f"{self.name} - Stop too wide: {stop_distance_atr:.2f} ATR "
+                f"(max: {max_stop_atr:.2f} ATR), signal rejected"
+            )
+            return False, stop_distance_atr
+        
+        return True, stop_distance_atr
     
     def calculate_risk_offsets(self, signal: Signal) -> Signal:
         """

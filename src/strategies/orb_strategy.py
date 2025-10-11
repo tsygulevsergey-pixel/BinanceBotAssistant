@@ -161,6 +161,14 @@ class ORBStrategy(BaseStrategy):
             
             entry = current_close
             stop_loss = ib_low - 0.25 * current_atr  # За противоположной границей IB +0.2-0.3 ATR
+            
+            # Проверить расстояние до стопа (защита от чрезмерного риска)
+            is_valid, stop_distance_atr = self.validate_stop_distance(
+                entry, stop_loss, current_atr, 'LONG'
+            )
+            if not is_valid:
+                return None
+            
             atr_distance = entry - stop_loss
             
             rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
@@ -213,6 +221,14 @@ class ORBStrategy(BaseStrategy):
             
             entry = current_close
             stop_loss = ib_high + 0.25 * current_atr
+            
+            # Проверить расстояние до стопа (защита от чрезмерного риска)
+            is_valid, stop_distance_atr = self.validate_stop_distance(
+                entry, stop_loss, current_atr, 'SHORT'
+            )
+            if not is_valid:
+                return None
+            
             atr_distance = stop_loss - entry
             
             rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
