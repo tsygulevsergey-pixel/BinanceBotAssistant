@@ -3,6 +3,7 @@ import signal
 import sys
 from typing import List, Optional, Dict
 from src.utils.logger import logger
+from src.utils.strategy_logger import strategy_logger
 from src.utils.config import config
 from src.binance.client import BinanceClient
 from src.binance.data_loader import DataLoader
@@ -311,6 +312,8 @@ class TradingBot:
         bias = self.regime_detector.get_h4_bias(h4_data)
         
         logger.debug(f"🔍 Analyzing {symbol} | Regime: {regime} | Bias: {bias}")
+        strategy_logger.info(f"\n{'='*80}")
+        strategy_logger.info(f"🔍 АНАЛИЗ: {symbol} | Режим: {regime} | Bias: {bias}")
         
         # Рассчитать H4 swings для confluence проверки
         h4_swing_high = h4_data['high'].tail(20).max() if h4_data is not None and len(h4_data) >= 20 else None
@@ -346,12 +349,16 @@ class TradingBot:
         }
         
         # Проверка MR блокировки по BTC
+        btc_block_mr = False
         if btc_data is not None:
-            block_mr = self.btc_filter.should_block_mean_reversion(btc_data)
-            if block_mr:
+            btc_block_mr = self.btc_filter.should_block_mean_reversion(btc_data)
+            if btc_block_mr:
                 logger.debug(f"{symbol}: MR strategies blocked due to BTC volatility")
+                strategy_logger.warning(f"⚠️  BTC импульс обнаружен - Mean Reversion стратегии ЗАБЛОКИРОВАНЫ")
         
         # Получить сигналы от всех стратегий
+        strategy_logger.info(f"📋 Проверка {len(self.strategy_manager.strategies)} стратегий...")
+        
         signals = self.strategy_manager.check_all_signals(
             symbol=symbol,
             timeframe_data=timeframe_data,
@@ -362,11 +369,15 @@ class TradingBot:
         
         if signals:
             logger.debug(f"📊 {symbol}: {len(signals)} signals from strategies: {[s.strategy_name for s in signals]}")
+            strategy_logger.info(f"✅ Получено {len(signals)} сигналов: {', '.join([s.strategy_name for s in signals])}")
         else:
             logger.debug(f"⚪ {symbol}: No signals from any strategy")
+            strategy_logger.info(f"⚪ Ни одна стратегия не дала сигнал")
         
         # Применить скоринг к каждому сигналу
         for signal in signals:
+            strategy_logger.info(f"\n📊 СКОРИНГ: {signal.strategy_name} | {signal.direction}")
+            
             final_score = self.signal_scorer.score_signal(
                 signal=signal,
                 market_data={'df': timeframe_data.get(signal.timeframe)},
@@ -374,9 +385,21 @@ class TradingBot:
                 btc_data=btc_data
             )
             
+            # Детальная информация о скоринге
+            score_breakdown = (
+                f"  • Base Score: {signal.base_score:.1f}\n"
+                f"  • Volume Ratio: {signal.volume_ratio:.2f}x\n"
+                f"  • CVD Direction: {signal.cvd_direction}\n"
+                f"  • Late Trend: {'Да' if signal.late_trend else 'Нет'}\n"
+                f"  • BTC Against: {'Да' if signal.btc_against else 'Нет'}\n"
+                f"  • ИТОГОВЫЙ SCORE: {final_score:.1f}"
+            )
+            strategy_logger.info(score_breakdown)
+            
             # Проверить порог входа
             if self.signal_scorer.should_enter(final_score):
                 logger.debug(f"✅ {signal.strategy_name} | {symbol} {signal.direction} | Score: {final_score:.1f} PASSED threshold")
+                strategy_logger.info(f"✅ ПРОШЕЛ ПОРОГ (≥2.0) - ВАЛИДНЫЙ СИГНАЛ!")
                 
                 # Проверить блокировку символа (политика "1 сигнал на символ")
                 lock_acquired = self.signal_lock_manager.acquire_lock(
@@ -390,6 +413,7 @@ class TradingBot:
                         f"⏭️  Signal skipped (symbol locked): {signal.strategy_name} | "
                         f"{signal.symbol} {signal.direction}"
                     )
+                    strategy_logger.warning(f"⏭️  ПРОПУЩЕН: Символ уже заблокирован другим сигналом")
                     continue
             else:
                 logger.debug(
@@ -398,6 +422,7 @@ class TradingBot:
                     f"Base: {signal.base_score:.1f}, Vol: {signal.volume_ratio:.1f}x, "
                     f"CVD: {signal.cvd_direction}, Late: {signal.late_trend}, BTC: {signal.btc_against}"
                 )
+                strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < 2.0")
                 continue
                 
                 logger.info(

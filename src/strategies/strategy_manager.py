@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.logger import logger
+from src.utils.strategy_logger import strategy_logger
 from src.utils.config import config
 
 
@@ -39,9 +40,13 @@ class StrategyManager:
             Список сгенерированных сигналов
         """
         signals = []
+        checked_count = 0
+        skipped_count = 0
         
         for strategy in self.strategies:
             if not strategy.is_enabled():
+                strategy_logger.debug(f"  ⏭️  {strategy.name} - отключена")
+                skipped_count += 1
                 continue
             
             # Получить данные для таймфрейма стратегии
@@ -49,9 +54,14 @@ class StrategyManager:
             df = timeframe_data.get(tf)
             
             if df is None or len(df) < 50:
+                strategy_logger.debug(f"  ⏭️  {strategy.name} ({tf}) - недостаточно данных")
+                skipped_count += 1
                 continue
             
             try:
+                strategy_logger.debug(f"  🔍 Проверка: {strategy.name} ({tf})")
+                checked_count += 1
+                
                 signal = strategy.check_signal(symbol, df, regime, bias, indicators)
                 if signal:
                     strategy.increment_signal_count()
@@ -60,8 +70,18 @@ class StrategyManager:
                         f"Signal generated: {signal.strategy_name} | "
                         f"{signal.symbol} {signal.direction} | Score: {signal.base_score}"
                     )
+                    strategy_logger.info(
+                        f"  ✅ {strategy.name} → СИГНАЛ! {signal.direction} | "
+                        f"Entry: {signal.entry_price:.4f} | SL: {signal.stop_loss:.4f} | "
+                        f"TP: {signal.take_profit:.4f}"
+                    )
+                else:
+                    strategy_logger.debug(f"  ⚪ {strategy.name} → нет сигнала")
             except Exception as e:
                 logger.error(f"Error in strategy {strategy.name}: {e}", exc_info=True)
+                strategy_logger.error(f"  ❌ {strategy.name} → ОШИБКА: {e}")
+        
+        strategy_logger.info(f"📈 Итого: проверено {checked_count}, пропущено {skipped_count}, сигналов {len(signals)}")
         
         return signals
     
