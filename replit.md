@@ -38,6 +38,17 @@ Preferred communication style: Simple, everyday language.
 ### Signal Scoring System
 - Combines a base strategy score with modifiers for volume, CVD, OI Delta, and Depth Imbalance. Penalties apply for late trends, extreme funding, or opposing BTC direction. An entry threshold of ≥ +2.0 is required for execution.
 
+### Signal Aggregation & Conflict Resolution
+- **Score-Based Prioritization**: All signals are scored first, then sorted by final_score (descending) before processing. This ensures the highest quality signal is selected.
+- **Direction-Aware Locks**: Lock key format `signal_lock:{symbol}:{direction}` allows simultaneous LONG and SHORT signals for the same symbol (different strategies/approaches).
+- **Best Signal Selection**: For each direction, the highest-scoring signal acquires the lock; subsequent lower-scoring signals are rejected.
+- **Threshold Gating**: Only signals with final_score ≥ 2.0 proceed to lock acquisition. Sub-threshold signals are immediately discarded.
+- **Conflict Policy**: 
+  - Multiple LONG signals → Best score wins
+  - Multiple SHORT signals → Best score wins
+  - LONG + SHORT signals → Both can execute (independent locks)
+- **Lock TTL**: Redis/SQLite locks expire after configurable TTL (default 3600s) to prevent stale locks.
+
 ### Filtering & Risk Management
 - **BTCFilter**: Prevents mean reversion during significant BTC impulses and applies directional penalties for trend strategies.
 - **Risk Calculator**: Manages position sizing, stop-loss (swing extreme + 0.2-0.3 ATR), and take-profit (1.5-3.0 RR).
