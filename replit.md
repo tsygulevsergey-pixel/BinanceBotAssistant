@@ -6,6 +6,12 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 # Recent Changes
 
+## 2025-10-11: Pandas FutureWarning Fix
+- **Fixed VWAP calculation pandas deprecation warning**:
+  - Added `include_groups=False` parameter to `groupby().apply()` in `src/indicators/vwap.py`
+  - Eliminated hundreds of FutureWarning messages that were spamming logs
+  - Logs now clean and readable
+
 ## 2025-10-11: Comprehensive Strategy Failure Logging (ALL 15 Strategies)
 - **Implemented detailed failure reason logging across all 15 active strategies**:
   - Added `strategy_logger.debug()` before EVERY `return None` statement in all strategy check_signal() methods
