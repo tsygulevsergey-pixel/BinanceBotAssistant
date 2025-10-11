@@ -36,49 +36,116 @@ class BreakRetestStrategy(BaseStrategy):
     def get_category(self) -> str:
         return "pullback"
     
-    def _find_recent_breakout(self, df: pd.DataFrame, atr: pd.Series) -> Optional[Dict]:
-        """Найти недавний пробой"""
-        for i in range(-self.breakout_lookback, 0):
-            if abs(i) >= len(df):
+    def _find_swing_high_low(self, df: pd.DataFrame, end_pos: int, lookback: int = 20, buffer: int = 3) -> Dict:
+        """Найти swing high/low с буфером N баров
+        Args:
+            end_pos: ПОЛОЖИТЕЛЬНЫЙ индекс окончания поиска
+        """
+        # Проверка границ
+        start_pos = max(buffer, end_pos - lookback)
+        
+        swing_high = None
+        swing_high_idx = None
+        swing_low = None
+        swing_low_idx = None
+        
+        # Ищем swing high (пик с buffer баров с каждой стороны)
+        for i in range(start_pos, end_pos - buffer):
+            if i < buffer or i + buffer >= len(df):
                 continue
+            
+            high_val = df['high'].iloc[i]
+            is_swing_high = True
+            
+            # Проверяем, что это локальный максимум
+            for j in range(i - buffer, i + buffer + 1):
+                if j != i and df['high'].iloc[j] >= high_val:
+                    is_swing_high = False
+                    break
+            
+            if is_swing_high:
+                swing_high = high_val
+                swing_high_idx = i
+        
+        # Ищем swing low (впадина с buffer баров с каждой стороны)
+        for i in range(end_idx - lookback, end_idx - buffer):
+            if i - buffer < 0 or i + buffer >= len(df):
+                continue
+            
+            low_val = df['low'].iloc[i]
+            is_swing_low = True
+            
+            # Проверяем, что это локальный минимум
+            for j in range(i - buffer, i + buffer + 1):
+                if j != i and df['low'].iloc[j] <= low_val:
+                    is_swing_low = False
+                    break
+            
+            if is_swing_low:
+                swing_low = low_val
+                swing_low_idx = i
+        
+        return {
+            'swing_high': swing_high,
+            'swing_high_idx': swing_high_idx,
+            'swing_low': swing_low,
+            'swing_low_idx': swing_low_idx
+        }
+    
+    def _find_recent_breakout(self, df: pd.DataFrame, atr: pd.Series, vwap: pd.Series) -> Optional[Dict]:
+        """Найти недавний пробой с использованием swing levels"""
+        df_len = len(df)
+        
+        for i in range(-self.breakout_lookback, -1):  # До -1, чтобы не включать текущий бар
+            if abs(i) >= df_len:
+                continue
+            
+            # Конвертируем отрицательный индекс в положительный
+            pos_idx = df_len + i
             
             bar_close = df['close'].iloc[i]
             bar_high = df['high'].iloc[i]
             bar_low = df['low'].iloc[i]
             bar_volume = df['volume'].iloc[i]
             bar_atr = atr.iloc[i]
+            bar_vwap = vwap.iloc[i] if vwap is not None and i < len(vwap) else None
             
-            # Проверяем предыдущий максимум/минимум (10 баров до)
-            if i - 10 < -len(df):
+            # Найти swing high/low перед этим баром (передаем ПОЛОЖИТЕЛЬНЫЙ индекс!)
+            swings = self._find_swing_high_low(df, pos_idx, lookback=20, buffer=3)
+            
+            if swings['swing_high'] is None and swings['swing_low'] is None:
                 continue
-                
-            prev_high = df['high'].iloc[i-10:i].max() if i < -1 else df['high'].iloc[i-10:i+1].max()
-            prev_low = df['low'].iloc[i-10:i].min() if i < -1 else df['low'].iloc[i-10:i+1].min()
             
             # Средний объём
-            avg_vol = df['volume'].iloc[i-20:i].mean() if i < -1 else df['volume'].iloc[i-20:i+1].mean()
+            if i - 20 < -len(df):
+                continue
+            avg_vol = df['volume'].iloc[i-20:i].mean()
             vol_ratio = bar_volume / avg_vol if avg_vol > 0 else 0
             
-            # Пробой вверх
-            if (bar_close > prev_high and 
-                (bar_close - prev_high) >= self.breakout_atr * bar_atr and
+            # Пробой вверх (через swing high)
+            if (swings['swing_high'] is not None and 
+                bar_close > swings['swing_high'] and 
+                (bar_close - swings['swing_high']) >= self.breakout_atr * bar_atr and
                 vol_ratio >= self.volume_threshold):
                 return {
                     'direction': 'LONG',
-                    'level': prev_high,
+                    'level': swings['swing_high'],
                     'bar_index': i,
-                    'atr': bar_atr
+                    'atr': bar_atr,
+                    'vwap': bar_vwap
                 }
             
-            # Пробой вниз
-            elif (bar_close < prev_low and 
-                  (prev_low - bar_close) >= self.breakout_atr * bar_atr and
+            # Пробой вниз (через swing low)
+            elif (swings['swing_low'] is not None and 
+                  bar_close < swings['swing_low'] and 
+                  (swings['swing_low'] - bar_close) >= self.breakout_atr * bar_atr and
                   vol_ratio >= self.volume_threshold):
                 return {
                     'direction': 'SHORT',
-                    'level': prev_low,
+                    'level': swings['swing_low'],
                     'bar_index': i,
-                    'atr': bar_atr
+                    'atr': bar_atr,
+                    'vwap': bar_vwap
                 }
         
         return None
@@ -91,14 +158,17 @@ class BreakRetestStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 50")
             return None
         
-        # Рассчитать ATR
+        # Рассчитать ATR и VWAP
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
         
+        # Получить VWAP из indicators или рассчитать
+        vwap = indicators.get('vwap', None)
+        
         # Найти недавний пробой
-        breakout = self._find_recent_breakout(df, atr)
+        breakout = self._find_recent_breakout(df, atr, vwap)
         if breakout is None:
-            strategy_logger.debug(f"    ❌ Нет недавнего пробоя с объемом >{self.volume_threshold}x и расстоянием ≥{self.breakout_atr} ATR")
+            strategy_logger.debug(f"    ❌ Нет недавнего пробоя swing level с объемом >{self.volume_threshold}x и расстоянием ≥{self.breakout_atr} ATR")
             return None
         
         # Текущие значения
@@ -106,18 +176,47 @@ class BreakRetestStrategy(BaseStrategy):
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         
-        # Зона ретеста = экстремум ± 0.2-0.3 ATR
+        # Зона ретеста = экстремум ± 0.2-0.3 ATR (используем ATR с момента пробоя!)
         breakout_level = breakout['level']
-        retest_zone_upper = breakout_level + self.zone_atr[1] * current_atr
-        retest_zone_lower = breakout_level - self.zone_atr[1] * current_atr
+        breakout_atr = breakout['atr']
+        breakout_vwap = breakout.get('vwap')
+        
+        retest_zone_upper = breakout_level + self.zone_atr[1] * breakout_atr
+        retest_zone_lower = breakout_level - self.zone_atr[1] * breakout_atr
+        
+        # Если есть VWAP, учитываем пересечение (по мануалу)
+        if breakout_vwap is not None:
+            retest_zone_upper = min(retest_zone_upper, breakout_vwap + 0.1 * breakout_atr)
+            retest_zone_lower = max(retest_zone_lower, breakout_vwap - 0.1 * breakout_atr)
+        
+        # Логирование для debug
+        strategy_logger.debug(f"    📊 Пробой найден: {breakout['direction']} на уровне {breakout_level:.4f}, ATR={breakout_atr:.4f}")
+        strategy_logger.debug(f"    📊 Зона ретеста: [{retest_zone_lower:.4f}, {retest_zone_upper:.4f}], текущая цена: {current_close:.4f}")
+        
+        # Проверка касания зоны за последние несколько баров (не только текущий)
+        lookback_retest = 5
+        touched_zone = False
+        reclaimed_level = False
         
         # LONG retest (после пробоя вверх)
         if breakout['direction'] == 'LONG':
-            # Проверка: цена вернулась в зону ретеста
-            if retest_zone_lower <= current_close <= retest_zone_upper:
-                # Проверка: есть ли rebound (отскок)
-                # Простая проверка: low коснулся зоны, но close выше
-                if current_low <= breakout_level and current_close > breakout_level:
+            # Проверка: цена касалась зоны ретеста за последние N баров
+            for i in range(-lookback_retest, 0):
+                if abs(i) >= len(df):
+                    continue
+                bar_low = df['low'].iloc[i]
+                bar_close = df['close'].iloc[i]
+                
+                # Касание зоны
+                if retest_zone_lower <= bar_low <= retest_zone_upper:
+                    touched_zone = True
+                
+                # Рекламирование уровня (close выше уровня пробоя)
+                if bar_low <= breakout_level and bar_close > breakout_level:
+                    reclaimed_level = True
+            
+            # Текущий бар также должен быть выше уровня
+            if touched_zone and reclaimed_level and current_close > breakout_level:
                     
                     # Фильтр по H4 bias
                     if bias == 'Bearish':
@@ -156,9 +255,23 @@ class BreakRetestStrategy(BaseStrategy):
         
         # SHORT retest (после пробоя вниз)
         elif breakout['direction'] == 'SHORT':
-            if retest_zone_lower <= current_close <= retest_zone_upper:
-                # Проверка: high коснулся зоны, но close ниже
-                if current_high >= breakout_level and current_close < breakout_level:
+            # Проверка: цена касалась зоны ретеста за последние N баров
+            for i in range(-lookback_retest, 0):
+                if abs(i) >= len(df):
+                    continue
+                bar_high = df['high'].iloc[i]
+                bar_close = df['close'].iloc[i]
+                
+                # Касание зоны
+                if retest_zone_lower <= bar_high <= retest_zone_upper:
+                    touched_zone = True
+                
+                # Рекламирование уровня (close ниже уровня пробоя)
+                if bar_high >= breakout_level and bar_close < breakout_level:
+                    reclaimed_level = True
+            
+            # Текущий бар также должен быть ниже уровня
+            if touched_zone and reclaimed_level and current_close < breakout_level:
                     
                     if bias == 'Bullish':
                         strategy_logger.debug(f"    ❌ SHORT ретест есть, но H4 bias {bias}")
@@ -194,5 +307,11 @@ class BreakRetestStrategy(BaseStrategy):
                     )
                     return signal
         
-        strategy_logger.debug(f"    ❌ Цена не в зоне ретеста или нет отскока от уровня пробоя")
+        # Детальное логирование причин отклонения
+        if not touched_zone:
+            strategy_logger.debug(f"    ❌ Цена НЕ касалась зоны ретеста [{retest_zone_lower:.4f}, {retest_zone_upper:.4f}] за последние {lookback_retest} баров")
+        elif not reclaimed_level:
+            strategy_logger.debug(f"    ❌ Зона касалась, но НЕТ рекламирования уровня {breakout_level:.4f} (close {'выше' if breakout['direction'] == 'LONG' else 'ниже'} уровня)")
+        else:
+            strategy_logger.debug(f"    ❌ Текущая цена {current_close:.4f} не {'выше' if breakout['direction'] == 'LONG' else 'ниже'} уровня пробоя {breakout_level:.4f}")
         return None
