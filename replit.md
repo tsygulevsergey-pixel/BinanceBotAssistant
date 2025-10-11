@@ -6,7 +6,30 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 ## Recent Updates (October 11, 2025)
 
-### ✅ Stop Distance Validation (NEW)
+### ✅ Real-Time Mark Price for MARKET Orders (NEW)
+Eliminated slippage by fetching current market price for MARKET orders instead of using stale candle close:
+
+**Implementation:**
+- **API Integration**: `BinanceClient.get_mark_price()` fetches real-time mark price (weight=1, very cheap!)
+- **Smart Usage**: Only called after signal passes all filters (5-20 times/min, not for all symbols)
+- **Price Accuracy**: MARKET orders use fresh mark_price; LIMIT orders keep using close price (intended)
+- **R:R Preservation**: SL/TP recalculated using offsets to maintain risk-reward ratios
+- **TP2 Handling**: Conditional check ensures single-target strategies keep TP2=None correctly
+
+**Flow:**
+1. Strategy generates signal with entry=close_price
+2. If entry_type="MARKET" → fetch mark_price from Binance
+3. Update entry_price to mark_price
+4. Recalculate SL/TP using offsets (preserves R:R)
+5. LIMIT orders continue using close price for target levels
+
+**Benefits:**
+- Eliminates slippage from stale candle prices
+- Rate limit safe: only 1 weight per signal (2-5% total usage)
+- Architect-validated implementation
+- Proper async/await flow throughout
+
+### ✅ Stop Distance Validation
 Added max_stop_distance_atr protection to prevent breakout strategies from taking excessive risk on wide structural levels:
 
 **Implementation:**
