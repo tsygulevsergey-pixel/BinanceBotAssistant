@@ -179,7 +179,7 @@ class BaseStrategy(ABC):
         
         return signal
     
-    def determine_entry_type(self, entry_price: float, df: pd.DataFrame) -> tuple:
+    def determine_entry_type(self, entry_price: float, df: pd.DataFrame, direction: str = None) -> tuple:
         """
         Определить тип входа на основе категории стратегии (ГИБРИДНЫЙ подход)
         
@@ -197,10 +197,25 @@ class BaseStrategy(ABC):
             # Для pullback стратегий entry_price уже содержит целевой уровень
             return ("LIMIT", entry_price, 6)
         
-        # MEAN REVERSION → LIMIT entry в зону интереса
+        # MEAN REVERSION → LIMIT entry с небольшим pullback offset
         elif category == "mean_reversion":
-            # Для MR стратегий entry_price - это целевая зона
-            return ("LIMIT", entry_price, 4)  # Меньший timeout для MR
+            # Используем ATR для расчета offset (небольшой pullback для лучшей цены)
+            atr = df['atr'].iloc[-1]
+            pullback_offset = 0.15 * atr  # 15% ATR для mean reversion entry
+            
+            # Определяем direction если не указан
+            if direction is None:
+                current_close = df['close'].iloc[-1]
+                direction = "LONG" if entry_price > current_close else "SHORT"
+            
+            if direction == "LONG":
+                # Для LONG ждем pullback вниз - target ниже entry
+                target_entry_price = entry_price - pullback_offset
+            else:
+                # Для SHORT ждем pullback вверх - target выше entry
+                target_entry_price = entry_price + pullback_offset
+            
+            return ("LIMIT", target_entry_price, 4)  # Меньший timeout для MR
         
         # ORDER FLOW, CVD и другие → MARKET (агрессивный вход)
         else:

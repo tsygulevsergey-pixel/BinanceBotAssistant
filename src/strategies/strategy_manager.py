@@ -70,7 +70,7 @@ class StrategyManager:
                     
                     # Применить гибридную логику входа на основе категории стратегии
                     entry_type, target_price, timeout = strategy.determine_entry_type(
-                        signal.entry_price, df
+                        signal.entry_price, df, signal.direction
                     )
                     signal.entry_type = entry_type
                     signal.entry_timeout = timeout
@@ -104,7 +104,7 @@ class StrategyManager:
                     
                     # Для LIMIT orders: сохранить целевую цену и пересчитать SL/TP
                     if entry_type == "LIMIT":
-                        signal.target_entry_price = signal.entry_price  # Целевой уровень
+                        signal.target_entry_price = target_price  # Целевая цена с offset
                         current_price = float(df['close'].iloc[-1])
                         
                         # Пересчитать SL/TP от target_entry_price используя offset'ы

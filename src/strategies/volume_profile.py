@@ -255,8 +255,9 @@ class VolumeProfileStrategy(BaseStrategy):
         if direction == 'long':
             entry = current_close
             stop_loss = current_low - 0.25 * atr
-            take_profit_1 = poc  # TP1 к POC
-            take_profit_2 = level + 0.5 * atr  # TP2 к противоположной стороне value
+            # TP логика: TP1 ближе, TP2 дальше
+            take_profit_1 = level + 0.5 * atr  # TP1 к ближайшей границе value area
+            take_profit_2 = poc  # TP2 к POC (дальняя цель)
             
             return Signal(
                 strategy_name=self.name,
@@ -281,8 +282,9 @@ class VolumeProfileStrategy(BaseStrategy):
         else:
             entry = current_close
             stop_loss = current_high + 0.25 * atr
-            take_profit_1 = poc
-            take_profit_2 = level - 0.5 * atr
+            # TP логика: TP1 ближе, TP2 дальше
+            take_profit_1 = level - 0.5 * atr  # TP1 к ближайшей границе value area
+            take_profit_2 = poc  # TP2 к POC (дальняя цель)
             
             return Signal(
                 strategy_name=self.name,
