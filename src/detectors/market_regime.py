@@ -9,6 +9,7 @@ from src.utils.logger import logger
 class MarketRegime(Enum):
     TREND = "TREND"
     RANGE = "RANGE"
+    CHOP = "CHOP"  # Choppy/боковое движение
     SQUEEZE = "SQUEEZE"
     UNDECIDED = "UNDECIDED"
 
@@ -62,21 +63,33 @@ class MarketRegimeDetector:
         regime = MarketRegime.UNDECIDED
         confidence = 0.0
         
-        if is_squeeze:
-            regime = MarketRegime.SQUEEZE
-            confidence = min(squeeze_bars / self.squeeze_min_bars, 1.0)
-        
-        elif adx > self.adx_threshold and ema_aligned:
+        # ПРИОРИТЕТ 1: TREND - сильный тренд с высоким ADX и выровненными EMA
+        if adx > self.adx_threshold and ema_aligned:
             regime = MarketRegime.TREND
             confidence = min(adx / 40, 1.0)
+            logger.debug(f"Regime: TREND | ADX={adx:.1f} > {self.adx_threshold}, EMA aligned={ema_aligned}")
         
+        # ПРИОРИТЕТ 2: SQUEEZE - очень узкая консолидация (BB width < 25 + длительность)
+        elif is_squeeze:
+            regime = MarketRegime.SQUEEZE
+            confidence = min(squeeze_bars / self.squeeze_min_bars, 1.0)
+            logger.debug(f"Regime: SQUEEZE | BB%ile={bb_width_percentile:.1f} < {self.squeeze_bb_percentile}, bars={squeeze_bars} >= {self.squeeze_min_bars}")
+        
+        # ПРИОРИТЕТ 3: RANGE/CHOP - низкий ADX и низкая волатильность (но не squeeze)
         elif adx < self.adx_threshold and bb_width_percentile < self.bb_percentile_threshold:
             ema_20_slope = abs(TechnicalIndicators.calculate_ema_slope(df, 20).iloc[-1])
             ema_50_slope = abs(TechnicalIndicators.calculate_ema_slope(df, 50).iloc[-1])
             
-            if ema_20_slope < 0.1 and ema_50_slope < 0.1:
+            # CHOP - беспорядочное движение (EMA не плоские, но ADX низкий)
+            if ema_20_slope >= 0.1 or ema_50_slope >= 0.1:
+                regime = MarketRegime.CHOP
+                confidence = 1.0 - (adx / self.adx_threshold)
+                logger.debug(f"Regime: CHOP | ADX={adx:.1f} < {self.adx_threshold}, BB%ile={bb_width_percentile:.1f} < {self.bb_percentile_threshold}, EMA slope не плоские")
+            # RANGE - чистый боковик (EMA плоские, ADX низкий)
+            else:
                 regime = MarketRegime.RANGE
                 confidence = 1.0 - (adx / self.adx_threshold)
+                logger.debug(f"Regime: RANGE | ADX={adx:.1f} < {self.adx_threshold}, BB%ile={bb_width_percentile:.1f} < {self.bb_percentile_threshold}, EMA плоские")
         
         details = {
             'adx': adx,
