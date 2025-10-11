@@ -4,6 +4,11 @@ This project is a sophisticated Binance USDT-M Futures Trading Bot designed to g
 
 The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
 
+## Recent Fixes (October 11, 2025)
+- **ADX Configuration Standardization**: Fixed MA/VWAP Pullback strategy to use `config.get('market_detector.trend.adx_threshold')` instead of hardcoded value 20, ensuring consistency across all strategies.
+- **Late Trend Blocking Removal**: Removed late_trend flag check from ATR Momentum strategy that was blocking signals. The late_trend flag is still calculated in market_regime.py but no longer blocks strategy execution, aligning with removal of late_trend penalty from scoring system.
+- **H4 ADX Propagation Fix**: Fixed ORB/IRB strategy receiving h4_adx=0 by adding `'h4_adx': regime_data.get('details', {}).get('adx', 0)` to indicators dictionary in main.py, and increased H4 data requirement from 50 to 200 bars to match MarketRegimeDetector's validation threshold.
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
