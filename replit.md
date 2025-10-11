@@ -1,8 +1,8 @@
 # Overview
 
-This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates 9 core strategies (with plans for 8+ more) spanning breakout, pullback, and mean reversion categories, all architect-validated against detailed specifications. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
+This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories, architect-validated against detailed specifications. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
-The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/RANGE/SQUEEZE), BTC correlation filtering, an advanced scoring system (volume, CVD, OI delta, depth imbalance), and robust risk management with stop-loss, take-profit, and time-stop mechanisms.
+The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/RANGE/SQUEEZE), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
 
 # User Preferences
 
@@ -14,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 
 ### 1. Market Data Infrastructure
 - **BinanceClient**: REST API client with rate limiting and exponential backoff.
-- **DataLoader**: Fetches historical data from data.binance.vision with caching.
+- **DataLoader**: Fetches historical data with caching.
 - **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates for sub-second depth imbalance detection.
 - **BinanceWebSocket**: Real-time market data streaming (klines, trades, depth updates).
 
@@ -25,7 +25,7 @@ Preferred communication style: Simple, everyday language.
 - **BaseStrategy**: Abstract base class for strategy definition.
 - **StrategyManager**: Orchestrates multiple strategies across timeframes.
 - **Signal Dataclass**: Standardized signal output.
-- **Implemented Strategies**: 16 strategies are implemented (15 active), including Donchian Breakout (1h), Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. Market Making is disabled (requires HFT orderbook). All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
+- **Implemented Strategies**: 15 active strategies, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies are architect-validated for compliance with manual requirements, including H4 swing confluence, mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold ≥+2.0.
 
 ### 4. Market Analysis System
 - **MarketRegimeDetector**: Classifies market into TREND/RANGE/SQUEEZE/UNDECIDED using multi-factor confirmation.
@@ -54,6 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Loader Task**: Loads historical data with retry logic and pushes symbols to a queue.
 - **Analyzer Task**: Consumes symbols from the queue, allowing immediate analysis of loaded data while background loading continues.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list every hour based on 24h volume criteria, adding new high-volume pairs and removing low-volume pairs dynamically.
+- **Data Integrity System**: Comprehensive data validation with a 99% threshold, including gap detection, auto-fix capabilities, and Telegram alerts for unfixed issues.
 
 ## Data Flow
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis of available symbols. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
@@ -79,92 +80,3 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 - **Exchange**: python-binance, ccxt.
 - **Scheduling**: APScheduler.
 - **Configuration**: pyyaml, python-dotenv.
-
-# Recent Changes (October 2025)
-
-## Latest Updates (October 11, 2025)
-1. ✅ **Dependencies Synchronized** - Синхронизированы версии зависимостей
-   - **Проблема**: requirements.txt и pyproject.toml имели разные версии пакетов (python-telegram-bot 20.7 vs 22.5, numpy 1.26 vs 2.2.6, etc.)
-   - **Решение**: requirements.txt обновлен под версии из pyproject.toml
-   - **Влияние**: Теперь одинаковые версии на Replit (uv) и Windows (pip)
-   - **Источник истины**: pyproject.toml (используется uv)
-   - **Совместимость**: requirements.txt для pip на Windows/других системах
-   
-2. ✅ **WebSocket Testnet Fix** - Исправлен критический баг переключения на testnet
-   - **Проблема**: WebSocket всегда подключался к production (`wss://fstream.binance.com`), даже при `use_testnet: true`
-   - **Решение**: Добавлен `WS_TESTNET_URL = wss://stream.binancefuture.com` и правильное переключение
-   - **Логирование**: WebSocket теперь показывает `[TESTNET]` или `[PRODUCTION]` при подключении
-   - **Влияние**: REST API и WebSocket теперь используют одинаковый environment (testnet/production)
-   - **До исправления**: REST → testnet, WebSocket → production (данные не совпадали!)
-   - **После исправления**: Оба используют testnet при `use_testnet: true`
-
-## Previous Updates (October 10, 2025)
-1. ✅ **Symbol Auto-Update System** - Автоматическое обновление списка монет
-   - **Периодическое обновление**: каждый час бот проверяет объемы и обновляет список монет
-   - **Динамическое добавление**: новые монеты с высоким объемом автоматически добавляются и загружаются
-   - **Динамическое удаление**: монеты с низким объемом удаляются из списка анализа
-   - **Настройка**: интервал обновления настраивается через `universe.update_interval_hours` в config.yaml (по умолчанию 1 час)
-   - **Логирование**: показывает какие монеты добавлены/удалены при каждом обновлении
-   - **Оптимизация**: фокус на монетах с высокой ликвидностью без перезапуска бота
-
-2. ✅ **Strategy Debug Logging** - Детальное логирование для отладки стратегий
-   - **Режим рынка**: показывает Regime (TREND/RANGE/SQUEEZE) и Bias (LONG/SHORT/NEUTRAL)
-   - **Какие стратегии проверялись**: логирует все стратегии которые сработали
-   - **Почему не прошли**: показывает Score, Base, Volume ratio, CVD, Late trend, BTC против
-   - **Пример**: `❌ Donchian Breakout | BTCUSDT LONG | Score: 1.5 < threshold 2.0 | Base: 2.0, Vol: 0.9x, CVD: neutral, Late: False, BTC: False`
-   - Логи видны в консоли бота каждые 60 секунд при проверке сигналов
-
-## Previous Updates
-1. ✅ **Smart Data Loading** - Умная докачка данных при запуске
-   - **Интеллектуальная проверка**: при запуске анализирует КАЖДУЮ монету
-   - **Gap detection**: находит последнюю свечу в БД и вычисляет разрыв
-   - **Точечная докачка**: загружает ТОЛЬКО недостающие данные (не все 90 дней)
-   - Пример: вместо 8640 свечей (90 дней 15m) догружает только 65 свечей (16 часов gap)
-   - Логирование: показывает точное время gap'а для каждого таймфрейма
-   - **Экономия**: минимум API запросов, быстрый старт, актуальные данные
-
-2. ✅ **Smart Timeframe Synchronization** - Умная докачка во время работы
-   - **Оптимизированное обновление**: свечи обновляются ТОЛЬКО когда закрываются
-     - 15m свечи: каждые 15 минут (00, 15, 30, 45)
-     - 1h свечи: каждый час (00:00)
-     - 4h свечи: каждые 4 часа (00, 04, 08, 12, 16, 20)
-   - TimeframeSync кэширует обновления (избегает дублирующих запросов)
-   - Автоматическая докачка gap'ов в данных (если разница >5 минут)
-   - Расписание обновлений отображается при запуске бота
-   - **Экономия API лимитов**: обновления только когда нужно (не каждую минуту)
-
-3. ✅ **Session Management Fix** - Исправлено управление BinanceClient сессией
-   - Проблема: контекстный менеджер закрывал сессию раньше времени
-   - Решение: ручное управление жизненным циклом сессии
-   - Сессия живет всё время работы бота (от start до stop)
-   - Исправлены ошибки "Session is closed" при загрузке данных
-
-## Previous Updates
-1. ✅ **Implemented Reclaim Mechanism** - "Hold N bars" validation for ALL mean reversion strategies
-   - New module `src/utils/reclaim_checker.py` with reusable reclaim functions:
-     - check_value_area_reclaim(): verifies price was outside VA, returned and held N bars inside
-     - check_level_reclaim(): for VWAP/EMA levels with tolerance
-     - check_range_reclaim(): for range boundaries with hold confirmation
-   - **All 4 MR strategies updated** (default 2-bar hold):
-     - **VWAP Mean Reversion**: requires hold inside VAL/VAH or VWAP bands
-     - **Range Fade**: proximity check (0.3 ATR) + reclaim support/resistance with hold
-     - **Volume Profile**: VAH/VAL rejection requires value area reclaim with hold
-     - **RSI/Stoch MR**: oscillator signals + reclaim VAL/VWAP levels with hold
-   - Reduces false signals from brief touches, improves signal quality significantly
-2. ✅ **Implemented Signal Performance Tracking** - Real-time PnL monitoring and win rate analytics
-   - SignalPerformanceTracker runs as background task (60s check interval)
-   - Monitors active signals: checks TP/SL/time-stop via mark price API
-   - Calculates PnL: LONG (exit-entry)/entry×100, SHORT (entry-exit)/entry×100
-   - Updates signal status: WIN (TP hit), LOSS (SL hit), TIME_STOP (no progress)
-   - Auto-releases symbol lock when signal exits
-   - **Telegram commands**: /performance (overall stats), /stats (per-strategy breakdown)
-   - Provides: total signals, win rate, avg/total PnL, avg win/loss, closed/active counts
-3. ✅ **Implemented "1 signal per symbol" lock** - Redis-based + SQLite fallback
-   - SignalLockManager prevents duplicate signals on same symbol
-   - TTL-based expiration (3600s default)
-   - Automatic lock release on signal exit
-4. ✅ **Signal persistence to database** - All signals saved with metadata
-   - Stable strategy_id using CRC32 hash
-   - Context_hash for deduplication  
-   - Telegram message_id linking
-   - Timezone-aware timestamps (UTC)

@@ -78,7 +78,7 @@ class TradingBot:
             # Создаём клиента и не закрываем сессию автоматически
             self.client = BinanceClient()
             await self.client.__aenter__()  # Открываем сессию
-            self.data_loader = DataLoader(self.client)
+            self.data_loader = DataLoader(self.client, self.telegram_bot)
             
             await self._initialize()
             await self._run_main_loop()

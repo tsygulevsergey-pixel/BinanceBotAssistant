@@ -269,6 +269,42 @@ class TelegramBot:
         except Exception as e:
             logger.error(f"Error sending startup message: {e}")
     
+    async def send_data_integrity_alert(self, symbol: str, issue_type: str, details: str):
+        """Send data integrity alert to Telegram
+        
+        Args:
+            symbol: Symbol with data issues
+            issue_type: Type of issue ('incomplete', 'gaps', 'corruption')
+            details: Detailed description of the issue
+        """
+        if not self.bot or not self.chat_id:
+            return
+        
+        try:
+            emoji_map = {
+                'incomplete': '⚠️',
+                'gaps': '🔴',
+                'corruption': '💥'
+            }
+            emoji = emoji_map.get(issue_type, '⚠️')
+            
+            message = (
+                f"{emoji} *Data Integrity Alert*\n\n"
+                f"📊 Symbol: `{symbol}`\n"
+                f"🔍 Issue: {issue_type}\n"
+                f"📝 Details: {details}\n\n"
+                f"⚠️ Trading on this symbol may be affected"
+            )
+            
+            await self.bot.send_message(
+                chat_id=self.chat_id,
+                text=message,
+                parse_mode='Markdown'
+            )
+            logger.info(f"Data integrity alert sent for {symbol}")
+        except Exception as e:
+            logger.error(f"Error sending data integrity alert: {e}")
+    
     async def send_signal(self, signal_data: dict):
         if not self.bot or not self.chat_id:
             return None
