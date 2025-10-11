@@ -125,6 +125,28 @@ class ATRMomentumStrategy(BaseStrategy):
                 tp1 = entry + atr_distance * rr_min
                 tp2 = entry + atr_distance * rr_max
                 
+                base_score = 1.0
+                confirmations = []
+                
+                cvd_change = indicators.get('cvd_change')
+                doi_pct = indicators.get('doi_pct')
+                depth_imbalance = indicators.get('depth_imbalance')
+                cvd_valid = indicators.get('cvd_valid', False)
+                oi_valid = indicators.get('oi_valid', False)
+                depth_valid = indicators.get('depth_valid', False)
+                
+                if cvd_valid and cvd_change is not None and cvd_change > 0:
+                    base_score += 0.5
+                    confirmations.append('cvd_direction')
+                
+                if oi_valid and doi_pct is not None and doi_pct > 5:
+                    base_score += 0.5
+                    confirmations.append('doi_growth')
+                
+                if depth_valid and depth_imbalance is not None and depth_imbalance > 0:
+                    base_score += 0.5
+                    confirmations.append('bid_pressure')
+                
                 signal = Signal(
                     strategy_name=self.name,
                     symbol=symbol,
@@ -137,14 +159,18 @@ class ATRMomentumStrategy(BaseStrategy):
                     take_profit_2=float(tp2),
                     regime=regime,
                     bias=bias,
-                    base_score=1.0,
+                    base_score=base_score,
                     volume_ratio=float(volume_ratio),
                     metadata={
                         'impulse_high': float(impulse_high),
                         'impulse_low': float(impulse_low),
                         'impulse_bar_index': int(impulse_bar_idx),
                         'distance_to_resistance_atr': float(distance_to_resistance),
-                        'entry_type': 'breakout'
+                        'entry_type': 'breakout',
+                        'confirmations': confirmations,
+                        'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                        'doi_pct': float(doi_pct) if doi_pct is not None else None,
+                        'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
                     }
                 )
                 return signal
@@ -162,6 +188,28 @@ class ATRMomentumStrategy(BaseStrategy):
                 tp1 = entry + atr_distance * rr_min
                 tp2 = entry + atr_distance * rr_max
                 
+                base_score = 1.0
+                confirmations = []
+                
+                cvd_change = indicators.get('cvd_change')
+                doi_pct = indicators.get('doi_pct')
+                depth_imbalance = indicators.get('depth_imbalance')
+                cvd_valid = indicators.get('cvd_valid', False)
+                oi_valid = indicators.get('oi_valid', False)
+                depth_valid = indicators.get('depth_valid', False)
+                
+                if cvd_valid and cvd_change is not None and cvd_change > 0:
+                    base_score += 0.5
+                    confirmations.append('cvd_direction')
+                
+                if oi_valid and doi_pct is not None and doi_pct > 5:
+                    base_score += 0.5
+                    confirmations.append('doi_growth')
+                
+                if depth_valid and depth_imbalance is not None and depth_imbalance > 0:
+                    base_score += 0.5
+                    confirmations.append('bid_pressure')
+                
                 signal = Signal(
                     strategy_name=self.name,
                     symbol=symbol,
@@ -174,14 +222,18 @@ class ATRMomentumStrategy(BaseStrategy):
                     take_profit_2=float(tp2),
                     regime=regime,
                     bias=bias,
-                    base_score=1.0,
+                    base_score=base_score,
                     volume_ratio=float(volume_ratio),
                     metadata={
                         'impulse_high': float(impulse_high),
                         'impulse_low': float(impulse_low),
                         'ema9': float(ema9_val),
                         'ema20': float(ema20_val),
-                        'entry_type': 'pullback'
+                        'entry_type': 'pullback',
+                        'confirmations': confirmations,
+                        'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                        'doi_pct': float(doi_pct) if doi_pct is not None else None,
+                        'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
                     }
                 )
                 return signal

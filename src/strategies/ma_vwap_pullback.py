@@ -101,6 +101,22 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                     tp1 = entry + atr_distance * 1.0  # TP1=+1R
                     tp2 = entry + atr_distance * rr_max
                     
+                    base_score = 1.0
+                    confirmations = []
+                    
+                    cvd_change = indicators.get('cvd_change')
+                    doi_pct = indicators.get('doi_pct')
+                    cvd_valid = indicators.get('cvd_valid', False)
+                    oi_valid = indicators.get('oi_valid', False)
+                    
+                    if cvd_valid and cvd_change is not None and cvd_change > 0:
+                        base_score += 0.5
+                        confirmations.append('cvd_flip_up')
+                    
+                    if oi_valid and doi_pct is not None and doi_pct > 5:
+                        base_score += 0.5
+                        confirmations.append('doi_growth')
+                    
                     signal = Signal(
                         strategy_name=self.name,
                         symbol=symbol,
@@ -113,7 +129,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                         take_profit_2=float(tp2),
                         regime=regime,
                         bias=bias,
-                        base_score=1.0,
+                        base_score=base_score,
                         volume_ratio=float(volume_ratio),
                         metadata={
                             'ema20': float(current_ema20),
@@ -121,7 +137,10 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                             'adx': float(current_adx),
                             'swing_low': float(swing_low),
                             'pullback_zone_upper': float(pullback_zone_upper),
-                            'pullback_zone_lower': float(pullback_zone_lower)
+                            'pullback_zone_lower': float(pullback_zone_lower),
+                            'confirmations': confirmations,
+                            'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                            'doi_pct': float(doi_pct) if doi_pct is not None else None
                         }
                     )
                     return signal
@@ -142,6 +161,22 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                     tp1 = entry - atr_distance * 1.0
                     tp2 = entry - atr_distance * rr_max
                     
+                    base_score = 1.0
+                    confirmations = []
+                    
+                    cvd_change = indicators.get('cvd_change')
+                    doi_pct = indicators.get('doi_pct')
+                    cvd_valid = indicators.get('cvd_valid', False)
+                    oi_valid = indicators.get('oi_valid', False)
+                    
+                    if cvd_valid and cvd_change is not None and cvd_change < 0:
+                        base_score += 0.5
+                        confirmations.append('cvd_flip_down')
+                    
+                    if oi_valid and doi_pct is not None and doi_pct > 5:
+                        base_score += 0.5
+                        confirmations.append('doi_growth')
+                    
                     signal = Signal(
                         strategy_name=self.name,
                         symbol=symbol,
@@ -154,7 +189,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                         take_profit_2=float(tp2),
                         regime=regime,
                         bias=bias,
-                        base_score=1.0,
+                        base_score=base_score,
                         volume_ratio=float(volume_ratio),
                         metadata={
                             'ema20': float(current_ema20),
@@ -162,7 +197,10 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                             'adx': float(current_adx),
                             'swing_high': float(swing_high),
                             'pullback_zone_upper': float(pullback_zone_upper),
-                            'pullback_zone_lower': float(pullback_zone_lower)
+                            'pullback_zone_lower': float(pullback_zone_lower),
+                            'confirmations': confirmations,
+                            'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                            'doi_pct': float(doi_pct) if doi_pct is not None else None
                         }
                     )
                     return signal

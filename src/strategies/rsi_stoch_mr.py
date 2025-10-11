@@ -124,6 +124,22 @@ class RSIStochMRStrategy(BaseStrategy):
                 tp1 = entry + atr_distance * 1.0
                 tp2 = entry + atr_distance * 2.0
                 
+                base_score = 1.0
+                confirmations = []
+                
+                cvd_change = indicators.get('cvd_change')
+                depth_imbalance = indicators.get('depth_imbalance')
+                cvd_valid = indicators.get('cvd_valid', False)
+                depth_valid = indicators.get('depth_valid', False)
+                
+                if cvd_valid and cvd_change is not None and cvd_change > 0:
+                    base_score += 0.5
+                    confirmations.append('cvd_flip_up')
+                
+                if depth_valid and depth_imbalance is not None and depth_imbalance > 0:
+                    base_score += 0.5
+                    confirmations.append('bid_pressure')
+                
                 signal = Signal(
                     strategy_name=self.name,
                     symbol=symbol,
@@ -136,7 +152,7 @@ class RSIStochMRStrategy(BaseStrategy):
                     take_profit_2=float(tp2),
                     regime=regime,
                     bias=bias,
-                    base_score=1.0,
+                    base_score=base_score,
                     metadata={
                         'rsi': float(current_rsi),
                         'rsi_oversold': float(rsi_oversold),
@@ -146,7 +162,10 @@ class RSIStochMRStrategy(BaseStrategy):
                         'cross_type': 'bullish',
                         'reclaim_bars': self.reclaim_bars,
                         'val_reclaim': val_reclaim,
-                        'vwap_reclaim': vwap_reclaim
+                        'vwap_reclaim': vwap_reclaim,
+                        'confirmations': confirmations,
+                        'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                        'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
                     }
                 )
                 return signal
@@ -189,6 +208,22 @@ class RSIStochMRStrategy(BaseStrategy):
                 tp1 = entry - atr_distance * 1.0
                 tp2 = entry - atr_distance * 2.0
                 
+                base_score = 1.0
+                confirmations = []
+                
+                cvd_change = indicators.get('cvd_change')
+                depth_imbalance = indicators.get('depth_imbalance')
+                cvd_valid = indicators.get('cvd_valid', False)
+                depth_valid = indicators.get('depth_valid', False)
+                
+                if cvd_valid and cvd_change is not None and cvd_change < 0:
+                    base_score += 0.5
+                    confirmations.append('cvd_flip_down')
+                
+                if depth_valid and depth_imbalance is not None and depth_imbalance < 0:
+                    base_score += 0.5
+                    confirmations.append('ask_pressure')
+                
                 signal = Signal(
                     strategy_name=self.name,
                     symbol=symbol,
@@ -201,7 +236,7 @@ class RSIStochMRStrategy(BaseStrategy):
                     take_profit_2=float(tp2),
                     regime=regime,
                     bias=bias,
-                    base_score=1.0,
+                    base_score=base_score,
                     metadata={
                         'rsi': float(current_rsi),
                         'rsi_oversold': float(rsi_oversold),
@@ -211,7 +246,10 @@ class RSIStochMRStrategy(BaseStrategy):
                         'cross_type': 'bearish',
                         'reclaim_bars': self.reclaim_bars,
                         'vah_reclaim': vah_reclaim,
-                        'vwap_upper_reclaim': vwap_upper_reclaim
+                        'vwap_upper_reclaim': vwap_upper_reclaim,
+                        'confirmations': confirmations,
+                        'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                        'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
                     }
                 )
                 return signal

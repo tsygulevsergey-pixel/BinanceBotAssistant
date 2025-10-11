@@ -193,6 +193,22 @@ class RangeFadeStrategy(BaseStrategy):
                 tp1 = mid_range
                 tp2 = resistance
                 
+                base_score = 1.0
+                confirmations = []
+                
+                cvd_change = indicators.get('cvd_change')
+                depth_imbalance = indicators.get('depth_imbalance')
+                cvd_valid = indicators.get('cvd_valid', False)
+                depth_valid = indicators.get('depth_valid', False)
+                
+                if cvd_valid and cvd_change is not None and cvd_change < 0:
+                    base_score += 0.5
+                    confirmations.append('cvd_divergence')
+                
+                if depth_valid and depth_imbalance is not None and depth_imbalance < 0:
+                    base_score += 0.5
+                    confirmations.append('ask_pressure_fade')
+                
                 signal = Signal(
                     strategy_name=self.name,
                     symbol=symbol,
@@ -205,14 +221,17 @@ class RangeFadeStrategy(BaseStrategy):
                     take_profit_2=float(tp2),
                     regime=regime,
                     bias=bias,
-                    base_score=1.0,
+                    base_score=base_score,
                     metadata={
                         'resistance': float(resistance),
                         'support': float(support),
                         'resistance_tests': int(range_bounds['resistance_tests']),
                         'support_tests': int(range_bounds['support_tests']),
                         'fade_from': 'support',
-                        'reclaim_bars': self.reclaim_bars
+                        'reclaim_bars': self.reclaim_bars,
+                        'confirmations': confirmations,
+                        'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                        'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
                     }
                 )
                 return signal
@@ -239,6 +258,22 @@ class RangeFadeStrategy(BaseStrategy):
                 tp1 = mid_range
                 tp2 = support
                 
+                base_score = 1.0
+                confirmations = []
+                
+                cvd_change = indicators.get('cvd_change')
+                depth_imbalance = indicators.get('depth_imbalance')
+                cvd_valid = indicators.get('cvd_valid', False)
+                depth_valid = indicators.get('depth_valid', False)
+                
+                if cvd_valid and cvd_change is not None and cvd_change > 0:
+                    base_score += 0.5
+                    confirmations.append('cvd_divergence')
+                
+                if depth_valid and depth_imbalance is not None and depth_imbalance > 0:
+                    base_score += 0.5
+                    confirmations.append('bid_pressure_fade')
+                
                 signal = Signal(
                     strategy_name=self.name,
                     symbol=symbol,
@@ -251,14 +286,17 @@ class RangeFadeStrategy(BaseStrategy):
                     take_profit_2=float(tp2),
                     regime=regime,
                     bias=bias,
-                    base_score=1.0,
+                    base_score=base_score,
                     metadata={
                         'resistance': float(resistance),
                         'support': float(support),
                         'resistance_tests': int(range_bounds['resistance_tests']),
                         'support_tests': int(range_bounds['support_tests']),
                         'fade_from': 'resistance',
-                        'reclaim_bars': self.reclaim_bars
+                        'reclaim_bars': self.reclaim_bars,
+                        'confirmations': confirmations,
+                        'cvd_change': float(cvd_change) if cvd_change is not None else None,
+                        'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
                     }
                 )
                 return signal
