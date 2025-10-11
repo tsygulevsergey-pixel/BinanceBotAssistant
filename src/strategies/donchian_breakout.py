@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
+from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_donchian, calculate_atr, calculate_bollinger_bands
 
 
@@ -42,11 +43,13 @@ class DonchianBreakoutStrategy(BaseStrategy):
         
         # Работает только в TREND режиме
         if regime != 'TREND':
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется TREND")
             return None
         
         # Проверка достаточности данных
         lookback_bars = self.lookback_days * 24  # Для H1
         if len(df) < max(self.period, lookback_bars) + 1:
+            strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров")
             return None
         
         # Рассчитать Donchian Channel
@@ -76,6 +79,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
         
         # Проверка: BB width был низким (p30-40) до пробоя
         if not (prev_bb_width_p30 <= prev_bb_width <= prev_bb_width_p40):
+            strategy_logger.debug(f"    ❌ BB width не в диапазоне p30-40: {prev_bb_width:.6f} (p30={prev_bb_width_p30:.6f}, p40={prev_bb_width_p40:.6f})")
             return None
         
         # Средний объём за 20 периодов
@@ -91,6 +95,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
             
             # Фильтр по H4 bias
             if bias == 'Bearish':
+                strategy_logger.debug(f"    ❌ LONG пробой есть, но H4 bias Bearish")
                 return None
             
             # Расчёт уровней
@@ -134,6 +139,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
             
             # Фильтр по H4 bias
             if bias == 'Bullish':
+                strategy_logger.debug(f"    ❌ SHORT пробой есть, но H4 bias Bullish")
                 return None
             
             # Расчёт уровней
@@ -169,4 +175,37 @@ class DonchianBreakoutStrategy(BaseStrategy):
             )
             return signal
         
+        # Логирование причины отсутствия сигнала
+        reasons = []
+        
+        # Проверка LONG условий
+        long_high_ok = current_high > current_upper
+        long_close_ok = current_close > current_upper
+        long_vol_ok = volume_ratio >= self.volume_threshold
+        long_dist_ok = (current_close - current_upper) >= self.min_close_distance_atr * current_atr if current_close > current_upper else False
+        
+        # Проверка SHORT условий
+        short_low_ok = current_low < current_lower
+        short_close_ok = current_close < current_lower
+        short_vol_ok = volume_ratio >= self.volume_threshold
+        short_dist_ok = (current_lower - current_close) >= self.min_close_distance_atr * current_atr if current_close < current_lower else False
+        
+        if not long_high_ok and not short_low_ok:
+            reasons.append(f"нет пробоя границ (high={current_high:.4f}, upper={current_upper:.4f}, low={current_low:.4f}, lower={current_lower:.4f})")
+        elif long_high_ok and not long_close_ok:
+            reasons.append(f"LONG: high пробил, но close не закрылся выше (close={current_close:.4f} < upper={current_upper:.4f})")
+        elif short_low_ok and not short_close_ok:
+            reasons.append(f"SHORT: low пробил, но close не закрылся ниже (close={current_close:.4f} > lower={current_lower:.4f})")
+        elif (long_high_ok and long_close_ok and not long_vol_ok) or (short_low_ok and short_close_ok and not short_vol_ok):
+            reasons.append(f"объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
+        elif (long_high_ok and long_close_ok and long_vol_ok and not long_dist_ok):
+            dist = (current_close - current_upper) / current_atr if current_atr > 0 else 0
+            reasons.append(f"LONG: расстояние от границы мало: {dist:.2f} ATR < {self.min_close_distance_atr} ATR")
+        elif (short_low_ok and short_close_ok and short_vol_ok and not short_dist_ok):
+            dist = (current_lower - current_close) / current_atr if current_atr > 0 else 0
+            reasons.append(f"SHORT: расстояние от границы мало: {dist:.2f} ATR < {self.min_close_distance_atr} ATR")
+        else:
+            reasons.append("условия пробоя не выполнены")
+        
+        strategy_logger.debug(f"    ❌ {', '.join(reasons)}")
         return None

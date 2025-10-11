@@ -6,12 +6,19 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 # Recent Changes
 
-## 2025-10-11: Dedicated Strategy Logging System
+## 2025-10-11: Dedicated Strategy Logging with Failure Reasons
 - **Created separate strategy logging for deep analysis**:
   - New `logs/strategies.log` file dedicated to strategy analysis (separate from main `bot.log`)
   - Added `src/utils/strategy_logger.py` with dedicated logger configuration
   - **Per-symbol logging**: Shows regime (TREND/RANGE/SQUEEZE), bias (bullish/bearish), which strategies checked, and results
   - **Per-strategy details**: Displays which of 16 strategies were checked/skipped/generated signals with entry/SL/TP prices
+  - **Failure reasons logging**: Each strategy now logs WHY it didn't generate a signal:
+    - "❌ Режим SQUEEZE, требуется TREND" - wrong market regime
+    - "❌ Недостаточно данных: 120 баров" - insufficient data
+    - "❌ BB width не в диапазоне p30-40" - volatility filter failed
+    - "❌ объем низкий: 1.2x < 1.5x" - volume requirement not met
+    - "❌ нет пробоя границ" - breakout conditions not met
+    - And more detailed diagnostics per strategy
   - **Scoring breakdown**: Detailed score components (Base, Volume, CVD, Late Trend, BTC) when signals are generated
   - **Filter logging**: Shows why signals passed/failed threshold (≥2.0) and symbol lock status
   - **Statistics**: Summary counts (checked/skipped/signals) for each analysis cycle
