@@ -44,21 +44,29 @@ market_detector:
 # Scoring System
 scoring:
   base_threshold: 2.0
+  enter_threshold: 2.0  # Threshold for entry (используется в коде как enter_threshold)
   
   volume_multiplier: 1.5
+  volume_mult: 1.5  # Threshold для volume ratio (используется в коде)
   volume_score: 1
   
   cvd_score: 1
   delta_oi_score: 1
   delta_oi_threshold: [1.0, 3.0]  # [min, max] %
   delta_oi_alt_threshold: [0.5, 1.0]  # for altcoins
+  doi_min_pct: 1.0  # Min OI delta % (используется в коде)
+  doi_max_pct: 3.0  # Max OI delta % (используется в коде)
   
   imbalance_duration: [10, 30]  # seconds
   imbalance_score: 1
+  depth_imbalance_ratio:
+    long_max: 0.90  # Ratio для LONG (bid/ask < 0.90)
+    short_min: 1.10  # Ratio для SHORT (bid/ask > 1.10)
   
   late_trend_penalty: -1
   funding_extreme_penalty: -1
   btc_against_penalty: -2
+  btc_filter_tf: "1h"  # BTC filter timeframe
 
 # Scanning
 scanning:
@@ -85,6 +93,8 @@ btc_filter:
   impulse_threshold: 1.5  # % H1 bar range (high-low)
   impulse_cooldown: 30  # minutes
   expansion_block_mr: true
+  expansion_atr_mult: 1.5  # ATR multiplier для expansion detection
+  lookback_bars: 10  # Lookback period для ATR average
 
 # Time of Day Gating
 tod_gating:
