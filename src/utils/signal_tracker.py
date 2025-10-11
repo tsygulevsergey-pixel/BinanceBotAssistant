@@ -14,12 +14,14 @@ class SignalPerformanceTracker:
     """Отслеживание производительности активных сигналов (PnL, win rate, exit tracking)"""
     
     def __init__(self, binance_client: BinanceClient, db: Database, 
-                 lock_manager: SignalLockManager, check_interval: int = 60):
+                 lock_manager: SignalLockManager, check_interval: int = 60,
+                 on_signal_closed_callback = None):
         self.binance_client = binance_client
         self.db = db
         self.lock_manager = lock_manager
         self.check_interval = check_interval
         self.running = False
+        self.on_signal_closed_callback = on_signal_closed_callback
         
     async def start(self):
         """Запустить фоновую задачу трекинга"""
@@ -85,6 +87,10 @@ class SignalPerformanceTracker:
                 signal.closed_at = datetime.now(pytz.UTC)  # type: ignore
                 
                 self.lock_manager.release_lock(symbol_str)
+                
+                # Вызвать callback для разблокировки символа
+                if self.on_signal_closed_callback:
+                    self.on_signal_closed_callback(symbol_str)
                 
                 status_emoji = "✅" if exit_reason == "WIN" else "❌" if exit_reason == "LOSS" else "⏱️"
                 logger.info(

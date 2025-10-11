@@ -57,6 +57,7 @@ class TradingBot:
         self.data_loader: Optional[DataLoader] = None
         self.symbols: List[str] = []
         self.ready_symbols: List[str] = []  # Symbols with loaded data, ready for analysis
+        self.symbols_with_active_signals: set = set()  # Символы с активными сигналами (блокированы от анализа)
         self.coordinator: Optional[SymbolLoadCoordinator] = None
         self.performance_tracker: Optional[SignalPerformanceTracker] = None
         
@@ -160,7 +161,8 @@ class TradingBot:
             binance_client=self.client,
             db=db,
             lock_manager=self.signal_lock_manager,
-            check_interval=check_interval
+            check_interval=check_interval,
+            on_signal_closed_callback=self._unblock_symbol
         )
         asyncio.create_task(self.performance_tracker.start())
         logger.info(f"📊 Signal Performance Tracker started (check interval: {check_interval}s)")
@@ -285,6 +287,11 @@ class TradingBot:
         
         # Проверяем все готовые символы
         for symbol in symbols_to_check:
+            # Пропускаем символы с активными сигналами
+            if symbol in self.symbols_with_active_signals:
+                logger.debug(f"⏭️  {symbol} skipped - has active signal")
+                continue
+            
             try:
                 await self._check_symbol_signals(symbol, btc_data)
             except Exception as e:
@@ -547,6 +554,9 @@ class TradingBot:
                         regime=regime,
                         telegram_msg_id=telegram_msg_id
                     )
+                    
+                    # Заблокировать символ от дальнейшего анализа
+                    self._block_symbol(signal.symbol)
                 
                 elif action == "PENDING":
                     # LIMIT entry → отложенный ордер
@@ -578,6 +588,9 @@ class TradingBot:
                         telegram_msg_id=telegram_msg_id,
                         status='PENDING'
                     )
+                    
+                    # Заблокировать символ от дальнейшего анализа
+                    self._block_symbol(signal.symbol)
                 
                 else:
                     # SKIP - уже есть активный LIMIT ордер
@@ -810,6 +823,17 @@ class TradingBot:
             logger.error(f"Failed to update LIMIT entry in DB: {e}", exc_info=True)
         finally:
             session.close()
+    
+    def _block_symbol(self, symbol: str):
+        """Заблокировать символ от анализа (есть активный сигнал)"""
+        self.symbols_with_active_signals.add(symbol)
+        logger.info(f"🔒 {symbol} blocked from analysis (active signal)")
+    
+    def _unblock_symbol(self, symbol: str):
+        """Разблокировать символ для анализа (сигнал закрыт)"""
+        if symbol in self.symbols_with_active_signals:
+            self.symbols_with_active_signals.remove(symbol)
+            logger.info(f"🔓 {symbol} unblocked for analysis (signal closed)")
     
     async def stop(self):
         import traceback
