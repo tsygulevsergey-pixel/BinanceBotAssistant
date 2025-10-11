@@ -40,18 +40,27 @@ class CVDDivergenceStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars + 10}")
             return None
         
-        # CVD из своего timeframe, fallback к верхнеуровневому или 0
-        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
+        # Получаем CVD Series из indicators или рассчитываем
+        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', None))
         
-        # Рассчитываем барную CVD из klines если нет тиковой
-        if cvd == 0:
-            # Барная CVD: buy volume - sell volume
+        # Проверяем тип CVD
+        if cvd is None or (isinstance(cvd, (int, float)) and cvd == 0):
+            # Рассчитываем барную CVD из klines
             buy_volume = df.get('takerBuyBaseAssetVolume', df['volume'] * 0.5)
             sell_volume = df['volume'] - buy_volume
             cvd_series = (buy_volume - sell_volume).cumsum()
+        elif isinstance(cvd, pd.Series):
+            # CVD уже Series - используем напрямую
+            cvd_series = cvd
+            if len(cvd_series) != len(df):
+                strategy_logger.debug(f"    ❌ Длина CVD Series ({len(cvd_series)}) не совпадает с df ({len(df)})")
+                return None
         else:
-            # Используем существующий CVD
-            cvd_series = pd.Series([cvd] * len(df), index=df.index)
+            # CVD скаляр - это последнее значение, нужно рассчитать историю
+            strategy_logger.debug(f"    ⚠️ CVD передан как скаляр ({cvd}), рассчитываем барную CVD")
+            buy_volume = df.get('takerBuyBaseAssetVolume', df['volume'] * 0.5)
+            sell_volume = df['volume'] - buy_volume
+            cvd_series = (buy_volume - sell_volume).cumsum()
         
         # Поиск дивергенции
         divergence_type = self._detect_divergence(df, cvd_series)
