@@ -33,6 +33,9 @@ class BinanceClient:
         
         self.session: Optional[aiohttp.ClientSession] = None
         self.rate_limiter = RateLimiter()
+        
+        # Кэш для информации о символах (precision)
+        self.symbols_info: Dict[str, Dict] = {}
     
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -82,6 +85,31 @@ class BinanceClient:
     
     async def get_exchange_info(self) -> Dict:
         return await self._request('GET', '/fapi/v1/exchangeInfo', weight=1)
+    
+    async def load_symbols_info(self):
+        """Загрузить информацию о символах (precision) в кэш"""
+        try:
+            info = await self.get_exchange_info()
+            for symbol_info in info.get('symbols', []):
+                symbol = symbol_info['symbol']
+                self.symbols_info[symbol] = {
+                    'pricePrecision': symbol_info.get('pricePrecision', 2),
+                    'quantityPrecision': symbol_info.get('quantityPrecision', 3),
+                    'status': symbol_info.get('status'),
+                    'contractType': symbol_info.get('contractType')
+                }
+            logger.info(f"Loaded precision info for {len(self.symbols_info)} symbols")
+        except Exception as e:
+            logger.error(f"Failed to load symbols info: {e}")
+    
+    def format_price(self, symbol: str, price: float) -> str:
+        """Форматировать цену согласно precision символа"""
+        if symbol not in self.symbols_info:
+            # Если нет информации, используем разумное форматирование
+            return f"{price:.8f}".rstrip('0').rstrip('.')
+        
+        precision = self.symbols_info[symbol]['pricePrecision']
+        return f"{price:.{precision}f}"
     
     async def get_futures_pairs(self) -> List[str]:
         info = await self.get_exchange_info()
