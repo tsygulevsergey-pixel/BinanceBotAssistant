@@ -418,7 +418,8 @@ class TradingBot:
             logger.debug(f"⚪ {symbol}: No signals from any strategy")
             strategy_logger.info(f"⚪ Ни одна стратегия не дала сигнал")
         
-        # Применить скоринг к каждому сигналу
+        # ШАГ 1: Рассчитать final_score для ВСЕХ сигналов
+        scored_signals = []
         for signal in signals:
             strategy_logger.info(f"\n📊 СКОРИНГ: {signal.strategy_name} | {signal.direction}")
             
@@ -440,12 +441,26 @@ class TradingBot:
             )
             strategy_logger.info(score_breakdown)
             
+            # Сохраняем сигнал с его score
+            scored_signals.append((signal, final_score))
+        
+        # ШАГ 2: Сортировка по final_score (от большего к меньшему)
+        # Это гарантирует, что лучший сигнал обработается первым
+        scored_signals.sort(key=lambda x: x[1], reverse=True)
+        
+        if scored_signals:
+            strategy_logger.info(f"\n🎯 ПРИОРИТИЗАЦИЯ: Сигналы отсортированы по score:")
+            for idx, (sig, score) in enumerate(scored_signals, 1):
+                strategy_logger.info(f"  {idx}. {sig.strategy_name} {sig.direction} - Score: {score:.1f}")
+        
+        # ШАГ 3: Обработка сигналов в порядке приоритета (highest score first)
+        for signal, final_score in scored_signals:
             # Проверить порог входа
             if self.signal_scorer.should_enter(final_score):
                 logger.debug(f"✅ {signal.strategy_name} | {symbol} {signal.direction} | Score: {final_score:.1f} PASSED threshold")
-                strategy_logger.info(f"✅ ПРОШЕЛ ПОРОГ (≥2.0) - ВАЛИДНЫЙ СИГНАЛ!")
+                strategy_logger.info(f"\n✅ ПРОШЕЛ ПОРОГ (≥2.0) - ВАЛИДНЫЙ СИГНАЛ!")
                 
-                # Проверить блокировку символа (политика "1 сигнал на символ")
+                # Проверить блокировку (политика "1 сигнал на направление на символ")
                 lock_acquired = self.signal_lock_manager.acquire_lock(
                     symbol=signal.symbol,
                     direction=signal.direction,
@@ -454,20 +469,11 @@ class TradingBot:
                 
                 if not lock_acquired:
                     logger.warning(
-                        f"⏭️  Signal skipped (symbol locked): {signal.strategy_name} | "
+                        f"⏭️  Signal skipped (locked): {signal.strategy_name} | "
                         f"{signal.symbol} {signal.direction}"
                     )
-                    strategy_logger.warning(f"⏭️  ПРОПУЩЕН: Символ уже заблокирован другим сигналом")
+                    strategy_logger.warning(f"⏭️  ПРОПУЩЕН: {signal.direction} уже заблокирован другим сигналом")
                     continue
-            else:
-                logger.debug(
-                    f"❌ {signal.strategy_name} | {symbol} {signal.direction} | "
-                    f"Score: {final_score:.1f} < threshold 2.0 | "
-                    f"Base: {signal.base_score:.1f}, Vol: {signal.volume_ratio:.1f}x, "
-                    f"CVD: {signal.cvd_direction}, Late: {signal.late_trend}, BTC: {signal.btc_against}"
-                )
-                strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < 2.0")
-                continue
                 
                 logger.info(
                     f"✅ VALID SIGNAL: {signal.strategy_name} | "
@@ -496,6 +502,15 @@ class TradingBot:
                     regime=regime,
                     telegram_msg_id=telegram_msg_id
                 )
+            else:
+                logger.debug(
+                    f"❌ {signal.strategy_name} | {symbol} {signal.direction} | "
+                    f"Score: {final_score:.1f} < threshold 2.0 | "
+                    f"Base: {signal.base_score:.1f}, Vol: {signal.volume_ratio:.1f}x, "
+                    f"CVD: {signal.cvd_direction}, Late: {signal.late_trend}, BTC: {signal.btc_against}"
+                )
+                strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < 2.0")
+                continue  # Пропустить сигналы с score < threshold
     
     async def _symbol_loader_task(self):
         """Background task to load symbol data and add to ready queue"""

@@ -57,8 +57,16 @@ class SignalLockManager:
         else:
             logger.warning("Redis library not available, using SQLite fallback for signal locks")
     
-    def _generate_lock_key(self, symbol: str) -> str:
-        """Генерировать ключ блокировки для символа"""
+    def _generate_lock_key(self, symbol: str, direction: str = None) -> str:
+        """
+        Генерировать ключ блокировки для символа и направления
+        
+        Args:
+            symbol: Торговая пара
+            direction: Направление (LONG/SHORT) - если None, только символ
+        """
+        if direction:
+            return f"signal_lock:{symbol}:{direction}"
         return f"signal_lock:{symbol}"
     
     def acquire_lock(self, symbol: str, direction: str, strategy_name: str) -> bool:
@@ -81,7 +89,8 @@ class SignalLockManager:
     def _acquire_lock_redis(self, symbol: str, direction: str, strategy_name: str) -> bool:
         """Получить блокировку через Redis"""
         try:
-            key = self._generate_lock_key(symbol)
+            # Используем direction в ключе для раздельных locks LONG/SHORT
+            key = self._generate_lock_key(symbol, direction)
             lock_data = f"{strategy_name}:{direction}"
             
             # SET NX EX - установить только если не существует с TTL
@@ -93,14 +102,14 @@ class SignalLockManager:
             )
             
             if result:
-                logger.info(f"🔒 Lock acquired: {symbol} ({strategy_name} {direction}) TTL={self.lock_ttl}s")
+                logger.info(f"🔒 Lock acquired: {symbol} {direction} ({strategy_name}) TTL={self.lock_ttl}s")
                 return True
             else:
                 existing = self.redis_client.get(key)
-                logger.warning(f"❌ Lock denied: {symbol} already locked by {existing}")
+                logger.warning(f"❌ Lock denied: {symbol} {direction} already locked by {existing}")
                 return False
         except Exception as e:
-            logger.error(f"Redis lock error for {symbol}: {e}")
+            logger.error(f"Redis lock error for {symbol} {direction}: {e}")
             # Fallback to SQLite on Redis error
             return self._acquire_lock_sqlite(symbol, direction, strategy_name)
     
@@ -117,15 +126,16 @@ class SignalLockManager:
             ).delete()
             session.commit()
             
-            # Проверить существующую блокировку
+            # Проверить существующую блокировку для этого символа И направления
             existing_lock = session.query(SignalLock).filter(
-                SignalLock.symbol == symbol
+                SignalLock.symbol == symbol,
+                SignalLock.direction == direction
             ).first()
             
             if existing_lock:
                 logger.warning(
-                    f"❌ Lock denied: {symbol} already locked by "
-                    f"{existing_lock.strategy_name} {existing_lock.direction}"
+                    f"❌ Lock denied: {symbol} {direction} already locked by "
+                    f"{existing_lock.strategy_name}"
                 )
                 return False
             
@@ -139,42 +149,67 @@ class SignalLockManager:
             session.add(new_lock)
             session.commit()
             
-            logger.info(f"🔒 Lock acquired (SQLite): {symbol} ({strategy_name} {direction}) TTL={self.lock_ttl}s")
+            logger.info(f"🔒 Lock acquired (SQLite): {symbol} {direction} ({strategy_name}) TTL={self.lock_ttl}s")
             return True
             
         except Exception as e:
             session.rollback()
-            logger.error(f"SQLite lock error for {symbol}: {e}")
+            logger.error(f"SQLite lock error for {symbol} {direction}: {e}")
             return False
         finally:
             session.close()
     
-    def release_lock(self, symbol: str):
-        """Освободить блокировку символа"""
+    def release_lock(self, symbol: str, direction: str = None):
+        """
+        Освободить блокировку символа
+        
+        Args:
+            symbol: Торговая пара
+            direction: Направление (LONG/SHORT) - если None, освобождает все locks символа
+        """
         if self.use_redis:
-            self._release_lock_redis(symbol)
+            self._release_lock_redis(symbol, direction)
         else:
-            self._release_lock_sqlite(symbol)
+            self._release_lock_sqlite(symbol, direction)
     
-    def _release_lock_redis(self, symbol: str):
+    def _release_lock_redis(self, symbol: str, direction: str = None):
         """Освободить блокировку через Redis"""
         try:
-            key = self._generate_lock_key(symbol)
-            deleted = self.redis_client.delete(key)
-            if deleted:
-                logger.info(f"🔓 Lock released: {symbol}")
+            if direction:
+                # Освободить конкретное направление
+                key = self._generate_lock_key(symbol, direction)
+                deleted = self.redis_client.delete(key)
+                if deleted:
+                    logger.info(f"🔓 Lock released: {symbol} {direction}")
+            else:
+                # Освободить все locks для символа (LONG и SHORT)
+                pattern = f"signal_lock:{symbol}:*"
+                keys = self.redis_client.keys(pattern)
+                if keys:
+                    deleted = self.redis_client.delete(*keys)
+                    logger.info(f"🔓 Locks released: {symbol} ({deleted} locks)")
         except Exception as e:
             logger.error(f"Redis unlock error for {symbol}: {e}")
     
-    def _release_lock_sqlite(self, symbol: str):
+    def _release_lock_sqlite(self, symbol: str, direction: str = None):
         """Освободить блокировку через SQLite"""
         session = db.get_session()
         try:
-            session.query(SignalLock).filter(
-                SignalLock.symbol == symbol
-            ).delete()
-            session.commit()
-            logger.info(f"🔓 Lock released (SQLite): {symbol}")
+            query = session.query(SignalLock).filter(SignalLock.symbol == symbol)
+            
+            if direction:
+                # Освободить конкретное направление
+                query = query.filter(SignalLock.direction == direction)
+                deleted = query.delete()
+                session.commit()
+                if deleted:
+                    logger.info(f"🔓 Lock released (SQLite): {symbol} {direction}")
+            else:
+                # Освободить все locks для символа
+                deleted = query.delete()
+                session.commit()
+                if deleted:
+                    logger.info(f"🔓 Locks released (SQLite): {symbol} ({deleted} locks)")
         except Exception as e:
             session.rollback()
             logger.error(f"SQLite unlock error for {symbol}: {e}")
