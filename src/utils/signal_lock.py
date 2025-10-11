@@ -16,7 +16,7 @@ except ImportError:
 
 from src.utils.config import config
 from src.utils.logger import logger
-from src.database import db
+from src.database.db import db
 from src.database.models import SignalLock
 
 
