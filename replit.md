@@ -52,6 +52,13 @@ A fully integrated **Action Price** strategy system is included, operating indep
   - Use when symbols are blocked and preventing new signal generation
   - Requires bot restart after execution
 
+## Telegram Message Fixes (October 12, 2025)
+- **Action Price R:R Display**: Fixed Telegram message to show TP2 (2R) with None-safety
+  - Was showing: `R:R: 1.0:1` (incorrect - only TP1)
+  - Now shows: `R:R: 1:2.0` (correct - shows main target TP2) with fallback logic
+  - Logic: Shows TP2 if available → TP1 if no TP2 → 1.5 default if neither
+  - Prevents TypeError crash when rr2 = None
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -1241,7 +1241,8 @@ class TradingBot:
             # Получить meta_data
             meta_data = ap_signal.get('meta_data', {})
             zone_touches = meta_data.get('zone_touches', 0)
-            rr1 = meta_data.get('rr1', 1.5)
+            rr1 = meta_data.get('rr1', 1.0)
+            rr2 = meta_data.get('rr2', 2.0)
             
             # Получить confluence flags
             confluence_flags = ap_signal.get('confluence_flags', {})
@@ -1270,7 +1271,13 @@ class TradingBot:
             if ap_signal.get('take_profit_2'):
                 message += f"🎯 TP2 (50%): <b>{ap_signal['take_profit_2']:.4f}</b>\n"
             
-            message += f"📈 R:R: <b>{rr1:.1f}:1</b>\n\n"
+            # Показать R:R (TP2 если есть, иначе TP1)
+            if rr2 and rr2 > 0:
+                message += f"📈 R:R: <b>1:{rr2:.1f}</b>\n\n"
+            elif rr1 and rr1 > 0:
+                message += f"📈 R:R: <b>1:{rr1:.1f}</b>\n\n"
+            else:
+                message += f"📈 R:R: <b>1:1.5</b>\n\n"
             
             # Конфлюэнсы
             if confluences:
