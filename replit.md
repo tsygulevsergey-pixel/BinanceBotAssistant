@@ -26,6 +26,7 @@ A fully integrated **Action Price** strategy system is included, operating indep
   - TP2 = Entry + 2R
 - **Fix 2**: Добавлен `min_confidence_score: 150.0` в config.yaml и проверка в engine.py
 - **Fix 3**: Ужесточен PPR паттерн - теперь требуется направленная свеча (close < open для SHORT) + сильное тело (≥30% range предыдущей свечи)
+- **Fix 4**: Добавлена строгая проверка близости паттерна к зоне S/R - паттерн должен быть либо ВНУТРИ зоны, либо в пределах 2×MTR от ближайшей границы зоны (иначе отбрасывается)
 - **Result**: Полное решение проблемы 0% Win Rate - Entry всегда актуальная, Stop Loss корректно за зоной, TP1/TP2 = 1R/2R; ожидается снижение количества сигналов до ~5-30 за проверку с положительным Win Rate
 
 ## Critical Bugfixes: Data Loader, TimeframeSync & Main Loop (October 12, 2025)

@@ -134,10 +134,10 @@ class ActionPriceEngine:
             if direction == 'SHORT' and not ema_allowed_short:
                 continue
             
-            # Найти зону для паттерна
-            pattern_zone = self.find_zone_for_pattern(pattern, zones, current_price)
+            # Найти зону для паттерна (проверка близости!)
+            pattern_zone = self.find_zone_for_pattern(pattern, zones, current_price, mtr_1h)
             if not pattern_zone:
-                continue
+                continue  # Паттерн далеко от зон - пропускаем!
             
             # Рассчитать риск/цели (используя ТЕКУЩУЮ цену и ЗОНУ)
             risk_data = self.risk_manager.calculate_entry_stop_targets(
@@ -229,17 +229,18 @@ class ActionPriceEngine:
         return signals
     
     def find_zone_for_pattern(self, pattern: Dict, zones: List[Dict], 
-                              current_price: float) -> Optional[Dict]:
+                              current_price: float, mtr: float) -> Optional[Dict]:
         """
-        Найти зону S/R для паттерна
+        Найти зону S/R для паттерна - ТОЛЬКО если цена возле зоны!
         
         Args:
             pattern: Данные паттерна
             zones: Список зон
             current_price: Текущая цена
+            mtr: Median True Range для определения "близости"
             
         Returns:
-            Зона или None
+            Зона или None (если паттерн далеко от зон)
         """
         direction = pattern['direction']
         
@@ -258,15 +259,23 @@ class ActionPriceEngine:
         for zone in zones:
             if zone['type'] == required_zone_type:
                 if is_price_in_zone(midpoint, zone['low'], zone['high']):
-                    return zone
+                    return zone  # Паттерн ВНУТРИ зоны - идеально!
         
-        # Если не нашли точное попадание, берём ближайшую нужного типа
+        # Если не в зоне, проверяем БЛИЗОСТЬ к ГРАНИЦЕ зоны (макс 2×MTR)
+        max_distance = 2.0 * mtr
         suitable_zones = [z for z in zones if z['type'] == required_zone_type]
-        if suitable_zones:
-            closest = min(suitable_zones, 
-                         key=lambda z: abs((z['low'] + z['high'])/2 - midpoint))
-            return closest
         
+        for zone in suitable_zones:
+            # Расстояние до БЛИЖАЙШЕЙ ГРАНИЦЫ зоны (не центра!)
+            distance_to_low = abs(midpoint - zone['low'])
+            distance_to_high = abs(midpoint - zone['high'])
+            distance_to_zone = min(distance_to_low, distance_to_high)
+            
+            # Паттерн должен быть БЛИЗКО к границе зоны (в пределах 2×MTR)
+            if distance_to_zone <= max_distance:
+                return zone
+        
+        # Паттерн далеко от всех зон - отбрасываем!
         return None
     
     def check_confluences(self, price: float, avwap_data: Dict, 
