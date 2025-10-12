@@ -28,6 +28,12 @@ class SignalPerformanceTracker:
         self.running = True
         logger.info("📊 Signal Performance Tracker started")
         
+        # Первая проверка - закрыть старые сигналы по историческим свечам
+        try:
+            await self._backfill_check()
+        except Exception as e:
+            logger.error(f"Error in backfill check: {e}", exc_info=True)
+        
         while self.running:
             try:
                 await self._check_active_signals()
@@ -41,12 +47,184 @@ class SignalPerformanceTracker:
         self.running = False
         logger.info("Signal Performance Tracker stopped")
     
+    async def _backfill_check(self):
+        """Проверить все активные сигналы по историческим свечам (закрыть старые)"""
+        session = self.db.get_session()
+        try:
+            active_signals = session.query(Signal).filter(
+                Signal.status.in_(['ACTIVE', 'PENDING'])
+            ).all()
+            
+            if not active_signals:
+                return
+            
+            logger.info(f"🔍 Backfill check: checking {len(active_signals)} active signals against historical candles")
+            closed_count = 0
+            
+            for signal in active_signals:
+                try:
+                    closed = await self._check_signal_historical(signal, session)
+                    if closed:
+                        closed_count += 1
+                except Exception as e:
+                    logger.error(f"Error in backfill check for signal {signal.id}: {e}", exc_info=True)
+            
+            session.commit()
+            
+            if closed_count > 0:
+                logger.info(f"✅ Backfill complete: closed {closed_count}/{len(active_signals)} signals")
+            else:
+                logger.info(f"✅ Backfill complete: all signals still active")
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error in backfill check: {e}", exc_info=True)
+        finally:
+            session.close()
+    
+    async def _check_signal_historical(self, signal: Signal, session) -> bool:
+        """Проверить сигнал по историческим свечам"""
+        try:
+            symbol = str(signal.symbol)
+            timeframe = str(signal.timeframe)
+            entry = float(signal.entry_price)
+            sl = float(signal.stop_loss)
+            tp1 = float(signal.take_profit_1) if signal.take_profit_1 else None
+            tp2 = float(signal.take_profit_2) if signal.take_profit_2 else None
+            direction = str(signal.direction)
+            
+            # Ensure created_at is timezone-aware
+            created_at = signal.created_at
+            if created_at.tzinfo is None:
+                created_at = pytz.UTC.localize(created_at)
+            
+            # Получить свечи с момента создания сигнала
+            now = datetime.now(pytz.UTC)
+            
+            # Получаем данные из БД
+            from src.database.models import Candle
+            klines = session.query(Candle).filter(
+                and_(
+                    Candle.symbol == symbol,
+                    Candle.timeframe == timeframe,
+                    Candle.open_time >= created_at,
+                    Candle.open_time <= now
+                )
+            ).order_by(Candle.open_time).all()
+            
+            if not klines:
+                return False
+            
+            # Проверить каждую свечу на SL/TP
+            for kline in klines:
+                high = float(kline.high)
+                low = float(kline.low)
+                close = float(kline.close)
+                
+                if direction == "LONG":
+                    # Проверка SL
+                    if low <= sl:
+                        signal.status = "LOSS"
+                        signal.exit_price = sl
+                        signal.exit_reason = "STOP_LOSS"
+                        signal.pnl_percent = ((sl - entry) / entry) * 100
+                        signal.closed_at = kline.open_time
+                        
+                        self.lock_manager.release_lock(symbol)
+                        if self.on_signal_closed_callback:
+                            self.on_signal_closed_callback(symbol)
+                        
+                        logger.info(f"❌ Signal closed (historical): {symbol} LONG | SL hit at {sl:.4f} | PnL: {signal.pnl_percent:+.2f}%")
+                        return True
+                    
+                    # Проверка TP2
+                    if tp2 and high >= tp2:
+                        signal.status = "WIN"
+                        signal.exit_price = tp2
+                        signal.exit_reason = "TAKE_PROFIT_2"
+                        signal.pnl_percent = ((tp2 - entry) / entry) * 100
+                        signal.closed_at = kline.open_time
+                        
+                        self.lock_manager.release_lock(symbol)
+                        if self.on_signal_closed_callback:
+                            self.on_signal_closed_callback(symbol)
+                        
+                        logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 hit at {tp2:.4f} | PnL: {signal.pnl_percent:+.2f}%")
+                        return True
+                    
+                    # Проверка TP1
+                    if tp1 and high >= tp1:
+                        signal.status = "WIN"
+                        signal.exit_price = tp1
+                        signal.exit_reason = "TAKE_PROFIT_1"
+                        signal.pnl_percent = ((tp1 - entry) / entry) * 100
+                        signal.closed_at = kline.open_time
+                        
+                        self.lock_manager.release_lock(symbol)
+                        if self.on_signal_closed_callback:
+                            self.on_signal_closed_callback(symbol)
+                        
+                        logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP1 hit at {tp1:.4f} | PnL: {signal.pnl_percent:+.2f}%")
+                        return True
+                
+                elif direction == "SHORT":
+                    # Проверка SL
+                    if high >= sl:
+                        signal.status = "LOSS"
+                        signal.exit_price = sl
+                        signal.exit_reason = "STOP_LOSS"
+                        signal.pnl_percent = ((entry - sl) / entry) * 100
+                        signal.closed_at = kline.open_time
+                        
+                        self.lock_manager.release_lock(symbol)
+                        if self.on_signal_closed_callback:
+                            self.on_signal_closed_callback(symbol)
+                        
+                        logger.info(f"❌ Signal closed (historical): {symbol} SHORT | SL hit at {sl:.4f} | PnL: {signal.pnl_percent:+.2f}%")
+                        return True
+                    
+                    # Проверка TP2
+                    if tp2 and low <= tp2:
+                        signal.status = "WIN"
+                        signal.exit_price = tp2
+                        signal.exit_reason = "TAKE_PROFIT_2"
+                        signal.pnl_percent = ((entry - tp2) / entry) * 100
+                        signal.closed_at = kline.open_time
+                        
+                        self.lock_manager.release_lock(symbol)
+                        if self.on_signal_closed_callback:
+                            self.on_signal_closed_callback(symbol)
+                        
+                        logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 hit at {tp2:.4f} | PnL: {signal.pnl_percent:+.2f}%")
+                        return True
+                    
+                    # Проверка TP1
+                    if tp1 and low <= tp1:
+                        signal.status = "WIN"
+                        signal.exit_price = tp1
+                        signal.exit_reason = "TAKE_PROFIT_1"
+                        signal.pnl_percent = ((entry - tp1) / entry) * 100
+                        signal.closed_at = kline.open_time
+                        
+                        self.lock_manager.release_lock(symbol)
+                        if self.on_signal_closed_callback:
+                            self.on_signal_closed_callback(symbol)
+                        
+                        logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP1 hit at {tp1:.4f} | PnL: {signal.pnl_percent:+.2f}%")
+                        return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error checking signal {signal.id} historical: {e}", exc_info=True)
+            return False
+    
     async def _check_active_signals(self):
         """Проверить все активные сигналы"""
         session = self.db.get_session()
         try:
             active_signals = session.query(Signal).filter(
-                Signal.status == 'ACTIVE'
+                Signal.status.in_(['ACTIVE', 'PENDING'])
             ).all()
             
             if not active_signals:
