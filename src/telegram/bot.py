@@ -157,10 +157,10 @@ class TelegramBot:
                 f"📊 Win Rate: <b>{perf['win_rate']}%</b>\n\n"
                 f"🎯 TP1 (0.5R): {perf.get('tp1_count', 0)}\n"
                 f"🎯 TP2 (1.5R): {perf.get('tp2_count', 0)}\n\n"
-                f"💰 Средний PnL: <b>{perf['avg_pnl']:+.2f}R</b>\n"
-                f"💵 Общий PnL: <b>{perf['total_pnl']:+.2f}R</b>\n\n"
-                f"🟢 Средняя победа: {perf['avg_win']:+.2f}R\n"
-                f"🔴 Среднее поражение: {perf['avg_loss']:+.2f}R\n"
+                f"💰 Средний PnL: <b>{perf['avg_pnl']:+.2f}%</b>\n"
+                f"💵 Общий PnL: <b>{perf['total_pnl']:+.2f}%</b>\n\n"
+                f"🟢 Средняя победа: {perf['avg_win']:+.2f}%\n"
+                f"🔴 Среднее поражение: {perf['avg_loss']:+.2f}%\n"
             )
             await update.message.reply_text(text, parse_mode='HTML')
         except Exception as e:
@@ -190,7 +190,7 @@ class TelegramBot:
                     f"{i}. <b>{s['strategy_name']}</b>\n"
                     f"   Сигналов: {s['total_signals']} | "
                     f"WR: {s['win_rate']}% | "
-                    f"PnL: {s['avg_pnl']:+.2f}R\n\n"
+                    f"PnL: {s['avg_pnl']:+.2f}%\n\n"
                 )
             
             if len(stats) > 10:

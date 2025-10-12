@@ -130,70 +130,72 @@ class SignalPerformanceTracker:
                     if tp1_hit:
                         # Проверка TP2
                         if tp2 and high >= tp2:
+                            pnl_percent = (tp2 - entry) / entry * 100
                             signal.status = "WIN"
                             signal.exit_price = tp2
                             signal.exit_reason = "WIN"
                             signal.exit_type = "TP2"
-                            signal.pnl_percent = 1.5
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 (+1.5R)")
+                            logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 (+{pnl_percent:.2f}%)")
                             return True
                         
                         # Проверка breakeven (SL = entry)
                         if low <= entry:
+                            pnl_percent = 0.0
                             signal.status = "WIN"
                             signal.exit_price = entry
                             signal.exit_reason = "WIN"
                             signal.exit_type = "TP1"
-                            signal.pnl_percent = 0.5
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"✅ Signal closed (historical): {symbol} LONG | Breakeven after TP1 (+0.5R)")
+                            logger.info(f"✅ Signal closed (historical): {symbol} LONG | Breakeven after TP1 (+{pnl_percent:.2f}%)")
                             return True
                     
                     # Если TP1 ЕЩЁ НЕ достигнут
                     else:
                         # Проверка SL
                         if low <= current_sl:
+                            pnl_percent = (current_sl - entry) / entry * 100
                             signal.status = "LOSS"
                             signal.exit_price = current_sl
                             signal.exit_reason = "LOSS"
                             signal.exit_type = "SL"
-                            signal.pnl_percent = -1.0
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"❌ Signal closed (historical): {symbol} LONG | SL (-1.0R)")
+                            logger.info(f"❌ Signal closed (historical): {symbol} LONG | SL ({pnl_percent:.2f}%)")
                             return True
                         
                         # Проверка TP2 (достигли сразу без TP1)
                         if tp2 and high >= tp2:
+                            pnl_percent = (tp2 - entry) / entry * 100
                             signal.status = "WIN"
                             signal.exit_price = tp2
                             signal.exit_reason = "WIN"
                             signal.exit_type = "TP2"
-                            profit = tp2 - entry
-                            pnl_r = profit / risk if risk > 0 else 2.0
-                            signal.pnl_percent = pnl_r
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 direct ({pnl_r:+.1f}R)")
+                            logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 direct (+{pnl_percent:.2f}%)")
                             return True
                         
                         # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
@@ -212,70 +214,72 @@ class SignalPerformanceTracker:
                     if tp1_hit:
                         # Проверка TP2
                         if tp2 and low <= tp2:
+                            pnl_percent = (entry - tp2) / entry * 100
                             signal.status = "WIN"
                             signal.exit_price = tp2
                             signal.exit_reason = "WIN"
                             signal.exit_type = "TP2"
-                            signal.pnl_percent = 1.5
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 (+1.5R)")
+                            logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 (+{pnl_percent:.2f}%)")
                             return True
                         
                         # Проверка breakeven (SL = entry)
                         if high >= entry:
+                            pnl_percent = 0.0
                             signal.status = "WIN"
                             signal.exit_price = entry
                             signal.exit_reason = "WIN"
                             signal.exit_type = "TP1"
-                            signal.pnl_percent = 0.5
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"✅ Signal closed (historical): {symbol} SHORT | Breakeven after TP1 (+0.5R)")
+                            logger.info(f"✅ Signal closed (historical): {symbol} SHORT | Breakeven after TP1 (+{pnl_percent:.2f}%)")
                             return True
                     
                     # Если TP1 ЕЩЁ НЕ достигнут
                     else:
                         # Проверка SL
                         if high >= current_sl:
+                            pnl_percent = (entry - current_sl) / entry * 100
                             signal.status = "LOSS"
                             signal.exit_price = current_sl
                             signal.exit_reason = "LOSS"
                             signal.exit_type = "SL"
-                            signal.pnl_percent = -1.0
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"❌ Signal closed (historical): {symbol} SHORT | SL (-1.0R)")
+                            logger.info(f"❌ Signal closed (historical): {symbol} SHORT | SL ({pnl_percent:.2f}%)")
                             return True
                         
                         # Проверка TP2 (достигли сразу без TP1)
                         if tp2 and low <= tp2:
+                            pnl_percent = (entry - tp2) / entry * 100
                             signal.status = "WIN"
                             signal.exit_price = tp2
                             signal.exit_reason = "WIN"
                             signal.exit_type = "TP2"
-                            profit = entry - tp2
-                            pnl_r = profit / risk if risk > 0 else 2.0
-                            signal.pnl_percent = pnl_r
+                            signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol)
                             
-                            logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 direct ({pnl_r:+.1f}R)")
+                            logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 direct (+{pnl_percent:.2f}%)")
                             return True
                         
                         # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
@@ -348,11 +352,10 @@ class SignalPerformanceTracker:
                     self.on_signal_closed_callback(symbol_str)
                 
                 status_emoji = "✅" if exit_reason == "WIN" else "❌" if exit_reason == "LOSS" else "⏱️"
-                exit_label = f"{exit_type} ({pnl_r:+.1f}R)" if exit_type in ["TP1", "TP2", "SL"] else exit_type
                 logger.info(
                     f"{status_emoji} Signal closed: {signal.symbol} {signal.direction} "
                     f"| Entry: {signal.entry_price:.4f} → Exit: {exit_price:.4f} "
-                    f"| PnL: {pnl_r:+.1f}R ({exit_label})"
+                    f"| PnL: {pnl_r:+.2f}% ({exit_type})"
                 )
                 
         except Exception as e:
@@ -385,46 +388,43 @@ class SignalPerformanceTracker:
             if direction == "LONG":
                 # Проверка TP2 (приоритет выше)
                 if tp2 and current_price >= tp2:
-                    pnl_r = 1.5
+                    pnl_percent = (tp2 - entry) / entry * 100
                     signal.exit_type = "TP2"  # type: ignore
-                    return ("WIN", tp2, pnl_r, "TP2")
+                    return ("WIN", tp2, pnl_percent, "TP2")
                 
                 # Проверка breakeven (SL перенесен в entry)
                 if current_price <= entry:
-                    pnl_r = 0.5
+                    pnl_percent = (entry - entry) / entry * 100  # 0%
                     signal.exit_type = "TP1"  # type: ignore
-                    return ("WIN", entry, pnl_r, "TP1")
+                    return ("WIN", entry, pnl_percent, "TP1")
             
             elif direction == "SHORT":
                 # Проверка TP2 (приоритет выше)
                 if tp2 and current_price <= tp2:
-                    pnl_r = 1.5
+                    pnl_percent = (entry - tp2) / entry * 100
                     signal.exit_type = "TP2"  # type: ignore
-                    return ("WIN", tp2, pnl_r, "TP2")
+                    return ("WIN", tp2, pnl_percent, "TP2")
                 
                 # Проверка breakeven (SL перенесен в entry)
                 if current_price >= entry:
-                    pnl_r = 0.5
+                    pnl_percent = (entry - entry) / entry * 100  # 0%
                     signal.exit_type = "TP1"  # type: ignore
-                    return ("WIN", entry, pnl_r, "TP1")
+                    return ("WIN", entry, pnl_percent, "TP1")
         
         # Если TP1 ЕЩЁ НЕ достигнут - обычная проверка
         else:
             if direction == "LONG":
                 # Проверка SL
                 if current_price <= sl:
-                    risk = abs(entry - sl)
-                    pnl_r = -1.0
+                    pnl_percent = (sl - entry) / entry * 100
                     signal.exit_type = "SL"  # type: ignore
-                    return ("LOSS", sl, pnl_r, "SL")
+                    return ("LOSS", sl, pnl_percent, "SL")
                 
                 # Проверка TP2 (если достигли сразу)
                 if tp2 and current_price >= tp2:
-                    risk = abs(entry - sl)
-                    profit = tp2 - entry
-                    pnl_r = profit / risk if risk > 0 else 2.0
+                    pnl_percent = (tp2 - entry) / entry * 100
                     signal.exit_type = "TP2"  # type: ignore
-                    return ("WIN", tp2, pnl_r, "TP2")
+                    return ("WIN", tp2, pnl_percent, "TP2")
                 
                 # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
                 if tp1 and current_price >= tp1:
@@ -433,9 +433,10 @@ class SignalPerformanceTracker:
                     signal.tp1_closed_at = datetime.now(pytz.UTC)  # type: ignore
                     signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
                     
+                    tp1_pnl = (tp1 - entry) / entry * 100
                     logger.info(
                         f"📈 TP1 HIT: {signal.symbol} {signal.direction} "
-                        f"| Partial close at {tp1:.4f} (+0.5R) "
+                        f"| Partial close at {tp1:.4f} (+{tp1_pnl:.2f}%) "
                         f"| SL moved to breakeven {entry:.4f}"
                     )
                     return None
@@ -443,18 +444,15 @@ class SignalPerformanceTracker:
             elif direction == "SHORT":
                 # Проверка SL
                 if current_price >= sl:
-                    risk = abs(entry - sl)
-                    pnl_r = -1.0
+                    pnl_percent = (entry - sl) / entry * 100
                     signal.exit_type = "SL"  # type: ignore
-                    return ("LOSS", sl, pnl_r, "SL")
+                    return ("LOSS", sl, pnl_percent, "SL")
                 
                 # Проверка TP2 (если достигли сразу)
                 if tp2 and current_price <= tp2:
-                    risk = abs(entry - sl)
-                    profit = entry - tp2
-                    pnl_r = profit / risk if risk > 0 else 2.0
+                    pnl_percent = (entry - tp2) / entry * 100
                     signal.exit_type = "TP2"  # type: ignore
-                    return ("WIN", tp2, pnl_r, "TP2")
+                    return ("WIN", tp2, pnl_percent, "TP2")
                 
                 # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
                 if tp1 and current_price <= tp1:
@@ -463,9 +461,10 @@ class SignalPerformanceTracker:
                     signal.tp1_closed_at = datetime.now(pytz.UTC)  # type: ignore
                     signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
                     
+                    tp1_pnl = (entry - tp1) / entry * 100
                     logger.info(
                         f"📉 TP1 HIT: {signal.symbol} {signal.direction} "
-                        f"| Partial close at {tp1:.4f} (+0.5R) "
+                        f"| Partial close at {tp1:.4f} (+{tp1_pnl:.2f}%) "
                         f"| SL moved to breakeven {entry:.4f}"
                     )
                     return None
