@@ -2,13 +2,17 @@
 Отдельный logger для Action Price стратегии
 """
 import logging
-from logging.handlers import TimedRotatingFileHandler
 import os
 from datetime import datetime
+import pytz
 
 
 def setup_action_price_logger():
-    """Настроить отдельный logger для Action Price"""
+    """
+    Настроить отдельный logger для Action Price
+    
+    Создает новый файл лога при каждом запуске бота с timestamp
+    """
     
     # Создать директорию logs если не существует
     os.makedirs('logs', exist_ok=True)
@@ -21,19 +25,27 @@ def setup_action_price_logger():
     # Удалить существующие handlers
     logger.handlers = []
     
-    # Формат логов
-    formatter = logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+    # Формат логов с таймзоной
+    class KyivFormatter(logging.Formatter):
+        def __init__(self, fmt=None, datefmt=None):
+            super().__init__(fmt, datefmt)
+            self.tz = pytz.timezone('Europe/Kyiv')
+        
+        def formatTime(self, record, datefmt=None):
+            dt = datetime.fromtimestamp(record.created, tz=pytz.UTC)
+            dt = dt.astimezone(self.tz)
+            return dt.strftime('%Y-%m-%d %H:%M:%S %Z')
+    
+    formatter = KyivFormatter(
+        '%(asctime)s | %(levelname)-8s | %(message)s'
     )
     
-    # File handler с ротацией по дням
-    log_filename = f"logs/action_price_{datetime.now().strftime('%Y-%m-%d')}.log"
-    file_handler = TimedRotatingFileHandler(
+    # File handler - НОВЫЙ ФАЙЛ при каждом запуске бота
+    timestamp = datetime.now(tz=pytz.timezone('Europe/Kyiv')).strftime('%Y-%m-%d_%H-%M-%S')
+    log_filename = f"logs/action_price_{timestamp}.log"
+    
+    file_handler = logging.FileHandler(
         log_filename,
-        when='midnight',
-        interval=1,
-        backupCount=30,  # Хранить 30 дней
         encoding='utf-8'
     )
     file_handler.setLevel(logging.INFO)
@@ -47,6 +59,8 @@ def setup_action_price_logger():
     # Добавить handlers
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+    
+    logger.info(f"🎯 Action Price Logger initialized - log file: {log_filename}")
     
     return logger
 

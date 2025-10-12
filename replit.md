@@ -92,6 +92,12 @@ Preferred communication style: Simple, everyday language.
 - Delivers Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
 - Dedicated `ap_stats` command for Action Price performance, including pattern breakdown and partial exit tracking.
 
+### Logging System
+- **Main Bot**: Creates new log file on each startup: `bot_{timestamp}.log`
+- **Action Price**: Creates separate log file on each startup: `action_price_{timestamp}.log`
+- Timezone: Europe/Kyiv (EEST/EET)
+- Location: `logs/` directory
+
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals and calculates exit conditions using precise SL/TP levels for accurate PnL.
 - Updates entry price for LIMIT orders upon fill to ensure accurate PnL calculations.
