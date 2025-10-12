@@ -184,6 +184,37 @@ class ActionPriceEngine:
                 timeframe, current_time
             )
             
+            # V2: Рассчитать pattern quality
+            pattern_quality = 0.0
+            if self.config.get('version') == 'v2':
+                candle_data = pattern.get('candle_data', {})
+                if candle_data:
+                    # Извлекаем последнюю свечу в зависимости от типа паттерна
+                    pattern_type = pattern['type']
+                    
+                    if pattern_type in ('pin_bar', 'engulfing'):
+                        # Плоский dict с OHLC
+                        candle_dict = candle_data
+                    elif pattern_type == 'inside_bar':
+                        # Используем inside bar (последняя свеча)
+                        candle_dict = candle_data.get('inside', {})
+                    elif pattern_type == 'fakey':
+                        # Используем fakey свечу (последняя свеча)
+                        candle_dict = candle_data.get('fakey', {})
+                    elif pattern_type == 'ppr':
+                        # Используем current свечу
+                        candle_dict = candle_data.get('current', {})
+                    else:
+                        candle_dict = {}
+                    
+                    if candle_dict and 'open' in candle_dict:
+                        # Создаём Series из dict для calculate_pattern_quality_v2
+                        import pandas as pd
+                        candle_series = pd.Series(candle_dict)
+                        pattern_quality = self.patterns.calculate_pattern_quality_v2(
+                            candle_series, direction, mtr_exec, self.config
+                        )
+            
             # Собрать сигнал
             signal = {
                 'symbol': symbol,
@@ -217,6 +248,7 @@ class ActionPriceEngine:
                 # Конфлюэнсы и score
                 'confidence_score': confidence,
                 'confluence_flags': confluence_flags,
+                'pattern_quality': pattern_quality,  # V2: pattern quality [0..1]
                 
                 # Метаданные
                 'meta_data': {

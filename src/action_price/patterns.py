@@ -382,3 +382,72 @@ class PriceActionPatterns:
             patterns.append(ppr)
         
         return patterns
+    
+    def calculate_pattern_quality_v2(self, candle: pd.Series, direction: str, 
+                                     atr_exec: float, parent_config: dict = None) -> float:
+        """
+        V2: Рассчитать качество паттерна [0..1]
+        
+        Формула: quality = clamp((tail/range) * (range/ATR_exec), 0, 1)
+        + бонус за позицию закрытия (для бычьего: close в верхних 30%)
+        
+        Args:
+            candle: Свеча паттерна (Series с open, high, low, close)
+            direction: Направление ('LONG' или 'SHORT')
+            atr_exec: ATR execution timeframe
+            parent_config: Полная конфигурация action_price
+            
+        Returns:
+            Quality score [0..1]
+        """
+        # Параметры v2
+        if parent_config:
+            v2_config = parent_config.get('patterns', {}).get('v2', {})
+        else:
+            v2_config = self.config.get('v2', {})
+        
+        close_position_pct = v2_config.get('close_position_top_pct', 0.30)
+        
+        # Извлекаем значения
+        open_price = float(candle['open'])
+        high = float(candle['high'])
+        low = float(candle['low'])
+        close = float(candle['close'])
+        
+        candle_range = high - low
+        if candle_range == 0 or atr_exec == 0:
+            return 0.0
+        
+        # Определяем тень (tail) в зависимости от направления
+        if direction == 'LONG':
+            # Для бычьего паттерна: нижняя тень (rejection от low)
+            body_low = min(open_price, close)
+            tail = body_low - low
+        else:
+            # Для медвежьего паттерна: верхняя тень (rejection от high)
+            body_high = max(open_price, close)
+            tail = high - body_high
+        
+        # Базовое качество: (tail/range) * (range/ATR)
+        tail_ratio = tail / candle_range
+        range_ratio = candle_range / atr_exec
+        base_quality = tail_ratio * range_ratio
+        
+        # Бонус за позицию закрытия
+        close_bonus = 0.0
+        if direction == 'LONG':
+            # Бычий: close в верхних 30% диапазона
+            close_position = (close - low) / candle_range
+            if close_position >= (1.0 - close_position_pct):
+                close_bonus = 0.2  # +0.2 за оптимальную позицию
+        else:
+            # Медвежий: close в нижних 30% диапазона
+            close_position = (close - low) / candle_range
+            if close_position <= close_position_pct:
+                close_bonus = 0.2
+        
+        # Итоговое качество
+        quality = base_quality + close_bonus
+        
+        # Clamp [0..1]
+        return max(0.0, min(1.0, quality))
