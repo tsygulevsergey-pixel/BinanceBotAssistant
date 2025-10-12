@@ -8,14 +8,17 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
-## Action Price Signal Data Structure Fix (October 2025)
-- **Issue**: Action Price signals failed to save to DB and send to Telegram with `KeyError: 'risk_reward'`
-- **Root Cause**: ActionPriceEngine returns signals with `meta_data['rr1']` but code expected top-level `risk_reward` field
-- **Fix**: Updated `_save_action_price_signal()` and `_send_action_price_telegram()` to extract data from correct structure:
-  - Risk/Reward from `meta_data['rr1']`
-  - Zone touches from `meta_data['zone_touches']`
-  - Confluences from `confluence_flags` dict
-- **Result**: Action Price signals now save correctly to DB and send formatted HTML messages to Telegram with confidence score
+## Action Price Database Schema Fix (October 2025)
+- **Issue 1**: Action Price signals failed to save with `TypeError: 'zone_type' is an invalid keyword argument`
+- **Issue 2**: Telegram send failed with `AttributeError: 'TelegramBot' object has no attribute 'send_message'`
+- **Root Cause**: 
+  - Code tried to save `zone_type` field that doesn't exist in ActionPriceSignal model
+  - Wrong Telegram method called (send_message instead of bot.send_message)
+- **Fix**: 
+  - Updated `_save_action_price_signal()` to use correct database fields: zone_id, zone_low, zone_high, context_hash, all VWAP/EMA values, confluence_flags JSON
+  - Changed Telegram call from `send_message()` to `bot.send_message(chat_id, text, parse_mode)` 
+  - Properly mapped all signal data to database schema including meta_data JSON
+- **Result**: Action Price signals now save correctly to DB and send formatted HTML messages to Telegram with full data
 
 ## Telegram HTML Formatting Migration (October 2025)
 - **Issue**: All Telegram commands failed with "can't parse entities" errors due to Markdown parsing

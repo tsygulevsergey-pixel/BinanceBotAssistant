@@ -1160,20 +1160,30 @@ class TradingBot:
             confluences_str = ', '.join(confluences) if confluences else None
             
             signal = ActionPriceSignal(
+                context_hash=ap_signal.get('context_hash', f"{ap_signal['symbol']}_{ap_signal['direction']}_{int(datetime.now(pytz.UTC).timestamp())}"),
                 symbol=ap_signal['symbol'],
                 timeframe=ap_signal['timeframe'],
                 direction=ap_signal['direction'],
                 pattern_type=ap_signal['pattern_type'],
-                zone_type=ap_signal['zone_type'],
-                zone_touches=zone_touches,
+                zone_id=ap_signal.get('zone_id', 'unknown'),
+                zone_low=float(ap_signal.get('zone_low', 0)),
+                zone_high=float(ap_signal.get('zone_high', 0)),
                 entry_price=float(ap_signal['entry_price']),
                 stop_loss=float(ap_signal['stop_loss']),
                 take_profit_1=float(ap_signal['take_profit_1']) if ap_signal.get('take_profit_1') else None,
                 take_profit_2=float(ap_signal['take_profit_2']) if ap_signal.get('take_profit_2') else None,
-                risk_reward=float(risk_reward),
-                confluences=confluences_str,
-                avwap_position=None,  # Рассчитаем позже если нужно
+                avwap_primary=ap_signal.get('avwap_primary'),
+                avwap_secondary=ap_signal.get('avwap_secondary'),
+                daily_vwap=ap_signal.get('daily_vwap'),
+                ema_50_4h=ap_signal.get('ema_50_4h'),
+                ema_200_4h=ap_signal.get('ema_200_4h'),
+                ema_50_1h=ap_signal.get('ema_50_1h'),
+                ema_200_1h=ap_signal.get('ema_200_1h'),
+                confidence_score=float(ap_signal.get('confidence_score', 0)),
+                confluence_flags=ap_signal.get('confluence_flags', {}),
+                market_regime=ap_signal.get('regime', ''),
                 status='ACTIVE',
+                meta_data=ap_signal.get('meta_data', {}),
                 created_at=datetime.now(pytz.UTC)
             )
             
@@ -1247,7 +1257,11 @@ class TradingBot:
             if confidence:
                 message += f"\n⭐ Уверенность: <b>{confidence:.1f}</b>\n"
             
-            await self.telegram_bot.send_message(message, parse_mode='HTML')
+            await self.telegram_bot.bot.send_message(
+                chat_id=self.telegram_bot.chat_id,
+                text=message,
+                parse_mode='HTML'
+            )
             
         except Exception as e:
             ap_logger.error(f"Failed to send AP signal to Telegram: {e}", exc_info=True)
