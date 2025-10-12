@@ -88,13 +88,22 @@ class ActionPriceEngine:
         atr_pct = (atr.iloc[-1] / current_price) * 100
         
         # Рассчитать BBW на H1
-        bb = ta.bbands(df_1h['close'], length=20)
+        bb = ta.bbands(df_1h['close'], length=20, std=2)
         if bb is None or len(bb) == 0:
             return False
         
-        bb_upper = bb[f'BBU_20_2.0']
-        bb_lower = bb[f'BBL_20_2.0']
-        bb_middle = bb[f'BBM_20_2.0']
+        # Найти правильные названия колонок (pandas_ta может использовать разные форматы)
+        bb_cols = bb.columns.tolist()
+        upper_col = [c for c in bb_cols if 'BBU' in c][0] if any('BBU' in c for c in bb_cols) else None
+        lower_col = [c for c in bb_cols if 'BBL' in c][0] if any('BBL' in c for c in bb_cols) else None
+        middle_col = [c for c in bb_cols if 'BBM' in c][0] if any('BBM' in c for c in bb_cols) else None
+        
+        if not (upper_col and lower_col and middle_col):
+            return False  # BB колонки не найдены
+        
+        bb_upper = bb[upper_col]
+        bb_lower = bb[lower_col]
+        bb_middle = bb[middle_col]
         
         current_bbw = ((bb_upper.iloc[-1] - bb_lower.iloc[-1]) / bb_middle.iloc[-1]) * 100
         
