@@ -59,12 +59,15 @@ class DataLoader:
                     
                 except Exception as e:
                     retry_count += 1
+                    error_msg = str(e) if str(e) else type(e).__name__
                     if retry_count < max_retries:
                         wait_time = 2 ** retry_count  # Exponential backoff: 2, 4, 8 seconds
-                        logger.warning(f"Error downloading {symbol} {interval} on {current_date.date()}: {e}. Retry {retry_count}/{max_retries} in {wait_time}s")
+                        logger.warning(f"Error downloading {symbol} {interval} on {current_date.date()}: {error_msg}. Retry {retry_count}/{max_retries} in {wait_time}s")
                         await asyncio.sleep(wait_time)
                     else:
-                        logger.error(f"Failed to download {symbol} {interval} on {current_date.date()} after {max_retries} retries: {e}")
+                        logger.error(f"Failed to download {symbol} {interval} on {current_date.date()} after {max_retries} retries: {error_msg}")
+                        # Raise exception to stop loading if data is critical
+                        raise Exception(f"Data download failed for {symbol} {interval} after {max_retries} retries: {error_msg}")
             
             if success:
                 day_counter += 1
