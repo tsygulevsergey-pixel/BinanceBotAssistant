@@ -46,9 +46,15 @@ Preferred communication style: Simple, everyday language.
 - **Conflict Resolution**: Score-based prioritization and direction-aware locks ensure the highest-scoring signals execute, while preventing conflicting signals for the same direction.
 
 ### Filtering & Risk Management
+- **S/R Zone-Based Stop-Loss System**: Advanced stop placement using Support/Resistance zones with intelligent fallback:
+  - Detects swing highs/lows from last 20 candles using fractal pattern (3-bar extreme)
+  - Creates S/R zones with ATR-based buffers (0.25 ATR)
+  - Places stops behind nearest zone in direction (zone boundary ± 0.1 ATR)
+  - **Smart Distance Guard**: Ignores zones >5 ATR away (protects from extreme impulses)
+  - **Fallback Logic**: If no valid zone found → uses 2 ATR from entry
+  - Fixed take-profits: TP1 at 1R, TP2 at 2R (where R = |Entry - Stop|)
 - **Stop Distance Validation**: Prevents excessive risk.
 - **Hybrid Entry System**: Adaptive MARKET/LIMIT execution based on strategy type.
-- **Risk Calculator**: Manages position sizing, stop-loss (swing extreme + ATR buffer), and take-profit (1.5-3.0 RR).
 - **Time Stops**: Exits trades if no progress within a set number of bars.
 - **Symbol Blocking System**: Prevents multiple signals on the same symbol while an active signal exists, persisting across restarts.
 

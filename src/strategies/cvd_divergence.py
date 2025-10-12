@@ -5,6 +5,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class CVDDivergenceStrategy(BaseStrategy):
@@ -239,9 +240,16 @@ class CVDDivergenceStrategy(BaseStrategy):
         
         if direction == 'long':
             entry = current_close
-            stop_loss = current_low - 0.3 * atr
-            take_profit_1 = entry + 1.0 * atr
-            take_profit_2 = entry + 2.0 * atr
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(entry - stop_loss)
+            take_profit_1 = entry + atr_distance * 1.0  # 1R
+            take_profit_2 = entry + atr_distance * 2.0  # 2R
             
             return Signal(
                 symbol=symbol,
@@ -262,9 +270,16 @@ class CVDDivergenceStrategy(BaseStrategy):
             )
         else:
             entry = current_close
-            stop_loss = current_high + 0.3 * atr
-            take_profit_1 = entry - 1.0 * atr
-            take_profit_2 = entry - 2.0 * atr
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(stop_loss - entry)
+            take_profit_1 = entry - atr_distance * 1.0  # 1R
+            take_profit_2 = entry - atr_distance * 2.0  # 2R
             
             return Signal(
                 symbol=symbol,
@@ -293,9 +308,16 @@ class CVDDivergenceStrategy(BaseStrategy):
         
         if direction == 'long':
             entry = current_close
-            stop_loss = entry - 0.5 * atr
-            take_profit_1 = entry + 1.5 * atr
-            take_profit_2 = entry + 3.0 * atr
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(entry - stop_loss)
+            take_profit_1 = entry + atr_distance * 1.0  # 1R
+            take_profit_2 = entry + atr_distance * 2.0  # 2R
             
             return Signal(
                 symbol=symbol,
@@ -316,9 +338,16 @@ class CVDDivergenceStrategy(BaseStrategy):
             )
         else:
             entry = current_close
-            stop_loss = entry + 0.5 * atr
-            take_profit_1 = entry - 1.5 * atr
-            take_profit_2 = entry - 3.0 * atr
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(stop_loss - entry)
+            take_profit_1 = entry - atr_distance * 1.0  # 1R
+            take_profit_2 = entry - atr_distance * 2.0  # 2R
             
             return Signal(
                 symbol=symbol,

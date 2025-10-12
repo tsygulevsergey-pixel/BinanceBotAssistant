@@ -7,6 +7,7 @@ from src.utils.strategy_logger import strategy_logger
 from src.indicators.vwap import calculate_daily_vwap
 from src.indicators.volume_profile import calculate_volume_profile
 from src.utils.reclaim_checker import check_value_area_reclaim, check_level_reclaim
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class VWAPMeanReversionStrategy(BaseStrategy):
@@ -194,13 +195,16 @@ class VWAPMeanReversionStrategy(BaseStrategy):
                 strategy_logger.debug(f"    ✅ LONG: отклонение {distance_from_vwap:.4f} > 2σ ({2.0 * std_dev:.4f}), volume {volume_ratio:.2f}x > 1.5x")
                 
                 entry = current_close
-                stop_loss = current_low - 0.25 * current_atr
                 
-                # TP1 = VWAP/POC (ближайшая цель)
-                # Выбираем ближайший уровень как TP1
-                tp1 = min(current_vwap, vpoc) if abs(entry - min(current_vwap, vpoc)) < abs(entry - max(current_vwap, vpoc)) else max(current_vwap, vpoc)
-                # TP2 = противоположная лента (дальняя цель)
-                tp2 = current_upper
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(entry - stop_loss)
+                tp1 = entry + atr_distance * 1.0  # 1R
+                tp2 = entry + atr_distance * 2.0  # 2R
                 
                 signal = Signal(
                     strategy_name=self.name,
@@ -267,13 +271,16 @@ class VWAPMeanReversionStrategy(BaseStrategy):
                 strategy_logger.debug(f"    ✅ SHORT: отклонение {distance_from_vwap:.4f} > 2σ ({2.0 * std_dev:.4f}), volume {volume_ratio:.2f}x > 1.5x")
                 
                 entry = current_close
-                stop_loss = current_high + 0.25 * current_atr
                 
-                # TP1 = VWAP/POC (ближайшая цель)
-                # Выбираем ближайший уровень как TP1
-                tp1 = max(current_vwap, vpoc) if abs(entry - max(current_vwap, vpoc)) < abs(entry - min(current_vwap, vpoc)) else min(current_vwap, vpoc)
-                # TP2 = противоположная лента (дальняя цель)
-                tp2 = current_lower
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(stop_loss - entry)
+                tp1 = entry - atr_distance * 1.0  # 1R
+                tp2 = entry - atr_distance * 2.0  # 2R
                 
                 signal = Signal(
                     strategy_name=self.name,

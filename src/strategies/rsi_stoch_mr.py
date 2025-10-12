@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_rsi, calculate_stochastic, calculate_atr, calculate_adx
 from src.utils.reclaim_checker import check_level_reclaim
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class RSIStochMRStrategy(BaseStrategy):
@@ -159,13 +160,16 @@ class RSIStochMRStrategy(BaseStrategy):
                     return None
                 
                 entry = current_close
-                stop_loss = current_low - 0.25 * current_atr
                 
-                # TP1 = средний уровень RSI (50), TP2 = overbought
-                # Упрощённо: TP в расчёте от entry
-                atr_distance = entry - stop_loss
-                tp1 = entry + atr_distance * 1.0
-                tp2 = entry + atr_distance * 2.0
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(entry - stop_loss)
+                tp1 = entry + atr_distance * 1.0  # 1R
+                tp2 = entry + atr_distance * 2.0  # 2R
                 
                 base_score = 1.0
                 confirmations = []
@@ -252,11 +256,16 @@ class RSIStochMRStrategy(BaseStrategy):
                     return None
                 
                 entry = current_close
-                stop_loss = current_high + 0.25 * current_atr
                 
-                atr_distance = stop_loss - entry
-                tp1 = entry - atr_distance * 1.0
-                tp2 = entry - atr_distance * 2.0
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(stop_loss - entry)
+                tp1 = entry - atr_distance * 1.0  # 1R
+                tp2 = entry - atr_distance * 2.0  # 2R
                 
                 base_score = 1.0
                 confirmations = []

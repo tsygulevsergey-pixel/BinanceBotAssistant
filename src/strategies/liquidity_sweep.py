@@ -7,6 +7,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 from src.indicators.swing_levels import SwingLevels
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class LiquiditySweepStrategy(BaseStrategy):
@@ -310,11 +311,16 @@ class LiquiditySweepStrategy(BaseStrategy):
         if direction == 'long':
             # Fade вниз после sweep down → long
             entry = current_close
-            stop_loss = current_low - 0.25 * atr  # За хвост свейпа
             
-            # TP как в mean reversion
-            take_profit_1 = sweep_level + 0.5 * atr  # TP1 обратно к уровню
-            take_profit_2 = sweep_level + 1.5 * atr  # TP2 дальше
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(entry - stop_loss)
+            take_profit_1 = entry + atr_distance * 1.0  # 1R
+            take_profit_2 = entry + atr_distance * 2.0  # 2R
             
             return Signal(
                 strategy_name=self.name,
@@ -338,10 +344,16 @@ class LiquiditySweepStrategy(BaseStrategy):
         else:
             # Fade вверх после sweep up → short
             entry = current_close
-            stop_loss = current_high + 0.25 * atr
             
-            take_profit_1 = sweep_level - 0.5 * atr
-            take_profit_2 = sweep_level - 1.5 * atr
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(stop_loss - entry)
+            take_profit_1 = entry - atr_distance * 1.0  # 1R
+            take_profit_2 = entry - atr_distance * 2.0  # 2R
             
             return Signal(
                 strategy_name=self.name,
@@ -372,11 +384,16 @@ class LiquiditySweepStrategy(BaseStrategy):
         
         if direction == 'long':
             entry = current_close
-            stop_loss = sweep_level - 0.3 * atr  # За уровень свейпа
             
-            # TP как в breakout
-            take_profit_1 = entry + 1.5 * atr
-            take_profit_2 = entry + 3.0 * atr
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(entry - stop_loss)
+            take_profit_1 = entry + atr_distance * 1.0  # 1R
+            take_profit_2 = entry + atr_distance * 2.0  # 2R
             
             return Signal(
                 strategy_name=self.name,
@@ -399,10 +416,16 @@ class LiquiditySweepStrategy(BaseStrategy):
             )
         else:
             entry = current_close
-            stop_loss = sweep_level + 0.3 * atr
             
-            take_profit_1 = entry - 1.5 * atr
-            take_profit_2 = entry - 3.0 * atr
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(stop_loss - entry)
+            take_profit_1 = entry - atr_distance * 1.0  # 1R
+            take_profit_2 = entry - atr_distance * 2.0  # 2R
             
             return Signal(
                 strategy_name=self.name,

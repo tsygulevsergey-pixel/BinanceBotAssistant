@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr, calculate_rsi
 from src.utils.reclaim_checker import check_range_reclaim
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class RangeFadeStrategy(BaseStrategy):
@@ -235,12 +236,16 @@ class RangeFadeStrategy(BaseStrategy):
             
             if long_reclaim:
                 entry = current_close
-                stop_loss = current_low - 0.25 * current_atr
                 
-                # TP1 = середина рейнджа, TP2 = resistance
-                mid_range = (resistance + support) / 2
-                tp1 = mid_range
-                tp2 = resistance
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(entry - stop_loss)
+                tp1 = entry + atr_distance * 1.0  # 1R
+                tp2 = entry + atr_distance * 2.0  # 2R
                 
                 base_score = 1.0
                 confirmations = []
@@ -312,11 +317,16 @@ class RangeFadeStrategy(BaseStrategy):
             
             if short_reclaim:
                 entry = current_close
-                stop_loss = current_high + 0.25 * current_atr
                 
-                mid_range = (resistance + support) / 2
-                tp1 = mid_range
-                tp2 = support
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(stop_loss - entry)
+                tp1 = entry - atr_distance * 1.0  # 1R
+                tp2 = entry - atr_distance * 2.0  # 2R
                 
                 base_score = 1.0
                 confirmations = []

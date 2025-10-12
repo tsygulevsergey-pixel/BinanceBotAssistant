@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr
 from src.indicators.volume_profile import calculate_volume_profile
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class OrderFlowStrategy(BaseStrategy):
@@ -158,9 +159,16 @@ class OrderFlowStrategy(BaseStrategy):
         
         if direction == 'long':
             entry = current_close
-            stop_loss = current_low - 0.3 * atr
-            take_profit_1 = level + 0.5 * atr  # TP к уровню
-            take_profit_2 = level + 1.5 * atr
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(entry - stop_loss)
+            take_profit_1 = entry + atr_distance * 1.0  # 1R
+            take_profit_2 = entry + atr_distance * 2.0  # 2R
             
             return Signal(
                 strategy_name=self.name,
@@ -183,9 +191,16 @@ class OrderFlowStrategy(BaseStrategy):
             )
         else:
             entry = current_close
-            stop_loss = current_high + 0.3 * atr
-            take_profit_1 = level - 0.5 * atr
-            take_profit_2 = level - 1.5 * atr
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+            
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(stop_loss - entry)
+            take_profit_1 = entry - atr_distance * 1.0  # 1R
+            take_profit_2 = entry - atr_distance * 2.0  # 2R
             
             return Signal(
                 strategy_name=self.name,
