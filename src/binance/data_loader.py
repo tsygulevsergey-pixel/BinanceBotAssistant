@@ -297,30 +297,18 @@ class DataLoader:
     def is_symbol_data_complete(self, symbol: str) -> bool:
         """Check if symbol has complete data for all required timeframes
         
-        For new coins (<90 days), adapts the expected data period to coin age
-        
         Returns:
             bool: True if all timeframes are loaded with >=99% expected data (raised from 95%)
         """
         warm_up_days = config.get('database.warm_up_days', 90)
-        
-        # Адаптивная проверка для новых монет
-        symbol_age = self._get_symbol_age_days(symbol)
-        if symbol_age > 0 and symbol_age < warm_up_days:
-            # Для новых монет используем реальный возраст вместо 90 дней
-            effective_days = symbol_age
-            logger.info(f"🆕 {symbol} is {symbol_age} days old, using adaptive threshold ({effective_days} days instead of {warm_up_days})")
-        else:
-            effective_days = warm_up_days
-        
         end_date = datetime.now(pytz.UTC)
-        start_date = end_date - timedelta(days=effective_days)
+        start_date = end_date - timedelta(days=warm_up_days)
         
         timeframes = ['15m', '1h', '4h', '1d']
         
         for interval in timeframes:
             existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
-            expected_count = self._expected_candle_count(interval, effective_days)
+            expected_count = self._expected_candle_count(interval, warm_up_days)
             
             # Raised threshold from 95% to 99% for better data quality
             if existing_count < expected_count * 0.99:
@@ -333,23 +321,14 @@ class DataLoader:
     async def auto_refill_incomplete_data(self, symbol: str) -> bool:
         """Автоматически докачать недостающие данные для символа
         
-        Находит все gaps и докачивает их параллельно
-        Для новых монет (<90 дней) адаптирует ожидаемый период данных
+        Находит все gaps за 90 дней и докачивает их параллельно
         
         Returns:
             bool: True если данные успешно докачаны до 99%, False иначе
         """
         warm_up_days = config.get('database.warm_up_days', 90)
-        
-        # Адаптивная проверка для новых монет
-        symbol_age = self._get_symbol_age_days(symbol)
-        if symbol_age > 0 and symbol_age < warm_up_days:
-            effective_days = symbol_age
-        else:
-            effective_days = warm_up_days
-        
         end_date = datetime.now(pytz.UTC)
-        start_date = end_date - timedelta(days=effective_days)
+        start_date = end_date - timedelta(days=warm_up_days)
         
         timeframes = ['15m', '1h', '4h', '1d']
         incomplete_timeframes = []
@@ -357,7 +336,7 @@ class DataLoader:
         # Найти неполные таймфреймы
         for interval in timeframes:
             existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
-            expected_count = self._expected_candle_count(interval, effective_days)
+            expected_count = self._expected_candle_count(interval, warm_up_days)
             
             if existing_count < expected_count * 0.99:
                 coverage = (existing_count / expected_count * 100) if expected_count > 0 else 0
