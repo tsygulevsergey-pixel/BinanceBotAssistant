@@ -446,8 +446,7 @@ action_price:
     
     # V2: улучшенные R:R фильтры
     v2:
-      min_rr: 1.2  # Минимум R:R с учётом комиссий
-      check_opposite_zone_body: true  # Проверять расстояние до ТЕЛА зоны, не центра
+      min_rr_zone_v2: 1.2  # Минимум R:R до противоположной зоны (до body, не центра)
   
   # Anti-duplicates
   cooldown:

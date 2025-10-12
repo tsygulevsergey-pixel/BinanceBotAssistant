@@ -25,6 +25,11 @@ class ActionPriceRiskManager:
         
         self.min_rr_zone = config.get('min_rr_zone', 1.0)
         self.breakeven_rr = config.get('breakeven_rr', 1.0)
+        
+        # V2: параметры улучшенной геометрии
+        self.version = config.get('version', 'v1')
+        v2_config = config.get('v2', {})
+        self.min_rr_zone_v2 = v2_config.get('min_rr_zone_v2', 1.2)
     
     def calculate_stop_loss(self, direction: str, zone: Dict, mtr: float, 
                            current_price: float) -> float:
@@ -94,6 +99,9 @@ class ActionPriceRiskManager:
         """
         Рассчитать TP1 и TP2
         
+        V1: TP2 до центра противоположной зоны
+        V2: TP2 до границы (body) противоположной зоны
+        
         Args:
             entry: Цена входа
             stop_loss: Стоп-лосс
@@ -117,7 +125,15 @@ class ActionPriceRiskManager:
         nearest_zone = self.find_nearest_opposite_zone(entry, direction, zones)
         
         if nearest_zone:
-            zone_target = (nearest_zone['low'] + nearest_zone['high']) / 2
+            if self.version == 'v2':
+                # V2: До границы (body) зоны
+                if direction == 'LONG':
+                    zone_target = nearest_zone['low']  # До нижней границы supply
+                else:  # SHORT
+                    zone_target = nearest_zone['high']  # До верхней границы demand
+            else:
+                # V1: До центра зоны (старая логика)
+                zone_target = (nearest_zone['low'] + nearest_zone['high']) / 2
             
             if direction == 'LONG':
                 tp2 = min(tp2_rr, zone_target)  # Что ближе
@@ -133,6 +149,9 @@ class ActionPriceRiskManager:
         """
         Проверить что до противоположной зоны >= min_rr_zone
         
+        V1: Проверка до центра зоны
+        V2: Проверка до ближайшей границы body зоны (более строгая)
+        
         Args:
             entry: Цена входа
             stop_loss: Стоп-лосс
@@ -147,10 +166,22 @@ class ActionPriceRiskManager:
         if not nearest_zone:
             return True  # Нет противоположной зоны - разрешаем
         
-        zone_center = (nearest_zone['low'] + nearest_zone['high']) / 2
-        rr = calculate_rr_ratio(entry, stop_loss, zone_center)
-        
-        return rr >= self.min_rr_zone
+        if self.version == 'v2':
+            # V2: Проверка до ближайшей границы (body) зоны
+            if direction == 'LONG':
+                # До нижней границы supply зоны
+                zone_target = nearest_zone['low']
+            else:  # SHORT
+                # До верхней границы demand зоны
+                zone_target = nearest_zone['high']
+            
+            rr = calculate_rr_ratio(entry, stop_loss, zone_target)
+            return rr >= self.min_rr_zone_v2
+        else:
+            # V1: Проверка до центра зоны (старая логика)
+            zone_center = (nearest_zone['low'] + nearest_zone['high']) / 2
+            rr = calculate_rr_ratio(entry, stop_loss, zone_center)
+            return rr >= self.min_rr_zone
     
     def calculate_entry_stop_targets(self, direction: str, zone: Dict, mtr: float,
                                      current_price: float, 

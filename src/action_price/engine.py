@@ -37,7 +37,10 @@ class ActionPriceEngine:
         self.avwap_calc = AnchoredVWAP(config['avwap'])
         self.ema_filter = EMAFilter(config['ema'])
         self.patterns = PriceActionPatterns(config['patterns'])
-        self.risk_manager = ActionPriceRiskManager(config['entry'])
+        # Передаём entry_config + parent version для v2 логики
+        entry_config = config['entry'].copy()
+        entry_config['version'] = config.get('version', 'v1')
+        self.risk_manager = ActionPriceRiskManager(entry_config)
         self.cooldown = ActionPriceCooldown(config['cooldown'])
         
         # Daily VWAP расчёт
