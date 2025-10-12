@@ -115,16 +115,25 @@ def calculate_donchian(high: pd.Series, low: pd.Series, period: int = 20) -> Tup
 def calculate_bollinger_bands(close: pd.Series, period: int = 20, std: float = 2.0) -> Tuple[pd.Series, pd.Series, pd.Series]:
     """Calculate Bollinger Bands (upper, middle, lower)"""
     bb = ta.bbands(close, length=period, std=std)
-    if bb is None or bb.empty:
-        return pd.Series(index=close.index, dtype=float), close.rolling(period).mean(), pd.Series(index=close.index, dtype=float)
     
     upper_col = f'BBU_{period}_{std}'
     lower_col = f'BBL_{period}_{std}'
     middle_col = f'BBM_{period}_{std}'
     
-    upper = bb[upper_col] if upper_col in bb.columns else pd.Series(index=close.index, dtype=float)
-    middle = bb[middle_col] if middle_col in bb.columns else close.rolling(period).mean()
-    lower = bb[lower_col] if lower_col in bb.columns else pd.Series(index=close.index, dtype=float)
+    # Если ta.bbands вернул пустой DataFrame или нужные колонки отсутствуют - вычислить вручную
+    if bb is None or bb.empty or upper_col not in bb.columns or lower_col not in bb.columns:
+        # Fallback: вычислить вручную
+        # min_periods=1 чтобы работать даже с малым количеством данных
+        middle = close.rolling(period, min_periods=1).mean()
+        rolling_std = close.rolling(period, min_periods=1).std()
+        upper = middle + (rolling_std * std)
+        lower = middle - (rolling_std * std)
+        return upper, middle, lower
+    
+    # Успешно получили колонки из ta.bbands
+    upper = bb[upper_col]
+    middle = bb[middle_col] if middle_col in bb.columns else close.rolling(period, min_periods=1).mean()
+    lower = bb[lower_col]
     
     return upper, middle, lower
 
