@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr, calculate_ema, calculate_adx
 from src.utils.time_of_day import get_adaptive_volume_threshold
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class ATRMomentumStrategy(BaseStrategy):
@@ -128,12 +129,16 @@ class ATRMomentumStrategy(BaseStrategy):
                 (current_high - impulse_high) >= self.breakout_atr_min * current_atr):
                 
                 entry = current_close
-                stop_loss = impulse_low - 0.25 * current_atr
-                atr_distance = entry - stop_loss
                 
-                rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
-                tp1 = entry + atr_distance * rr_min
-                tp2 = entry + atr_distance * rr_max
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(entry - stop_loss)
+                tp1 = entry + atr_distance * 1.0  # 1R
+                tp2 = entry + atr_distance * 2.0  # 2R
                 
                 base_score = 1.0
                 confirmations = []
@@ -194,12 +199,16 @@ class ATRMomentumStrategy(BaseStrategy):
             
             if (current_low <= ema20_val and current_close > ema20_val):
                 entry = current_close
-                stop_loss = current_low - 0.25 * current_atr
-                atr_distance = entry - stop_loss
                 
-                rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
-                tp1 = entry + atr_distance * rr_min
-                tp2 = entry + atr_distance * rr_max
+                # Расчет зон S/R для точного стопа
+                sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+                
+                # Расчет дистанции и тейков 1R и 2R
+                atr_distance = abs(entry - stop_loss)
+                tp1 = entry + atr_distance * 1.0  # 1R
+                tp2 = entry + atr_distance * 2.0  # 2R
                 
                 base_score = 1.0
                 confirmations = []

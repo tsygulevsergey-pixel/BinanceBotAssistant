@@ -7,6 +7,7 @@ from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_ema, calculate_atr, calculate_adx
 from src.indicators.vwap import calculate_daily_vwap
 from src.utils.time_of_day import get_adaptive_volume_threshold
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class MAVWAPPullbackStrategy(BaseStrategy):
@@ -117,14 +118,16 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                 if current_close > current_ema20:
                     
                     entry = current_close
-                    # Найти swing low для стопа
-                    swing_low = df['low'].tail(20).min()
-                    stop_loss = swing_low - 0.25 * current_atr
-                    atr_distance = entry - stop_loss
                     
-                    rr_min, rr_max = config.get('risk.rr_targets.pullback', [1.5, 2.5])
-                    tp1 = entry + atr_distance * 1.0  # TP1=+1R
-                    tp2 = entry + atr_distance * rr_max
+                    # Расчет зон S/R для точного стопа
+                    sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                    nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                    stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0, max_distance_atr=5.0)
+                    
+                    # Расчет дистанции и тейков 1R и 2R
+                    atr_distance = abs(entry - stop_loss)
+                    tp1 = entry + atr_distance * 1.0  # 1R
+                    tp2 = entry + atr_distance * 2.0  # 2R
                     
                     base_score = 1.0
                     confirmations = []
@@ -192,14 +195,16 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                 if current_close < current_ema20:
                     
                     entry = current_close
-                    # Найти swing high для стопа
-                    swing_high = df['high'].tail(20).max()
-                    stop_loss = swing_high + 0.25 * current_atr
-                    atr_distance = stop_loss - entry
                     
-                    rr_min, rr_max = config.get('risk.rr_targets.pullback', [1.5, 2.5])
-                    tp1 = entry - atr_distance * 1.0
-                    tp2 = entry - atr_distance * rr_max
+                    # Расчет зон S/R для точного стопа
+                    sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                    nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+                    stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0, max_distance_atr=5.0)
+                    
+                    # Расчет дистанции и тейков 1R и 2R
+                    atr_distance = abs(stop_loss - entry)
+                    tp1 = entry - atr_distance * 1.0  # 1R
+                    tp2 = entry - atr_distance * 2.0  # 2R
                     
                     base_score = 1.0
                     confirmations = []

@@ -145,9 +145,10 @@ def find_nearest_zone(current_price: float, zones: Dict[str, List[Dict]],
 
 def calculate_stop_loss_from_zone(entry_price: float, nearest_zone: Optional[Dict], 
                                    current_atr: float, direction: str,
-                                   fallback_mult: float = 2.0) -> float:
+                                   fallback_mult: float = 2.0,
+                                   max_distance_atr: float = 5.0) -> float:
     """
-    Рассчитать стоп-лосс за ближайшей зоной S/R
+    Рассчитать стоп-лосс за ближайшей зоной S/R с проверкой максимальной дистанции
     
     Args:
         entry_price: Цена входа
@@ -155,10 +156,20 @@ def calculate_stop_loss_from_zone(entry_price: float, nearest_zone: Optional[Dic
         current_atr: Текущий ATR
         direction: 'LONG' или 'SHORT'
         fallback_mult: Множитель ATR для fallback стопа если зона не найдена
+        max_distance_atr: Максимальная дистанция до зоны в ATR (по умолчанию 5.0)
     
     Returns:
         Уровень стоп-лосса
     """
+    # Проверка: если зона найдена, но слишком далеко (>5 ATR) - игнорируем её
+    if nearest_zone:
+        zone_distance = abs(entry_price - nearest_zone['level'])
+        max_distance = max_distance_atr * current_atr
+        
+        if zone_distance > max_distance:
+            # Зона слишком далеко (резкий импульс) → используем Fallback
+            nearest_zone = None
+    
     if nearest_zone:
         if direction == 'LONG':
             # Стоп за нижней границей зоны поддержки
@@ -167,7 +178,7 @@ def calculate_stop_loss_from_zone(entry_price: float, nearest_zone: Optional[Dic
             # Стоп за верхней границей зоны сопротивления
             stop_loss = nearest_zone['upper'] + 0.1 * current_atr
     else:
-        # Fallback: если зона не найдена, используем простую логику
+        # Fallback: если зона не найдена или слишком далеко, используем простую логику
         if direction == 'LONG':
             stop_loss = entry_price - fallback_mult * current_atr
         else:  # SHORT
