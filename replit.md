@@ -34,6 +34,28 @@ A fully integrated **Action Price** strategy system is included, operating indep
   - Query filters and `signal.closed_at` assignments now use correct field name
 - **Status**: ✅ Production-ready, zero AttributeError exceptions
 
+## Auto-Refill Data Integrity System (October 12, 2025)
+- **Feature**: Automatic data gap detection and refill when data completeness drops below 99%
+- **Logic**:
+  - When data integrity check detects <99% completeness → auto_refill_incomplete_data() triggered
+  - Scans all timeframes (15m, 1h, 4h, 1d) for missing candles across 90-day period
+  - Uses validate_candles_continuity() to detect exact gap locations
+  - Refills ONLY missing candles (not entire 90 days) via auto_fix_gaps()
+  - Telegram alert sent only if auto-refill fails
+- **Configuration**: 
+  - `data_integrity.auto_refill_on_incomplete: true` (enabled by default in config.yaml)
+  - Can be disabled to receive alerts without auto-refill
+- **Components**:
+  - New method: `DataLoader.auto_refill_incomplete_data()` for smart gap detection and refill
+  - Integrated into `load_warm_up_data()` with configurable enable/disable
+  - Works alongside existing PeriodicGapRefill for comprehensive data coverage
+- **Benefits**:
+  - Zero manual intervention - gaps fixed automatically
+  - Efficient: downloads only missing candles, not full history
+  - Database integrity maintained with duplicate prevention
+  - Chronological insertion ensures seamless data continuity
+- **Status**: ✅ Production-ready, tested with gap detection and refill logic
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -216,14 +216,35 @@ class DataLoader:
                 error_msg = f"❌ {symbol}: data incomplete after loading (99% threshold not met)"
                 logger.error(error_msg)
                 
-                # Send telegram alert for critical data issues
-                if self.telegram_bot:
-                    asyncio.create_task(
-                        self.telegram_bot.send_data_integrity_alert(symbol, "incomplete", 
-                                                                    "Data completeness below 99%")
-                    )
+                # Try auto-refill if enabled
+                auto_refill_enabled = config.get('data_integrity.auto_refill_on_incomplete', True)
                 
-                return False
+                if auto_refill_enabled:
+                    logger.info(f"🔧 Attempting auto-refill for {symbol}...")
+                    refill_success = await self.auto_refill_incomplete_data(symbol)
+                    
+                    if refill_success:
+                        logger.info(f"✅ {symbol}: auto-refill successful, data complete")
+                        return True
+                    else:
+                        logger.warning(f"⚠️ {symbol}: auto-refill failed, sending alert")
+                        # Send alert only if auto-refill failed
+                        if self.telegram_bot:
+                            asyncio.create_task(
+                                self.telegram_bot.send_data_integrity_alert(
+                                    symbol, "incomplete", 
+                                    "Data completeness below 99% (auto-refill failed)"
+                                )
+                            )
+                        return False
+                else:
+                    # Auto-refill disabled, just send alert
+                    if self.telegram_bot:
+                        asyncio.create_task(
+                            self.telegram_bot.send_data_integrity_alert(symbol, "incomplete", 
+                                                                        "Data completeness below 99%")
+                        )
+                    return False
             
             return True
         except Exception as e:
@@ -253,6 +274,78 @@ class DataLoader:
                 return False
         
         return True
+    
+    async def auto_refill_incomplete_data(self, symbol: str) -> bool:
+        """Автоматически докачать недостающие данные для символа
+        
+        Находит все gaps за 90 дней и докачивает их параллельно
+        
+        Returns:
+            bool: True если данные успешно докачаны до 99%, False иначе
+        """
+        warm_up_days = config.get('database.warm_up_days', 90)
+        end_date = datetime.now(pytz.UTC)
+        start_date = end_date - timedelta(days=warm_up_days)
+        
+        timeframes = ['15m', '1h', '4h', '1d']
+        incomplete_timeframes = []
+        
+        # Найти неполные таймфреймы
+        for interval in timeframes:
+            existing_count = self._count_existing_candles(symbol, interval, start_date, end_date)
+            expected_count = self._expected_candle_count(interval, warm_up_days)
+            
+            if existing_count < expected_count * 0.99:
+                coverage = (existing_count / expected_count * 100) if expected_count > 0 else 0
+                incomplete_timeframes.append({
+                    'interval': interval,
+                    'coverage': coverage,
+                    'existing': existing_count,
+                    'expected': expected_count
+                })
+        
+        if not incomplete_timeframes:
+            return True
+        
+        logger.info(
+            f"🔧 AUTO-REFILL starting for {symbol}:\n"
+            f"  📊 Incomplete timeframes: {len(incomplete_timeframes)}"
+        )
+        
+        # Докачать gaps для каждого неполного таймфрейма
+        total_fixed = 0
+        for tf_info in incomplete_timeframes:
+            interval = tf_info['interval']
+            logger.info(
+                f"  📈 {interval}: {tf_info['coverage']:.1f}% coverage "
+                f"({tf_info['existing']}/{tf_info['expected']} candles)"
+            )
+            
+            # Найти gaps
+            gaps = self.validate_candles_continuity(symbol, interval)
+            
+            if gaps:
+                logger.info(f"  🔍 Found {len(gaps)} gaps in {interval}")
+                # Докачать gaps
+                fixed = await self.auto_fix_gaps(gaps)
+                total_fixed += fixed
+                
+                if fixed == len(gaps):
+                    logger.info(f"  ✅ {interval}: all {fixed} gaps fixed")
+                else:
+                    logger.warning(f"  ⚠️ {interval}: only {fixed}/{len(gaps)} gaps fixed")
+            else:
+                logger.info(f"  ✅ {interval}: no internal gaps detected")
+        
+        # Проверить результат
+        is_complete = self.is_symbol_data_complete(symbol)
+        
+        if is_complete:
+            logger.info(f"✅ AUTO-REFILL complete for {symbol}: data now at 99%+")
+        else:
+            logger.warning(f"⚠️ AUTO-REFILL finished for {symbol}: still below 99% threshold")
+        
+        return is_complete
     
     def validate_candles_continuity(self, symbol: str, interval: str) -> list:
         """Validate candle continuity and detect internal gaps
