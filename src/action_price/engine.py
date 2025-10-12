@@ -131,6 +131,14 @@ class ActionPriceEngine:
             if not risk_data:
                 continue  # Не прошёл R:R фильтр
             
+            # Проверка актуальности entry price (для PPR и breakout паттернов)
+            entry_trigger = pattern['entry_trigger']
+            price_distance = abs(current_price - entry_trigger)
+            max_distance = mtr_exec * 0.75  # Максимум 0.75 MTR от entry
+            
+            if price_distance > max_distance:
+                continue  # Цена ушла слишком далеко от entry - сигнал устарел
+            
             # Проверка cooldown
             if self.cooldown.is_duplicate(symbol, direction, pattern_zone['id'],
                                           pattern['type'], timeframe, current_time):
@@ -144,6 +152,11 @@ class ActionPriceEngine:
             
             # Рассчитать confidence score
             confidence = self.calculate_confidence(confluence_flags, pattern_zone)
+            
+            # Проверка минимального порога confidence
+            min_confidence = self.config.get('filters', {}).get('min_confidence_score', 0)
+            if confidence < min_confidence:
+                continue  # Слишком низкая уверенность - пропускаем
             
             # Создать контекстный хеш
             context_hash = self.generate_context_hash(

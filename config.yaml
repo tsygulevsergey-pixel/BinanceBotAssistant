@@ -382,6 +382,10 @@ action_price:
     timeframe_15m: 2  # часов
     unique_key: ["symbol", "direction", "zone_id", "pattern", "timeframe"]
   
+  # Фильтры
+  filters:
+    min_confidence_score: 150.0  # Минимальная уверенность для сигнала (0-600+)
+  
   # Производительность
   performance:
     track_partial_exits: true  # Отслеживать частичные фиксации
