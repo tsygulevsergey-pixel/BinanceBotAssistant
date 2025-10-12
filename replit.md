@@ -87,20 +87,29 @@ A fully integrated **Action Price** strategy system is included, operating indep
   - Scans all timeframes (15m, 1h, 4h, 1d) for missing candles across 90-day period
   - Uses validate_candles_continuity() to detect exact gap locations
   - Refills ONLY missing candles (not entire 90 days) via auto_fix_gaps()
-  - Telegram alert sent only if auto-refill fails
+  - **Silent Mode for New Coins**: Alerts sent ONLY if symbol age >= 90 days (old coins with real problems)
+- **New Coin Detection**:
+  - `_get_symbol_age_days()` determines coin age from first available candle
+  - Young coins (< 90 days) have expected incomplete data → **no alerts sent**
+  - Old coins (>= 90 days) with <99% data → **alert sent** (real data integrity issue)
+  - Examples:
+    - LYNUSDT (10 days old, 11% data) → 🔇 Silent (expected)
+    - BTCUSDT (1500 days old, 95% data) → 🔔 Alert (problem!)
 - **Configuration**: 
   - `data_integrity.auto_refill_on_incomplete: true` (enabled by default in config.yaml)
   - Can be disabled to receive alerts without auto-refill
 - **Components**:
   - New method: `DataLoader.auto_refill_incomplete_data()` for smart gap detection and refill
+  - New method: `DataLoader._get_symbol_age_days()` for coin age detection
   - Integrated into `load_warm_up_data()` with configurable enable/disable
   - Works alongside existing PeriodicGapRefill for comprehensive data coverage
 - **Benefits**:
   - Zero manual intervention - gaps fixed automatically
   - Efficient: downloads only missing candles, not full history
+  - No false alerts from newly listed coins
   - Database integrity maintained with duplicate prevention
   - Chronological insertion ensures seamless data continuity
-- **Status**: ✅ Production-ready, tested with gap detection and refill logic
+- **Status**: ✅ Production-ready, smart age-based alerting prevents false positives
 
 # User Preferences
 

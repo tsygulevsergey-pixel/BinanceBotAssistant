@@ -202,14 +202,17 @@ class DataLoader:
                         error_msg = f"  [{idx}/{total_tf}] ❌ {symbol} {interval}: only {fixed}/{len(gaps)} gaps fixed"
                         logger.error(error_msg)
                         
-                        # Send telegram alert for unfixed gaps
-                        if self.telegram_bot:
+                        # Send telegram alert for unfixed gaps (только для старых монет)
+                        symbol_age = self._get_symbol_age_days(symbol)
+                        if symbol_age >= 90 and self.telegram_bot:
                             asyncio.create_task(
                                 self.telegram_bot.send_data_integrity_alert(
                                     symbol, "gaps", 
                                     f"{interval}: {len(gaps)-fixed} gaps remain unfixed"
                                 )
                             )
+                        elif symbol_age < 90:
+                            logger.info(f"🆕 {symbol} is new ({symbol_age} days old), skipping gaps alert")
             
             # Final completeness check with 99% threshold
             if not self.is_symbol_data_complete(symbol):
@@ -227,29 +230,69 @@ class DataLoader:
                         logger.info(f"✅ {symbol}: auto-refill successful, data complete")
                         return True
                     else:
-                        logger.warning(f"⚠️ {symbol}: auto-refill failed, sending alert")
-                        # Send alert only if auto-refill failed
-                        if self.telegram_bot:
+                        logger.warning(f"⚠️ {symbol}: auto-refill failed")
+                        # Send alert only if auto-refill failed (только для старых монет)
+                        symbol_age = self._get_symbol_age_days(symbol)
+                        if symbol_age >= 90 and self.telegram_bot:
                             asyncio.create_task(
                                 self.telegram_bot.send_data_integrity_alert(
                                     symbol, "incomplete", 
                                     "Data completeness below 99% (auto-refill failed)"
                                 )
                             )
+                            logger.warning(f"📤 {symbol}: sending alert (age: {symbol_age} days)")
+                        elif symbol_age < 90:
+                            logger.info(f"🆕 {symbol} is new ({symbol_age} days old), skipping incomplete alert")
                         return False
                 else:
-                    # Auto-refill disabled, just send alert
-                    if self.telegram_bot:
+                    # Auto-refill disabled - проверяем возраст перед алертом
+                    symbol_age = self._get_symbol_age_days(symbol)
+                    if symbol_age >= 90 and self.telegram_bot:
                         asyncio.create_task(
                             self.telegram_bot.send_data_integrity_alert(symbol, "incomplete", 
                                                                         "Data completeness below 99%")
                         )
+                        logger.warning(f"📤 {symbol}: sending alert (age: {symbol_age} days)")
+                    elif symbol_age < 90:
+                        logger.info(f"🆕 {symbol} is new ({symbol_age} days old), skipping incomplete alert")
                     return False
             
             return True
         except Exception as e:
             logger.error(f"Failed to load warm-up data for {symbol}: {e}")
             return False
+    
+    def _get_symbol_age_days(self, symbol: str) -> int:
+        """Определить возраст монеты по первой доступной свече
+        
+        Returns:
+            int: Количество дней с момента листинга монеты, 0 если нет данных
+        """
+        session = db.get_session()
+        try:
+            # Проверяем самый длинный таймфрейм для точности
+            first_candle = session.query(Candle).filter(
+                Candle.symbol == symbol,
+                Candle.timeframe == '1d'
+            ).order_by(Candle.open_time.asc()).first()
+            
+            if not first_candle:
+                # Если 1d нет, пробуем 4h
+                first_candle = session.query(Candle).filter(
+                    Candle.symbol == symbol,
+                    Candle.timeframe == '4h'
+                ).order_by(Candle.open_time.asc()).first()
+            
+            if first_candle:
+                # Ensure timezone-aware comparison
+                now = datetime.now(pytz.UTC)
+                candle_time = first_candle.open_time if first_candle.open_time.tzinfo else pytz.UTC.localize(first_candle.open_time)
+                age_delta = now - candle_time
+                return age_delta.days
+            
+            return 0
+        finally:
+            session.close()
     
     def is_symbol_data_complete(self, symbol: str) -> bool:
         """Check if symbol has complete data for all required timeframes
