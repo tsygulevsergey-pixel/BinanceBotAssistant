@@ -291,13 +291,16 @@ class TradingBot:
         
         iteration = 0
         check_interval = config.get('scanning.check_interval_seconds', 60)
+        last_check_time = datetime.now()
         
         while self.running:
             iteration += 1
+            current_time = datetime.now()
             
             # Каждые check_interval секунд проверяем сигналы
-            if iteration % check_interval == 0 and len(self.ready_symbols) > 0:
+            if (current_time - last_check_time).total_seconds() >= check_interval and len(self.ready_symbols) > 0:
                 await self._check_signals()
+                last_check_time = current_time
             
             # Action Price анализ (только на закрытии 15m/1H свечей)
             if self.action_price_enabled and len(self.ready_symbols) > 0:

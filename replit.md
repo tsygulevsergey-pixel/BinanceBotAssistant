@@ -8,14 +8,17 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
-## Critical Bugfixes: Data Loader & TimeframeSync (October 12, 2025)
+## Critical Bugfixes: Data Loader, TimeframeSync & Main Loop (October 12, 2025)
 - **Issue 1**: Bot crashed with empty error messages during data loading failures (`Error downloading SPXUSDT 15m: . Retry 1/3...`)
 - **Issue 2**: TimeframeSync never detected candle closes - strategies never ran (`⏭️ No candles closed - skipping` every check)
+- **Issue 3**: Main loop strategy check never executed - `iteration % check_interval` never aligned with actual time
 - **Root Cause 1**: DataLoader continued execution with incomplete data after download failures, causing unhandled exceptions
 - **Root Cause 2**: TimeframeSync checked cache BEFORE checking if candle closed - always returned False even at :00, :15, :30, :45
+- **Root Cause 3**: Main loop used `iteration % 60 == 0` which never matched actual time - bot started at 12:52:55, iteration 211 at 12:56:26 → 211 % 60 = 31 ≠ 0
 - **Fix 1**: DataLoader now raises explicit exception on download failure with proper error message; symbol marked as failed, bot continues with other symbols
 - **Fix 2**: TimeframeSync logic reordered - checks candle close time FIRST, then cache; detection window expanded to 90 seconds (e.g., 12:45:00-12:46:30)
-- **Result**: Bot no longer crashes on network errors; strategies correctly trigger at candle closes; Runtime Fast Catchup executes properly
+- **Fix 3**: Main loop now uses `(current_time - last_check_time).total_seconds() >= check_interval` - checks real elapsed time instead of iteration counter
+- **Result**: Bot no longer crashes on network errors; strategies correctly trigger every 60 seconds; Runtime Fast Catchup executes properly
 
 ## Symbol Blocking Logic Fix (October 2025)
 - **Issue**: Symbols were blocked from analysis even when signal saving to DB failed, causing permanent blocking with empty database
