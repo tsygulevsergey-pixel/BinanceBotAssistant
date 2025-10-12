@@ -345,16 +345,33 @@ class TradingBot:
         if not self.data_loader:
             return
         
+        # Определить какие таймфреймы обновились (свечи закрылись)
+        now = datetime.now(pytz.UTC)
+        updated_timeframes = []
+        
+        if TimeframeSync.should_update_timeframe('15m'):
+            updated_timeframes.append('15m')
+        if TimeframeSync.should_update_timeframe('1h'):
+            updated_timeframes.append('1h')
+        if TimeframeSync.should_update_timeframe('4h'):
+            updated_timeframes.append('4h')
+        
+        # Если ни одна свеча не закрылась - пропускаем проверку стратегий
+        if not updated_timeframes:
+            logger.info(f"⏭️  No candles closed - skipping strategy check")
+            return
+        
+        logger.info(f"🕯️  Candles closed: {', '.join(updated_timeframes)} - checking strategies")
+        
         symbols_to_check = self.ready_symbols.copy()
         if not symbols_to_check:
             logger.debug("No symbols ready for analysis yet...")
             return
         
-        logger.debug(f"Checking signals for {len(symbols_to_check)} ready symbols...")
+        logger.debug(f"Checking signals for {len(symbols_to_check)} ready symbols on {', '.join(updated_timeframes)} timeframes...")
         
         # Обновить BTC данные только если свеча закрылась
-        now = datetime.now(pytz.UTC)
-        if TimeframeSync.should_update_timeframe('1h'):
+        if '1h' in updated_timeframes:
             try:
                 await self.data_loader.update_missing_candles('BTCUSDT', '1h')
                 logger.info(f"✅ Updated BTCUSDT 1h data (candle closed at {now.strftime('%H:%M UTC')})")
@@ -371,26 +388,31 @@ class TradingBot:
                 continue
             
             try:
-                await self._check_symbol_signals(symbol, btc_data)
+                await self._check_symbol_signals(symbol, btc_data, updated_timeframes)
             except Exception as e:
                 logger.error(f"Error checking {symbol}: {e}")
             
             await asyncio.sleep(0.05)  # Небольшая пауза между символами
     
-    async def _check_symbol_signals(self, symbol: str, btc_data):
-        """Проверить сигналы для одного символа"""
+    async def _check_symbol_signals(self, symbol: str, btc_data, updated_timeframes: list):
+        """Проверить сигналы для одного символа
+        
+        Args:
+            symbol: Символ для проверки
+            btc_data: BTC данные для фильтра
+            updated_timeframes: Список обновившихся таймфреймов (свечи которых закрылись)
+        """
         if not self.data_loader:
             return
         
-        # Обновить актуальные свечи ТОЛЬКО если свеча закрылась
-        for tf in ['15m', '1h', '4h']:
-            if TimeframeSync.should_update_timeframe(tf):
-                try:
-                    await self.data_loader.update_missing_candles(symbol, tf)
-                except Exception as e:
-                    logger.debug(f"Could not update {symbol} {tf}: {e}")
+        # Обновить актуальные свечи ТОЛЬКО для обновившихся таймфреймов
+        for tf in updated_timeframes:
+            try:
+                await self.data_loader.update_missing_candles(symbol, tf)
+            except Exception as e:
+                logger.debug(f"Could not update {symbol} {tf}: {e}")
         
-        # Загрузить данные для всех таймфреймов
+        # Загрузить данные ТОЛЬКО для обновившихся таймфреймов
         # Лимиты рассчитаны на основе максимальных требований стратегий:
         # - 15m: RSI/Stoch MR требует 90 дней × 24 × 4 = 8,640 баров
         # - 1h: Donchian требует ~87 дней × 24 = 2,100 баров
@@ -402,11 +424,17 @@ class TradingBot:
         }
         
         timeframe_data = {}
-        for tf in ['15m', '1h', '4h']:
+        for tf in updated_timeframes:  # ОПТИМИЗАЦИЯ: загружаем только обновившиеся таймфреймы
             limit = tf_limits.get(tf, 200)
             df = self.data_loader.get_candles(symbol, tf, limit=limit)
             if df is not None and len(df) > 0:
                 timeframe_data[tf] = df
+        
+        # ВСЕГДА загружаем 4h для определения режима рынка (даже если свеча не закрылась)
+        if '4h' not in timeframe_data:
+            df_4h = self.data_loader.get_candles(symbol, '4h', limit=tf_limits['4h'])
+            if df_4h is not None and len(df_4h) > 0:
+                timeframe_data['4h'] = df_4h
         
         # Проверить pending LIMIT orders для этого символа
         if '15m' in timeframe_data:
