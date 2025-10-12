@@ -152,6 +152,16 @@ class TradingBot:
         
         symbols = [s for s in all_pairs if volume_map.get(s, 0) >= min_volume]
         logger.info(f"Filtered to {len(symbols)} pairs with volume >= ${min_volume:,.0f}")
+        
+        # Фильтр стейблкоинов (нулевая волатильность)
+        if config.get('universe.exclude_stablecoins', True):
+            stablecoins = config.get('universe.stablecoins', [])
+            before_count = len(symbols)
+            symbols = [s for s in symbols if s not in stablecoins]
+            excluded_count = before_count - len(symbols)
+            if excluded_count > 0:
+                logger.info(f"Excluded {excluded_count} stablecoins: {', '.join([s for s in stablecoins if s in volume_map])}")
+        
         return symbols
     
     async def _initialize(self):

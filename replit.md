@@ -8,6 +8,26 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## Stablecoin Filter (October 12, 2025)
+- **Feature**: Automatic exclusion of stablecoins from analysis
+- **Reason**: Stablecoins (USDCUSDT, BUSDUSDT, etc.) have zero volatility, making them unsuitable for trading
+- **Excluded symbols**: USDCUSDT, BUSDUSDT, TUSDUSDT, USDPUSDT, FDUSDUSDT, DAIUSDT, EURUSDT
+- **Configuration**: `universe.exclude_stablecoins: true` in config.yaml (enabled by default)
+- **Impact**: Prevents false signals on pegged assets with hundreds of zone touches but micro-movements
+- **Status**: ✅ Production-ready, applies to both main strategies and Action Price
+
+## Rate Limit Optimization (October 12, 2025)
+- **Issue**: With 300 symbols, bot was hitting Binance API limits (2,400 weight/minute)
+- **Solution**: Reduced parallelism to prevent rate limit violations
+  - `fast_catchup.max_parallel: 2` (was auto 4-12) → ~50% API load
+  - `periodic_gap_refill.max_parallel: 3` (was 8) → ~75% API load
+  - Combined load: ~94% of limit (safe margin for bursts)
+- **Results**: 
+  - Fast catchup: 1,200 weight/min (50% limit)
+  - Periodic refill: 1,800 weight/min (75% limit)
+  - Auto-refill: 450 weight/min (19% limit)
+- **Status**: ✅ Production-ready, tested with 300 symbols on mainnet API
+
 ## Trailing Stop-Loss with Partial TP (October 12, 2025)
 - **Feature**: Implemented trailing stop-loss system with partial profit taking
 - **Logic**:

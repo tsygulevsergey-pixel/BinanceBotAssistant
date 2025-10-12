@@ -288,6 +288,17 @@ universe:
   filter_quote: "USDT"
   min_volume_24h: 10000000  # $10M minimum
   update_interval_hours: 1  # Auto-update symbol list every N hours
+  
+  # Исключить стейблкоины (нулевая волатильность, бесполезны для торговли)
+  exclude_stablecoins: true
+  stablecoins:
+    - "USDCUSDT"
+    - "BUSDUSDT"
+    - "TUSDUSDT"
+    - "USDPUSDT"
+    - "FDUSDUSDT"
+    - "DAIUSDT"
+    - "EURUSDT"
 
 # Action Price Strategy (отдельная система)
 action_price:
