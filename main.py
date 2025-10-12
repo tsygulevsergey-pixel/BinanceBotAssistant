@@ -207,7 +207,7 @@ class TradingBot:
         
         if not use_testnet and ap_enabled:
             self.action_price_enabled = True
-            ap_config = config.get_dict('action_price')
+            ap_config = config.get('action_price', {})
             self.action_price_engine = ActionPriceEngine(ap_config)
             
             # Запуск Action Price Performance Tracker
