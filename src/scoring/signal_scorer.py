@@ -53,35 +53,69 @@ class SignalScorer:
             Финальный score (float)
         """
         score = signal.base_score  # Начинаем с базового score от стратегии
+        components = []  # Детали компонентов
         
         # +1: Объём > 1.5× медианы 20 баров
+        volume_bonus = 0.0
         if signal.volume_ratio and signal.volume_ratio >= self.volume_threshold:
-            score += 1.0
-            logger.debug(f"{signal.symbol} +1 volume (ratio={signal.volume_ratio:.2f})")
+            volume_bonus = 1.0
+            score += volume_bonus
+            components.append(f"Vol: +1.0 (ratio={signal.volume_ratio:.2f})")
+        else:
+            vol_ratio = signal.volume_ratio or 0.0
+            components.append(f"Vol: 0 (ratio={vol_ratio:.2f} < {self.volume_threshold})")
         
         # +1: CVD в сторону (или дивергенция для MR)
         cvd_score = self._score_cvd(signal, indicators)
         score += cvd_score
+        cvd_val = indicators.get('cvd', 0.0)
+        if cvd_score > 0:
+            components.append(f"CVD: +{cvd_score:.1f} ({'bullish' if cvd_val > 0 else 'bearish'})")
+        else:
+            components.append(f"CVD: 0 (val={cvd_val:.0f})")
         
         # +1: ΔOI ≥ +1…+3% за 30–90 мин
         doi_score = self._score_doi(signal, indicators)
         score += doi_score
+        doi_pct = indicators.get('doi_pct', 0.0)
+        if doi_score > 0:
+            components.append(f"ΔOI: +{doi_score:.1f} ({doi_pct:.2f}%)")
+        else:
+            components.append(f"ΔOI: 0 ({doi_pct:.2f}%)")
         
         # +1: Устойчивый depth-imbalance 10–30с в сторону
         imbalance_score = self._score_imbalance(signal, indicators)
         score += imbalance_score
+        imbalance_ratio = indicators.get('depth_imbalance', 1.0)
+        if imbalance_score > 0:
+            components.append(f"Imbalance: +{imbalance_score:.1f} (ratio={imbalance_ratio:.2f})")
+        else:
+            components.append(f"Imbalance: 0 (ratio={imbalance_ratio:.2f})")
         
         # −1: Funding-экстрем
         funding_penalty = self._score_funding_extreme(signal, indicators)
         score += funding_penalty
+        if funding_penalty < 0:
+            components.append(f"Funding: {funding_penalty:.1f} (extreme)")
+        else:
+            components.append("Funding: 0")
         
         # −2: BTC идёт против (на H1)
-        btc_penalty = self._score_btc_filter(signal, btc_data)
+        btc_penalty, btc_change = self._score_btc_filter(signal, btc_data)
         score += btc_penalty
+        if btc_penalty < 0 and btc_change is not None:
+            components.append(f"BTC: {btc_penalty:.1f} (BTC {'up' if btc_change > 0 else 'down'} {abs(btc_change):.2f}% vs {signal.direction})")
+        else:
+            if btc_change is not None:
+                components.append(f"BTC: 0 ({'up' if btc_change > 0 else 'down'} {abs(btc_change):.2f}%, neutral)")
+            else:
+                components.append("BTC: 0 (no data)")
         
+        # Логируем детальный breakdown
         logger.info(
-            f"{signal.symbol} {signal.direction} score={score:.1f} "
-            f"(base={signal.base_score}, vol={signal.volume_ratio:.2f})"
+            f"{signal.symbol} {signal.direction} scoring breakdown:\n"
+            f"  Base: {signal.base_score:.1f} | " + " | ".join(components) + f"\n"
+            f"  Final Score: {score:.1f}"
         )
         
         return score
@@ -179,13 +213,19 @@ class SignalScorer:
         self, 
         signal: Signal, 
         btc_data: Optional[pd.DataFrame]
-    ) -> float:
+    ) -> tuple[float, Optional[float]]:
         """
         BTC фильтр: −2 если BTC идёт против (на H1)
         Использует btc_filter.get_direction_penalty() с порогом 0.3%
+        
+        Returns:
+            tuple: (penalty, btc_change_pct) - пенальти и % изменения BTC
         """
         if btc_data is None or len(btc_data) < 3:
-            return 0.0
+            return 0.0, None
+        
+        # Вычисляем изменение BTC за 3 бара
+        btc_change_pct = (btc_data['close'].iloc[-1] - btc_data['close'].iloc[-3]) / btc_data['close'].iloc[-3] * 100
         
         # Используем btc_filter для определения направления с порогом
         from src.filters.btc_filter import BTCFilter
@@ -197,7 +237,7 @@ class SignalScorer:
         if penalty < 0:
             logger.debug(f"{signal.symbol} {penalty:.1f} BTC against (signal {signal.direction})")
         
-        return penalty
+        return penalty, btc_change_pct
     
     def should_enter(self, score: float) -> bool:
         """Проверить, достаточен ли score для входа"""
