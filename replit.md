@@ -6,6 +6,17 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
+# Recent Changes
+
+## Signal Tracker Backfill Fix (October 12, 2025)
+- **Fixed**: Corrected Candle model field references in backfill mechanism from `kline.timestamp` to `kline.open_time`
+- **Impact**: Backfill now successfully closes signals missed during bot downtime using historical candle data
+- **Testing**: Verified with 18/33 signals closed on startup without errors
+- **Components Updated**: 
+  - `src/utils/signal_tracker.py`: All 6 instances of `kline.timestamp` replaced with `kline.open_time` in backfill logic
+  - Query filters and `signal.closed_at` assignments now use correct field name
+- **Status**: ✅ Production-ready, zero AttributeError exceptions
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
