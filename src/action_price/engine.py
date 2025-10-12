@@ -47,6 +47,89 @@ class ActionPriceEngine:
         from src.indicators.vwap import VWAPCalculator
         self.daily_vwap = VWAPCalculator()
     
+    def _check_super_chop_filter_v2(self, symbol: str, df_1h: pd.DataFrame) -> bool:
+        """
+        V2: Проверить фильтр super-chop (низкая волатильность)
+        
+        Блокировать если ВСЕ 3 условия выполнены:
+        - ADX(H1) < 14
+        - ATR%(H1) < p30
+        - BBW(H1) < p30
+        
+        Args:
+            df_1h: Часовые свечи
+            
+        Returns:
+            True если супер-пила (блокировать сигнал)
+        """
+        if self.config.get('version') != 'v2':
+            return False  # V1 - фильтр отключён
+        
+        v2_filters = self.config.get('filters', {}).get('v2', {})
+        adx_threshold = v2_filters.get('adx_threshold_1h', 14)
+        atr_pct_percentile = v2_filters.get('atr_pct_percentile', 30)
+        bbw_percentile = v2_filters.get('bbw_percentile', 30)
+        lookback_days = v2_filters.get('percentile_lookback_days', 90)
+        
+        # Рассчитать ADX на H1
+        import pandas_ta as ta
+        adx = ta.adx(df_1h['high'], df_1h['low'], df_1h['close'], length=14)
+        if adx is None or len(adx) == 0:
+            return False
+        
+        current_adx = adx['ADX_14'].iloc[-1]
+        
+        # Рассчитать ATR% на H1
+        atr = ta.atr(df_1h['high'], df_1h['low'], df_1h['close'], length=14)
+        if atr is None or len(atr) == 0:
+            return False
+        
+        current_price = df_1h['close'].iloc[-1]
+        atr_pct = (atr.iloc[-1] / current_price) * 100
+        
+        # Рассчитать BBW на H1
+        bb = ta.bbands(df_1h['close'], length=20)
+        if bb is None or len(bb) == 0:
+            return False
+        
+        bb_upper = bb[f'BBU_20_2.0']
+        bb_lower = bb[f'BBL_20_2.0']
+        bb_middle = bb[f'BBM_20_2.0']
+        
+        current_bbw = ((bb_upper.iloc[-1] - bb_lower.iloc[-1]) / bb_middle.iloc[-1]) * 100
+        
+        # Рассчитать перцентили за lookback_days
+        lookback_bars = lookback_days * 24  # H1 → 24 бара в день
+        lookback_bars = min(lookback_bars, len(df_1h) - 1)
+        
+        if lookback_bars < 100:
+            return False  # Недостаточно данных
+        
+        # ATR% перцентиль
+        atr_pct_series = (atr.tail(lookback_bars) / df_1h['close'].tail(lookback_bars)) * 100
+        atr_pct_p30 = atr_pct_series.quantile(atr_pct_percentile / 100)
+        
+        # BBW перцентиль
+        bbw_series = ((bb_upper - bb_lower) / bb_middle * 100).tail(lookback_bars)
+        bbw_p30 = bbw_series.quantile(bbw_percentile / 100)
+        
+        # Проверка всех 3 условий
+        condition_adx = current_adx < adx_threshold
+        condition_atr = atr_pct < atr_pct_p30
+        condition_bbw = current_bbw < bbw_p30
+        
+        is_super_chop = condition_adx and condition_atr and condition_bbw
+        
+        if is_super_chop:
+            logger.info(
+                f"🚫 Super-chop filter: {symbol} blocked "
+                f"(ADX={current_adx:.1f}<{adx_threshold}, "
+                f"ATR%={atr_pct:.3f}<{atr_pct_p30:.3f}, "
+                f"BBW={current_bbw:.2f}<{bbw_p30:.2f})"
+            )
+        
+        return is_super_chop
+    
     async def analyze_symbol(self, symbol: str, df_1d: pd.DataFrame, 
                        df_4h: pd.DataFrame, df_1h: pd.DataFrame, 
                        df_15m: pd.DataFrame, timeframe: str,
@@ -89,6 +172,10 @@ class ActionPriceEngine:
         else:
             # Client не передан (backtesting/тесты) - используем close свечи
             current_price = float(df_exec['close'].iloc[-1])
+        
+        # V2: Проверка super-chop фильтра
+        if self._check_super_chop_filter_v2(symbol, df_1h):
+            return []  # Блокировать symbol из-за низкой волатильности
         
         # 1. Получить зоны S/R
         zones = self.zone_builder.get_zones(symbol, df_1d, df_4h, current_price)
