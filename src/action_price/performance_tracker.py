@@ -8,7 +8,7 @@ import pytz
 import logging
 
 from src.database.models import ActionPriceSignal
-from src.database.database import Database
+from src.database.db import db
 from src.binance.client import BinanceClient
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class ActionPricePerformanceTracker:
     """Отслеживание производительности Action Price сигналов с частичными выходами"""
     
-    def __init__(self, binance_client: BinanceClient, db: Database,
+    def __init__(self, binance_client: BinanceClient, db,
                  check_interval: int = 60, on_signal_closed_callback=None):
         """
         Args:

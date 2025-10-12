@@ -192,10 +192,10 @@ class TradingBot:
             
             # Запуск Action Price Performance Tracker
             self.ap_performance_tracker = ActionPricePerformanceTracker(
-                binance_client=self.client,
-                db=db,
-                check_interval=check_interval,
-                on_signal_closed_callback=self._unblock_symbol
+                self.client,
+                db,
+                check_interval,
+                self._unblock_symbol
             )
             asyncio.create_task(self.ap_performance_tracker.start())
             ap_logger.info("🎯 Action Price Engine initialized (Production mode)")
