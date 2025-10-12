@@ -256,12 +256,13 @@ class SignalPerformanceTracker:
             exit_result = self._check_exit_conditions(signal, current_price)
             
             if exit_result:
-                exit_reason, exit_price, pnl_percent = exit_result
+                exit_reason, exit_price, pnl_r, exit_type = exit_result
                 
                 signal.status = exit_reason  # type: ignore
                 signal.exit_price = exit_price  # type: ignore
                 signal.exit_reason = exit_reason  # type: ignore
-                signal.pnl_percent = pnl_percent  # type: ignore
+                signal.pnl_percent = pnl_r  # type: ignore
+                signal.exit_type = exit_type  # type: ignore
                 signal.closed_at = datetime.now(pytz.UTC)  # type: ignore
                 
                 self.lock_manager.release_lock(symbol_str)
@@ -271,10 +272,11 @@ class SignalPerformanceTracker:
                     self.on_signal_closed_callback(symbol_str)
                 
                 status_emoji = "✅" if exit_reason == "WIN" else "❌" if exit_reason == "LOSS" else "⏱️"
+                exit_label = f"{exit_type} ({pnl_r:+.1f}R)" if exit_type in ["TP1", "TP2", "SL"] else exit_type
                 logger.info(
                     f"{status_emoji} Signal closed: {signal.symbol} {signal.direction} "
                     f"| Entry: {signal.entry_price:.4f} → Exit: {exit_price:.4f} "
-                    f"| PnL: {pnl_percent:+.2f}% | Reason: {exit_reason}"
+                    f"| {exit_label} | Reason: {exit_reason}"
                 )
                 
         except Exception as e:
@@ -282,48 +284,115 @@ class SignalPerformanceTracker:
     
     def _check_exit_conditions(self, signal: Signal, current_price: float) -> Optional[tuple]:
         """
-        Проверить условия выхода для сигнала
+        Проверить условия выхода для сигнала с trailing stop-loss
+        
+        Логика:
+        1. Если TP1 не достигнут:
+           - Проверить SL, TP2, TP1
+           - При достижении TP1: перенести SL в breakeven, записать 0.5R, продолжить
+        2. Если TP1 уже достигнут:
+           - Проверить breakeven (новый SL) -> закрыть с 0.5R
+           - Проверить TP2 -> закрыть с 1.5R
         
         Returns:
-            tuple (exit_reason, exit_price, pnl_percent) или None если выхода нет
+            tuple (exit_reason, exit_price, pnl_percent, exit_type) или None если выхода нет
         """
         entry = float(signal.entry_price)  # type: ignore
         sl = float(signal.stop_loss)  # type: ignore
         tp1 = float(signal.take_profit_1) if signal.take_profit_1 else None  # type: ignore
         tp2 = float(signal.take_profit_2) if signal.take_profit_2 else None  # type: ignore
         direction = str(signal.direction)  # type: ignore
+        tp1_hit = bool(signal.tp1_hit) if hasattr(signal, 'tp1_hit') and signal.tp1_hit is not None else False  # type: ignore
         
-        if direction == "LONG":
-            # Проверка SL (используем точный уровень SL для exit_price)
-            if current_price <= sl:
-                pnl_percent = ((sl - entry) / entry) * 100
-                return ("LOSS", sl, pnl_percent)
+        # Если TP1 УЖЕ достигнут - проверяем breakeven и TP2
+        if tp1_hit:
+            if direction == "LONG":
+                # Проверка TP2 (приоритет выше)
+                if tp2 and current_price >= tp2:
+                    pnl_r = 1.5
+                    signal.exit_type = "TP2"  # type: ignore
+                    return ("WIN", tp2, pnl_r, "TP2")
+                
+                # Проверка breakeven (SL перенесен в entry)
+                if current_price <= entry:
+                    pnl_r = 0.5
+                    signal.exit_type = "TP1"  # type: ignore
+                    return ("WIN", entry, pnl_r, "TP1")
             
-            # Проверка TP2 (используем точный уровень TP2)
-            if tp2 and current_price >= tp2:
-                pnl_percent = ((tp2 - entry) / entry) * 100
-                return ("WIN", tp2, pnl_percent)
-            
-            # Проверка TP1 (используем точный уровень TP1)
-            if tp1 and current_price >= tp1:
-                pnl_percent = ((tp1 - entry) / entry) * 100
-                return ("WIN", tp1, pnl_percent)
+            elif direction == "SHORT":
+                # Проверка TP2 (приоритет выше)
+                if tp2 and current_price <= tp2:
+                    pnl_r = 1.5
+                    signal.exit_type = "TP2"  # type: ignore
+                    return ("WIN", tp2, pnl_r, "TP2")
+                
+                # Проверка breakeven (SL перенесен в entry)
+                if current_price >= entry:
+                    pnl_r = 0.5
+                    signal.exit_type = "TP1"  # type: ignore
+                    return ("WIN", entry, pnl_r, "TP1")
         
-        elif direction == "SHORT":
-            # Проверка SL (используем точный уровень SL для exit_price)
-            if current_price >= sl:
-                pnl_percent = ((entry - sl) / entry) * 100
-                return ("LOSS", sl, pnl_percent)
+        # Если TP1 ЕЩЁ НЕ достигнут - обычная проверка
+        else:
+            if direction == "LONG":
+                # Проверка SL
+                if current_price <= sl:
+                    risk = abs(entry - sl)
+                    pnl_r = -1.0
+                    signal.exit_type = "SL"  # type: ignore
+                    return ("LOSS", sl, pnl_r, "SL")
+                
+                # Проверка TP2 (если достигли сразу)
+                if tp2 and current_price >= tp2:
+                    risk = abs(entry - sl)
+                    profit = tp2 - entry
+                    pnl_r = profit / risk if risk > 0 else 2.0
+                    signal.exit_type = "TP2"  # type: ignore
+                    return ("WIN", tp2, pnl_r, "TP2")
+                
+                # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
+                if tp1 and current_price >= tp1:
+                    # Установить флаг TP1 и перенести SL в breakeven
+                    signal.tp1_hit = True  # type: ignore
+                    signal.tp1_closed_at = datetime.now(pytz.UTC)  # type: ignore
+                    signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
+                    
+                    logger.info(
+                        f"📈 TP1 HIT: {signal.symbol} {signal.direction} "
+                        f"| Partial close at {tp1:.4f} (+0.5R) "
+                        f"| SL moved to breakeven {entry:.4f}"
+                    )
+                    return None
             
-            # Проверка TP2 (используем точный уровень TP2)
-            if tp2 and current_price <= tp2:
-                pnl_percent = ((entry - tp2) / entry) * 100
-                return ("WIN", tp2, pnl_percent)
-            
-            # Проверка TP1 (используем точный уровень TP1)
-            if tp1 and current_price <= tp1:
-                pnl_percent = ((entry - tp1) / entry) * 100
-                return ("WIN", tp1, pnl_percent)
+            elif direction == "SHORT":
+                # Проверка SL
+                if current_price >= sl:
+                    risk = abs(entry - sl)
+                    pnl_r = -1.0
+                    signal.exit_type = "SL"  # type: ignore
+                    return ("LOSS", sl, pnl_r, "SL")
+                
+                # Проверка TP2 (если достигли сразу)
+                if tp2 and current_price <= tp2:
+                    risk = abs(entry - sl)
+                    profit = entry - tp2
+                    pnl_r = profit / risk if risk > 0 else 2.0
+                    signal.exit_type = "TP2"  # type: ignore
+                    return ("WIN", tp2, pnl_r, "TP2")
+                
+                # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
+                if tp1 and current_price <= tp1:
+                    # Установить флаг TP1 и перенести SL в breakeven
+                    signal.tp1_hit = True  # type: ignore
+                    signal.tp1_closed_at = datetime.now(pytz.UTC)  # type: ignore
+                    signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
+                    
+                    logger.info(
+                        f"📉 TP1 HIT: {signal.symbol} {signal.direction} "
+                        f"| Partial close at {tp1:.4f} (+0.5R) "
+                        f"| SL moved to breakeven {entry:.4f}"
+                    )
+                    return None
         
         time_stop_result = self._check_time_stop(signal, current_price)
         if time_stop_result:
@@ -355,22 +424,27 @@ class SignalPerformanceTracker:
             return None
         
         entry = float(signal.entry_price)  # type: ignore
+        sl = float(signal.stop_loss)  # type: ignore
         direction = str(signal.direction)  # type: ignore
+        risk = abs(entry - sl)
         
         atr_threshold = 0.5
-        meta = signal.meta_data or {}  # type: ignore
         
         if direction == "LONG":
             required_move = entry * (atr_threshold / 100)
             if current_price < entry + required_move:
-                pnl_percent = ((current_price - entry) / entry) * 100
-                return ("TIME_STOP", current_price, pnl_percent)
+                pnl = current_price - entry
+                pnl_r = pnl / risk if risk > 0 else 0
+                signal.exit_type = "TIME_STOP"  # type: ignore
+                return ("TIME_STOP", current_price, pnl_r, "TIME_STOP")
         
         elif direction == "SHORT":
             required_move = entry * (atr_threshold / 100)
             if current_price > entry - required_move:
-                pnl_percent = ((entry - current_price) / entry) * 100
-                return ("TIME_STOP", current_price, pnl_percent)
+                pnl = entry - current_price
+                pnl_r = pnl / risk if risk > 0 else 0
+                signal.exit_type = "TIME_STOP"  # type: ignore
+                return ("TIME_STOP", current_price, pnl_r, "TIME_STOP")
         
         return None
     

@@ -70,8 +70,13 @@ class Signal(Base):
     status = Column(String(20), nullable=False, default='ACTIVE')
     
     telegram_message_id = Column(Integer)
+    
+    tp1_hit = Column(Boolean, default=False)
+    tp1_closed_at = Column(DateTime)
+    
     exit_price = Column(Float)
     exit_reason = Column(String(50))
+    exit_type = Column(String(20))
     pnl = Column(Float)
     pnl_percent = Column(Float)
     closed_at = Column(DateTime)
