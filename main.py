@@ -173,12 +173,16 @@ class TradingBot:
         
         self.coordinator = SymbolLoadCoordinator(total_symbols=len(self.symbols), queue_max_size=50)
         
+        # ВАЖНО: Запустить analyzer ДО Fast Catchup, чтобы он мог потреблять символы из очереди
+        # Иначе очередь переполнится и Fast Catchup зависнет на await ready_queue.put()
+        analyzer_task = asyncio.create_task(self._symbol_analyzer_task())
+        logger.info("Analyzer task started - ready to consume symbols from queue")
+        
         # Сначала FAST CATCHUP для existing symbols с gaps
         await self._fast_catchup_phase()
         
         # Потом нормальный loader для новых символов
         loader_task = asyncio.create_task(self._symbol_loader_task())
-        analyzer_task = asyncio.create_task(self._symbol_analyzer_task())
         update_symbols_task = asyncio.create_task(self._update_symbols_task())
         periodic_gap_refill_task = asyncio.create_task(self._periodic_gap_refill_task())
         
