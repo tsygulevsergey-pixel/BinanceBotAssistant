@@ -704,15 +704,19 @@ class TradingBot:
                 if len(timeframe_data) < 4:
                     continue
                 
-                # Анализ паттернов
-                ap_signal = await self.action_price_engine.analyze_symbol(
-                    symbol=symbol,
-                    timeframe_data=timeframe_data,
-                    current_timeframe=current_tf,
-                    force_zone_recalc=force_zone_recalc
+                # Анализ паттернов - передаём DataFrame отдельно
+                ap_signals = self.action_price_engine.analyze_symbol(
+                    symbol,
+                    timeframe_data.get('1d'),
+                    timeframe_data.get('4h'),
+                    timeframe_data.get('1h'),
+                    timeframe_data.get('15m'),
+                    current_tf,
+                    current_time
                 )
                 
-                if ap_signal:
+                # Обработать каждый сигнал (может быть несколько)
+                for ap_signal in ap_signals:
                     signals_found += 1
                     
                     # Сохранить в БД
@@ -727,7 +731,7 @@ class TradingBot:
                     ap_logger.info(
                         f"🎯 AP Signal: {ap_signal['symbol']} {ap_signal['direction']} "
                         f"{ap_signal['pattern_type']} @ {ap_signal['entry_price']:.4f} "
-                        f"(Zone: {ap_signal['zone_type']}, Confluences: {len(ap_signal['confluences'])})"
+                        f"(Zone: {ap_signal['zone_type']}, Confidence: {ap_signal.get('confidence_score', 0):.1f})"
                     )
             
             except Exception as e:
