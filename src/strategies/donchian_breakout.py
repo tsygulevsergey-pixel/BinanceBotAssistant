@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_donchian, calculate_atr, calculate_bollinger_bands
 from src.utils.time_of_day import get_adaptive_volume_threshold
+from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
 
 
 class DonchianBreakoutStrategy(BaseStrategy):
@@ -116,7 +117,11 @@ class DonchianBreakoutStrategy(BaseStrategy):
             
             # Расчёт уровней
             entry = current_close
-            stop_loss = current_lower
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0)
             
             # ВАЖНО: Проверить расстояние до стопа (защита от чрезмерного риска)
             is_valid, stop_distance_atr = self.validate_stop_distance(
@@ -128,12 +133,10 @@ class DonchianBreakoutStrategy(BaseStrategy):
                 )
                 return None
             
-            atr_distance = entry - stop_loss
-            
-            # R:R targets
-            rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
-            tp1 = entry + atr_distance * rr_min
-            tp2 = entry + atr_distance * rr_max
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(entry - stop_loss)
+            tp1 = entry + atr_distance * 1.0  # 1R
+            tp2 = entry + atr_distance * 2.0  # 2R
             
             signal = Signal(
                 strategy_name=self.name,
@@ -171,7 +174,11 @@ class DonchianBreakoutStrategy(BaseStrategy):
             
             # Расчёт уровней
             entry = current_close
-            stop_loss = current_upper
+            
+            # Расчет зон S/R для точного стопа
+            sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+            nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+            stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0)
             
             # ВАЖНО: Проверить расстояние до стопа (защита от чрезмерного риска)
             is_valid, stop_distance_atr = self.validate_stop_distance(
@@ -183,12 +190,10 @@ class DonchianBreakoutStrategy(BaseStrategy):
                 )
                 return None
             
-            atr_distance = stop_loss - entry
-            
-            # R:R targets
-            rr_min, rr_max = config.get('risk.rr_targets.breakout', [2.0, 3.0])
-            tp1 = entry - atr_distance * rr_min
-            tp2 = entry - atr_distance * rr_max
+            # Расчет дистанции и тейков 1R и 2R
+            atr_distance = abs(stop_loss - entry)
+            tp1 = entry - atr_distance * 1.0  # 1R
+            tp2 = entry - atr_distance * 2.0  # 2R
             
             signal = Signal(
                 strategy_name=self.name,
