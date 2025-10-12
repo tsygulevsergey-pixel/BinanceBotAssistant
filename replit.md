@@ -1,25 +1,10 @@
 # Overview
 
-This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection.
+This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories, providing real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
-## Recent Changes
+The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading with fast catchup and periodic gap refill, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms.
 
-### 2025-10-12: Fast Catchup & Periodic Gap Refill Implementation
-- **Added Fast Catchup System**: New module `src/data/fast_catchup.py` for intelligent restart optimization
-- **Burst Loading**: At startup, analyzes DB for gaps in existing symbols, performs parallel burst loading (auto-scaled 4-12 workers based on volume)
-- **Smart Coordination**: Symbols processed by Fast Catchup are tracked in `catchup_done_symbols` set, normal loader skips them
-- **Configuration**: Added `fast_catchup` section in config.yaml (enabled by default, configurable max_parallel)
-- **Performance Improvement**: Reduced bot restart time from 5-6 minutes to 15-20 seconds (~20x faster)
-- **Fallback Safety**: If Fast Catchup is disabled or fails, system falls back to normal sequential loader
-- **Periodic Gap Refill**: New module `src/data/periodic_gap_refill.py` for continuous gap detection and parallel refilling during bot operation
-- **Smart Scheduling**: Timeframe-aware refill - 15m every 15min, 15m+1h every hour, 15m+1h+4h every 4h, all every day at 00:00 UTC
-- **Parallel Refill**: Uses burst loading (max 8 workers) to quickly fill recent gaps (last 2 hours) without blocking analysis
-
---- It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
-
-The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms.
-
-**NEW**: The bot now includes a fully integrated **Action Price** strategy system - a production-only price action trading module that operates independently from main strategies with its own statistics, database table, performance tracking, and Telegram commands. Action Price identifies high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
+A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
 # User Preferences
 
@@ -34,6 +19,8 @@ Preferred communication style: Simple, everyday language.
 - **DataLoader**: Fetches historical data with caching.
 - **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates.
 - **BinanceWebSocket**: Real-time market data streaming.
+- **FastCatchupLoader**: Optimizes bot restart time by detecting and filling historical data gaps for existing symbols in parallel.
+- **PeriodicGapRefill**: Continuously detects and refills data gaps during bot operation using smart scheduling and parallel loading.
 
 ### Database Layer
 - **Technology**: SQLAlchemy ORM with SQLite backend (WAL mode, indexed queries on (symbol, timeframe, timestamp)).
@@ -42,91 +29,55 @@ Preferred communication style: Simple, everyday language.
 - **BaseStrategy**: Abstract base class for strategy definition.
 - **StrategyManager**: Orchestrates multiple strategies across timeframes.
 - **Signal Dataclass**: Standardized signal output.
-- **Implemented Strategies**: 15 active strategies, including Donchian Breakout, Squeeze Breakout, MA/VWAP Pullback, Range Fade, Volume Profile, Liquidity Sweep, Order Flow, CVD Divergence, and Time-of-Day. All strategies include mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold.
+- **Implemented Strategies**: 15 active strategies covering breakout, pullback, and mean reversion, with mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold.
+- **Action Price Strategy System**: A production-only module using S/R zones, Anchored VWAP, EMA filters, and 5 price action patterns for signal generation with dedicated performance tracking and partial profit-taking.
 
 ### Market Analysis System
-- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED using multi-factor confirmation and priority-based detection.
+- **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED.
 - **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
 - **CVDCalculator**: Cumulative Volume Delta.
 - **VWAPCalculator**: Daily, anchored, and session-based VWAP.
 - **VolumeProfile**: POC, VAH/VAL calculation.
-- **IndicatorCache**: High-performance caching system with timestamp-based invalidation for pre-computed indicators.
+- **IndicatorCache**: High-performance caching for pre-computed indicators.
 
-### Signal Scoring System
-- **Scoring Formula**: Base strategy score + volume modifier + CVD alignment + OI Delta + Depth Imbalance - Funding Extreme - BTC Opposition.
-- **BTC Filter**: Uses 3-bar (2-hour) lookback on H1 with 0.3% threshold to filter noise, applying a penalty for opposing BTC trends.
-- **Entry Threshold**: Signals require a final_score ≥ +2.0 for execution.
-
-### Signal Aggregation & Conflict Resolution
-- **Score-Based Prioritization**: Signals are scored and sorted by final_score (descending) before processing.
-- **Direction-Aware Locks**: Lock key format `signal_lock:{symbol}:{direction}` allows simultaneous LONG and SHORT signals.
-- **Best Signal Selection**: For each direction, the highest-scoring signal acquires the lock; lower-scoring signals are rejected.
-- **Threshold Gating**: Only signals with final_score ≥ 2.0 proceed to lock acquisition.
-- **Conflict Policy**: Multiple signals of the same direction result in the best score winning; opposing directional signals can both execute.
-- **Lock TTL**: Redis/SQLite locks expire after a configurable TTL.
+### Signal Scoring & Aggregation
+- **Scoring Formula**: Combines base strategy score with market modifiers (volume, CVD, OI Delta, Depth Imbalance, Funding, BTC Opposition).
+- **BTC Filter**: Filters noise and applies penalties for opposing BTC trends.
+- **Conflict Resolution**: Score-based prioritization and direction-aware locks ensure the highest-scoring signals execute, while preventing conflicting signals for the same direction.
 
 ### Filtering & Risk Management
-- **Stop Distance Validation**: Prevents excessive risk by validating stop distance based on ATR.
-- **Hybrid Entry System**: Adaptive MARKET/LIMIT execution based on strategy category (Breakout strategies use MARKET, Pullback/Mean Reversion use LIMIT) with R:R preservation using offset calculations.
-- **BTCFilter**: Prevents mean reversion during significant BTC impulses and applies directional penalties.
-- **Risk Calculator**: Manages position sizing, stop-loss (swing extreme + 0.2-0.3 ATR), and take-profit (1.5-3.0 RR).
-- **Time Stops**: Exits trades if no progress within 6-8 bars.
+- **Stop Distance Validation**: Prevents excessive risk.
+- **Hybrid Entry System**: Adaptive MARKET/LIMIT execution based on strategy type.
+- **Risk Calculator**: Manages position sizing, stop-loss (swing extreme + ATR buffer), and take-profit (1.5-3.0 RR).
+- **Time Stops**: Exits trades if no progress within a set number of bars.
+- **Symbol Blocking System**: Prevents multiple signals on the same symbol while an active signal exists, persisting across restarts.
 
 ### Telegram Integration
-- Provides commands (/start, /help, /status, /strategies, /performance, /stats, /validate, /latency, /report, /ap_stats) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
-- **/validate** - Validates all strategies for data availability, OHLCV integrity, price logic, signal generation, and entry/SL/TP correctness across different market regimes.
-- **/performance** - Shows performance metrics with accurate PnL calculations.
-- **/ap_stats** - Shows Action Price statistics with pattern breakdown, partial exits tracking, win rate, and average PnL per pattern type.
+- Provides commands for status, strategy details, performance, validation, and latency.
+- Delivers Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
+- Dedicated `ap_stats` command for Action Price performance, including pattern breakdown and partial exit tracking.
 
 ### Performance Tracking System
-- **SignalPerformanceTracker**: Monitors active signals and calculates exit conditions using exact SL/TP levels.
-- **Exit Logic**: Uses precise SL/TP levels (not current price) for exit_price and pnl_percent to ensure accurate statistics.
-- **LIMIT Order Handling**: When LIMIT order fills, entry_price is updated in DB from target to actual fill price, ensuring accurate PnL calculations. Status transitions from PENDING to ACTIVE.
-- **Performance Metrics Explained**:
-  - **Средний PnL (Average PnL)**: Average profit/loss across ALL closed trades (wins + losses). Formula: (Total PnL) / (Number of trades). Shows average earnings per trade.
-  - **Средняя победа (Average Win)**: Average profit on WINNING trades only. Formula: (Sum of wins) / (Number of wins). Shows typical profit when winning.
-  - **Среднее поражение (Average Loss)**: Average loss on LOSING trades only. Formula: (Sum of losses) / (Number of losses). Shows typical loss when losing.
-  - **Example**: 5 wins = +13% total (avg +2.60%), 7 losses = -11.7% total (avg -1.67%) → Average PnL = +1.3% / 12 = +0.11%
-- **Exit Price Accuracy**: For LONG SL hit at 98 when price drops to 97.5, records exit=98 and PnL=-2% (not -2.5%). For SHORT TP hit at 96 when price drops to 95.8, records exit=96 and PnL=+4% (not +4.2%).
-
-### Symbol Blocking System
-- **Purpose**: Prevents multiple signals on the same symbol while an active signal exists.
-- **Startup Loading**: On bot start, queries DB for all ACTIVE/PENDING signals and populates `symbols_with_active_signals` set before analysis begins.
-- **Block on Signal Creation**: When MARKET or LIMIT signal is saved to DB, symbol is added to blocked set.
-- **Skip Analysis**: Analysis loop checks if symbol is blocked before running strategies. Blocked symbols are skipped entirely.
-- **Unblock on Closure**: When Performance Tracker closes a signal (SL/TP/TIME_STOP hit), callback removes symbol from blocked set.
-- **DB Persistence**: Blocking state survives bot restarts by reloading active signals from database.
-- **Logs**: "🔒 Loaded 6 active signals, blocked 6 symbols" on startup, "⏭️ {symbol} skipped - has active signal" during analysis.
-
-### Action Price Strategy System (Production-Only)
-- **Activation**: Runs ONLY when `use_testnet: false` (production mode) and `action_price.enabled: true`
-- **S/R Zones**: Built from Daily fractal swings (k=3 for 1H, k=2 for 4H, impulse ≥1.5×mTR) and 4H consolidation bases, scored by touches/volume, refined every 4H + 00:00 UTC
-- **AVWAP Sticky**: Anchored to fractal swings with impulse validation, sticky logic uses higher TF anchors (15m→1H/4H, 1H→4H/1D)
-- **EMA Filters**: Strict trend validation using EMA50/200 on both 4H and 1H timeframes
-- **5 Patterns**: Pin-Bar (wick ≥66% range), Engulfing (100% prior range), Inside-Bar (parent setup), Fakey (false break + reversal), PPR (Pullback-Pin-Reversal combo)
-- **Risk Management**: SL at swing extreme + 0.2-0.3×mTR buffer, TP1 at 1.5R (50% exit), TP2 at 2.5-3.0R, R:R filter rejects <1.8
-- **Cooldown System**: Anti-duplicate signals using (symbol, direction, zone_id, pattern, TF) hash with 6h TTL for 1H, 2h for 15m
-- **Execution**: Signals generated on 15m/1H candle closes, zones recalculated at 00:00 UTC and every 4H close
-- **Isolation**: Separate DB table (action_price_signals), independent performance tracker with partial exits, dedicated logger (logs/action_price_*.log), unique Telegram signal format with 🎯 emoji
+- **SignalPerformanceTracker**: Monitors active signals and calculates exit conditions using precise SL/TP levels for accurate PnL.
+- Updates entry price for LIMIT orders upon fill to ensure accurate PnL calculations.
+- Provides detailed metrics: Average PnL, Average Win, Average Loss.
 
 ### Configuration Management
-- Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
-- **Action Price Config**: Section `action_price` in config.yaml controls execution_timeframes, zone recalculation schedules, pattern parameters, and production-only activation guard.
+- Uses YAML for strategy parameters and thresholds, and environment variables for API keys.
+- Supports `signals_only_mode` and specific configurations for the Action Price system.
 
 ### Parallel Data Loading Architecture
-- **SymbolLoadCoordinator**: Manages thread-safe coordination for parallel loading and analysis.
-- **FastCatchupLoader** (NEW): Smart restart optimization - detects gaps for existing symbols at startup, performs burst parallel loading (8-12 workers) to catch up within seconds, then hands control to normal loader for new symbols. Reduces restart time from 5-6 minutes to 15-20 seconds.
-- **PeriodicGapRefill** (NEW): Continuous gap detection and refilling - runs every 15 minutes with smart timeframe scheduling (15m/1h/4h/1d based on time), uses parallel burst loading (max 8 workers) to quickly fill recent gaps without blocking analysis.
-- **Loader Task**: Loads historical data with retry logic and pushes symbols to a queue. Skips symbols already processed by Fast Catchup.
+- **SymbolLoadCoordinator**: Manages thread-safe coordination.
+- **Loader Task**: Loads historical data, retries on failure, and pushes symbols to a queue.
 - **Analyzer Task**: Consumes symbols from the queue for immediate analysis.
-- **Symbol Auto-Update Task**: Automatically updates the symbol list based on 24h volume criteria.
-- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix capabilities, and Telegram alerts.
+- **Symbol Auto-Update Task**: Automatically updates the symbol list based on 24h volume.
+- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts.
 
 ## Data Flow
-The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis of available symbols. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
+The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-Features include rate limiting with exponential backoff, auto-reconnection for WebSockets, orderbook resynchronization on sequence gaps, and a graceful shutdown mechanism.
+Includes rate limiting with exponential backoff, auto-reconnection for WebSockets, orderbook resynchronization, and graceful shutdown.
 
 # External Dependencies
 
@@ -137,7 +88,6 @@ Features include rate limiting with exponential backoff, auto-reconnection for W
 
 ## Third-Party Services
 - **Telegram Bot API**: For message delivery.
-- **pytz**: For timezone localization.
 
 ## Python Libraries
 - **Data Processing**: pandas, numpy, pandas-ta.
