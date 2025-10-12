@@ -172,22 +172,10 @@ class ActionPriceEngine:
                 pattern_zone, mtr_1h, direction
             )
             
-            # Рассчитать confidence score (передаём ema_score для v2)
+            # Рассчитать EMA score
             ema_score = ema_score_long if direction == 'LONG' else ema_score_short
-            confidence = self.calculate_confidence(confluence_flags, pattern_zone, ema_score)
             
-            # Проверка минимального порога confidence
-            min_confidence = self.config.get('filters', {}).get('min_confidence_score', 0)
-            if confidence < min_confidence:
-                continue  # Слишком низкая уверенность - пропускаем
-            
-            # Создать контекстный хеш
-            context_hash = self.generate_context_hash(
-                symbol, pattern['type'], direction, pattern_zone['id'], 
-                timeframe, current_time
-            )
-            
-            # V2: Рассчитать pattern quality
+            # V2: Рассчитать pattern quality (нужно для total score)
             pattern_quality = 0.0
             if self.config.get('version') == 'v2':
                 candle_data = pattern.get('candle_data', {})
@@ -217,6 +205,33 @@ class ActionPriceEngine:
                         pattern_quality = self.patterns.calculate_pattern_quality_v2(
                             candle_series, direction, mtr_exec, self.config
                         )
+            
+            # Рассчитать score
+            if self.config.get('version') == 'v2':
+                # V2: Нормализованный total score 0-10
+                vwap_bonus = confluence_flags.get('vwap_bonus', 0.0)
+                confidence = self.calculate_total_score_v2(
+                    pattern_zone, pattern_quality, vwap_bonus, ema_score
+                )
+                
+                # Проверка минимального порога V2
+                min_score_v2 = self.config.get('filters', {}).get('v2', {}).get('min_total_score', 6.5)
+                if confidence < min_score_v2:
+                    continue  # Слишком низкий score - пропускаем
+            else:
+                # V1: Старая логика
+                confidence = self.calculate_confidence(confluence_flags, pattern_zone, ema_score)
+                
+                # Проверка минимального порога V1
+                min_confidence = self.config.get('filters', {}).get('min_confidence_score', 0)
+                if confidence < min_confidence:
+                    continue  # Слишком низкая уверенность - пропускаем
+            
+            # Создать контекстный хеш
+            context_hash = self.generate_context_hash(
+                symbol, pattern['type'], direction, pattern_zone['id'], 
+                timeframe, current_time
+            )
             
             # Собрать сигнал
             signal = {
@@ -467,6 +482,49 @@ class ActionPriceEngine:
         else:  # SHORT
             # SHORT: цена должна быть ниже VWAP (сопротивление сверху)
             return price <= vwap
+    
+    def calculate_total_score_v2(self, zone: Dict, pattern_quality: float, 
+                                 vwap_bonus: float, ema_score: float) -> float:
+        """
+        V2: Рассчитать нормализованный total score 0-10
+        
+        Компоненты:
+        - zone_score: 4.0 (max)
+        - pattern_quality: 3.0 (max)
+        - vwap_bonus: 1.2 (max)
+        - proximity: 1.0 (max)
+        - ema: 0.8 (max)
+        
+        Args:
+            zone: Зона S/R (содержит score и proximity_score)
+            pattern_quality: Качество паттерна [0..1]
+            vwap_bonus: VWAP бонус (уже с cap 1.2)
+            ema_score: EMA score (0.8/0.4/0)
+            
+        Returns:
+            Total score [0..10]
+        """
+        score = 0.0
+        
+        # Zone strength (max 4.0)
+        zone_score = zone.get('score', 0.0)
+        score += min(zone_score, 4.0)
+        
+        # Pattern quality (max 3.0)
+        pattern_score = pattern_quality * 3.0
+        score += min(pattern_score, 3.0)
+        
+        # VWAP bonus (max 1.2, уже capped)
+        score += min(vwap_bonus, 1.2)
+        
+        # Proximity (max 1.0)
+        proximity_score = zone.get('proximity_score', 0.0)
+        score += min(proximity_score, 1.0)
+        
+        # EMA (max 0.8)
+        score += min(ema_score, 0.8)
+        
+        return round(score, 2)
     
     def calculate_confidence(self, confluence_flags: Dict, zone: Dict, ema_score: float = 0.8) -> float:
         """
