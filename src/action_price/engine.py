@@ -32,8 +32,8 @@ class ActionPriceEngine:
         self.enabled = config.get('enabled', True)
         self.client = binance_client
         
-        # Инициализация компонентов
-        self.zone_builder = SRZoneBuilder(config['zones'])
+        # Инициализация компонентов (передаём parent_config для version)
+        self.zone_builder = SRZoneBuilder(config['zones'], parent_config=config)
         self.avwap_calc = AnchoredVWAP(config['avwap'])
         self.ema_filter = EMAFilter(config['ema'])
         self.patterns = PriceActionPatterns(config['patterns'])

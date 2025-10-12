@@ -303,6 +303,7 @@ universe:
 # Action Price Strategy (отдельная система)
 action_price:
   enabled: true  # Работает только при use_testnet: false
+  version: "v2"  # "v1" (старая логика) или "v2" (улучшенная логика)
   
   # Расписание
   execution_timeframes: ["15m", "1h"]  # Запуск только на закрытии этих ТФ
@@ -322,8 +323,35 @@ action_price:
     buffer_mult: 0.25  # buffer для расширения зон
     merge_distance_mult: 0.75  # Слияние если центры ближе 0.75×mTR
     max_width_mult: 1.25  # max final_width = 1.25× базовой ширины
-    top_zones_count: 6  # Топ-N зон для торговли
+    top_zones_count: 6  # Топ-N зон для торговли (v1)
     broken_closes: 3  # Зона ломается после N закрытий за границей
+    
+    # V2 параметры (улучшенная логика)
+    v2:
+      # MTR периоды
+      mtr_period_1d: 50
+      mtr_period_4h: 50
+      mtr_period_1h: 50
+      mtr_period_15m: 30
+      
+      # Определение касания
+      touch_shadow_in_zone_ratio: 0.33  # Тень >= 33% ширины зоны в зоне
+      touch_gap_bars_4h: 5  # Анти-дребезг: минимум 5 баров 4H между касаниями
+      
+      # Скоринг зоны
+      touch_weight_cap: 2.0  # Максимальный вес касаний = log2(cap)
+      touch_penalty_threshold: 4  # Пенализация после N касаний
+      touch_penalty_mult: 0.25  # penalty = (touches - threshold) * mult
+      recency_decay_days: 30  # Затухание за N дней
+      zone_score_weight: 4.0  # Вес силы зоны в итоговом скоре 0-10
+      
+      # Отбор зон
+      zones_distance_k_atr: 3.0  # Окно отбора K × ATR_1D от цены
+      zones_top_per_side: 3  # Топ-3 demand + топ-3 supply
+      
+      # Proximity (близость к зоне)
+      overlap_ratio_inside: 0.30  # overlap >= 30% → "inside"
+      proximity_distance_mult: 1.5  # dist <= 1.5×MTR → "near"
   
   # Anchored VWAP
   avwap:
@@ -353,6 +381,18 @@ action_price:
     
     # Конфлюэнс
     confluence_tolerance_mult: 0.5  # Цена в пределах 0.5×mTR(1H) от AVWAP
+    
+    # V2: улучшенный якорь с гистерезисом
+    v2:
+      hysteresis_impulse_mult: 1.5  # Условие (a): импульс >= 1.5×MTR
+      hysteresis_min_bars_1h: 30  # Условие (b): прошло >= 30 баров H1
+      hysteresis_distance_mult: 2.0  # Условие (c): цена ушла >= K×ATR от якоря
+      hysteresis_conditions_required: 2  # 2 из 3 условий должны выполниться
+      anti_dither_min_days: 1  # Минимум 1 день между перестановками на разных TF
+      
+      # Конфлюэнс с вектором
+      vwap_proximity_beta: 1.0  # |price - vwap| <= beta × MTR_exec
+      vwap_family_bonus_cap: 1.2  # Суммарный бонус за VWAP-семейство <= 1.2
   
   # EMA фильтры
   ema:
@@ -360,6 +400,11 @@ action_price:
     timeframes: ["4h", "1h"]
     strict_mode: true  # Строгая проверка по обоим ТФ
     aggressive_mode: false  # Разрешить при конфликте 4H/1H
+    
+    # V2: pullback исключение
+    v2:
+      pullback_score: 0.4  # Пониженный скор если H4 OK, H1 pullback
+      strict_score: 0.8  # Полный скор если оба ТФ OK
   
   # Паттерны
   patterns:
@@ -380,6 +425,11 @@ action_price:
     # Fakey
     fakey:
       sequence_bars: 3  # mother, inside, breakout
+    
+    # V2: pattern quality
+    v2:
+      pattern_score_weight: 3.0  # Вес качества паттерна в скоре 0-10
+      close_position_top_pct: 0.30  # Для бычьего: close в верхних 30% диапазона
   
   # Входы и управление
   entry:
@@ -393,6 +443,11 @@ action_price:
     
     min_rr_zone: 1.0  # Минимум 1R до противоположной зоны
     breakeven_rr: 1.0  # BE после 1R
+    
+    # V2: улучшенные R:R фильтры
+    v2:
+      min_rr: 1.2  # Минимум R:R с учётом комиссий
+      check_opposite_zone_body: true  # Проверять расстояние до ТЕЛА зоны, не центра
   
   # Anti-duplicates
   cooldown:
@@ -402,7 +457,18 @@ action_price:
   
   # Фильтры
   filters:
-    min_confidence_score: 150.0  # Минимальная уверенность для сигнала (0-600+)
+    min_confidence_score: 150.0  # Минимальная уверенность для сигнала (v1: 0-600+)
+    
+    # V2: нормализованный скор 0-10
+    v2:
+      min_total_score: 6.5  # Порог для сигнала: total >= 6.5
+      proximity_score_weight: 1.0  # Вес близости к зоне
+      
+      # Фильтр волатильности (супер-пила)
+      adx_threshold_1h: 14  # ADX(H1) < 14 → низкий тренд
+      atr_pct_percentile: 30  # ATR%(H1) < p30 → низкая волатильность
+      bbw_percentile: 30  # BBW(H1) < p30 → узкий диапазон
+      percentile_lookback_days: 90  # Окно для расчёта перцентилей
   
   # Производительность
   performance:

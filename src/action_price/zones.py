@@ -4,8 +4,9 @@
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
+import math
 
 from .utils import (
     calculate_mtr, calculate_zone_width, calculate_buffer,
@@ -16,12 +17,19 @@ from .utils import (
 class SRZoneBuilder:
     """Построитель зон поддержки и сопротивления"""
     
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, parent_config: Optional[dict] = None):
         """
         Args:
             config: Конфигурация из config.yaml['action_price']['zones']
+            parent_config: Полная конфигурация action_price для доступа к version
         """
         self.config = config
+        self.parent_config = parent_config if parent_config is not None else {}
+        
+        # Определяем версию логики
+        self.version = self.parent_config.get('version', 'v1')
+        
+        # Общие параметры
         self.lookback_days = config.get('lookback_days', 90)
         self.fractal_k_1d = config.get('fractal_k_1d', 2)
         self.fractal_k_4h = config.get('fractal_k_4h', 2)
@@ -34,6 +42,25 @@ class SRZoneBuilder:
         self.max_width_mult = config.get('max_width_mult', 1.25)
         self.top_zones_count = config.get('top_zones_count', 6)
         self.broken_closes = config.get('broken_closes', 3)
+        
+        # V2 параметры
+        self.v2_config = config.get('v2', {})
+        self.mtr_period_1d = self.v2_config.get('mtr_period_1d', 50)
+        self.mtr_period_4h = self.v2_config.get('mtr_period_4h', 50)
+        self.mtr_period_1h = self.v2_config.get('mtr_period_1h', 50)
+        self.mtr_period_15m = self.v2_config.get('mtr_period_15m', 30)
+        
+        self.touch_shadow_ratio = self.v2_config.get('touch_shadow_in_zone_ratio', 0.33)
+        self.touch_gap_bars = self.v2_config.get('touch_gap_bars_4h', 5)
+        
+        self.touch_weight_cap = self.v2_config.get('touch_weight_cap', 2.0)
+        self.touch_penalty_threshold = self.v2_config.get('touch_penalty_threshold', 4)
+        self.touch_penalty_mult = self.v2_config.get('touch_penalty_mult', 0.25)
+        self.recency_decay_days = self.v2_config.get('recency_decay_days', 30)
+        self.zone_score_weight = self.v2_config.get('zone_score_weight', 4.0)
+        
+        self.zones_distance_k = self.v2_config.get('zones_distance_k_atr', 3.0)
+        self.zones_top_per_side = self.v2_config.get('zones_top_per_side', 3)
         
         self.zones_cache = {}  # Кэш зон по символам
     
@@ -188,8 +215,9 @@ class SRZoneBuilder:
         Returns:
             Список зон S/R
         """
-        # Рассчитать mTR для 1D
-        mtr_1d = calculate_mtr(df_1d, period=20)
+        # Рассчитать mTR для 1D (используем правильный период для v2)
+        period = self.mtr_period_1d if self.version == 'v2' else 20
+        mtr_1d = calculate_mtr(df_1d, period=period)
         if mtr_1d == 0:
             return []
         
@@ -218,6 +246,8 @@ class SRZoneBuilder:
         """
         Уточнить зоны на 4H: подсчёт касаний и смарт-подстройка границ
         
+        Автоматически выбирает v1 или v2 логику на основе self.version
+        
         Args:
             zones: Зоны с 1D
             df_4h: DataFrame с 4H свечами
@@ -226,6 +256,11 @@ class SRZoneBuilder:
         Returns:
             Уточнённые зоны
         """
+        # Выбор версии логики
+        if self.version == 'v2':
+            return self.refine_zones_4h_v2(zones, df_4h, current_price)
+        
+        # V1 логика (оригинальная)
         mtr_4h = calculate_mtr(df_4h, period=20)
         if mtr_4h == 0:
             return zones
@@ -376,3 +411,209 @@ class SRZoneBuilder:
         self.zones_cache[symbol] = refined
         
         return refined
+    
+    # ============================================================================
+    # V2 МЕТОДЫ (Улучшенная логика)
+    # ============================================================================
+    
+    def check_touch_v2(self, candle: pd.Series, zone: Dict) -> bool:
+        """
+        V2: Проверка касания зоны с улучшенной логикой
+        
+        Засчитывается если:
+        1. Тело закрывается ВНЕ зоны
+        2. Тень заходит в зону >= 33% ширины зоны
+        
+        Args:
+            candle: Свеча (Series с open, high, low, close)
+            zone: Зона S/R
+            
+        Returns:
+            True если касание валидное
+        """
+        zone_low = zone['low']
+        zone_high = zone['high']
+        zone_width = zone_high - zone_low
+        
+        # Проверка 1: тело закрывается вне зоны
+        body_min = min(float(candle['open']), float(candle['close']))
+        body_max = max(float(candle['open']), float(candle['close']))
+        
+        if zone['type'] == 'demand':
+            # Для demand: тело должно закрыться выше зоны
+            if body_min <= zone_high:
+                return False
+        else:  # supply
+            # Для supply: тело должно закрыться ниже зоны
+            if body_max >= zone_low:
+                return False
+        
+        # Проверка 2: тень заходит в зону >= 33% ширины зоны
+        shadow_low = float(candle['low'])
+        shadow_high = float(candle['high'])
+        
+        # Рассчитываем пересечение тени с зоной
+        intersection_low = max(shadow_low, zone_low)
+        intersection_high = min(shadow_high, zone_high)
+        
+        if intersection_high <= intersection_low:
+            return False  # Нет пересечения
+        
+        shadow_in_zone = intersection_high - intersection_low
+        min_shadow_required = self.touch_shadow_ratio * zone_width
+        
+        return shadow_in_zone >= min_shadow_required
+    
+    def calculate_zone_score_v2(self, zone: Dict, touches: List[Dict], 
+                                current_time: datetime) -> float:
+        """
+        V2: Расчёт силы зоны с затуханием и пенализацией
+        
+        Формула:
+        touch_weight = min(log2(1 + touches), 2.0)
+        penalty = max(0, touches - 4) * 0.25
+        recency = exp(-Δt_days / 30)
+        zone_score = 4.0 * recency * max(0, tw - penalty)
+        
+        Args:
+            zone: Зона S/R
+            touches: Список касаний [{timestamp, ...}, ...]
+            current_time: Текущее время
+            
+        Returns:
+            Скор зоны (0-4.0 для итогового скора 0-10)
+        """
+        if not touches:
+            return 0.0
+        
+        # Сортируем по времени
+        touches_sorted = sorted(touches, key=lambda x: x['timestamp'])
+        last_touch = touches_sorted[-1]['timestamp']
+        
+        # Recency: свежесть последнего касания
+        if isinstance(last_touch, pd.Timestamp):
+            last_touch = last_touch.to_pydatetime()
+        if isinstance(current_time, pd.Timestamp):
+            current_time = current_time.to_pydatetime()
+        
+        delta_days = (current_time - last_touch).days
+        recency = math.exp(-delta_days / self.recency_decay_days)
+        
+        # Touch weight: логарифм от количества касаний
+        num_touches = len(touches)
+        touch_weight = min(math.log2(1 + num_touches), self.touch_weight_cap)
+        
+        # Penalty: пенализация за >4 касаний
+        penalty = max(0, num_touches - self.touch_penalty_threshold) * self.touch_penalty_mult
+        
+        # Итоговый скор
+        zone_score = self.zone_score_weight * recency * max(0, touch_weight - penalty)
+        
+        return round(zone_score, 2)
+    
+    def filter_zones_v2(self, zones: List[Dict], current_price: float, 
+                       atr_1d: float) -> List[Dict]:
+        """
+        V2: Отбор зон в окне K×ATR_1D от цены
+        
+        Оставляет топ-3 demand + топ-3 supply
+        
+        Args:
+            zones: Список зон
+            current_price: Текущая цена
+            atr_1d: ATR 1D для окна
+            
+        Returns:
+            Отфильтрованные зоны
+        """
+        window = self.zones_distance_k * atr_1d
+        
+        # Фильтруем по расстоянию
+        zones_in_window = []
+        for zone in zones:
+            zone_center = (zone['low'] + zone['high']) / 2
+            distance = abs(zone_center - current_price)
+            
+            if distance <= window:
+                zone['distance_to_price'] = distance
+                zones_in_window.append(zone)
+        
+        # Разделяем на demand и supply
+        demand_zones = [z for z in zones_in_window if z['type'] == 'demand']
+        supply_zones = [z for z in zones_in_window if z['type'] == 'supply']
+        
+        # Сортируем по скору (убывание)
+        demand_zones.sort(key=lambda x: x.get('score', 0), reverse=True)
+        supply_zones.sort(key=lambda x: x.get('score', 0), reverse=True)
+        
+        # Берём топ-N с каждой стороны
+        top_demand = demand_zones[:self.zones_top_per_side]
+        top_supply = supply_zones[:self.zones_top_per_side]
+        
+        return top_demand + top_supply
+    
+    def refine_zones_4h_v2(self, zones: List[Dict], df_4h: pd.DataFrame, 
+                          current_price: float) -> List[Dict]:
+        """
+        V2: Уточнение зон на 4H с улучшенной логикой касаний
+        
+        Args:
+            zones: Зоны с 1D
+            df_4h: DataFrame с 4H свечами
+            current_price: Текущая цена
+            
+        Returns:
+            Уточнённые зоны с v2 скором
+        """
+        mtr_4h = calculate_mtr(df_4h, period=self.mtr_period_4h)
+        if mtr_4h == 0:
+            return zones
+        
+        refined_zones = []
+        # Получаем current_time как datetime
+        if len(df_4h) > 0:
+            last_idx = df_4h.index[-1]
+            current_time = last_idx.to_pydatetime() if isinstance(last_idx, pd.Timestamp) else last_idx
+        else:
+            current_time = datetime.now()
+        
+        for zone in zones:
+            touches = []
+            last_touch_idx = -999  # Для анти-дребезга
+            
+            for i in range(len(df_4h)):
+                candle = df_4h.iloc[i]
+                
+                # Проверка касания v2
+                if self.check_touch_v2(candle, zone):
+                    # Анти-дребезг: минимум gap_bars между касаниями
+                    if i - last_touch_idx >= self.touch_gap_bars:
+                        touches.append({
+                            'timestamp': df_4h.index[i],
+                            'index': i,
+                            'low': float(candle['low']),
+                            'high': float(candle['high'])
+                        })
+                        last_touch_idx = i
+            
+            # Рассчитываем v2 скор
+            zone_score = self.calculate_zone_score_v2(zone, touches, current_time)
+            
+            zone['touches'] = len(touches)
+            zone['touches_recent'] = len([t for t in touches 
+                                         if (current_time - t['timestamp']).days <= 60])
+            zone['score'] = zone_score
+            zone['touches_list'] = touches  # Для дебага
+            
+            refined_zones.append(zone)
+        
+        # V2 фильтрация: топ-3 per side в окне K×ATR
+        atr_1d = calculate_mtr(df_4h, period=self.mtr_period_1d) * 6  # Примерно ATR_1D
+        filtered_zones = self.filter_zones_v2(refined_zones, current_price, atr_1d)
+        
+        # Добавляем уникальные ID
+        for zone in filtered_zones:
+            zone_str = f"{zone['type']}_{zone['low']:.2f}_{zone['high']:.2f}"
+            zone['id'] = hashlib.md5(zone_str.encode()).hexdigest()[:16]
+        
+        return filtered_zones
