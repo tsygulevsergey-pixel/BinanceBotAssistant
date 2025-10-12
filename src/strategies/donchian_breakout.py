@@ -5,6 +5,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_donchian, calculate_atr, calculate_bollinger_bands
+from src.utils.time_of_day import get_adaptive_volume_threshold
 
 
 class DonchianBreakoutStrategy(BaseStrategy):
@@ -29,7 +30,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
         self.volume_threshold = 1.5  # >1.5× медианы 20
         self.bbw_percentile_low = 30  # BB width должен быть в p30-40 до пробоя
         self.bbw_percentile_high = 40
-        self.lookback_days = 60  # Для перцентилей
+        self.lookback_days = 14  # Для перцентилей (14 дней = 336 баров H1, более реалистично)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -61,8 +62,17 @@ class DonchianBreakoutStrategy(BaseStrategy):
         bb_width = (bb_upper - bb_lower) / bb_middle
         
         # Перцентили BB width (для проверки что было сжатие p30-40)
-        bb_width_p30 = bb_width.rolling(lookback_bars).quantile(0.30)
-        bb_width_p40 = bb_width.rolling(lookback_bars).quantile(0.40)
+        # Убираем NaN из bb_width перед вычислением квантилей
+        bb_width_clean = bb_width.dropna()
+        
+        # Требуем минимум 20 точек (1 период BB) для расчета квантилей
+        if len(bb_width_clean) < 20:
+            strategy_logger.debug(f"    ❌ Недостаточно чистых данных BB width: {len(bb_width_clean)} < 20")
+            return None
+        
+        # Вычисляем глобальные квантили по чистым данным (без NaN)
+        bb_width_p30 = bb_width_clean.quantile(0.30)
+        bb_width_p40 = bb_width_clean.quantile(0.40)
         
         # Текущие значения
         current_close = df['close'].iloc[-1]
@@ -74,12 +84,15 @@ class DonchianBreakoutStrategy(BaseStrategy):
         
         # BB width ДО текущего бара (проверяем -2 бар чтобы было "до пробоя")
         prev_bb_width = bb_width.iloc[-2]
-        prev_bb_width_p30 = bb_width_p30.iloc[-2]
-        prev_bb_width_p40 = bb_width_p40.iloc[-2]
+        
+        # Проверка на NaN
+        if pd.isna(prev_bb_width):
+            strategy_logger.debug(f"    ❌ BB width[-2] является NaN")
+            return None
         
         # Проверка: BB width был низким (p30-40) до пробоя
-        if not (prev_bb_width_p30 <= prev_bb_width <= prev_bb_width_p40):
-            strategy_logger.debug(f"    ❌ BB width не в диапазоне p30-40: {prev_bb_width:.6f} (p30={prev_bb_width_p30:.6f}, p40={prev_bb_width_p40:.6f})")
+        if not (bb_width_p30 <= prev_bb_width <= bb_width_p40):
+            strategy_logger.debug(f"    ❌ BB width не в диапазоне p30-40: {prev_bb_width:.6f} (p30={bb_width_p30:.6f}, p40={bb_width_p40:.6f})")
             return None
         
         # Средний объём за 20 периодов
@@ -87,10 +100,13 @@ class DonchianBreakoutStrategy(BaseStrategy):
         current_volume = df['volume'].iloc[-1]
         volume_ratio = current_volume / avg_volume if avg_volume > 0 else 0
         
+        # Адаптивный порог объема по времени суток
+        adaptive_volume_threshold = get_adaptive_volume_threshold(df.index[-1], self.volume_threshold)
+        
         # Проверка пробоя верхней границы (LONG)
         if (current_high > current_upper and 
             current_close > current_upper and
-            volume_ratio >= self.volume_threshold and
+            volume_ratio >= adaptive_volume_threshold and
             (current_close - current_upper) >= self.min_close_distance_atr * current_atr):
             
             # Фильтр по H4 bias
@@ -145,7 +161,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
         # Проверка пробоя нижней границы (SHORT)
         elif (current_low < current_lower and 
               current_close < current_lower and
-              volume_ratio >= self.volume_threshold and
+              volume_ratio >= adaptive_volume_threshold and
               (current_lower - current_close) >= self.min_close_distance_atr * current_atr):
             
             # Фильтр по H4 bias

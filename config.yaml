@@ -22,7 +22,7 @@ binance:
 
 # Fast Catchup - Быстрая догрузка gaps при рестарте
 fast_catchup:
-  enabled: true  # Включить/выключить fast catchup режим
+  enabled: false  # Временно отключено для тестирования стратегий
   max_parallel: null  # null = auto (4-12 based on volume), or set manual value (1-20)
   min_gap_size: 1  # Минимальный размер gap для burst режима (в свечах)
 

@@ -6,6 +6,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr, calculate_ema, calculate_adx
+from src.utils.time_of_day import get_adaptive_volume_threshold
 
 
 class ORBStrategy(BaseStrategy):
@@ -33,7 +34,7 @@ class ORBStrategy(BaseStrategy):
         self.ib_duration_minutes = 60
         self.width_percentile = 30  # p30
         self.lookback_days = 60
-        self.atr_multiplier = 0.8  # <0.8·ATR
+        self.atr_multiplier = 1.3  # <1.3·ATR (повышено с 0.8 - более реалистичный порог)
         self.breakout_atr = 0.25  # ≥0.25 ATR
         self.volume_threshold = 1.5
         self.timeframe = '15m'  # Для отслеживания IB используем 15m
@@ -134,9 +135,12 @@ class ORBStrategy(BaseStrategy):
         current_volume = df['volume'].iloc[-1]
         volume_ratio = current_volume / avg_volume if avg_volume > 0 else 0
         
+        # Адаптивный порог объема по времени суток
+        adaptive_volume_threshold = get_adaptive_volume_threshold(current_timestamp, self.volume_threshold)
+        
         # Проверка объёма
-        if volume_ratio < self.volume_threshold:
-            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
+        if volume_ratio < adaptive_volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {adaptive_volume_threshold:.2f}x (адаптивный)")
             return None
         
         # LONG: пробой IB вверх

@@ -5,6 +5,7 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr, calculate_ema, calculate_adx
+from src.utils.time_of_day import get_adaptive_volume_threshold
 
 
 class ATRMomentumStrategy(BaseStrategy):
@@ -104,8 +105,11 @@ class ATRMomentumStrategy(BaseStrategy):
         volume_ratio = current_volume / avg_volume if avg_volume > 0 else 0
         
         # Проверка объёма
-        if volume_ratio < self.volume_threshold:
-            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
+        # Адаптивный порог объема по времени суток
+        adaptive_volume_threshold = get_adaptive_volume_threshold(df.index[-1], self.volume_threshold)
+        
+        if volume_ratio < adaptive_volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {adaptive_volume_threshold:.2f}x (адаптивный)")
             return None
         
         # Проверка расстояния до сопротивления (упрощённо - проверяем есть ли место)

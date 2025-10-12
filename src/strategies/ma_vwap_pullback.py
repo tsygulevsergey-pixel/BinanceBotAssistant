@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_ema, calculate_atr, calculate_adx
 from src.indicators.vwap import calculate_daily_vwap
+from src.utils.time_of_day import get_adaptive_volume_threshold
 
 
 class MAVWAPPullbackStrategy(BaseStrategy):
@@ -79,8 +80,11 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         volume_ratio = current_volume / avg_volume if avg_volume > 0 else 0
         
         # Проверка объёма
-        if volume_ratio < self.volume_threshold:
-            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {self.volume_threshold}x")
+        # Адаптивный порог объема по времени суток
+        adaptive_volume_threshold = get_adaptive_volume_threshold(df.index[-1], self.volume_threshold)
+        
+        if volume_ratio < adaptive_volume_threshold:
+            strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {adaptive_volume_threshold:.2f}x (адаптивный)")
             return None
         
         # Зона отката: EMA20 ± 0.3 ATR или VWAP ± 0.3 ATR

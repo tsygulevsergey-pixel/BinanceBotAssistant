@@ -1,0 +1,57 @@
+  ✅ Success: 145 symbols
+  ❌ Failed: 0 symbols
+  ⏱️  Time: 59.5s (avg 0.41s per symbol)
+  🚀 Speed: 5.0 requests/sec
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ BTCUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ETHUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ BCHUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ XRPUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ LTCUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ TRXUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ETCUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ LINKUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ XLMUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ADAUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ XMRUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ DASHUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ZECUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ XTZUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ BNBUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ATOMUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ IOTAUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ BATUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ VETUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ NEOUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ QTUMUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ IOSTUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ THETAUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ALGOUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ COMPUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ DOGEUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ KAVAUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ SNXUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ DOTUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ YFIUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ CRVUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ TRBUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ RUNEUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ SUSHIUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ EGLDUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ SOLUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ UNIUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ AVAXUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ KSMUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ NEARUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ AAVEUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ FILUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ RSRUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ BELUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ AXSUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ ZENUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ SKLUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ GRTUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ 1INCHUSDT caught up and ready
+2025-10-12 05:05:06 EEST | INFO     | trading_bot | ⚡ CHZUSDT caught up and ready
+
+
+
