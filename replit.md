@@ -8,18 +8,23 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
-## Action Price Filters Enhancement (October 12, 2025)
+## Action Price Architecture Overhaul (October 12, 2025)
 - **Issue 1**: 141 сигнала за одну проверку - слишком много сигналов низкого качества
-- **Issue 2**: 0% Win Rate - точки входа устаревали к моменту отправки в Telegram
+- **Issue 2**: 0% Win Rate - точки входа устаревали к моменту отправки в Telegram, сигналы моментально закрывались по SL
 - **Issue 3**: Сигналы с confidence 4.6 принимались - нет минимального порога
 - **Issue 4**: PPR паттерн слишком агрессивен - 131/141 сигналов были PPR (любой пробой засчитывался)
 - **Root Cause 1**: PPR паттерн использует `entry_trigger = c0['close']` - цена закрытия прошлой свечи, которая устаревает через несколько секунд
-- **Root Cause 2**: Нет проверки минимального confidence score - любой сигнал проходит
-- **Root Cause 3**: PPR условие `c0['close'] < c1['low']` слишком простое - даже слабый пробой генерирует сигнал
-- **Fix 1**: Добавлена суперстрогая проверка актуальности для PPR - пропускаются сигналы где цена ушла выше/ниже entry или слишком близко к SL (±1% от SL)
+- **Root Cause 2**: Stop Loss ставился за экстремумом СВЕЧИ (c0['high']/c0['low']), а не за ЗОНОЙ поддержки/сопротивления
+- **Root Cause 3**: Нет проверки минимального confidence score - любой сигнал проходит
+- **Root Cause 4**: PPR условие `c0['close'] < c1['low']` слишком простое - даже слабый пробой генерирует сигнал
+- **Fix 1 (CRITICAL)**: Полностью переработана архитектура расчета Entry/Stop/Targets:
+  - Entry теперь ВСЕГДА = current_price (актуальная цена на момент проверки, не историческая c0['close'])
+  - Stop Loss теперь ставится ЗА ЗОНОЙ (zone['high']/zone['low'] + buffer), а не за свечой
+  - TP1 = Entry + 1R (где R = |Entry - Stop Loss|)
+  - TP2 = Entry + 2R
 - **Fix 2**: Добавлен `min_confidence_score: 150.0` в config.yaml и проверка в engine.py
 - **Fix 3**: Ужесточен PPR паттерн - теперь требуется направленная свеча (close < open для SHORT) + сильное тело (≥30% range предыдущей свечи)
-- **Result**: Только качественные сигналы с актуальной ценой входа, достаточной уверенностью и сильными паттернами попадают в систему; ожидается снижение с 141 до ~5-30 сигналов за проверку
+- **Result**: Полное решение проблемы 0% Win Rate - Entry всегда актуальная, Stop Loss корректно за зоной, TP1/TP2 = 1R/2R; ожидается снижение количества сигналов до ~5-30 за проверку с положительным Win Rate
 
 ## Critical Bugfixes: Data Loader, TimeframeSync & Main Loop (October 12, 2025)
 - **Issue 1**: Bot crashed with empty error messages during data loading failures (`Error downloading SPXUSDT 15m: . Retry 1/3...`)

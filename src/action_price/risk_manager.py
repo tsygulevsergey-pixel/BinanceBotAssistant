@@ -26,12 +26,14 @@ class ActionPriceRiskManager:
         self.min_rr_zone = config.get('min_rr_zone', 1.0)
         self.breakeven_rr = config.get('breakeven_rr', 1.0)
     
-    def calculate_stop_loss(self, pattern: Dict, mtr: float, current_price: float) -> float:
+    def calculate_stop_loss(self, direction: str, zone: Dict, mtr: float, 
+                           current_price: float) -> float:
         """
-        Рассчитать стоп-лосс с буфером по паттерну
+        Рассчитать стоп-лосс ЗА ЗОНОЙ с буфером
         
         Args:
-            pattern: Данные паттерна
+            direction: Направление сделки
+            zone: Зона S/R от которой идет сигнал
             mtr: median True Range
             current_price: Текущая цена
             
@@ -42,15 +44,12 @@ class ActionPriceRiskManager:
                                  self.buffer_atr_mult, 
                                  self.buffer_min_pct)
         
-        stop_reference = pattern['stop_reference']
-        direction = pattern['direction']
-        
         if direction == 'LONG':
-            # Стоп ниже reference с буфером
-            stop_loss = stop_reference - buffer
+            # Стоп ниже зоны поддержки (demand) с буфером
+            stop_loss = zone['low'] - buffer
         else:  # SHORT
-            # Стоп выше reference с буфером
-            stop_loss = stop_reference + buffer
+            # Стоп выше зоны сопротивления (supply) с буфером
+            stop_loss = zone['high'] + buffer
         
         return stop_loss
     
@@ -153,44 +152,45 @@ class ActionPriceRiskManager:
         
         return rr >= self.min_rr_zone
     
-    def calculate_entry_stop_targets(self, pattern: Dict, mtr: float,
+    def calculate_entry_stop_targets(self, direction: str, zone: Dict, mtr: float,
                                      current_price: float, 
                                      zones: List[Dict]) -> Optional[Dict]:
         """
         Рассчитать полную информацию о входе, стопе и целях
         
         Args:
-            pattern: Данные паттерна
+            direction: Направление сделки
+            zone: Зона S/R от которой идет сигнал
             mtr: median True Range
-            current_price: Текущая цена
-            zones: Зоны S/R
+            current_price: Текущая актуальная цена (используется как ENTRY!)
+            zones: Все зоны S/R
             
         Returns:
             Dict с entry/stop/tp1/tp2 или None если не проходит фильтры
         """
-        direction = pattern['direction']
-        entry_trigger = pattern['entry_trigger']
+        # ENTRY = ТЕКУЩАЯ ЦЕНА (не историческая!)
+        entry = current_price
         
-        # Рассчитываем стоп
-        stop_loss = self.calculate_stop_loss(pattern, mtr, current_price)
+        # Рассчитываем стоп ЗА ЗОНОЙ
+        stop_loss = self.calculate_stop_loss(direction, zone, mtr, current_price)
         
         # Валидация минимального R:R до противоположной зоны
-        if not self.validate_rr_to_zone(entry_trigger, stop_loss, direction, zones):
+        if not self.validate_rr_to_zone(entry, stop_loss, direction, zones):
             return None  # Слишком близко к противоположной зоне
         
-        # Рассчитываем цели
-        tp1, tp2 = self.calculate_targets(entry_trigger, stop_loss, direction, zones)
+        # Рассчитываем цели от ТЕКУЩЕЙ цены
+        tp1, tp2 = self.calculate_targets(entry, stop_loss, direction, zones)
         
         # Рассчитываем R:R соотношения
-        rr1 = calculate_rr_ratio(entry_trigger, stop_loss, tp1)
-        rr2 = calculate_rr_ratio(entry_trigger, stop_loss, tp2) if tp2 else None
+        rr1 = calculate_rr_ratio(entry, stop_loss, tp1)
+        rr2 = calculate_rr_ratio(entry, stop_loss, tp2) if tp2 else None
         
         return {
-            'entry': entry_trigger,
+            'entry': entry,
             'stop_loss': stop_loss,
             'take_profit_1': tp1,
             'take_profit_2': tp2,
-            'risk': abs(entry_trigger - stop_loss),
+            'risk': abs(entry - stop_loss),
             'rr1': rr1,
             'rr2': rr2,
             'partial_tp1_pct': self.partial_tp1,

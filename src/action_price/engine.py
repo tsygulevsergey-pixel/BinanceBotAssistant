@@ -123,37 +123,16 @@ class ActionPriceEngine:
             if not pattern_zone:
                 continue
             
-            # Рассчитать риск/цели
+            # Рассчитать риск/цели (используя ТЕКУЩУЮ цену и ЗОНУ)
             risk_data = self.risk_manager.calculate_entry_stop_targets(
-                pattern, mtr_exec, current_price, zones
+                direction, pattern_zone, mtr_exec, current_price, zones
             )
             
             if not risk_data:
                 continue  # Не прошёл R:R фильтр
             
-            # Проверка актуальности entry price (для PPR и breakout паттернов)
-            entry_trigger = pattern['entry_trigger']
-            price_distance = abs(current_price - entry_trigger)
-            
-            # Для PPR паттерна - ОЧЕНЬ строгая проверка (close цена устаревает быстро)
-            if pattern['type'] == 'ppr':
-                # PPR использует c0['close'] как entry - это ПРОШЛАЯ цена!
-                # Проверяем что текущая цена не ушла в сторону SL
-                stop_ref = pattern['stop_reference']
-                
-                if direction == 'LONG':
-                    # Для LONG: current_price должна быть выше entry и далеко от SL
-                    if current_price < entry_trigger or current_price <= stop_ref * 1.01:
-                        continue  # Цена ниже entry или слишком близко к SL
-                elif direction == 'SHORT':
-                    # Для SHORT: current_price должна быть ниже entry и далеко от SL  
-                    if current_price > entry_trigger or current_price >= stop_ref * 0.99:
-                        continue  # Цена выше entry или слишком близко к SL
-            else:
-                # Для других паттернов - обычная проверка
-                max_distance = mtr_exec * 0.75
-                if price_distance > max_distance:
-                    continue  # Цена ушла слишком далеко от entry
+            # Примечание: Entry price теперь = current_price (всегда актуальная!)
+            # Проверка устаревания больше не требуется
             
             # Проверка cooldown
             if self.cooldown.is_duplicate(symbol, direction, pattern_zone['id'],
