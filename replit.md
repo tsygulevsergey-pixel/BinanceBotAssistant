@@ -6,6 +6,20 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
+# Recent Changes
+
+## Fast Catchup Deadlock Fix (October 2025)
+- **Issue**: Fast Catchup deadlocked after burst loading - ready_queue.put() blocked when analyzer task wasn't consuming
+- **Root Cause**: Analyzer task started AFTER Fast Catchup, causing queue backpressure when 30+ symbols pushed to 50-item queue
+- **Fix**: Reordered task creation in main.py - analyzer task now starts BEFORE _fast_catchup_phase()
+- **Result**: Fast Catchup restored to 2.1s for 37 symbols (17.3 req/s), background tasks launch successfully
+
+## Strategy & Indicator Fixes (October 2025)
+- **Donchian Breakout**: Reduced lookback from 100 to 20 points, 60-day to 14-day percentiles
+- **ORB Strategy**: Increased atr_multiplier from 1.1 to 1.3
+- **Volume Thresholds**: Adaptive by time (0.6x night, 0.8x evening, 1.0x day) for ORB/VWAP/SwingHigh/EMA strategies
+- **BB Width Enhancement**: Manual fallback calculation with min_periods=1 when ta.bbands returns incomplete DataFrame
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
