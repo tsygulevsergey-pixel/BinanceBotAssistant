@@ -7,6 +7,7 @@ from src.utils.strategy_logger import strategy_logger
 from src.utils.config import config
 from src.binance.client import BinanceClient
 from src.binance.data_loader import DataLoader
+from src.data.fast_catchup import FastCatchupLoader
 from src.strategies.strategy_manager import StrategyManager
 from src.scoring.signal_scorer import SignalScorer
 from src.filters.btc_filter import BTCFilter
@@ -61,9 +62,11 @@ class TradingBot:
         self.running = False
         self.client: Optional[BinanceClient] = None
         self.data_loader: Optional[DataLoader] = None
+        self.fast_catchup: Optional[FastCatchupLoader] = None
         self.symbols: List[str] = []
         self.ready_symbols: List[str] = []  # Symbols with loaded data, ready for analysis
         self.symbols_with_active_signals: set = set()  # Символы с активными сигналами (блокированы от анализа)
+        self.catchup_done_symbols: set = set()  # Символы обработанные в fast catchup
         self.coordinator: Optional[SymbolLoadCoordinator] = None
         self.performance_tracker: Optional[SignalPerformanceTracker] = None
         
@@ -106,6 +109,9 @@ class TradingBot:
             await self.client.load_symbols_info()
             
             self.data_loader = DataLoader(self.client, self.telegram_bot)
+            
+            # Инициализация Fast Catchup Loader
+            self.fast_catchup = FastCatchupLoader(self.data_loader, db)
             
             # Передаем binance_client в StrategyManager и TelegramBot
             self.strategy_manager.binance_client = self.client
@@ -162,6 +168,10 @@ class TradingBot:
         
         self.coordinator = SymbolLoadCoordinator(total_symbols=len(self.symbols), queue_max_size=50)
         
+        # Сначала FAST CATCHUP для existing symbols с gaps
+        await self._fast_catchup_phase()
+        
+        # Потом нормальный loader для новых символов
         loader_task = asyncio.create_task(self._symbol_loader_task())
         analyzer_task = asyncio.create_task(self._symbol_analyzer_task())
         update_symbols_task = asyncio.create_task(self._update_symbols_task())
@@ -742,6 +752,57 @@ class TradingBot:
         if signals_found > 0:
             ap_logger.info(f"🎯 Action Price analysis complete: {signals_found} signals found")
     
+    async def _fast_catchup_phase(self):
+        """FAST CATCHUP: Быстрая параллельная догрузка gaps для existing symbols"""
+        if not self.fast_catchup or not self.coordinator:
+            return
+        
+        # Проверка включен ли fast catchup
+        if not config.get('fast_catchup.enabled', True):
+            logger.info("⚡ Fast catchup disabled in config - using normal loader")
+            return
+        
+        current_time = datetime.now(pytz.UTC)
+        
+        # Анализ состояния БД
+        existing_gaps, new_symbols = self.fast_catchup.analyze_restart_state(
+            self.symbols, current_time
+        )
+        
+        if not existing_gaps:
+            logger.info("⚡ No gaps detected - all symbols are new or up-to-date")
+            return
+        
+        # Показать статистику
+        stats = self.fast_catchup.get_catchup_stats(existing_gaps)
+        logger.info(
+            f"⚡ BURST CATCHUP starting:\n"
+            f"  📦 Symbols with gaps: {stats['total_symbols']}\n"
+            f"  📊 Total gaps: {stats['total_gaps']}\n"
+            f"  🕐 15m gaps: {stats['by_timeframe']['15m']['gaps']} ({stats['by_timeframe']['15m']['candles']} candles)\n"
+            f"  🕑 1h gaps: {stats['by_timeframe']['1h']['gaps']} ({stats['by_timeframe']['1h']['candles']} candles)\n"
+            f"  🕓 4h gaps: {stats['by_timeframe']['4h']['gaps']} ({stats['by_timeframe']['4h']['candles']} candles)\n"
+            f"  🕔 1d gaps: {stats['by_timeframe']['1d']['gaps']} ({stats['by_timeframe']['1d']['candles']} candles)"
+        )
+        
+        # Запуск burst catchup с настройками из config
+        max_parallel = config.get('fast_catchup.max_parallel', None)
+        success_count, failed_count = await self.fast_catchup.burst_catchup(
+            existing_gaps, max_parallel=max_parallel
+        )
+        
+        # Добавить успешно обработанные символы в ready queue
+        for symbol in existing_gaps.keys():
+            if symbol not in self.coordinator._failed_symbols:
+                await self.coordinator.add_ready_symbol(symbol)
+                self.catchup_done_symbols.add(symbol)  # Track processed symbols
+                logger.info(f"⚡ {symbol} caught up and ready")
+        
+        logger.info(
+            f"⚡ BURST CATCHUP finished: {success_count} success, {failed_count} failed\n"
+            f"📊 {len(new_symbols)} new symbols will be loaded by normal loader"
+        )
+    
     async def _symbol_loader_task(self):
         """Background task to load symbol data and add to ready queue"""
         if not self.coordinator or not self.data_loader:
@@ -755,6 +816,11 @@ class TradingBot:
             if self.coordinator.is_shutdown_requested():
                 logger.info("Loader task shutting down...")
                 break
+            
+            # Пропускаем символы уже обработанные в fast catchup
+            if symbol in self.catchup_done_symbols:
+                logger.debug(f"⚡ Skipping {symbol} - already processed in catchup")
+                continue
             
             try:
                 self.coordinator.increment_loading_count()
