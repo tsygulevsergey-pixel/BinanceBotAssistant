@@ -303,12 +303,13 @@ class TradingBot:
                 last_check_time = current_time
             
             # Action Price анализ (только на закрытии 15m/1H свечей)
+            # Проверяем каждую секунду для точного детектирования closes
             if self.action_price_enabled and len(self.ready_symbols) > 0:
-                current_time = datetime.now(pytz.UTC)
+                current_time_utc = datetime.now(pytz.UTC)
                 
                 # Проверка закрытия 15m или 1H
-                if TimeframeSync.should_update_timeframe('15m', consumer_id='action_price') or TimeframeSync.should_update_timeframe('1h', consumer_id='action_price'):
-                    await self._check_action_price_signals(current_time)
+                if TimeframeSync.should_update_timeframe('15m', current_time=current_time_utc, consumer_id='action_price') or TimeframeSync.should_update_timeframe('1h', current_time=current_time_utc, consumer_id='action_price'):
+                    await self._check_action_price_signals(current_time_utc)
                 
                 # Пересчёт зон: каждый день в 00:00 UTC
                 if current_time.hour == 0 and current_time.minute == 0:
@@ -1290,11 +1291,17 @@ class TradingBot:
             if confidence:
                 message += f"\n⭐ Уверенность: <b>{confidence:.1f}</b>\n"
             
+            # Проверка что Telegram инициализирован
+            if not self.telegram_bot or not self.telegram_bot.bot or not self.telegram_bot.chat_id:
+                ap_logger.warning("Telegram bot not initialized - skipping AP signal notification")
+                return
+            
             await self.telegram_bot.bot.send_message(
                 chat_id=self.telegram_bot.chat_id,
                 text=message,
                 parse_mode='HTML'
             )
+            ap_logger.info(f"📤 Sent AP signal to Telegram: {ap_signal['symbol']} {ap_signal['direction']}")
             
         except Exception as e:
             ap_logger.error(f"Failed to send AP signal to Telegram: {e}", exc_info=True)

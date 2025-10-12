@@ -78,13 +78,13 @@ class PeriodicGapRefill:
                     last_candle = session.query(Candle).filter(
                         Candle.symbol == symbol,
                         Candle.timeframe == tf
-                    ).order_by(Candle.timestamp.desc()).first()
+                    ).order_by(Candle.open_time.desc()).first()
                     
                     if not last_candle:
                         continue
                     
                     # Проверить gap между последней свечой и текущим временем
-                    last_time = last_candle.timestamp.replace(tzinfo=pytz.UTC)
+                    last_time = last_candle.open_time.replace(tzinfo=pytz.UTC)
                     
                     # Вычислить интервал для таймфрейма
                     interval_minutes = {

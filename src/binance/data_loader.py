@@ -220,7 +220,7 @@ class DataLoader:
                 if self.telegram_bot:
                     asyncio.create_task(
                         self.telegram_bot.send_data_integrity_alert(symbol, "incomplete", 
-                                                                    "Data completeness <99%")
+                                                                    "Data completeness below 99%")
                     )
                 
                 return False
