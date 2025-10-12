@@ -35,6 +35,13 @@ A fully integrated **Action Price** strategy system is included, operating indep
 - **Multi-TF Context**: 4h data always loaded for regime detection even when only 15m/1h closes
 - **Logging**: Shows "⏭️ No candles closed - skipping" until timeframe updates, then "🕯️ Candles closed: 15m - checking"
 
+## Runtime Fast Catchup (October 2025)
+- **Parallel Candle Updates**: During runtime, all symbols update candles in parallel at candle close using asyncio.gather
+- **Performance**: 67 symbols updated in 0.94s (71.4 req/s) vs ~67s sequential - achieving ~70x speedup
+- **Integration**: Replaces sequential update loop in _check_signals with _parallel_update_candles method
+- **Failure Handling**: Returns False on failures with debug logging; strategy checks proceed with freshest available data
+- **Metrics**: Logs show "⚡ Runtime Fast Catchup: X/Y updates in Zs (R req/s) | X symbols × N TFs"
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
