@@ -1136,20 +1136,43 @@ class TradingBot:
         """Сохранить Action Price сигнал в БД"""
         session = db.get_session()
         try:
+            # Получить meta_data
+            meta_data = ap_signal.get('meta_data', {})
+            
+            # Получить risk_reward из rr1 (первая цель)
+            risk_reward = meta_data.get('rr1', 1.5)
+            
+            # Получить zone_touches из meta_data
+            zone_touches = meta_data.get('zone_touches', 0)
+            
+            # Сформировать confluence list из флагов
+            confluence_flags = ap_signal.get('confluence_flags', {})
+            confluences = []
+            if confluence_flags.get('avwap_primary'):
+                confluences.append('AVWAP Primary')
+            if confluence_flags.get('avwap_secondary'):
+                confluences.append('AVWAP Secondary')
+            if confluence_flags.get('daily_vwap'):
+                confluences.append('Daily VWAP')
+            if confluence_flags.get('zone_sr'):
+                confluences.append('S/R Zone')
+            
+            confluences_str = ', '.join(confluences) if confluences else None
+            
             signal = ActionPriceSignal(
                 symbol=ap_signal['symbol'],
                 timeframe=ap_signal['timeframe'],
                 direction=ap_signal['direction'],
                 pattern_type=ap_signal['pattern_type'],
                 zone_type=ap_signal['zone_type'],
-                zone_touches=ap_signal.get('zone_touches', 0),
+                zone_touches=zone_touches,
                 entry_price=float(ap_signal['entry_price']),
                 stop_loss=float(ap_signal['stop_loss']),
                 take_profit_1=float(ap_signal['take_profit_1']) if ap_signal.get('take_profit_1') else None,
                 take_profit_2=float(ap_signal['take_profit_2']) if ap_signal.get('take_profit_2') else None,
-                risk_reward=float(ap_signal['risk_reward']),
-                confluences=ap_signal['confluences'],
-                avwap_position=ap_signal.get('avwap_position'),
+                risk_reward=float(risk_reward),
+                confluences=confluences_str,
+                avwap_position=None,  # Рассчитаем позже если нужно
                 status='ACTIVE',
                 created_at=datetime.now(pytz.UTC)
             )
@@ -1179,33 +1202,52 @@ class TradingBot:
             emoji = pattern_emoji.get(ap_signal['pattern_type'], '🎯')
             direction_emoji = '🟢' if ap_signal['direction'] == 'LONG' else '🔴'
             
+            # Получить meta_data
+            meta_data = ap_signal.get('meta_data', {})
+            zone_touches = meta_data.get('zone_touches', 0)
+            rr1 = meta_data.get('rr1', 1.5)
+            
+            # Получить confluence flags
+            confluence_flags = ap_signal.get('confluence_flags', {})
+            confluences = []
+            if confluence_flags.get('avwap_primary'):
+                confluences.append('AVWAP Primary')
+            if confluence_flags.get('avwap_secondary'):
+                confluences.append('AVWAP Secondary')
+            if confluence_flags.get('daily_vwap'):
+                confluences.append('Daily VWAP')
+            if confluence_flags.get('zone_sr'):
+                confluences.append('S/R Zone')
+            
             message = (
-                f"🎯 **ACTION PRICE SIGNAL**\n\n"
-                f"{direction_emoji} **{ap_signal['symbol']} {ap_signal['direction']}**\n"
-                f"{emoji} Паттерн: **{ap_signal['pattern_type'].upper()}**\n"
-                f"📊 Таймфрейм: **{ap_signal['timeframe']}**\n"
-                f"🎯 Зона: **{ap_signal['zone_type']}** (касания: {ap_signal.get('zone_touches', 0)})\n\n"
-                f"💰 Вход: **{ap_signal['entry_price']:.4f}**\n"
-                f"🛑 Стоп: **{ap_signal['stop_loss']:.4f}**\n"
+                f"🎯 <b>ACTION PRICE SIGNAL</b>\n\n"
+                f"{direction_emoji} <b>{ap_signal['symbol']} {ap_signal['direction']}</b>\n"
+                f"{emoji} Паттерн: <b>{ap_signal['pattern_type'].upper()}</b>\n"
+                f"📊 Таймфрейм: <b>{ap_signal['timeframe']}</b>\n"
+                f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                f"💰 Вход: <b>{ap_signal['entry_price']:.4f}</b>\n"
+                f"🛑 Стоп: <b>{ap_signal['stop_loss']:.4f}</b>\n"
             )
             
             if ap_signal.get('take_profit_1'):
-                message += f"🎯 TP1 (50%): **{ap_signal['take_profit_1']:.4f}**\n"
+                message += f"🎯 TP1 (50%): <b>{ap_signal['take_profit_1']:.4f}</b>\n"
             if ap_signal.get('take_profit_2'):
-                message += f"🎯 TP2 (50%): **{ap_signal['take_profit_2']:.4f}**\n"
+                message += f"🎯 TP2 (50%): <b>{ap_signal['take_profit_2']:.4f}</b>\n"
             
-            message += f"📈 R:R: **{ap_signal['risk_reward']:.1f}:1**\n\n"
+            message += f"📈 R:R: <b>{rr1:.1f}:1</b>\n\n"
             
             # Конфлюэнсы
-            if ap_signal['confluences']:
-                message += "✅ **Конфлюэнсы:**\n"
-                for conf in ap_signal['confluences']:
+            if confluences:
+                message += "✅ <b>Конфлюэнсы:</b>\n"
+                for conf in confluences:
                     message += f"  • {conf}\n"
             
-            if ap_signal.get('avwap_position'):
-                message += f"\n📍 AVWAP: {ap_signal['avwap_position']}\n"
+            # Confidence score
+            confidence = ap_signal.get('confidence_score', 0)
+            if confidence:
+                message += f"\n⭐ Уверенность: <b>{confidence:.1f}</b>\n"
             
-            await self.telegram_bot.send_message(message)
+            await self.telegram_bot.send_message(message, parse_mode='HTML')
             
         except Exception as e:
             ap_logger.error(f"Failed to send AP signal to Telegram: {e}", exc_info=True)

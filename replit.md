@@ -8,6 +8,27 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## Action Price Signal Data Structure Fix (October 2025)
+- **Issue**: Action Price signals failed to save to DB and send to Telegram with `KeyError: 'risk_reward'`
+- **Root Cause**: ActionPriceEngine returns signals with `meta_data['rr1']` but code expected top-level `risk_reward` field
+- **Fix**: Updated `_save_action_price_signal()` and `_send_action_price_telegram()` to extract data from correct structure:
+  - Risk/Reward from `meta_data['rr1']`
+  - Zone touches from `meta_data['zone_touches']`
+  - Confluences from `confluence_flags` dict
+- **Result**: Action Price signals now save correctly to DB and send formatted HTML messages to Telegram with confidence score
+
+## Telegram HTML Formatting Migration (October 2025)
+- **Issue**: All Telegram commands failed with "can't parse entities" errors due to Markdown parsing
+- **Root Cause**: Underscores in commands like `/ap_stats` conflicted with Markdown italic syntax
+- **Fix**: Replaced all `parse_mode='Markdown'` with `parse_mode='HTML'` across all Telegram bot functions
+- **Commands Fixed**: /start, /help, /strategies, /performance, /stats, /ap_stats, /validate, signal formatting
+- **Result**: All Telegram communication now stable using HTML formatting
+
+## Config Method Correction (October 2025)
+- **Issue**: Bot failed to start with `AttributeError: 'Config' object has no attribute 'get_dict'`
+- **Fix**: Replaced non-existent `config.get_dict('action_price')` with `config.get('action_price', {})`
+- **Result**: Bot initialization succeeds; Action Price Engine loads configuration correctly
+
 ## Fast Catchup Deadlock Fix (October 2025)
 - **Issue**: Fast Catchup deadlocked after burst loading - ready_queue.put() blocked when analyzer task wasn't consuming
 - **Root Cause**: Analyzer task started AFTER Fast Catchup, causing queue backpressure when 30+ symbols pushed to 50-item queue
