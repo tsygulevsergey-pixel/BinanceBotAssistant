@@ -90,6 +90,9 @@ class TradingBot:
         self.entry_manager = EntryManager()  # Управление MARKET/LIMIT входами
         self.indicator_cache = IndicatorCache()  # Кеш для индикаторов
         
+        self._check_signals_lock = asyncio.Lock()
+        self._check_signals_task: Optional[asyncio.Task] = None
+        
         self._register_strategies()
     
     async def start(self):
@@ -311,10 +314,14 @@ class TradingBot:
             iteration += 1
             current_time = datetime.now()
             
-            # Каждые check_interval секунд проверяем сигналы
+            # Каждые check_interval секунд проверяем сигналы (неблокирующий запуск)
             if (current_time - last_check_time).total_seconds() >= check_interval and len(self.ready_symbols) > 0:
-                await self._check_signals()
-                last_check_time = current_time
+                # Запускаем только если предыдущая проверка завершена
+                if not self._check_signals_lock.locked():
+                    self._check_signals_task = asyncio.create_task(self._check_signals_wrapper())
+                    last_check_time = current_time
+                else:
+                    logger.debug("⏳ Previous signal check still running, skipping this cycle")
             
             # Action Price анализ (только на закрытии 15m/1H свечей)
             # Проверяем каждую секунду для точного детектирования closes
@@ -395,6 +402,21 @@ class TradingBot:
             f"in {elapsed:.2f}s ({total_requests/elapsed:.1f} req/s) | "
             f"{len(symbols)} symbols × {len(timeframes)} TFs"
         )
+    
+    async def _check_signals_wrapper(self):
+        """Обёртка для _check_signals с Lock и логированием времени выполнения"""
+        async with self._check_signals_lock:
+            start_time = datetime.now()
+            try:
+                await self._check_signals()
+            except Exception as e:
+                logger.error(f"Error in _check_signals: {e}", exc_info=True)
+            finally:
+                elapsed = (datetime.now() - start_time).total_seconds()
+                if elapsed > 90:
+                    logger.warning(f"⚠️ Signal check took {elapsed:.1f}s (>90s tolerance)")
+                else:
+                    logger.debug(f"✅ Signal check completed in {elapsed:.1f}s")
     
     async def _check_signals(self):
         """Проверить сигналы для всех готовых символов"""
