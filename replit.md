@@ -11,14 +11,19 @@ A fully integrated **Action Price** strategy system is included, operating indep
 ## Trailing Stop-Loss with Partial TP (October 12, 2025)
 - **Feature**: Implemented trailing stop-loss system with partial profit taking
 - **Logic**:
-  - TP1 hit → Close 50%, move SL to breakeven, record +0.5R
-  - After TP1: TP2 → Close remaining 50% with +1.5R total (0.5R + 1R)
-  - After TP1: Breakeven → Close remaining 50% with +0.5R total
+  - TP1 hit → Move SL to breakeven, continue tracking
+  - After TP1: TP2 → Close with full TP2 profit
+  - After TP1: Breakeven → Close with 0% (breakeven)
+- **PnL Calculation**: Real percentages from entry price
+  - LONG TP: (exit - entry) / entry * 100 → positive %
+  - SHORT TP: (entry - exit) / entry * 100 → positive %
+  - LONG SL: (sl - entry) / entry * 100 → negative %
+  - SHORT SL: (entry - sl) / entry * 100 → negative %
 - **Components Added**:
   - Database fields: `tp1_hit`, `tp1_closed_at`, `exit_type`
-  - R-based PnL calculation (0.5R, 1.5R, -1.0R instead of percentages)
   - TP1/TP2 counters in Telegram statistics
-- **Status**: ✅ Production-ready, both live tracking and historical backfill use identical trailing logic
+  - Migration script: `migrate_add_tp_fields.py` for safe DB update
+- **Status**: ✅ Production-ready, percentage-based PnL with identical logic in live/historical tracking
 
 ## Signal Tracker Backfill Fix (October 12, 2025)
 - **Fixed**: Corrected Candle model field references in backfill mechanism from `kline.timestamp` to `kline.open_time`
