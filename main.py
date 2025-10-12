@@ -340,6 +340,44 @@ class TradingBot:
             
             await asyncio.sleep(1)
     
+    async def _parallel_update_candles(self, symbols: list, timeframes: list):
+        """
+        Параллельная загрузка свечей для всех символов (Runtime Fast Catchup)
+        
+        Args:
+            symbols: Список символов для обновления
+            timeframes: Список таймфреймов для обновления
+        """
+        start_time = datetime.now()
+        
+        async def update_symbol_tf(symbol: str, tf: str):
+            """Обновить один символ на одном таймфрейме"""
+            try:
+                await self.data_loader.update_missing_candles(symbol, tf)
+                return True
+            except Exception as e:
+                logger.debug(f"Could not update {symbol} {tf}: {e}")
+                return False
+        
+        # Создать задачи для всех символов и таймфреймов
+        tasks = []
+        for symbol in symbols:
+            for tf in timeframes:
+                tasks.append(update_symbol_tf(symbol, tf))
+        
+        # Запустить все параллельно
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        elapsed = (datetime.now() - start_time).total_seconds()
+        success_count = sum(1 for r in results if r is True)
+        total_requests = len(symbols) * len(timeframes)
+        
+        logger.info(
+            f"⚡ Runtime Fast Catchup: {success_count}/{total_requests} updates "
+            f"in {elapsed:.2f}s ({total_requests/elapsed:.1f} req/s) | "
+            f"{len(symbols)} symbols × {len(timeframes)} TFs"
+        )
+    
     async def _check_signals(self):
         """Проверить сигналы для всех готовых символов"""
         if not self.data_loader:
@@ -368,9 +406,12 @@ class TradingBot:
             logger.debug("No symbols ready for analysis yet...")
             return
         
-        logger.debug(f"Checking signals for {len(symbols_to_check)} ready symbols on {', '.join(updated_timeframes)} timeframes...")
+        # Фильтровать символы с активными сигналами
+        symbols_to_update = [s for s in symbols_to_check if s not in self.symbols_with_active_signals]
         
-        # Обновить BTC данные только если свеча закрылась
+        logger.debug(f"Checking signals for {len(symbols_to_update)} symbols on {', '.join(updated_timeframes)} timeframes...")
+        
+        # 1. ПАРАЛЛЕЛЬНО обновить BTC данные
         if '1h' in updated_timeframes:
             try:
                 await self.data_loader.update_missing_candles('BTCUSDT', '1h')
@@ -378,9 +419,13 @@ class TradingBot:
             except Exception as e:
                 logger.debug(f"Could not update BTCUSDT: {e}")
         
+        # 2. ПАРАЛЛЕЛЬНО обновить все символы (Runtime Fast Catchup)
+        if symbols_to_update:
+            await self._parallel_update_candles(symbols_to_update, updated_timeframes)
+        
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
-        # Проверяем все готовые символы
+        # 3. Проверить стратегии для каждого символа
         for symbol in symbols_to_check:
             # Пропускаем символы с активными сигналами
             if symbol in self.symbols_with_active_signals:
@@ -401,16 +446,11 @@ class TradingBot:
             symbol: Символ для проверки
             btc_data: BTC данные для фильтра
             updated_timeframes: Список обновившихся таймфреймов (свечи которых закрылись)
+        
+        Note: Свечи уже обновлены параллельно в _check_signals через Runtime Fast Catchup
         """
         if not self.data_loader:
             return
-        
-        # Обновить актуальные свечи ТОЛЬКО для обновившихся таймфреймов
-        for tf in updated_timeframes:
-            try:
-                await self.data_loader.update_missing_candles(symbol, tf)
-            except Exception as e:
-                logger.debug(f"Could not update {symbol} {tf}: {e}")
         
         # Загрузить данные ТОЛЬКО для обновившихся таймфреймов
         # Лимиты рассчитаны на основе максимальных требований стратегий:
