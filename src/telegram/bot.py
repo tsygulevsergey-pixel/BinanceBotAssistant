@@ -61,7 +61,7 @@ class TelegramBot:
         if not update.message:
             return
         welcome_text = (
-            "🤖 *Торговый бот запущен*\n\n"
+            "🤖 <b>Торговый бот запущен</b>\n\n"
             "Доступные команды:\n"
             "/help - Справка\n"
             "/status - Статус бота\n"
@@ -73,13 +73,13 @@ class TelegramBot:
             "/latency - Задержки системы\n"
             "/report - Статистика сигналов\n"
         )
-        await update.message.reply_text(welcome_text, parse_mode='Markdown')
+        await update.message.reply_text(welcome_text, parse_mode='HTML')
     
     async def cmd_help(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
             return
         help_text = (
-            "*Справка по командам:*\n\n"
+            "<b>Справка по командам:</b>\n\n"
             "/start - Начало работы\n"
             "/status - Состояние бота и рынков\n"
             "/strategies - Активные стратегии\n"
@@ -89,7 +89,7 @@ class TelegramBot:
             "/latency - Задержки WebSocket\n"
             "/report - Статистика за период\n"
         )
-        await update.message.reply_text(help_text, parse_mode='Markdown')
+        await update.message.reply_text(help_text, parse_mode='HTML')
     
     async def cmd_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
@@ -101,12 +101,12 @@ class TelegramBot:
         if not update.message:
             return
         strategies_text = (
-            "*Активные стратегии:*\n\n"
+            "<b>Активные стратегии:</b>\n\n"
             "1. Donchian Breakout\n"
-            "2. Squeeze→Breakout\n"
+            "2. Squeeze → Breakout\n"
             "3. ORB/IRB\n"
             "4. MA/VWAP Pullback\n"
-            "5. Break & Retest\n"
+            "5. Break &amp; Retest\n"
             "6. ATR Momentum\n"
             "7. VWAP Mean Reversion\n"
             "8. Range Fade\n"
@@ -116,14 +116,14 @@ class TelegramBot:
             "12. Order Flow\n"
             "13. CVD Divergence\n"
             "14. Time of Day\n"
-            "15. Cash & Carry\n"
+            "15. Cash &amp; Carry\n"
             "16. Market Making\n\n"
-            "🎯 *Action Price* (отдельная статистика)\n"
+            "🎯 <b>Action Price</b> (отдельная статистика)\n"
             "   • Pin-Bar, Engulfing, Inside-Bar\n"
             "   • Fakey, ППР\n"
             "   • Команда: /ap_stats\n"
         )
-        await update.message.reply_text(strategies_text, parse_mode='Markdown')
+        await update.message.reply_text(strategies_text, parse_mode='HTML')
     
     async def cmd_latency(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
@@ -148,19 +148,19 @@ class TelegramBot:
             perf = await self.performance_tracker.get_strategy_performance(days=7)
             
             text = (
-                f"📊 *Производительность (7 дней)*\n\n"
+                f"📊 <b>Производительность (7 дней)</b>\n\n"
                 f"📈 Всего сигналов: {perf['total_signals']}\n"
                 f"✅ Закрыто: {perf['closed_signals']}\n"
                 f"🔄 Активных: {perf['active_signals']}\n\n"
                 f"🏆 Побед: {perf['wins']}\n"
                 f"❌ Поражений: {perf['losses']}\n"
-                f"📊 Win Rate: *{perf['win_rate']}%*\n\n"
-                f"💰 Средний PnL: *{perf['avg_pnl']:+.2f}%*\n"
-                f"💵 Общий PnL: *{perf['total_pnl']:+.2f}%*\n\n"
+                f"📊 Win Rate: <b>{perf['win_rate']}%</b>\n\n"
+                f"💰 Средний PnL: <b>{perf['avg_pnl']:+.2f}%</b>\n"
+                f"💵 Общий PnL: <b>{perf['total_pnl']:+.2f}%</b>\n\n"
                 f"🟢 Средняя победа: {perf['avg_win']:+.2f}%\n"
                 f"🔴 Среднее поражение: {perf['avg_loss']:+.2f}%\n"
             )
-            await update.message.reply_text(text, parse_mode='Markdown')
+            await update.message.reply_text(text, parse_mode='HTML')
         except Exception as e:
             logger.error(f"Error getting performance: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
@@ -181,11 +181,11 @@ class TelegramBot:
                 await update.message.reply_text("📊 Пока нет данных по стратегиям")
                 return
             
-            text = "*📊 Статистика по стратегиям (7 дней):*\n\n"
+            text = "<b>📊 Статистика по стратегиям (7 дней):</b>\n\n"
             
             for i, s in enumerate(stats[:10], 1):
                 text += (
-                    f"{i}. *{s['strategy_name']}*\n"
+                    f"{i}. <b>{s['strategy_name']}</b>\n"
                     f"   Сигналов: {s['total_signals']} | "
                     f"WR: {s['win_rate']}% | "
                     f"PnL: {s['avg_pnl']:+.2f}%\n\n"
@@ -194,7 +194,7 @@ class TelegramBot:
             if len(stats) > 10:
                 text += f"... и еще {len(stats) - 10} стратегий"
             
-            await update.message.reply_text(text, parse_mode='Markdown')
+            await update.message.reply_text(text, parse_mode='HTML')
         except Exception as e:
             logger.error(f"Error getting stats: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
@@ -215,7 +215,7 @@ class TelegramBot:
             # Разбивка по паттернам
             breakdown = await self.ap_performance_tracker.get_pattern_breakdown(days=7)
             
-            text = "*🎯 Action Price - Статистика (7 дней):*\n\n"
+            text = "<b>🎯 Action Price - Статистика (7 дней):</b>\n\n"
             
             # Общие метрики
             text += (
@@ -224,16 +224,16 @@ class TelegramBot:
                 f"🔄 Активных: {overall['active_signals']}\n\n"
                 f"🏆 Побед: {overall['wins']}\n"
                 f"❌ Поражений: {overall['losses']}\n"
-                f"📊 Win Rate: *{overall['win_rate']}%*\n\n"
-                f"💰 Средний PnL: *{overall['avg_pnl']:+.2f}%*\n"
-                f"💵 Общий PnL: *{overall['total_pnl']:+.2f}%*\n"
+                f"📊 Win Rate: <b>{overall['win_rate']}%</b>\n\n"
+                f"💰 Средний PnL: <b>{overall['avg_pnl']:+.2f}%</b>\n"
+                f"💵 Общий PnL: <b>{overall['total_pnl']:+.2f}%</b>\n"
                 f"🎯 Частичных фиксаций: {overall['partial_exits']}\n\n"
                 f"🟢 Средняя победа: {overall['avg_win']:+.2f}%\n"
                 f"🔴 Среднее поражение: {overall['avg_loss']:+.2f}%\n\n"
             )
             
             # Разбивка по паттернам
-            text += "*📈 По паттернам:*\n\n"
+            text += "<b>📈 По паттернам:</b>\n\n"
             
             pattern_names = {
                 'pin_bar': '📌 Pin-Bar',
@@ -252,7 +252,7 @@ class TelegramBot:
                         f"PnL: {stats['avg_pnl']:+.2f}%\n"
                     )
             
-            await update.message.reply_text(text, parse_mode='Markdown')
+            await update.message.reply_text(text, parse_mode='HTML')
         except Exception as e:
             logger.error(f"Error getting AP stats: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
@@ -280,7 +280,7 @@ class TelegramBot:
             total = results['strategies_tested']
             
             text = (
-                f"✅ *Результаты валидации ({symbol})*\n\n"
+                f"✅ <b>Результаты валидации ({symbol})</b>\n\n"
                 f"📊 Всего стратегий: {total}\n"
                 f"✅ Прошли проверку: {passed}\n"
                 f"❌ Провалили проверку: {failed}\n\n"
@@ -289,19 +289,19 @@ class TelegramBot:
             # Показываем проблемные стратегии
             for detail in results['details']:
                 if detail['status'] == 'FAIL':
-                    text += f"\n❌ *{detail['strategy']}* ({detail['timeframe']})\n"
+                    text += f"\n❌ <b>{detail['strategy']}</b> ({detail['timeframe']})\n"
                     for issue in detail.get('issues', [])[:2]:  # Первые 2 проблемы
                         text += f"   • {issue}\n"
                 elif detail.get('warnings'):
-                    text += f"\n⚡ *{detail['strategy']}* ({detail['timeframe']})\n"
+                    text += f"\n⚡ <b>{detail['strategy']}</b> ({detail['timeframe']})\n"
                     text += f"   • {detail['warnings'][0]}\n"
             
             # Успешные стратегии (только count)
             passed_list = [d['strategy'] for d in results['details'] if d['status'] == 'PASS']
             if passed_list:
-                text += f"\n✅ *Успешно:* {len(passed_list)} стратегий"
+                text += f"\n✅ <b>Успешно:</b> {len(passed_list)} стратегий"
             
-            await update.message.reply_text(text, parse_mode='Markdown')
+            await update.message.reply_text(text, parse_mode='HTML')
             
         except Exception as e:
             logger.error(f"Error validating strategies: {e}", exc_info=True)
@@ -331,16 +331,16 @@ class TelegramBot:
         
         try:
             message = (
-                f"🤖 *Бот запущен!*\n\n"
-                f"📊 *В работе:* {pairs_count} пар\n"
-                f"🎯 *Активных стратегий:* {strategies_count}\n"
-                f"⚙️ *Режим:* {mode}\n\n"
+                f"🤖 <b>Бот запущен!</b>\n\n"
+                f"📊 <b>В работе:</b> {pairs_count} пар\n"
+                f"🎯 <b>Активных стратегий:</b> {strategies_count}\n"
+                f"⚙️ <b>Режим:</b> {mode}\n\n"
                 f"Используйте /help для списка команд"
             )
             await self.bot.send_message(
                 chat_id=self.chat_id,
                 text=message,
-                parse_mode='Markdown'
+                parse_mode='HTML'
             )
             self.startup_message_sent = True
             logger.info("Startup message sent to Telegram")
@@ -367,8 +367,8 @@ class TelegramBot:
             emoji = emoji_map.get(issue_type, '⚠️')
             
             message = (
-                f"{emoji} *Data Integrity Alert*\n\n"
-                f"📊 Symbol: `{symbol}`\n"
+                f"{emoji} <b>Data Integrity Alert</b>\n\n"
+                f"📊 Symbol: <code>{symbol}</code>\n"
                 f"🔍 Issue: {issue_type}\n"
                 f"📝 Details: {details}\n\n"
                 f"⚠️ Trading on this symbol may be affected"
@@ -377,7 +377,7 @@ class TelegramBot:
             await self.bot.send_message(
                 chat_id=self.chat_id,
                 text=message,
-                parse_mode='Markdown'
+                parse_mode='HTML'
             )
             logger.info(f"Data integrity alert sent for {symbol}")
         except Exception as e:
@@ -392,7 +392,7 @@ class TelegramBot:
             msg = await self.bot.send_message(
                 chat_id=self.chat_id,
                 text=message,
-                parse_mode='Markdown'
+                parse_mode='HTML'
             )
             return msg.message_id if msg else None
         except Exception as e:
@@ -413,10 +413,10 @@ class TelegramBot:
             entry_emoji = "⚡"
         
         message = (
-            f"{direction_emoji} *{signal_data['strategy_name']}*\n\n"
-            f"📊 Символ: `{symbol}`\n"
-            f"📈 Направление: *{signal_data['direction']}*\n"
-            f"{entry_emoji} Тип входа: `{entry_type}`\n"
+            f"{direction_emoji} <b>{signal_data['strategy_name']}</b>\n\n"
+            f"📊 Символ: <code>{symbol}</code>\n"
+            f"📈 Направление: <b>{signal_data['direction']}</b>\n"
+            f"{entry_emoji} Тип входа: <code>{entry_type}</code>\n"
         )
         
         # Форматировать цены с правильной точностью
@@ -428,11 +428,11 @@ class TelegramBot:
         # Для LIMIT pending показать целевую и текущую цену
         if 'pending' in entry_type.lower() and 'current_price' in signal_data:
             message += (
-                f"🎯 Целевая цена: `{format_price(signal_data['entry_price'])}`\n"
-                f"💰 Текущая цена: `{format_price(signal_data['current_price'])}`\n"
+                f"🎯 Целевая цена: <code>{format_price(signal_data['entry_price'])}</code>\n"
+                f"💰 Текущая цена: <code>{format_price(signal_data['current_price'])}</code>\n"
             )
         else:
-            message += f"💰 Вход: `{format_price(signal_data['entry_price'])}`\n"
+            message += f"💰 Вход: <code>{format_price(signal_data['entry_price'])}</code>\n"
         
         # Форматировать SL и TP
         stop_loss = format_price(signal_data['stop_loss'])
@@ -440,11 +440,11 @@ class TelegramBot:
         tp2 = format_price(signal_data['tp2']) if signal_data.get('tp2') else 'N/A'
         
         message += (
-            f"🛑 Стоп: `{stop_loss}`\n"
-            f"🎯 TP1: `{tp1}`\n"
-            f"🎯 TP2: `{tp2}`\n\n"
-            f"⭐️ Скор: `{signal_data['score']:.1f}`\n"
-            f"🔄 Режим: `{signal_data['regime']}`\n"
+            f"🛑 Стоп: <code>{stop_loss}</code>\n"
+            f"🎯 TP1: <code>{tp1}</code>\n"
+            f"🎯 TP2: <code>{tp2}</code>\n\n"
+            f"⭐️ Скор: <code>{signal_data['score']:.1f}</code>\n"
+            f"🔄 Режим: <code>{signal_data['regime']}</code>\n"
         )
         
         return message
