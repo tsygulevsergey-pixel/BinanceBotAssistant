@@ -6,62 +6,6 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
-# Recent Changes
-
-## Action Price Architecture Overhaul (October 12, 2025)
-- **Issue 1**: 141 сигнала за одну проверку - слишком много сигналов низкого качества
-- **Issue 2**: 0% Win Rate - точки входа устаревали к моменту отправки в Telegram, сигналы моментально закрывались по SL
-- **Issue 3**: Сигналы с confidence 4.6 принимались - нет минимального порога
-- **Issue 4**: PPR паттерн слишком агрессивен - 131/141 сигналов были PPR (любой пробой засчитывался)
-- **Root Cause 1**: PPR паттерн использует `entry_trigger = c0['close']` - цена закрытия прошлой свечи, которая устаревает через несколько секунд
-- **Root Cause 2**: Stop Loss ставился за экстремумом СВЕЧИ (c0['high']/c0['low']), а не за ЗОНОЙ поддержки/сопротивления
-- **Root Cause 3**: Нет проверки минимального confidence score - любой сигнал проходит
-- **Root Cause 4**: PPR условие `c0['close'] < c1['low']` слишком простое - даже слабый пробой генерирует сигнал
-- **Fix 1 (CRITICAL)**: Полностью переработана архитектура расчета Entry/Stop/Targets:
-  - Entry теперь ВСЕГДА = current_price (получается через API запрос Binance get_mark_price, не историческая c0['close'])
-  - Stop Loss теперь ставится ЗА ЗОНОЙ (zone['high']/zone['low'] + buffer), а не за свечой:
-    * LONG: stop_loss = zone['low'] - buffer (ниже зоны поддержки)
-    * SHORT: stop_loss = zone['high'] + buffer (выше зоны сопротивления)
-  - TP1 = Entry + 1R (где R = |Entry - Stop Loss|)
-  - TP2 = Entry + 2R
-- **Fix 2**: Добавлен `min_confidence_score: 150.0` в config.yaml и проверка в engine.py
-- **Fix 3**: Ужесточен PPR паттерн - теперь требуется направленная свеча (close < open для SHORT) + сильное тело (≥30% range предыдущей свечи)
-- **Fix 4**: Добавлена строгая проверка близости паттерна к зоне S/R - паттерн должен быть либо ВНУТРИ зоны, либо в пределах 2×MTR от ближайшей границы зоны (иначе отбрасывается)
-- **Result**: Полное решение проблемы 0% Win Rate - Entry всегда актуальная, Stop Loss корректно за зоной, TP1/TP2 = 1R/2R; ожидается снижение количества сигналов до ~5-30 за проверку с положительным Win Rate
-
-## Critical Bugfixes: Data Loader, TimeframeSync & Main Loop (October 12, 2025)
-- **Issue 1**: Bot crashed with empty error messages during data loading failures (`Error downloading SPXUSDT 15m: . Retry 1/3...`)
-- **Issue 2**: TimeframeSync never detected candle closes - strategies never ran (`⏭️ No candles closed - skipping` every check)
-- **Issue 3**: Main loop strategy check never executed - `iteration % check_interval` never aligned with actual time
-- **Issue 4**: TimeframeSync global cache causes cross-component suppression - first consumer "eats" candle close event, others get False
-- **Root Cause 1**: DataLoader continued execution with incomplete data after download failures, causing unhandled exceptions
-- **Root Cause 2**: TimeframeSync checked cache BEFORE checking if candle closed - always returned False even at :00, :15, :30, :45
-- **Root Cause 3**: Main loop used `iteration % 60 == 0` which never matched actual time - bot started at 12:52:55, iteration 211 at 12:56:26 → 211 % 60 = 31 ≠ 0
-- **Root Cause 4**: TimeframeSync cache_key = "{timeframe}_{timestamp}" - shared across ALL components (Performance Tracker, Action Price, Strategies); first consumer records close, subsequent calls return False
-- **Fix 1**: DataLoader now raises explicit exception on download failure with proper error message; symbol marked as failed, bot continues with other symbols
-- **Fix 2**: TimeframeSync logic reordered - checks candle close time FIRST, then cache; detection window expanded to 90 seconds (e.g., 12:45:00-12:46:30)
-- **Fix 3**: Main loop now uses `(current_time - last_check_time).total_seconds() >= check_interval` - checks real elapsed time instead of iteration counter
-- **Fix 4**: TimeframeSync now uses per-consumer cache: cache_key = "{consumer_id}_{timeframe}_{timestamp}"; each component has independent cache (strategies, action_price, action_price_check)
-- **Result**: Bot no longer crashes on network errors; strategies correctly trigger every 60 seconds; Runtime Fast Catchup executes properly; ALL components now see candle closes independently!
-
-## Database Cleanup Scripts (October 12, 2025)
-- **clear_signals.py**: Interactive script to clean signal data while preserving candle history
-  - Supports both standard strategies and Action Price signals
-  - Options: Delete all signals, delete by status (WIN/LOSS/TIME_STOP), delete only Action Price, delete ACTIVE/PENDING
-  - Shows detailed statistics before deletion with confirmation prompts
-  - Safely removes signals without touching valuable candle data (2.4M+ candles preserved)
-- **clear_blocked_symbols.py**: Quick script to unblock symbols by removing ACTIVE/PENDING signals
-  - Handles both signal types (standard + Action Price)
-  - Use when symbols are blocked and preventing new signal generation
-  - Requires bot restart after execution
-
-## Telegram Message Fixes (October 12, 2025)
-- **Action Price R:R Display**: Fixed Telegram message to show TP2 (2R) with None-safety
-  - Was showing: `R:R: 1.0:1` (incorrect - only TP1)
-  - Now shows: `R:R: 1:2.0` (correct - shows main target TP2) with fallback logic
-  - Logic: Shows TP2 if available → TP1 if no TP2 → 1.5 default if neither
-  - Prevents TypeError crash when rr2 = None
-
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
