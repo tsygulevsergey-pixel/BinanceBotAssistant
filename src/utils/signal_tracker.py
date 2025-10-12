@@ -156,7 +156,13 @@ class SignalPerformanceTracker:
     def _check_time_stop(self, signal: Signal, current_price: float) -> Optional[tuple]:
         """Проверить time-stop (выход по времени если нет прогресса)"""
         now = datetime.now(pytz.UTC)
-        signal_age = (now - signal.created_at).total_seconds() / 60  # type: ignore
+        
+        # Ensure signal.created_at is timezone-aware
+        created_at = signal.created_at  # type: ignore
+        if created_at.tzinfo is None:
+            created_at = pytz.UTC.localize(created_at)
+        
+        signal_age = (now - created_at).total_seconds() / 60
         
         timeframe_minutes = {
             '1m': 1, '5m': 5, '15m': 15, '1h': 60, '4h': 240
