@@ -8,6 +8,15 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## Symbol Blocking Logic Fix (October 2025)
+- **Issue**: Symbols were blocked from analysis even when signal saving to DB failed, causing permanent blocking with empty database
+- **Root Cause**: `_block_symbol()` was called BEFORE verifying successful DB save - if save failed, symbol stayed blocked forever
+- **Fix**: 
+  - Changed `_save_signal_to_db()` and `_save_action_price_signal()` to return `bool` (True/False)
+  - Symbol blocking now happens ONLY after successful DB save
+  - If DB save fails, symbol remains available for analysis with warning logged
+- **Result**: Symbols only blocked when signal actually saved to DB, preventing phantom blocks on empty database
+
 ## Action Price Database Schema Fix (October 2025)
 - **Issue 1**: Action Price signals failed to save with `TypeError: 'zone_type' is an invalid keyword argument`
 - **Issue 2**: Telegram send failed with `AttributeError: 'TelegramBot' object has no attribute 'send_message'`

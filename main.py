@@ -693,16 +693,19 @@ class TradingBot:
                         'entry_type': 'MARKET'
                     })
                     
-                    # Сохранить сигнал в БД
-                    self._save_signal_to_db(
+                    # Сохранить сигнал в БД - ТОЛЬКО если успешно, блокируем символ
+                    save_success = self._save_signal_to_db(
                         signal=signal,
                         final_score=final_score,
                         regime=regime,
                         telegram_msg_id=telegram_msg_id
                     )
                     
-                    # Заблокировать символ от дальнейшего анализа
-                    self._block_symbol(signal.symbol)
+                    # Заблокировать символ ТОЛЬКО после успешного сохранения
+                    if save_success:
+                        self._block_symbol(signal.symbol)
+                    else:
+                        logger.warning(f"⚠️ {signal.symbol} NOT blocked - DB save failed")
                 
                 elif action == "PENDING":
                     # LIMIT entry → отложенный ордер
@@ -726,8 +729,8 @@ class TradingBot:
                         'current_price': signal.entry_price
                     })
                     
-                    # Сохранить как pending в БД
-                    self._save_signal_to_db(
+                    # Сохранить как pending в БД - ТОЛЬКО если успешно, блокируем символ
+                    save_success = self._save_signal_to_db(
                         signal=signal,
                         final_score=final_score,
                         regime=regime,
@@ -735,8 +738,11 @@ class TradingBot:
                         status='PENDING'
                     )
                     
-                    # Заблокировать символ от дальнейшего анализа
-                    self._block_symbol(signal.symbol)
+                    # Заблокировать символ ТОЛЬКО после успешного сохранения
+                    if save_success:
+                        self._block_symbol(signal.symbol)
+                    else:
+                        logger.warning(f"⚠️ {signal.symbol} NOT blocked - DB save failed")
                 
                 else:
                     # SKIP - уже есть активный LIMIT ордер
@@ -805,16 +811,19 @@ class TradingBot:
                 
                 # Обработать каждый сигнал (может быть несколько)
                 for ap_signal in ap_signals:
-                    signals_found += 1
+                    # Сохранить в БД - ТОЛЬКО если успешно, блокируем символ
+                    save_success = self._save_action_price_signal(ap_signal)
                     
-                    # Сохранить в БД
-                    self._save_action_price_signal(ap_signal)
-                    
-                    # Заблокировать символ
-                    self._block_symbol(symbol)
-                    
-                    # Отправить в Telegram
-                    await self._send_action_price_telegram(ap_signal)
+                    if save_success:
+                        signals_found += 1
+                        
+                        # Заблокировать символ ТОЛЬКО после успешного сохранения
+                        self._block_symbol(symbol)
+                        
+                        # Отправить в Telegram
+                        await self._send_action_price_telegram(ap_signal)
+                    else:
+                        ap_logger.warning(f"⚠️ Skipping {symbol} - failed to save signal to DB")
                     
                     ap_logger.info(
                         f"🎯 AP Signal: {ap_signal['symbol']} {ap_signal['direction']} "
@@ -1051,8 +1060,13 @@ class TradingBot:
         
         logger.info("Periodic gap refill task stopped")
     
-    def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None, status: str = 'ACTIVE'):
-        """Сохранить сигнал в базу данных"""
+    def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None, status: str = 'ACTIVE') -> bool:
+        """
+        Сохранить сигнал в базу данных
+        
+        Returns:
+            bool: True если успешно сохранено, False если ошибка
+        """
         session = db.get_session()
         try:
             # Генерировать уникальный context_hash для сигнала
@@ -1095,9 +1109,11 @@ class TradingBot:
             session.add(db_signal)
             session.commit()
             logger.info(f"💾 Signal saved to DB: {signal.symbol} {signal.direction} (ID: {db_signal.id}, Strategy ID: {strategy_id})")
+            return True
         except Exception as e:
             session.rollback()
             logger.error(f"Failed to save signal to DB: {e}", exc_info=True)
+            return False
         finally:
             session.close()
     
@@ -1132,8 +1148,13 @@ class TradingBot:
         finally:
             session.close()
     
-    def _save_action_price_signal(self, ap_signal: Dict):
-        """Сохранить Action Price сигнал в БД"""
+    def _save_action_price_signal(self, ap_signal: Dict) -> bool:
+        """
+        Сохранить Action Price сигнал в БД
+        
+        Returns:
+            bool: True если успешно сохранено, False если ошибка
+        """
         session = db.get_session()
         try:
             # Получить meta_data
@@ -1190,10 +1211,12 @@ class TradingBot:
             session.add(signal)
             session.commit()
             ap_logger.info(f"💾 Saved AP signal to DB: {ap_signal['symbol']} {ap_signal['direction']}")
+            return True
             
         except Exception as e:
             session.rollback()
             ap_logger.error(f"Failed to save AP signal to DB: {e}", exc_info=True)
+            return False
         finally:
             session.close()
     
