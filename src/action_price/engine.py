@@ -187,7 +187,8 @@ class ActionPriceEngine:
         df_secondary = df_4h if timeframe == '15m' else df_1d
         
         avwap_data = self.avwap_calc.get_dual_avwap(symbol, df_primary, 
-                                                     df_secondary, timeframe)
+                                                     df_secondary, timeframe,
+                                                     parent_config=self.config)
         
         # 3. Получить Daily VWAP
         daily_vwap_series = self.daily_vwap.calculate_daily_vwap(df_1h)

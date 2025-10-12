@@ -42,8 +42,19 @@ class AnchoredVWAP:
         # Конфлюэнс
         self.confluence_tolerance_mult = config.get('confluence_tolerance_mult', 0.5)
         
+        # V2: Гистерезис (2 из 3 условий)
+        v2_config = config.get('v2', {})
+        self.v2_hysteresis_impulse_mult = v2_config.get('hysteresis_impulse_mult', 1.5)
+        self.v2_hysteresis_min_bars_1h = v2_config.get('hysteresis_min_bars_1h', 30)
+        self.v2_hysteresis_distance_mult = v2_config.get('hysteresis_distance_mult', 2.0)
+        self.v2_conditions_required = v2_config.get('hysteresis_conditions_required', 2)
+        self.v2_anti_dither_days = v2_config.get('anti_dither_min_days', 1)
+        
         # Кэш якорей по символам
         self.anchors = {}  # {symbol: {tf: {anchor_data}}}
+        
+        # V2: История переякорений для анти-дребезга
+        self.reanchor_history = {}  # {symbol: {tf: [timestamps]}}
     
     def find_fractal_swings(self, df: pd.DataFrame, k: int) -> Dict[str, list]:
         """Найти fractal swing точки"""
@@ -249,6 +260,89 @@ class AnchoredVWAP:
         
         return False
     
+    def check_hysteresis_v2(self, symbol: str, df: pd.DataFrame, timeframe: str,
+                           anchor: Dict, parent_config: Optional[dict] = None) -> bool:
+        """
+        V2: Проверка гистерезиса "2 из 3 условий" для переякорения
+        
+        Условия:
+        (a) Импульс нового свинга >= 1.5×MTR
+        (b) Прошло >= 30 баров H1 с момента якоря (масштабируется по TF)
+        (c) Цена ушла >= K×ATR от текущего AVWAP
+        
+        Возвращает True если выполнены минимум 2 из 3 условий
+        """
+        if not parent_config or parent_config.get('version') != 'v2':
+            return False  # V1 - обычная логика
+        
+        # Получаем параметры
+        mtr = calculate_mtr(df, period=20)
+        if mtr == 0:
+            return False
+        
+        current_idx = len(df) - 1
+        anchor_idx = anchor['index']
+        bars_since = current_idx - anchor_idx
+        
+        # Масштабируем bars для разных TF
+        min_bars = self.v2_hysteresis_min_bars_1h
+        if timeframe == '4h':
+            min_bars = min_bars // 4  # ~7-8 баров
+        elif timeframe == '1d':
+            min_bars = min_bars // 24  # ~1-2 бара
+        
+        # Проверяем 3 условия
+        conditions_met = 0
+        
+        # (a) Новый свинг с достаточным импульсом
+        new_swing = self.find_valid_swing(df, timeframe)
+        if new_swing and new_swing['impulse'] >= self.v2_hysteresis_impulse_mult * mtr:
+            conditions_met += 1
+        
+        # (b) Прошло достаточно времени
+        if bars_since >= min_bars:
+            conditions_met += 1
+        
+        # (c) Цена далеко от якоря
+        avwap_value = self.calculate_avwap_from_anchor(df, anchor)
+        current_price = df['close'].iloc[-1]
+        distance = abs(current_price - avwap_value)
+        threshold = self.v2_hysteresis_distance_mult * mtr
+        
+        if distance >= threshold:
+            conditions_met += 1
+        
+        return conditions_met >= self.v2_conditions_required
+    
+    def check_anti_dither_v2(self, symbol: str, timeframe: str, 
+                            new_anchor_time: datetime, parent_config: Optional[dict] = None) -> bool:
+        """
+        V2: Анти-дребезг - минимум 1 день между переякорениями
+        
+        Returns:
+            True если можно переякорить (прошло >= 1 день)
+        """
+        if not parent_config or parent_config.get('version') != 'v2':
+            return True  # V1 - без ограничений
+        
+        if symbol not in self.reanchor_history:
+            self.reanchor_history[symbol] = {}
+        
+        if timeframe not in self.reanchor_history[symbol]:
+            self.reanchor_history[symbol][timeframe] = []
+            return True
+        
+        # Получаем последнее переякорение
+        history = self.reanchor_history[symbol][timeframe]
+        if not history:
+            return True
+        
+        last_reanchor = history[-1]
+        time_diff = new_anchor_time - last_reanchor
+        min_days = timedelta(days=self.v2_anti_dither_days)
+        
+        return time_diff >= min_days
+    
     def should_reanchor(self, symbol: str, df: pd.DataFrame, timeframe: str) -> bool:
         """
         Проверить нужно ли переякорить
@@ -324,7 +418,7 @@ class AnchoredVWAP:
         return float(avwap)
     
     def get_avwap(self, symbol: str, df: pd.DataFrame, timeframe: str,
-                  force_recalc: bool = False) -> Optional[float]:
+                  force_recalc: bool = False, parent_config: Optional[dict] = None) -> Optional[float]:
         """
         Получить AVWAP для символа и таймфрейма
         
@@ -333,6 +427,7 @@ class AnchoredVWAP:
             df: DataFrame
             timeframe: '1h' или '4h' или '1d'
             force_recalc: Принудительный пересчёт
+            parent_config: Конфиг для определения версии (V1/V2)
             
         Returns:
             Значение AVWAP или None
@@ -340,11 +435,41 @@ class AnchoredVWAP:
         if symbol not in self.anchors:
             self.anchors[symbol] = {}
         
-        # Проверка нужно ли переякорить
-        if force_recalc or self.should_reanchor(symbol, df, timeframe):
+        # V2: проверка гистерезиса и анти-дребезга
+        should_reanchor = False
+        
+        if force_recalc:
+            should_reanchor = True
+        elif parent_config and parent_config.get('version') == 'v2':
+            # V2: улучшенная логика переякорения
+            if timeframe in self.anchors[symbol]:
+                anchor = self.anchors[symbol][timeframe]
+                # Проверка 2 из 3 условий
+                if self.check_hysteresis_v2(symbol, df, timeframe, anchor, parent_config):
+                    # Нашли кандидата - проверяем анти-дребезг
+                    new_swing = self.find_valid_swing(df, timeframe)
+                    if new_swing:
+                        new_time = new_swing['timestamp']
+                        if self.check_anti_dither_v2(symbol, timeframe, new_time, parent_config):
+                            should_reanchor = True
+            else:
+                should_reanchor = True  # Нет якоря - создать
+        else:
+            # V1: обычная логика
+            should_reanchor = self.should_reanchor(symbol, df, timeframe)
+        
+        # Переякорить если нужно
+        if should_reanchor:
             new_swing = self.find_valid_swing(df, timeframe)
             if new_swing:
                 self.anchors[symbol][timeframe] = new_swing
+                # V2: записать в историю
+                if parent_config and parent_config.get('version') == 'v2':
+                    if symbol not in self.reanchor_history:
+                        self.reanchor_history[symbol] = {}
+                    if timeframe not in self.reanchor_history[symbol]:
+                        self.reanchor_history[symbol][timeframe] = []
+                    self.reanchor_history[symbol][timeframe].append(new_swing['timestamp'])
             elif timeframe not in self.anchors[symbol]:
                 return None  # Нет якоря и не нашли новый
         
@@ -356,7 +481,8 @@ class AnchoredVWAP:
         return None
     
     def get_dual_avwap(self, symbol: str, df_primary: pd.DataFrame, 
-                       df_secondary: pd.DataFrame, execution_tf: str) -> Dict:
+                       df_secondary: pd.DataFrame, execution_tf: str,
+                       parent_config: Optional[dict] = None) -> Dict:
         """
         Получить Primary и Secondary AVWAP для сигналов
         
@@ -365,6 +491,7 @@ class AnchoredVWAP:
             df_primary: DataFrame для primary якоря
             df_secondary: DataFrame для secondary якоря
             execution_tf: Таймфрейм исполнения ('15m' или '1h')
+            parent_config: Конфиг для определения версии (V1/V2)
             
         Returns:
             Dict с 'primary' и 'secondary' AVWAP
@@ -377,8 +504,10 @@ class AnchoredVWAP:
             primary_tf = self.config.get('anchor_1h_primary', '4h')
             secondary_tf = self.config.get('anchor_1h_secondary', '1d')
         
-        primary_avwap = self.get_avwap(symbol, df_primary, primary_tf)
-        secondary_avwap = self.get_avwap(symbol, df_secondary, secondary_tf)
+        primary_avwap = self.get_avwap(symbol, df_primary, primary_tf, 
+                                        parent_config=parent_config)
+        secondary_avwap = self.get_avwap(symbol, df_secondary, secondary_tf,
+                                          parent_config=parent_config)
         
         return {
             'primary': primary_avwap,
