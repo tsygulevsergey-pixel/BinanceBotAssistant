@@ -27,45 +27,52 @@ class TimeframeSync:
         if current_time is None:
             current_time = datetime.now(pytz.UTC)
         
-        # Проверяем кэш - если уже обновляли в эту минуту, скипаем
-        cache_key = f"{timeframe}_{current_time.strftime('%Y%m%d%H%M')}"
-        if cache_key in TimeframeSync._last_update:
-            return False
-        
         minute = current_time.minute
         hour = current_time.hour
+        second = current_time.second
         
-        # 15m свечи закрываются в 00, 15, 30, 45 минут
+        # Определяем закрылась ли свеча (проверяем первые 90 секунд после закрытия)
         if timeframe == '15m':
-            should_update = minute % 15 == 0
+            # 15m свечи закрываются в :00, :15, :30, :45 - проверяем в течение 90 сек после
+            should_update = minute % 15 == 0 and second < 90
             
-        # 1h свечи закрываются в 00 минут каждого часа
         elif timeframe == '1h':
-            should_update = minute == 0
+            # 1h свечи закрываются в :00 каждого часа - проверяем в течение 90 сек после
+            should_update = minute == 0 and second < 90
             
-        # 4h свечи закрываются в 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
         elif timeframe == '4h':
-            should_update = minute == 0 and hour % 4 == 0
+            # 4h свечи закрываются в 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
+            should_update = minute == 0 and hour % 4 == 0 and second < 90
             
-        # 1d свечи закрываются в 00:00 UTC
         elif timeframe == '1d':
-            should_update = minute == 0 and hour == 0
+            # 1d свечи закрываются в 00:00 UTC
+            should_update = minute == 0 and hour == 0 and second < 90
             
         else:
             # Неизвестный таймфрейм - всегда обновляем
             should_update = True
         
-        # Если нужно обновить - сохраняем в кэш
-        if should_update:
-            TimeframeSync._last_update[cache_key] = current_time
-            
-            # Очищаем старые записи (оставляем только последние 100)
-            if len(TimeframeSync._last_update) > 100:
-                oldest_keys = sorted(TimeframeSync._last_update.keys())[:50]
-                for key in oldest_keys:
-                    TimeframeSync._last_update.pop(key, None)
+        if not should_update:
+            return False
         
-        return should_update
+        # Проверяем кэш - если уже обновляли в эту минуту в последние 90 секунд, скипаем
+        cache_key = f"{timeframe}_{current_time.strftime('%Y%m%d%H%M')}"
+        if cache_key in TimeframeSync._last_update:
+            last_update = TimeframeSync._last_update[cache_key]
+            # Если обновляли менее 90 секунд назад - пропускаем
+            if (current_time - last_update).total_seconds() < 90:
+                return False
+        
+        # Сохраняем время обновления в кэш
+        TimeframeSync._last_update[cache_key] = current_time
+        
+        # Очищаем старые записи (оставляем только последние 100)
+        if len(TimeframeSync._last_update) > 100:
+            oldest_keys = sorted(TimeframeSync._last_update.keys())[:50]
+            for key in oldest_keys:
+                TimeframeSync._last_update.pop(key, None)
+        
+        return True
     
     @staticmethod
     def get_next_update_time(timeframe: str, current_time: datetime = None) -> datetime:
