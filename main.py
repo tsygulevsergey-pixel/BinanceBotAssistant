@@ -8,6 +8,7 @@ from src.utils.config import config
 from src.binance.client import BinanceClient
 from src.binance.data_loader import DataLoader
 from src.data.fast_catchup import FastCatchupLoader
+from src.data.periodic_gap_refill import PeriodicGapRefill
 from src.strategies.strategy_manager import StrategyManager
 from src.scoring.signal_scorer import SignalScorer
 from src.filters.btc_filter import BTCFilter
@@ -113,6 +114,10 @@ class TradingBot:
             # Инициализация Fast Catchup Loader
             self.fast_catchup = FastCatchupLoader(self.data_loader, db)
             
+            # Инициализация Periodic Gap Refill
+            timezone_str = config.get('timezone', 'Europe/Kyiv')
+            self.periodic_gap_refill = PeriodicGapRefill(self.data_loader, config, timezone_str)
+            
             # Передаем binance_client в StrategyManager и TelegramBot
             self.strategy_manager.binance_client = self.client
             self.telegram_bot.binance_client = self.client
@@ -175,8 +180,9 @@ class TradingBot:
         loader_task = asyncio.create_task(self._symbol_loader_task())
         analyzer_task = asyncio.create_task(self._symbol_analyzer_task())
         update_symbols_task = asyncio.create_task(self._update_symbols_task())
+        periodic_gap_refill_task = asyncio.create_task(self._periodic_gap_refill_task())
         
-        logger.info("Background tasks started (loader + analyzer + symbol updater running in parallel)")
+        logger.info("Background tasks started (loader + analyzer + symbol updater + periodic gap refill running in parallel)")
         logger.info("Bot will start analyzing symbols as soon as their data is loaded")
         
         # Запуск системы трекинга производительности
@@ -945,6 +951,33 @@ class TradingBot:
                 logger.error(f"Error updating symbols: {e}", exc_info=True)
         
         logger.info("Symbol auto-update task stopped")
+    
+    async def _periodic_gap_refill_task(self):
+        """Background task to periodically refill gaps every 15 minutes"""
+        if not config.get('periodic_gap_refill.enabled', True):
+            logger.info("Periodic gap refill disabled")
+            return
+        
+        # Ждем перед первым запуском (пусть бот загрузится)
+        await asyncio.sleep(60)
+        
+        logger.info("🔄 Periodic gap refill started (interval: 15 minutes)")
+        
+        while self.running:
+            # Ждать 15 минут до следующей проверки
+            await asyncio.sleep(15 * 60)  # 15 минут
+            
+            if not self.running:
+                break
+            
+            try:
+                # Запустить периодическую докачку gaps
+                await self.periodic_gap_refill.run_periodic_check(self.ready_symbols)
+                
+            except Exception as e:
+                logger.error(f"Error in periodic gap refill: {e}", exc_info=True)
+        
+        logger.info("Periodic gap refill task stopped")
     
     def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None, status: str = 'ACTIVE'):
         """Сохранить сигнал в базу данных"""

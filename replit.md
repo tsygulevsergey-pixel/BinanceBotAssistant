@@ -4,13 +4,16 @@ This project is a sophisticated Binance USDT-M Futures Trading Bot designed to g
 
 ## Recent Changes
 
-### 2025-10-12: Fast Catchup Loader Implementation
+### 2025-10-12: Fast Catchup & Periodic Gap Refill Implementation
 - **Added Fast Catchup System**: New module `src/data/fast_catchup.py` for intelligent restart optimization
 - **Burst Loading**: At startup, analyzes DB for gaps in existing symbols, performs parallel burst loading (auto-scaled 4-12 workers based on volume)
 - **Smart Coordination**: Symbols processed by Fast Catchup are tracked in `catchup_done_symbols` set, normal loader skips them
 - **Configuration**: Added `fast_catchup` section in config.yaml (enabled by default, configurable max_parallel)
 - **Performance Improvement**: Reduced bot restart time from 5-6 minutes to 15-20 seconds (~20x faster)
 - **Fallback Safety**: If Fast Catchup is disabled or fails, system falls back to normal sequential loader
+- **Periodic Gap Refill**: New module `src/data/periodic_gap_refill.py` for continuous gap detection and parallel refilling during bot operation
+- **Smart Scheduling**: Timeframe-aware refill - 15m every 15min, 15m+1h every hour, 15m+1h+4h every 4h, all every day at 00:00 UTC
+- **Parallel Refill**: Uses burst loading (max 8 workers) to quickly fill recent gaps (last 2 hours) without blocking analysis
 
 --- It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
@@ -113,6 +116,7 @@ Preferred communication style: Simple, everyday language.
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe coordination for parallel loading and analysis.
 - **FastCatchupLoader** (NEW): Smart restart optimization - detects gaps for existing symbols at startup, performs burst parallel loading (8-12 workers) to catch up within seconds, then hands control to normal loader for new symbols. Reduces restart time from 5-6 minutes to 15-20 seconds.
+- **PeriodicGapRefill** (NEW): Continuous gap detection and refilling - runs every 15 minutes with smart timeframe scheduling (15m/1h/4h/1d based on time), uses parallel burst loading (max 8 workers) to quickly fill recent gaps without blocking analysis.
 - **Loader Task**: Loads historical data with retry logic and pushes symbols to a queue. Skips symbols already processed by Fast Catchup.
 - **Analyzer Task**: Consumes symbols from the queue for immediate analysis.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list based on 24h volume criteria.

@@ -26,6 +26,17 @@ fast_catchup:
   max_parallel: null  # null = auto (4-12 based on volume), or set manual value (1-20)
   min_gap_size: 1  # Минимальный размер gap для burst режима (в свечах)
 
+# Periodic Gap Refill - Периодическая быстрая докачка gaps во время работы
+periodic_gap_refill:
+  enabled: true  # Включить/выключить периодическую докачку
+  max_parallel: 8  # Максимальное количество параллельных загрузок
+  lookback_minutes: 120  # Проверять gaps за последние N минут (2 часа)
+  # Расписание:
+  # - Каждые 15 мин → докачка 15m свечей
+  # - Каждый час (XX:00) → докачка 15m + 1h свечей
+  # - Каждые 4 часа (00:00, 04:00, 08:00...) → докачка 15m + 1h + 4h свечей
+  # - Каждый день (00:00) → докачка 15m + 1h + 4h + 1d свечей
+
 # Market Detection
 market_detector:
   timeframes:
