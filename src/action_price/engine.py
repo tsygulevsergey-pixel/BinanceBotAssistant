@@ -169,7 +169,7 @@ class ActionPriceEngine:
             # Проверка конфлюэнсов
             confluence_flags = self.check_confluences(
                 current_price, avwap_data, daily_vwap_value, 
-                pattern_zone, mtr_1h
+                pattern_zone, mtr_1h, direction
             )
             
             # Рассчитать confidence score (передаём ema_score для v2)
@@ -354,9 +354,12 @@ class ActionPriceEngine:
     
     def check_confluences(self, price: float, avwap_data: Dict, 
                          daily_vwap: Optional[float], zone: Dict,
-                         mtr_1h: float) -> Dict:
+                         mtr_1h: float, direction: Optional[str] = None) -> Dict:
         """
         Проверить конфлюэнсы для сигнала
+        
+        V1: Проксимальность к VWAP без проверки вектора
+        V2: Проверка вектора + cap +1.2 для VWAP-семейства
         
         Args:
             price: Текущая цена
@@ -364,6 +367,7 @@ class ActionPriceEngine:
             daily_vwap: Daily VWAP
             zone: Зона S/R
             mtr_1h: mTR для 1H
+            direction: Направление сделки (для V2 проверки вектора)
             
         Returns:
             Dict с флагами конфлюэнсов
@@ -373,32 +377,106 @@ class ActionPriceEngine:
             'avwap_secondary': False,
             'daily_vwap': False,
             'zone_sr': True,  # Всегда True т.к. мы в зоне
-            'count': 1  # Зона уже +1
+            'count': 1,  # Зона уже +1
+            'vwap_bonus': 0.0  # V2: суммарный бонус от VWAP-семейства
         }
         
-        # AVWAP Primary
-        if self.avwap_calc.check_confluence(price, avwap_data['primary'], mtr_1h):
-            flags['avwap_primary'] = True
-            flags['count'] += 1
+        version = self.config.get('version', 'v1')
         
-        # AVWAP Secondary
-        if self.avwap_calc.check_confluence(price, avwap_data['secondary'], mtr_1h):
-            flags['avwap_secondary'] = True
-            flags['count'] += 1
-        
-        # Daily VWAP
-        if self.avwap_calc.check_confluence(price, daily_vwap, mtr_1h):
-            flags['daily_vwap'] = True
-            flags['count'] += 1
+        if version == 'v2' and direction is not None:
+            # V2: Проверка вектора + cap бонуса
+            v2_config = self.config.get('avwap', {}).get('v2', {})
+            proximity_beta = v2_config.get('vwap_proximity_beta', 1.0)
+            vwap_cap = v2_config.get('vwap_family_bonus_cap', 1.2)
+            
+            vwap_bonus = 0.0
+            
+            # AVWAP Primary с вектором
+            if avwap_data['primary'] is not None:
+                if self._check_vwap_vector_v2(price, avwap_data['primary'], direction, proximity_beta, mtr_1h):
+                    flags['avwap_primary'] = True
+                    flags['count'] += 1
+                    vwap_bonus += 0.5
+            
+            # AVWAP Secondary с вектором
+            if avwap_data['secondary'] is not None:
+                if self._check_vwap_vector_v2(price, avwap_data['secondary'], direction, proximity_beta, mtr_1h):
+                    flags['avwap_secondary'] = True
+                    flags['count'] += 1
+                    vwap_bonus += 0.4
+            
+            # Daily VWAP с вектором
+            if daily_vwap is not None:
+                if self._check_vwap_vector_v2(price, daily_vwap, direction, proximity_beta, mtr_1h):
+                    flags['daily_vwap'] = True
+                    flags['count'] += 1
+                    vwap_bonus += 0.3
+            
+            # Cap суммарного бонуса
+            flags['vwap_bonus'] = min(vwap_bonus, vwap_cap)
+            
+        else:
+            # V1: старая логика без вектора
+            # AVWAP Primary
+            if self.avwap_calc.check_confluence(price, avwap_data['primary'], mtr_1h):
+                flags['avwap_primary'] = True
+                flags['count'] += 1
+            
+            # AVWAP Secondary
+            if self.avwap_calc.check_confluence(price, avwap_data['secondary'], mtr_1h):
+                flags['avwap_secondary'] = True
+                flags['count'] += 1
+            
+            # Daily VWAP
+            if self.avwap_calc.check_confluence(price, daily_vwap, mtr_1h):
+                flags['daily_vwap'] = True
+                flags['count'] += 1
         
         return flags
+    
+    def _check_vwap_vector_v2(self, price: float, vwap: Optional[float], 
+                             direction: str, proximity_beta: float, 
+                             mtr: float) -> bool:
+        """
+        V2: Проверить VWAP конфлюэнс с учётом вектора
+        
+        Args:
+            price: Текущая цена
+            vwap: Значение VWAP
+            direction: Направление сделки
+            proximity_beta: Множитель для проверки близости
+            mtr: MTR для расчёта толерантности
+            
+        Returns:
+            True если вектор правильный И цена близко к VWAP
+        """
+        if vwap is None:
+            return False
+        
+        # Проверка близости: |price - vwap| <= beta × MTR
+        distance = abs(price - vwap)
+        tolerance = proximity_beta * mtr
+        
+        if distance > tolerance:
+            return False  # Слишком далеко
+        
+        # Проверка вектора
+        if direction == 'LONG':
+            # LONG: цена должна быть выше VWAP (поддержка снизу)
+            return price >= vwap
+        else:  # SHORT
+            # SHORT: цена должна быть ниже VWAP (сопротивление сверху)
+            return price <= vwap
     
     def calculate_confidence(self, confluence_flags: Dict, zone: Dict, ema_score: float = 0.8) -> float:
         """
         Рассчитать confidence score для сигнала
         
+        V1: Старая логика с count*0.5 + primary +1.0
+        V2: Использует vwap_bonus с cap +1.2
+        
         Args:
-            confluence_flags: Флаги конфлюэнсов
+            confluence_flags: Флаги конфлюэнсов (с vwap_bonus для V2)
             zone: Зона S/R
             ema_score: EMA score (0.8 для strict, 0.4 для pullback, 0 для reject)
             
@@ -413,12 +491,18 @@ class ActionPriceEngine:
         # EMA score (0.8 strict, 0.4 pullback, 0 rejected)
         score += ema_score
         
-        # Бонус за конфлюэнсы
-        score += confluence_flags['count'] * 0.5
-        
-        # Бонус за AVWAP Primary (важнее)
-        if confluence_flags['avwap_primary']:
-            score += 1.0
+        # Проверяем V2 через наличие vwap_bonus
+        if 'vwap_bonus' in confluence_flags and confluence_flags['vwap_bonus'] > 0:
+            # V2: Используем vwap_bonus с cap
+            score += confluence_flags['vwap_bonus']
+        else:
+            # V1: Старая логика
+            # Бонус за конфлюэнсы
+            score += confluence_flags['count'] * 0.5
+            
+            # Бонус за AVWAP Primary (важнее)
+            if confluence_flags['avwap_primary']:
+                score += 1.0
         
         # Бонус за количество касаний зоны
         score += min(zone.get('touches_recent', 0) * 0.2, 1.0)
