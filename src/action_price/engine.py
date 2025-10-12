@@ -104,8 +104,16 @@ class ActionPriceEngine:
         daily_vwap_value = float(daily_vwap_series.iloc[-1]) if daily_vwap_series is not None and len(daily_vwap_series) > 0 else None
         
         # 4. Получить EMA значения и проверить тренд
-        ema_allowed_long, emas = self.ema_filter.check_trend(df_4h, df_1h, 'LONG')
-        ema_allowed_short, _ = self.ema_filter.check_trend(df_4h, df_1h, 'SHORT')
+        if self.config.get('version') == 'v2':
+            # V2: возвращает (allowed, score, emas)
+            ema_allowed_long, ema_score_long, emas = self.ema_filter.check_trend_v2(df_4h, df_1h, 'LONG', self.config)
+            ema_allowed_short, ema_score_short, _ = self.ema_filter.check_trend_v2(df_4h, df_1h, 'SHORT', self.config)
+        else:
+            # V1: возвращает (allowed, emas)
+            ema_allowed_long, emas = self.ema_filter.check_trend(df_4h, df_1h, 'LONG')
+            ema_allowed_short, _ = self.ema_filter.check_trend(df_4h, df_1h, 'SHORT')
+            ema_score_long = 0.8 if ema_allowed_long else 0.0
+            ema_score_short = 0.8 if ema_allowed_short else 0.0
         
         # Определяем направление тренда для inside-bar
         if ema_allowed_long:
@@ -161,8 +169,9 @@ class ActionPriceEngine:
                 pattern_zone, mtr_1h
             )
             
-            # Рассчитать confidence score
-            confidence = self.calculate_confidence(confluence_flags, pattern_zone)
+            # Рассчитать confidence score (передаём ema_score для v2)
+            ema_score = ema_score_long if direction == 'LONG' else ema_score_short
+            confidence = self.calculate_confidence(confluence_flags, pattern_zone, ema_score)
             
             # Проверка минимального порога confidence
             min_confidence = self.config.get('filters', {}).get('min_confidence_score', 0)
@@ -349,13 +358,14 @@ class ActionPriceEngine:
         
         return flags
     
-    def calculate_confidence(self, confluence_flags: Dict, zone: Dict) -> float:
+    def calculate_confidence(self, confluence_flags: Dict, zone: Dict, ema_score: float = 0.8) -> float:
         """
         Рассчитать confidence score для сигнала
         
         Args:
             confluence_flags: Флаги конфлюэнсов
             zone: Зона S/R
+            ema_score: EMA score (0.8 для strict, 0.4 для pullback, 0 для reject)
             
         Returns:
             Confidence score
@@ -364,6 +374,9 @@ class ActionPriceEngine:
         
         # Базовый score от зоны
         score += zone.get('score', 1.0)
+        
+        # EMA score (0.8 strict, 0.4 pullback, 0 rejected)
+        score += ema_score
         
         # Бонус за конфлюэнсы
         score += confluence_flags['count'] * 0.5

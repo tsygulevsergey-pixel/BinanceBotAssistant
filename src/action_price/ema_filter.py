@@ -111,3 +111,69 @@ class EMAFilter:
             return allowed, emas
         
         return False, emas
+    
+    def check_trend_v2(self, df_4h: pd.DataFrame, df_1h: pd.DataFrame, 
+                      direction: str, parent_config: dict = None) -> tuple[bool, float, Dict]:
+        """
+        V2: Проверить тренд с pullback exception
+        
+        Логика:
+        - H4 + H1 OK → allowed=True, score=0.8 (strict_score)
+        - H4 OK, H1 pullback → allowed=True, score=0.4 (pullback_score)
+        - Иначе → allowed=False, score=0
+        
+        Args:
+            df_4h: 4H свечи
+            df_1h: 1H свечи
+            direction: 'LONG' или 'SHORT'
+            parent_config: Полная конфигурация action_price для v2 параметров
+            
+        Returns:
+            (allowed, score, ema_values)
+        """
+        emas = self.get_ema_values(df_4h, df_1h)
+        
+        # Проверка наличия данных
+        if None in [emas['ema_50_4h'], emas['ema_200_4h'], 
+                    emas['ema_50_1h'], emas['ema_200_1h'],
+                    emas['close_4h'], emas['close_1h']]:
+            return False, 0.0, emas
+        
+        # Параметры v2 из parent_config (или fallback на self.config)
+        if parent_config:
+            v2_config = parent_config.get('ema', {}).get('v2', {})
+        else:
+            v2_config = self.config.get('v2', {})
+        
+        strict_score = v2_config.get('strict_score', 0.8)
+        pullback_score = v2_config.get('pullback_score', 0.4)
+        
+        # Проверка трендов
+        h4_bullish = emas['close_4h'] > emas['ema_200_4h']
+        h4_bearish = emas['close_4h'] < emas['ema_200_4h']
+        h1_bullish = emas['ema_50_1h'] > emas['ema_200_1h']
+        h1_bearish = emas['ema_50_1h'] < emas['ema_200_1h']
+        
+        if direction == 'LONG':
+            # Строгое совпадение: H4 bullish + H1 bullish
+            if h4_bullish and h1_bullish:
+                return True, strict_score, emas
+            
+            # Pullback exception: H4 bullish, H1 делает pullback (bearish)
+            if h4_bullish and h1_bearish:
+                return True, pullback_score, emas
+            
+            return False, 0.0, emas
+        
+        elif direction == 'SHORT':
+            # Строгое совпадение: H4 bearish + H1 bearish
+            if h4_bearish and h1_bearish:
+                return True, strict_score, emas
+            
+            # Pullback exception: H4 bearish, H1 делает pullback (bullish)
+            if h4_bearish and h1_bullish:
+                return True, pullback_score, emas
+            
+            return False, 0.0, emas
+        
+        return False, 0.0, emas
