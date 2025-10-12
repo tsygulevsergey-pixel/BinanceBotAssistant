@@ -20,6 +20,13 @@ A fully integrated **Action Price** strategy system is included, operating indep
 - **Volume Thresholds**: Adaptive by time (0.6x night, 0.8x evening, 1.0x day) for ORB/VWAP/SwingHigh/EMA strategies
 - **BB Width Enhancement**: Manual fallback calculation with min_periods=1 when ta.bbands returns incomplete DataFrame
 
+## Scoring Transparency Enhancement (October 2025)
+- **Detailed Component Breakdown**: Each signal now logs all scoring modifiers with explicit values
+- **BTC Filter Enhancement**: Shows exact BTC % change and direction when penalty applies
+- **Format**: Multi-line breakdown showing Base, Volume ratio, CVD direction, ΔOI %, Imbalance ratio, Funding status, and BTC filter with directional context
+- **Example**: `BTC: -2.0 (BTC up 0.45% vs SHORT)` - instantly clear why penalty applied
+- **Debugging**: Makes signal rejection/acceptance analysis transparent and actionable
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
