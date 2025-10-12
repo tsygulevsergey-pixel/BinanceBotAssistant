@@ -405,11 +405,11 @@ class TradingBot:
         now = datetime.now(pytz.UTC)
         updated_timeframes = []
         
-        if TimeframeSync.should_update_timeframe('15m', consumer_id='strategies'):
+        if TimeframeSync.should_update_timeframe('15m', current_time=now, consumer_id='strategies'):
             updated_timeframes.append('15m')
-        if TimeframeSync.should_update_timeframe('1h', consumer_id='strategies'):
+        if TimeframeSync.should_update_timeframe('1h', current_time=now, consumer_id='strategies'):
             updated_timeframes.append('1h')
-        if TimeframeSync.should_update_timeframe('4h', consumer_id='strategies'):
+        if TimeframeSync.should_update_timeframe('4h', current_time=now, consumer_id='strategies'):
             updated_timeframes.append('4h')
         
         # Если ни одна свеча не закрылась - пропускаем проверку стратегий
