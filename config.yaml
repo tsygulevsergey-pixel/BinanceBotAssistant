@@ -39,10 +39,10 @@ periodic_gap_refill:
 
 # Data Integrity - Контроль качества данных
 data_integrity:
-  auto_refill_on_incomplete: false  # ОТКЛЮЧЕНО из-за rate limits! Включать только при стабильном API
+  auto_refill_on_incomplete: true  # Автоматически докачивать данные при обнаружении пропусков (<99%)
   # Если true: бот автоматически находит gaps за 90 дней и докачивает только недостающие свечи
   # Если false: только отправляется Telegram алерт, без докачки
-  # ⚠️ WARNING: Включение auto-refill при rate limit проблемах УСУГУБИТ ситуацию!
+  # С уменьшенным параллелизмом (fast_catchup: 2, periodic: 3) нагрузка на API снижена
 
 # Market Detection
 market_detector:
