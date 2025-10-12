@@ -155,6 +155,8 @@ class TelegramBot:
                 f"🏆 Побед: {perf['wins']}\n"
                 f"❌ Поражений: {perf['losses']}\n"
                 f"📊 Win Rate: <b>{perf['win_rate']}%</b>\n\n"
+                f"🎯 TP1 (0.5R): {perf.get('tp1_count', 0)}\n"
+                f"🎯 TP2 (1.5R): {perf.get('tp2_count', 0)}\n\n"
                 f"💰 Средний PnL: <b>{perf['avg_pnl']:+.2f}%</b>\n"
                 f"💵 Общий PnL: <b>{perf['total_pnl']:+.2f}%</b>\n\n"
                 f"🟢 Средняя победа: {perf['avg_win']:+.2f}%\n"

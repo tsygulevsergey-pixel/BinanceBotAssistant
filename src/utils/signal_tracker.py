@@ -471,6 +471,8 @@ class SignalPerformanceTracker:
                     'active_signals': 0,
                     'wins': 0,
                     'losses': 0,
+                    'tp1_count': 0,
+                    'tp2_count': 0,
                     'win_rate': 0.0,
                     'avg_pnl': 0.0,
                     'total_pnl': 0.0,
@@ -482,6 +484,10 @@ class SignalPerformanceTracker:
             closed = [s for s in signals if str(s.status) in ['WIN', 'LOSS', 'TIME_STOP']]  # type: ignore
             wins = [s for s in closed if str(s.status) == 'WIN']  # type: ignore
             losses = [s for s in closed if str(s.status) in ['LOSS', 'TIME_STOP']]  # type: ignore
+            
+            # Подсчет TP1 и TP2
+            tp1_count = len([s for s in closed if hasattr(s, 'exit_type') and s.exit_type == 'TP1'])  # type: ignore
+            tp2_count = len([s for s in closed if hasattr(s, 'exit_type') and s.exit_type == 'TP2'])  # type: ignore
             
             win_rate = (len(wins) / len(closed) * 100) if closed else 0.0
             
@@ -498,6 +504,8 @@ class SignalPerformanceTracker:
                 'active_signals': total - len(closed),
                 'wins': len(wins),
                 'losses': len(losses),
+                'tp1_count': tp1_count,
+                'tp2_count': tp2_count,
                 'win_rate': round(win_rate, 2),
                 'avg_pnl': round(avg_pnl, 2),
                 'total_pnl': round(total_pnl, 2),
