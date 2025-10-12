@@ -252,9 +252,39 @@ class ActionPriceEngine:
         
         if isinstance(candle_data, dict) and 'high' in candle_data:
             midpoint = (candle_data['high'] + candle_data['low']) / 2
+            candle_low = candle_data['low']
+            candle_high = candle_data['high']
         else:
             midpoint = current_price
+            candle_low = current_price
+            candle_high = current_price
         
+        # V2 логика (формальная proximity)
+        if self.config.get('version') == 'v2':
+            from .utils import calculate_proximity_v2
+            
+            proximity_config = self.config.get('zones', {}).get('v2', {})
+            min_overlap = proximity_config.get('overlap_ratio_inside', 0.3)
+            max_dist_mult = proximity_config.get('proximity_distance_mult', 1.5)
+            
+            suitable_zones = [z for z in zones if z['type'] == required_zone_type]
+            
+            for zone in suitable_zones:
+                prox_type, prox_value, prox_score = calculate_proximity_v2(
+                    candle_low, candle_high,
+                    zone['low'], zone['high'],
+                    mtr, min_overlap, max_dist_mult
+                )
+                
+                if prox_type in ('inside', 'near'):
+                    zone['proximity_type'] = prox_type
+                    zone['proximity_value'] = prox_value
+                    zone['proximity_score'] = prox_score
+                    return zone
+            
+            return None
+        
+        # V1 логика (оригинальная)
         # Ищем подходящую зону
         for zone in zones:
             if zone['type'] == required_zone_type:

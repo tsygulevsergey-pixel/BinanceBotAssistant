@@ -216,3 +216,70 @@ def is_zone_broken(df: pd.DataFrame, zone_low: float, zone_high: float,
         return all(close > zone_high for close in recent_closes)
     
     return False
+
+
+def calculate_proximity_v2(candle_low: float, candle_high: float, 
+                           zone_low: float, zone_high: float,
+                           mtr: float, min_overlap_ratio: float = 0.3,
+                           max_distance_multiplier: float = 1.5) -> Tuple[str, float, float]:
+    """
+    V2: Формальная проверка близости паттерна к зоне
+    
+    Возвращает тип близости:
+    - 'inside': overlap_ratio >= min_overlap_ratio (относительно zone_width)
+    - 'near': distance <= max_distance_multiplier * MTR (расстояние между ближайшими краями)
+    - 'far': не подходит ни под одно условие
+    
+    Args:
+        candle_low: Минимум свечи/паттерна
+        candle_high: Максимум свечи/паттерна
+        zone_low: Нижняя граница зоны
+        zone_high: Верхняя граница зоны
+        mtr: Median True Range
+        min_overlap_ratio: Минимальный overlap для 'inside' (default 0.3)
+        max_distance_multiplier: Максимальная дистанция в MTR для 'near' (default 1.5)
+        
+    Returns:
+        (proximity_type: str, value: float, score: float)
+        - proximity_type: 'inside', 'near', 'far'
+        - value: overlap_ratio или distance
+        - score: 1.0 для inside, 0-0.5 для near, 0 для far
+    """
+    zone_width = zone_high - zone_low
+    
+    # Проверка overlap (пересечение)
+    overlap_low = max(candle_low, zone_low)
+    overlap_high = min(candle_high, zone_high)
+    
+    if overlap_high > overlap_low:
+        # Есть пересечение
+        overlap = overlap_high - overlap_low
+        # ИСПРАВЛЕНО: делим на zone_width, чтобы узкие зоны не отбрасывались
+        overlap_ratio = overlap / zone_width if zone_width > 0 else 0
+        
+        if overlap_ratio >= min_overlap_ratio:
+            return ('inside', overlap_ratio, 1.0)
+    
+    # Проверка distance (расстояние между ближайшими краями)
+    # ИСПРАВЛЕНО: distance = 0 если свеча касается зоны
+    if candle_high < zone_low:
+        # Свеча ниже зоны
+        distance = zone_low - candle_high
+    elif candle_low > zone_high:
+        # Свеча выше зоны
+        distance = candle_low - zone_high
+    else:
+        # Пересекаются, но overlap < min_overlap_ratio
+        # Расстояние = 0 (касаются)
+        distance = 0.0
+    
+    max_distance = max_distance_multiplier * mtr
+    
+    if distance <= max_distance:
+        # Близко к границе
+        proximity_ratio = 1.0 - (distance / max_distance) if max_distance > 0 else 1.0
+        score = 0.5 * proximity_ratio  # 0.5 max для near
+        return ('near', distance, score)
+    
+    # Далеко
+    return ('far', distance, 0.0)
