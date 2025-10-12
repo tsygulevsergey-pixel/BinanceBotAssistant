@@ -41,6 +41,17 @@ A fully integrated **Action Price** strategy system is included, operating indep
 - **Fix 3**: Main loop now uses `(current_time - last_check_time).total_seconds() >= check_interval` - checks real elapsed time instead of iteration counter
 - **Result**: Bot no longer crashes on network errors; strategies correctly trigger every 60 seconds; Runtime Fast Catchup executes properly
 
+## Database Cleanup Scripts (October 12, 2025)
+- **clear_signals.py**: Interactive script to clean signal data while preserving candle history
+  - Supports both standard strategies and Action Price signals
+  - Options: Delete all signals, delete by status (WIN/LOSS/TIME_STOP), delete only Action Price, delete ACTIVE/PENDING
+  - Shows detailed statistics before deletion with confirmation prompts
+  - Safely removes signals without touching valuable candle data (2.4M+ candles preserved)
+- **clear_blocked_symbols.py**: Quick script to unblock symbols by removing ACTIVE/PENDING signals
+  - Handles both signal types (standard + Action Price)
+  - Use when symbols are blocked and preventing new signal generation
+  - Requires bot restart after execution
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
