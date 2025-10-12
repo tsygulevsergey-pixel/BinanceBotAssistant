@@ -23,13 +23,13 @@ binance:
 # Fast Catchup - Быстрая догрузка gaps при рестарте
 fast_catchup:
   enabled: true  # Быстрая докачка при рестарте (15-20 сек вместо 5-6 минут)
-  max_parallel: null  # null = auto (4-12 based on volume), or set manual value (1-20)
+  max_parallel: 2  # УМЕНЬШЕНО С auto (4-12) до 2 для снижения нагрузки на API
   min_gap_size: 1  # Минимальный размер gap для burst режима (в свечах)
 
 # Periodic Gap Refill - Периодическая быстрая докачка gaps во время работы
 periodic_gap_refill:
   enabled: true  # Включить/выключить периодическую докачку
-  max_parallel: 8  # Максимальное количество параллельных загрузок
+  max_parallel: 3  # УМЕНЬШЕНО С 8 до 3 для снижения нагрузки на API
   lookback_minutes: 120  # Проверять gaps за последние N минут (2 часа)
   # Расписание:
   # - Каждые 15 мин → докачка 15m свечей
@@ -39,9 +39,10 @@ periodic_gap_refill:
 
 # Data Integrity - Контроль качества данных
 data_integrity:
-  auto_refill_on_incomplete: true  # Автоматически докачивать данные при обнаружении пропусков (<99%)
+  auto_refill_on_incomplete: false  # ОТКЛЮЧЕНО из-за rate limits! Включать только при стабильном API
   # Если true: бот автоматически находит gaps за 90 дней и докачивает только недостающие свечи
   # Если false: только отправляется Telegram алерт, без докачки
+  # ⚠️ WARNING: Включение auto-refill при rate limit проблемах УСУГУБИТ ситуацию!
 
 # Market Detection
 market_detector:
