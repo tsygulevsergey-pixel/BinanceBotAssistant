@@ -101,7 +101,8 @@ class ActionPricePerformanceTracker:
                 # Callback для разблокировки символа
                 if self.on_signal_closed_callback:
                     try:
-                        await self.on_signal_closed_callback(signal.symbol)
+                        # Вызываем callback (синхронный)
+                        self.on_signal_closed_callback(signal.symbol)
                     except Exception as e:
                         logger.error(f"Error in AP close callback: {e}")
         
