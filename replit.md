@@ -27,6 +27,14 @@ A fully integrated **Action Price** strategy system is included, operating indep
 - **Example**: `BTC: -2.0 (BTC up 0.45% vs SHORT)` - instantly clear why penalty applied
 - **Debugging**: Makes signal rejection/acceptance analysis transparent and actionable
 
+## Strategy Execution Optimization (October 2025)
+- **Candle-Based Triggering**: Strategies now run ONLY when candles close (15m/1h/4h), eliminating 93-99% redundant checks
+- **TimeframeSync Gating**: _check_signals() aggregates closed timeframes; returns early if none closed
+- **Selective Data Loading**: Updated timeframes propagated to _check_symbol_signals for filtered data loading
+- **Resource Efficiency**: 15m saves 93%, 1h saves 98%, 4h saves 99.6% of unnecessary strategy executions
+- **Multi-TF Context**: 4h data always loaded for regime detection even when only 15m/1h closes
+- **Logging**: Shows "⏭️ No candles closed - skipping" until timeframe updates, then "🕯️ Candles closed: 15m - checking"
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
