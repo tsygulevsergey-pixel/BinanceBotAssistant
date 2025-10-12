@@ -6,6 +6,18 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
+# Recent Changes
+
+## October 12, 2025 - Critical Fix: Main Strategies Execution
+**Problem Resolved**: Main strategies were blocked and never executing due to `_check_signals()` blocking the main loop for 100+ seconds, causing candle close window misses.
+
+**Solution Implemented**:
+1. **Async Non-Blocking Execution**: Refactored `_check_signals()` to use `asyncio.create_task()` with Lock protection, preventing main loop blocking while ensuring single execution
+2. **Timestamp-Based Candle Detection**: Rewrote `TimeframeSync` to use floor timestamp tracking instead of strict wall-clock windows, enabling reliable detection even when checks are delayed
+3. **Runtime Monitoring**: Added execution time logging for performance tracking and regression detection
+
+**Impact**: All 16 main strategies now successfully execute on candle closes, with confirmed market analysis, regime detection, and filter application.
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
