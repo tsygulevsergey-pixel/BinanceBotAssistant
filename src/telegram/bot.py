@@ -13,6 +13,7 @@ class TelegramBot:
         self.bot = None
         self.startup_message_sent = False
         self.performance_tracker = None
+        self.ap_performance_tracker = None  # Action Price tracker
         self.strategy_validator = None
         self.binance_client = binance_client
     
@@ -32,6 +33,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("report", self.cmd_report))
         self.app.add_handler(CommandHandler("performance", self.cmd_performance))
         self.app.add_handler(CommandHandler("stats", self.cmd_stats))
+        self.app.add_handler(CommandHandler("ap_stats", self.cmd_ap_stats))
         self.app.add_handler(CommandHandler("validate", self.cmd_validate))
         
         await self.app.initialize()
@@ -66,6 +68,7 @@ class TelegramBot:
             "/strategies - Список стратегий\n"
             "/performance - Производительность (7 дней)\n"
             "/stats - Статистика по стратегиям\n"
+            "/ap_stats - Action Price статистика\n"
             "/validate - Проверка стратегий\n"
             "/latency - Задержки системы\n"
             "/report - Статистика сигналов\n"
@@ -107,6 +110,18 @@ class TelegramBot:
             "6. ATR Momentum\n"
             "7. VWAP Mean Reversion\n"
             "8. Range Fade\n"
+            "9. Volume Profile\n"
+            "10. RSI/Stoch MR\n"
+            "11. Liquidity Sweep\n"
+            "12. Order Flow\n"
+            "13. CVD Divergence\n"
+            "14. Time of Day\n"
+            "15. Cash & Carry\n"
+            "16. Market Making\n\n"
+            "🎯 *Action Price* (отдельная статистика)\n"
+            "   • Pin-Bar, Engulfing, Inside-Bar\n"
+            "   • Fakey, ППР\n"
+            "   • Команда: /ap_stats\n"
         )
         await update.message.reply_text(strategies_text, parse_mode='Markdown')
     
@@ -184,6 +199,64 @@ class TelegramBot:
             logger.error(f"Error getting stats: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
     
+    async def cmd_ap_stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать статистику Action Price"""
+        if not update.message:
+            return
+        
+        if not self.ap_performance_tracker:
+            await update.message.reply_text("⚠️ Action Price не активирован (требуется production режим)")
+            return
+        
+        try:
+            # Общая статистика
+            overall = await self.ap_performance_tracker.get_performance_stats(days=7)
+            
+            # Разбивка по паттернам
+            breakdown = await self.ap_performance_tracker.get_pattern_breakdown(days=7)
+            
+            text = "*🎯 Action Price - Статистика (7 дней):*\n\n"
+            
+            # Общие метрики
+            text += (
+                f"📊 Всего сигналов: {overall['total_signals']}\n"
+                f"✅ Закрыто: {overall['closed_signals']}\n"
+                f"🔄 Активных: {overall['active_signals']}\n\n"
+                f"🏆 Побед: {overall['wins']}\n"
+                f"❌ Поражений: {overall['losses']}\n"
+                f"📊 Win Rate: *{overall['win_rate']}%*\n\n"
+                f"💰 Средний PnL: *{overall['avg_pnl']:+.2f}%*\n"
+                f"💵 Общий PnL: *{overall['total_pnl']:+.2f}%*\n"
+                f"🎯 Частичных фиксаций: {overall['partial_exits']}\n\n"
+                f"🟢 Средняя победа: {overall['avg_win']:+.2f}%\n"
+                f"🔴 Среднее поражение: {overall['avg_loss']:+.2f}%\n\n"
+            )
+            
+            # Разбивка по паттернам
+            text += "*📈 По паттернам:*\n\n"
+            
+            pattern_names = {
+                'pin_bar': '📌 Pin-Bar',
+                'engulfing': '🔥 Engulfing',
+                'inside_bar': '📦 Inside-Bar',
+                'fakey': '🎭 Fakey',
+                'ppr': '🔄 ППР'
+            }
+            
+            for pattern, stats in breakdown.items():
+                if stats['total_signals'] > 0:
+                    text += (
+                        f"{pattern_names.get(pattern, pattern)}: "
+                        f"{stats['total_signals']} сиг | "
+                        f"WR: {stats['win_rate']}% | "
+                        f"PnL: {stats['avg_pnl']:+.2f}%\n"
+                    )
+            
+            await update.message.reply_text(text, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Error getting AP stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
     async def cmd_validate(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Проверить корректность работы стратегий"""
         if not update.message:
@@ -241,6 +314,10 @@ class TelegramBot:
     def set_performance_tracker(self, tracker):
         """Установить трекер производительности для доступа из команд"""
         self.performance_tracker = tracker
+    
+    def set_ap_performance_tracker(self, tracker):
+        """Установить Action Price трекер для доступа из команд"""
+        self.ap_performance_tracker = tracker
     
     async def send_startup_message(self, pairs_count: int, strategies_count: int, mode: str = "Signals-Only"):
         if not self.bot or not self.chat_id:

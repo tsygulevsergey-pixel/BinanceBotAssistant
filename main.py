@@ -49,6 +49,12 @@ import hashlib
 from datetime import datetime
 import pytz
 
+# Action Price imports
+from src.action_price.engine import ActionPriceEngine
+from src.action_price.performance_tracker import ActionPricePerformanceTracker
+from src.action_price.logger import ap_logger
+from src.database.models import ActionPriceSignal
+
 
 class TradingBot:
     def __init__(self):
@@ -60,6 +66,11 @@ class TradingBot:
         self.symbols_with_active_signals: set = set()  # Символы с активными сигналами (блокированы от анализа)
         self.coordinator: Optional[SymbolLoadCoordinator] = None
         self.performance_tracker: Optional[SignalPerformanceTracker] = None
+        
+        # Action Price components (only enabled when use_testnet=false)
+        self.action_price_engine: Optional[ActionPriceEngine] = None
+        self.ap_performance_tracker: Optional[ActionPricePerformanceTracker] = None
+        self.action_price_enabled = False
         
         # Компоненты бота
         self.strategy_manager = StrategyManager(binance_client=None)  # Will be set after client init
@@ -170,6 +181,29 @@ class TradingBot:
         asyncio.create_task(self.performance_tracker.start())
         logger.info(f"📊 Signal Performance Tracker started (check interval: {check_interval}s)")
         
+        # Action Price Engine (только для production режима)
+        use_testnet = config.get('binance.use_testnet', True)
+        ap_enabled = config.get('action_price.enabled', True)
+        
+        if not use_testnet and ap_enabled:
+            self.action_price_enabled = True
+            ap_config = config.get_dict('action_price')
+            self.action_price_engine = ActionPriceEngine(ap_config)
+            
+            # Запуск Action Price Performance Tracker
+            self.ap_performance_tracker = ActionPricePerformanceTracker(
+                binance_client=self.client,
+                db=db,
+                check_interval=check_interval,
+                on_signal_closed_callback=self._unblock_symbol
+            )
+            asyncio.create_task(self.ap_performance_tracker.start())
+            ap_logger.info("🎯 Action Price Engine initialized (Production mode)")
+            ap_logger.info(f"🎯 Execution timeframes: {ap_config.get('execution_timeframes', ['15m', '1h'])}")
+        else:
+            reason = "testnet mode" if use_testnet else "disabled in config"
+            logger.info(f"⏸️  Action Price disabled ({reason})")
+        
         # Создание валидатора стратегий
         strategy_validator = StrategyValidator(
             strategy_manager=self.strategy_manager,
@@ -182,6 +216,10 @@ class TradingBot:
         # Связываем компоненты с Telegram ботом для команд
         self.telegram_bot.set_performance_tracker(self.performance_tracker)
         self.telegram_bot.set_validator(strategy_validator)
+        
+        # Связать Action Price tracker если активирован
+        if self.ap_performance_tracker:
+            self.telegram_bot.set_ap_performance_tracker(self.ap_performance_tracker)
         
         # Отправка приветственного сообщения
         signals_only = config.get('binance.signals_only_mode', False)
@@ -240,6 +278,23 @@ class TradingBot:
             # Каждые check_interval секунд проверяем сигналы
             if iteration % check_interval == 0 and len(self.ready_symbols) > 0:
                 await self._check_signals()
+            
+            # Action Price анализ (только на закрытии 15m/1H свечей)
+            if self.action_price_enabled and len(self.ready_symbols) > 0:
+                current_time = datetime.now(pytz.UTC)
+                
+                # Проверка закрытия 15m или 1H
+                if TimeframeSync.should_update_timeframe('15m') or TimeframeSync.should_update_timeframe('1h'):
+                    await self._check_action_price_signals(current_time)
+                
+                # Пересчёт зон: каждый день в 00:00 UTC
+                if current_time.hour == 0 and current_time.minute == 0:
+                    ap_logger.info("🔄 Daily zone recalculation at 00:00 UTC")
+                    # Зоны пересчитываются автоматически при force_recalc в analyze_symbol
+                
+                # Обновление зон: на каждом 4H закрытии
+                if TimeframeSync.should_update_timeframe('4h'):
+                    ap_logger.info("🔄 4H zone update")
             
             # Статус каждую минуту или каждые 10 сек если загрузка идёт
             status_interval = 10 if self.coordinator and not self.coordinator.is_loading_complete() else 60
@@ -608,6 +663,81 @@ class TradingBot:
                 strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < 2.0")
                 continue  # Пропустить сигналы с score < threshold
     
+    async def _check_action_price_signals(self, current_time: datetime):
+        """Проверить Action Price сигналы для всех готовых символов"""
+        if not self.action_price_engine or not self.data_loader:
+            return
+        
+        symbols_to_check = self.ready_symbols.copy()
+        if not symbols_to_check:
+            return
+        
+        # Определить текущий таймфрейм
+        tf_15m_close = TimeframeSync.should_update_timeframe('15m')
+        tf_1h_close = TimeframeSync.should_update_timeframe('1h')
+        tf_4h_close = TimeframeSync.should_update_timeframe('4h')
+        
+        if not (tf_15m_close or tf_1h_close):
+            return
+        
+        current_tf = '1h' if tf_1h_close else '15m'
+        force_zone_recalc = (current_time.hour == 0 and current_time.minute == 0) or tf_4h_close
+        
+        ap_logger.info(f"🎯 Checking Action Price signals on {current_tf} close (force_recalc={force_zone_recalc})")
+        
+        signals_found = 0
+        for symbol in symbols_to_check:
+            # Пропускаем символы с активными сигналами
+            if symbol in self.symbols_with_active_signals:
+                continue
+            
+            try:
+                # Загрузить данные для всех необходимых таймфреймов
+                timeframe_data = {}
+                for tf in ['15m', '1h', '4h', '1d']:
+                    limits = {'15m': 500, '1h': 500, '4h': 500, '1d': 200}
+                    df = self.data_loader.get_candles(symbol, tf, limit=limits.get(tf, 200))
+                    if df is not None and len(df) > 0:
+                        timeframe_data[tf] = df
+                
+                # Пропустить если нет данных
+                if len(timeframe_data) < 4:
+                    continue
+                
+                # Анализ паттернов
+                ap_signal = await self.action_price_engine.analyze_symbol(
+                    symbol=symbol,
+                    timeframe_data=timeframe_data,
+                    current_timeframe=current_tf,
+                    force_zone_recalc=force_zone_recalc
+                )
+                
+                if ap_signal:
+                    signals_found += 1
+                    
+                    # Сохранить в БД
+                    self._save_action_price_signal(ap_signal)
+                    
+                    # Заблокировать символ
+                    self._block_symbol(symbol)
+                    
+                    # Отправить в Telegram
+                    await self._send_action_price_telegram(ap_signal)
+                    
+                    ap_logger.info(
+                        f"🎯 AP Signal: {ap_signal['symbol']} {ap_signal['direction']} "
+                        f"{ap_signal['pattern_type']} @ {ap_signal['entry_price']:.4f} "
+                        f"(Zone: {ap_signal['zone_type']}, Confluences: {len(ap_signal['confluences'])})"
+                    )
+            
+            except Exception as e:
+                ap_logger.error(f"Error checking AP for {symbol}: {e}", exc_info=True)
+            
+            await asyncio.sleep(0.05)
+        
+        if signals_found > 0:
+            ap_logger.info(f"🎯 Action Price analysis complete: {signals_found} signals found")
+    
     async def _symbol_loader_task(self):
         """Background task to load symbol data and add to ready queue"""
         if not self.coordinator or not self.data_loader:
@@ -827,22 +957,110 @@ class TradingBot:
         finally:
             session.close()
     
+    def _save_action_price_signal(self, ap_signal: Dict):
+        """Сохранить Action Price сигнал в БД"""
+        session = db.get_session()
+        try:
+            signal = ActionPriceSignal(
+                symbol=ap_signal['symbol'],
+                timeframe=ap_signal['timeframe'],
+                direction=ap_signal['direction'],
+                pattern_type=ap_signal['pattern_type'],
+                zone_type=ap_signal['zone_type'],
+                zone_touches=ap_signal.get('zone_touches', 0),
+                entry_price=float(ap_signal['entry_price']),
+                stop_loss=float(ap_signal['stop_loss']),
+                take_profit_1=float(ap_signal['take_profit_1']) if ap_signal.get('take_profit_1') else None,
+                take_profit_2=float(ap_signal['take_profit_2']) if ap_signal.get('take_profit_2') else None,
+                risk_reward=float(ap_signal['risk_reward']),
+                confluences=ap_signal['confluences'],
+                avwap_position=ap_signal.get('avwap_position'),
+                status='ACTIVE',
+                created_at=datetime.now(pytz.UTC)
+            )
+            
+            session.add(signal)
+            session.commit()
+            ap_logger.info(f"💾 Saved AP signal to DB: {ap_signal['symbol']} {ap_signal['direction']}")
+            
+        except Exception as e:
+            session.rollback()
+            ap_logger.error(f"Failed to save AP signal to DB: {e}", exc_info=True)
+        finally:
+            session.close()
+    
+    async def _send_action_price_telegram(self, ap_signal: Dict):
+        """Отправить Action Price сигнал в Telegram"""
+        try:
+            # Формат уникален для Action Price
+            pattern_emoji = {
+                'pin_bar': '📌',
+                'engulfing': '🔥',
+                'inside_bar': '📦',
+                'fakey': '🎭',
+                'ppr': '🔄'
+            }
+            
+            emoji = pattern_emoji.get(ap_signal['pattern_type'], '🎯')
+            direction_emoji = '🟢' if ap_signal['direction'] == 'LONG' else '🔴'
+            
+            message = (
+                f"🎯 **ACTION PRICE SIGNAL**\n\n"
+                f"{direction_emoji} **{ap_signal['symbol']} {ap_signal['direction']}**\n"
+                f"{emoji} Паттерн: **{ap_signal['pattern_type'].upper()}**\n"
+                f"📊 Таймфрейм: **{ap_signal['timeframe']}**\n"
+                f"🎯 Зона: **{ap_signal['zone_type']}** (касания: {ap_signal.get('zone_touches', 0)})\n\n"
+                f"💰 Вход: **{ap_signal['entry_price']:.4f}**\n"
+                f"🛑 Стоп: **{ap_signal['stop_loss']:.4f}**\n"
+            )
+            
+            if ap_signal.get('take_profit_1'):
+                message += f"🎯 TP1 (50%): **{ap_signal['take_profit_1']:.4f}**\n"
+            if ap_signal.get('take_profit_2'):
+                message += f"🎯 TP2 (50%): **{ap_signal['take_profit_2']:.4f}**\n"
+            
+            message += f"📈 R:R: **{ap_signal['risk_reward']:.1f}:1**\n\n"
+            
+            # Конфлюэнсы
+            if ap_signal['confluences']:
+                message += "✅ **Конфлюэнсы:**\n"
+                for conf in ap_signal['confluences']:
+                    message += f"  • {conf}\n"
+            
+            if ap_signal.get('avwap_position'):
+                message += f"\n📍 AVWAP: {ap_signal['avwap_position']}\n"
+            
+            await self.telegram_bot.send_message(message)
+            
+        except Exception as e:
+            ap_logger.error(f"Failed to send AP signal to Telegram: {e}", exc_info=True)
+    
     def _load_active_signals_on_startup(self):
         """Загрузить активные сигналы из БД при старте и заблокировать символы"""
         session = db.get_session()
         try:
-            # Получить все активные и pending сигналы
+            # Получить все активные и pending сигналы из основной таблицы
             active_signals = session.query(Signal).filter(
                 Signal.status.in_(['ACTIVE', 'PENDING'])
             ).all()
             
-            if active_signals:
+            # Получить активные Action Price сигналы
+            active_ap_signals = session.query(ActionPriceSignal).filter(
+                ActionPriceSignal.status.in_(['ACTIVE', 'PENDING'])
+            ).all()
+            
+            total_active = len(active_signals) + len(active_ap_signals)
+            
+            if active_signals or active_ap_signals:
                 # Добавить уникальные символы в блокировку
                 for signal in active_signals:
                     self.symbols_with_active_signals.add(str(signal.symbol))
+                for ap_signal in active_ap_signals:
+                    self.symbols_with_active_signals.add(str(ap_signal.symbol))
                 
                 logger.info(
-                    f"🔒 Loaded {len(active_signals)} active signals, "
+                    f"🔒 Loaded {total_active} active signals "
+                    f"(Main: {len(active_signals)}, AP: {len(active_ap_signals)}), "
                     f"blocked {len(self.symbols_with_active_signals)} symbols from analysis"
                 )
                 logger.debug(f"Blocked symbols: {', '.join(sorted(self.symbols_with_active_signals))}")
@@ -884,6 +1102,9 @@ class TradingBot:
         
         if self.performance_tracker:
             await self.performance_tracker.stop()
+        
+        if self.ap_performance_tracker:
+            await self.ap_performance_tracker.stop()
         
         await self.telegram_bot.stop()
         
