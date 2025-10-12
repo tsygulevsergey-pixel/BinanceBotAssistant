@@ -299,8 +299,15 @@ class PriceActionPatterns:
         c1 = df.iloc[-2]  # Предыдущая свеча
         eps = get_eps(c0['close'], self.eps_mult)
         
-        # Медвежий ППР: закрытие C0 ниже низа C1
-        bearish_ppr = c0['close'] < (c1['low'] - eps)
+        # Рассчитываем силу пробоя
+        c1_range = c1['high'] - c1['low']
+        
+        # Медвежий ППР: закрытие C0 ниже низа C1 + фильтр силы
+        bearish_ppr = (
+            c0['close'] < (c1['low'] - eps) and
+            c0['close'] < c0['open'] and  # Медвежья свеча
+            abs(c0['close'] - c0['open']) >= 0.3 * c1_range  # Тело C0 >= 30% от range C1
+        )
         
         if bearish_ppr:
             return {
@@ -314,8 +321,12 @@ class PriceActionPatterns:
                 }
             }
         
-        # Бычий ППР: закрытие C0 выше верха C1
-        bullish_ppr = c0['close'] > (c1['high'] + eps)
+        # Бычий ППР: закрытие C0 выше верха C1 + фильтр силы
+        bullish_ppr = (
+            c0['close'] > (c1['high'] + eps) and
+            c0['close'] > c0['open'] and  # Бычья свеча
+            abs(c0['close'] - c0['open']) >= 0.3 * c1_range  # Тело C0 >= 30% от range C1
+        )
         
         if bullish_ppr:
             return {

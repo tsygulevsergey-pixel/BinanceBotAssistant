@@ -6,6 +6,33 @@ The bot operates in two modes: a Signals-Only Mode for generating signals withou
 
 A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
+# Recent Changes
+
+## Action Price Filters Enhancement (October 12, 2025)
+- **Issue 1**: 141 сигнала за одну проверку - слишком много сигналов низкого качества
+- **Issue 2**: 0% Win Rate - точки входа устаревали к моменту отправки в Telegram
+- **Issue 3**: Сигналы с confidence 4.6 принимались - нет минимального порога
+- **Issue 4**: PPR паттерн слишком агрессивен - 131/141 сигналов были PPR (любой пробой засчитывался)
+- **Root Cause 1**: PPR паттерн использует `entry_trigger = c0['close']` - цена закрытия прошлой свечи, которая устаревает через несколько секунд
+- **Root Cause 2**: Нет проверки минимального confidence score - любой сигнал проходит
+- **Root Cause 3**: PPR условие `c0['close'] < c1['low']` слишком простое - даже слабый пробой генерирует сигнал
+- **Fix 1**: Добавлена проверка актуальности entry price - пропускаются сигналы где `|current_price - entry| > 0.75×MTR`
+- **Fix 2**: Добавлен `min_confidence_score: 150.0` в config.yaml и проверка в engine.py
+- **Fix 3**: Ужесточен PPR паттерн - теперь требуется направленная свеча (close < open для SHORT) + сильное тело (≥30% range предыдущей свечи)
+- **Result**: Только качественные сигналы с актуальной ценой входа, достаточной уверенностью и сильными паттернами попадают в систему; ожидается снижение с 141 до ~5-30 сигналов за проверку
+
+## Critical Bugfixes: Data Loader, TimeframeSync & Main Loop (October 12, 2025)
+- **Issue 1**: Bot crashed with empty error messages during data loading failures (`Error downloading SPXUSDT 15m: . Retry 1/3...`)
+- **Issue 2**: TimeframeSync never detected candle closes - strategies never ran (`⏭️ No candles closed - skipping` every check)
+- **Issue 3**: Main loop strategy check never executed - `iteration % check_interval` never aligned with actual time
+- **Root Cause 1**: DataLoader continued execution with incomplete data after download failures, causing unhandled exceptions
+- **Root Cause 2**: TimeframeSync checked cache BEFORE checking if candle closed - always returned False even at :00, :15, :30, :45
+- **Root Cause 3**: Main loop used `iteration % 60 == 0` which never matched actual time - bot started at 12:52:55, iteration 211 at 12:56:26 → 211 % 60 = 31 ≠ 0
+- **Fix 1**: DataLoader now raises explicit exception on download failure with proper error message; symbol marked as failed, bot continues with other symbols
+- **Fix 2**: TimeframeSync logic reordered - checks candle close time FIRST, then cache; detection window expanded to 90 seconds (e.g., 12:45:00-12:46:30)
+- **Fix 3**: Main loop now uses `(current_time - last_check_time).total_seconds() >= check_interval` - checks real elapsed time instead of iteration counter
+- **Result**: Bot no longer crashes on network errors; strategies correctly trigger every 60 seconds; Runtime Fast Catchup executes properly
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
