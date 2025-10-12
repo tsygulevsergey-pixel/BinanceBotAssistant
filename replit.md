@@ -8,6 +8,32 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## Independent Symbol Blocking for Main & Action Price (October 12, 2025)
+- **Feature**: Раздельные блокировки символов для независимой работы систем
+- **Logic**:
+  - Main Strategies: `symbols_blocked_main` - блокирует символы только для основных стратегий
+  - Action Price: `symbols_blocked_action_price` - блокирует символы только для Action Price
+  - Обе системы могут одновременно иметь активные сигналы на одном символе!
+- **Example**:
+  ```
+  BTCUSDT:
+    - Action Price SHORT активен → заблокирован только для AP
+    - Main Strategies может дать LONG → оба сигнала активны одновременно
+  
+  Закрытие:
+    - Main LONG закрылся → разблокирован только для Main
+    - AP SHORT всё ещё активен → заблокирован для AP
+  ```
+- **Components**:
+  - `_block_symbol_main()` / `_unblock_symbol_main()` - управление блокировками Main
+  - `_block_symbol_action_price()` / `_unblock_symbol_action_price()` - управление блокировками AP
+  - Раздельные callbacks в performance trackers для правильной разблокировки
+- **Benefits**:
+  - Максимальное использование торговых возможностей
+  - Обе системы работают независимо без конфликтов
+  - Одна монета может иметь 2 сигнала одновременно (Main + AP)
+- **Status**: ✅ Production-ready, полная независимость систем
+
 ## Stablecoin Filter (October 12, 2025)
 - **Feature**: Automatic exclusion of stablecoins from analysis
 - **Reason**: Stablecoins (USDCUSDT, BUSDUSDT, etc.) have zero volatility, making them unsuitable for trading

@@ -66,7 +66,11 @@ class TradingBot:
         self.fast_catchup: Optional[FastCatchupLoader] = None
         self.symbols: List[str] = []
         self.ready_symbols: List[str] = []  # Symbols with loaded data, ready for analysis
-        self.symbols_with_active_signals: set = set()  # Символы с активными сигналами (блокированы от анализа)
+        
+        # Раздельные блокировки для независимой работы систем
+        self.symbols_blocked_main: set = set()          # Заблокированы для основных стратегий
+        self.symbols_blocked_action_price: set = set()  # Заблокированы для Action Price
+        
         self.catchup_done_symbols: set = set()  # Символы обработанные в fast catchup
         self.coordinator: Optional[SymbolLoadCoordinator] = None
         self.performance_tracker: Optional[SignalPerformanceTracker] = None
@@ -206,7 +210,7 @@ class TradingBot:
             db=db,
             lock_manager=self.signal_lock_manager,
             check_interval=check_interval,
-            on_signal_closed_callback=self._unblock_symbol
+            on_signal_closed_callback=self._unblock_symbol_main  # Разблокировка для ОСНОВНЫХ стратегий
         )
         asyncio.create_task(self.performance_tracker.start())
         logger.info(f"📊 Signal Performance Tracker started (check interval: {check_interval}s)")
@@ -225,7 +229,7 @@ class TradingBot:
                 self.client,
                 db,
                 check_interval,
-                self._unblock_symbol
+                self._unblock_symbol_action_price  # Разблокировка для ACTION PRICE
             )
             asyncio.create_task(self.ap_performance_tracker.start())
             ap_logger.info("🎯 Action Price Engine initialized (Production mode)")
@@ -420,8 +424,8 @@ class TradingBot:
             logger.debug("No symbols ready for analysis yet...")
             return
         
-        # Фильтровать символы с активными сигналами
-        symbols_to_update = [s for s in symbols_to_check if s not in self.symbols_with_active_signals]
+        # Фильтровать символы с активными сигналами ОСНОВНЫХ СТРАТЕГИЙ
+        symbols_to_update = [s for s in symbols_to_check if s not in self.symbols_blocked_main]
         
         logger.debug(f"Checking signals for {len(symbols_to_update)} symbols on {', '.join(updated_timeframes)} timeframes...")
         
@@ -441,9 +445,9 @@ class TradingBot:
         
         # 3. Проверить стратегии для каждого символа
         for symbol in symbols_to_check:
-            # Пропускаем символы с активными сигналами
-            if symbol in self.symbols_with_active_signals:
-                logger.debug(f"⏭️  {symbol} skipped - has active signal")
+            # Пропускаем символы с активными сигналами ОСНОВНЫХ СТРАТЕГИЙ
+            if symbol in self.symbols_blocked_main:
+                logger.debug(f"⏭️  {symbol} skipped - has active main strategy signal")
                 continue
             
             try:
@@ -715,9 +719,9 @@ class TradingBot:
                         telegram_msg_id=telegram_msg_id
                     )
                     
-                    # Заблокировать символ ТОЛЬКО после успешного сохранения
+                    # Заблокировать символ ТОЛЬКО после успешного сохранения (для ОСНОВНЫХ стратегий)
                     if save_success:
-                        self._block_symbol(signal.symbol)
+                        self._block_symbol_main(signal.symbol)
                     else:
                         logger.warning(f"⚠️ {signal.symbol} NOT blocked - DB save failed")
                 
@@ -752,9 +756,9 @@ class TradingBot:
                         status='PENDING'
                     )
                     
-                    # Заблокировать символ ТОЛЬКО после успешного сохранения
+                    # Заблокировать символ ТОЛЬКО после успешного сохранения (для ОСНОВНЫХ стратегий)
                     if save_success:
-                        self._block_symbol(signal.symbol)
+                        self._block_symbol_main(signal.symbol)
                     else:
                         logger.warning(f"⚠️ {signal.symbol} NOT blocked - DB save failed")
                 
@@ -795,8 +799,8 @@ class TradingBot:
         
         signals_found = 0
         for symbol in symbols_to_check:
-            # Пропускаем символы с активными сигналами
-            if symbol in self.symbols_with_active_signals:
+            # Пропускаем символы с активными сигналами ACTION PRICE
+            if symbol in self.symbols_blocked_action_price:
                 continue
             
             try:
@@ -831,8 +835,8 @@ class TradingBot:
                     if save_success:
                         signals_found += 1
                         
-                        # Заблокировать символ ТОЛЬКО после успешного сохранения
-                        self._block_symbol(symbol)
+                        # Заблокировать символ ТОЛЬКО после успешного сохранения (для ACTION PRICE)
+                        self._block_symbol_action_price(symbol)
                         
                         # Отправить в Telegram
                         await self._send_action_price_telegram(ap_signal)
@@ -1333,18 +1337,26 @@ class TradingBot:
             total_active = len(active_signals) + len(active_ap_signals)
             
             if active_signals or active_ap_signals:
-                # Добавить уникальные символы в блокировку
+                # Добавить уникальные символы в РАЗДЕЛЬНЫЕ блокировки
                 for signal in active_signals:
-                    self.symbols_with_active_signals.add(str(signal.symbol))
+                    self.symbols_blocked_main.add(str(signal.symbol))
                 for ap_signal in active_ap_signals:
-                    self.symbols_with_active_signals.add(str(ap_signal.symbol))
+                    self.symbols_blocked_action_price.add(str(ap_signal.symbol))
                 
                 logger.info(
                     f"🔒 Loaded {total_active} active signals "
-                    f"(Main: {len(active_signals)}, AP: {len(active_ap_signals)}), "
-                    f"blocked {len(self.symbols_with_active_signals)} symbols from analysis"
+                    f"(Main: {len(active_signals)}, AP: {len(active_ap_signals)})"
                 )
-                logger.debug(f"Blocked symbols: {', '.join(sorted(self.symbols_with_active_signals))}")
+                logger.info(
+                    f"   • Main strategies: {len(self.symbols_blocked_main)} symbols blocked"
+                )
+                logger.info(
+                    f"   • Action Price: {len(self.symbols_blocked_action_price)} symbols blocked"
+                )
+                if self.symbols_blocked_main:
+                    logger.debug(f"Main blocked: {', '.join(sorted(self.symbols_blocked_main))}")
+                if self.symbols_blocked_action_price:
+                    logger.debug(f"AP blocked: {', '.join(sorted(self.symbols_blocked_action_price))}")
             else:
                 logger.info("✅ No active signals in DB - all symbols available for analysis")
                 
@@ -1353,19 +1365,33 @@ class TradingBot:
         finally:
             session.close()
     
-    def _block_symbol(self, symbol: str):
-        """Заблокировать символ от анализа (есть активный сигнал)"""
-        self.symbols_with_active_signals.add(symbol)
-        logger.info(f"🔒 {symbol} blocked from analysis (active signal)")
+    def _block_symbol_main(self, symbol: str):
+        """Заблокировать символ для основных стратегий (есть активный сигнал)"""
+        self.symbols_blocked_main.add(symbol)
+        logger.info(f"🔒 Main: {symbol} blocked (active signal)")
     
-    def _unblock_symbol(self, symbol: str):
-        """Разблокировать символ для анализа (сигнал закрыт)"""
+    def _block_symbol_action_price(self, symbol: str):
+        """Заблокировать символ для Action Price (есть активный сигнал)"""
+        self.symbols_blocked_action_price.add(symbol)
+        logger.info(f"🔒 AP: {symbol} blocked (active signal)")
+    
+    def _unblock_symbol_main(self, symbol: str):
+        """Разблокировать символ для основных стратегий (сигнал закрыт)"""
         try:
-            if symbol in self.symbols_with_active_signals:
-                self.symbols_with_active_signals.remove(symbol)
-                logger.info(f"🔓 {symbol} unblocked for analysis (signal closed)")
+            if symbol in self.symbols_blocked_main:
+                self.symbols_blocked_main.discard(symbol)
+                logger.info(f"🔓 Main: {symbol} unblocked (signal closed)")
         except Exception as e:
-            logger.error(f"Error unblocking symbol {symbol}: {e}", exc_info=True)
+            logger.error(f"Error unblocking symbol {symbol} for main: {e}", exc_info=True)
+    
+    def _unblock_symbol_action_price(self, symbol: str):
+        """Разблокировать символ для Action Price (сигнал закрыт)"""
+        try:
+            if symbol in self.symbols_blocked_action_price:
+                self.symbols_blocked_action_price.discard(symbol)
+                logger.info(f"🔓 AP: {symbol} unblocked (signal closed)")
+        except Exception as e:
+            logger.error(f"Error unblocking symbol {symbol} for AP: {e}", exc_info=True)
     
     async def stop(self):
         import traceback
