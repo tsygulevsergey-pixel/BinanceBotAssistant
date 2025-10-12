@@ -13,13 +13,14 @@ class TimeframeSync:
     _last_update: Dict[str, datetime] = {}
     
     @staticmethod
-    def should_update_timeframe(timeframe: str, current_time: datetime = None) -> bool:
+    def should_update_timeframe(timeframe: str, current_time: datetime = None, consumer_id: str = 'default') -> bool:
         """
         Проверить нужно ли обновлять данные для таймфрейма
         
         Args:
             timeframe: Таймфрейм ('15m', '1h', '4h', '1d')
             current_time: Текущее время (UTC), если None - берется сейчас
+            consumer_id: Идентификатор потребителя (для независимого кэша)
             
         Returns:
             True если свеча закрылась и нужно обновить данные
@@ -56,7 +57,7 @@ class TimeframeSync:
             return False
         
         # Проверяем кэш - если уже обновляли в эту минуту в последние 90 секунд, скипаем
-        cache_key = f"{timeframe}_{current_time.strftime('%Y%m%d%H%M')}"
+        cache_key = f"{consumer_id}_{timeframe}_{current_time.strftime('%Y%m%d%H%M')}"
         if cache_key in TimeframeSync._last_update:
             last_update = TimeframeSync._last_update[cache_key]
             # Если обновляли менее 90 секунд назад - пропускаем

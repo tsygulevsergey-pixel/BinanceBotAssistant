@@ -307,7 +307,7 @@ class TradingBot:
                 current_time = datetime.now(pytz.UTC)
                 
                 # Проверка закрытия 15m или 1H
-                if TimeframeSync.should_update_timeframe('15m') or TimeframeSync.should_update_timeframe('1h'):
+                if TimeframeSync.should_update_timeframe('15m', consumer_id='action_price') or TimeframeSync.should_update_timeframe('1h', consumer_id='action_price'):
                     await self._check_action_price_signals(current_time)
                 
                 # Пересчёт зон: каждый день в 00:00 UTC
@@ -316,7 +316,7 @@ class TradingBot:
                     # Зоны пересчитываются автоматически при force_recalc в analyze_symbol
                 
                 # Обновление зон: на каждом 4H закрытии
-                if TimeframeSync.should_update_timeframe('4h'):
+                if TimeframeSync.should_update_timeframe('4h', consumer_id='action_price'):
                     ap_logger.info("🔄 4H zone update")
             
             # Статус каждую минуту или каждые 10 сек если загрузка идёт
@@ -390,11 +390,11 @@ class TradingBot:
         now = datetime.now(pytz.UTC)
         updated_timeframes = []
         
-        if TimeframeSync.should_update_timeframe('15m'):
+        if TimeframeSync.should_update_timeframe('15m', consumer_id='strategies'):
             updated_timeframes.append('15m')
-        if TimeframeSync.should_update_timeframe('1h'):
+        if TimeframeSync.should_update_timeframe('1h', consumer_id='strategies'):
             updated_timeframes.append('1h')
-        if TimeframeSync.should_update_timeframe('4h'):
+        if TimeframeSync.should_update_timeframe('4h', consumer_id='strategies'):
             updated_timeframes.append('4h')
         
         # Если ни одна свеча не закрылась - пропускаем проверку стратегий
@@ -770,9 +770,9 @@ class TradingBot:
             return
         
         # Определить текущий таймфрейм
-        tf_15m_close = TimeframeSync.should_update_timeframe('15m')
-        tf_1h_close = TimeframeSync.should_update_timeframe('1h')
-        tf_4h_close = TimeframeSync.should_update_timeframe('4h')
+        tf_15m_close = TimeframeSync.should_update_timeframe('15m', consumer_id='action_price_check')
+        tf_1h_close = TimeframeSync.should_update_timeframe('1h', consumer_id='action_price_check')
+        tf_4h_close = TimeframeSync.should_update_timeframe('4h', consumer_id='action_price_check')
         
         if not (tf_15m_close or tf_1h_close):
             return

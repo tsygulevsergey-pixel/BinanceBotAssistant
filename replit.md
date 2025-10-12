@@ -33,13 +33,16 @@ A fully integrated **Action Price** strategy system is included, operating indep
 - **Issue 1**: Bot crashed with empty error messages during data loading failures (`Error downloading SPXUSDT 15m: . Retry 1/3...`)
 - **Issue 2**: TimeframeSync never detected candle closes - strategies never ran (`⏭️ No candles closed - skipping` every check)
 - **Issue 3**: Main loop strategy check never executed - `iteration % check_interval` never aligned with actual time
+- **Issue 4**: TimeframeSync global cache causes cross-component suppression - first consumer "eats" candle close event, others get False
 - **Root Cause 1**: DataLoader continued execution with incomplete data after download failures, causing unhandled exceptions
 - **Root Cause 2**: TimeframeSync checked cache BEFORE checking if candle closed - always returned False even at :00, :15, :30, :45
 - **Root Cause 3**: Main loop used `iteration % 60 == 0` which never matched actual time - bot started at 12:52:55, iteration 211 at 12:56:26 → 211 % 60 = 31 ≠ 0
+- **Root Cause 4**: TimeframeSync cache_key = "{timeframe}_{timestamp}" - shared across ALL components (Performance Tracker, Action Price, Strategies); first consumer records close, subsequent calls return False
 - **Fix 1**: DataLoader now raises explicit exception on download failure with proper error message; symbol marked as failed, bot continues with other symbols
 - **Fix 2**: TimeframeSync logic reordered - checks candle close time FIRST, then cache; detection window expanded to 90 seconds (e.g., 12:45:00-12:46:30)
 - **Fix 3**: Main loop now uses `(current_time - last_check_time).total_seconds() >= check_interval` - checks real elapsed time instead of iteration counter
-- **Result**: Bot no longer crashes on network errors; strategies correctly trigger every 60 seconds; Runtime Fast Catchup executes properly
+- **Fix 4**: TimeframeSync now uses per-consumer cache: cache_key = "{consumer_id}_{timeframe}_{timestamp}"; each component has independent cache (strategies, action_price, action_price_check)
+- **Result**: Bot no longer crashes on network errors; strategies correctly trigger every 60 seconds; Runtime Fast Catchup executes properly; ALL components now see candle closes independently!
 
 ## Database Cleanup Scripts (October 12, 2025)
 - **clear_signals.py**: Interactive script to clean signal data while preserving candle history
