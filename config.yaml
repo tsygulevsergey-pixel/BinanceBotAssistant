@@ -264,3 +264,108 @@ universe:
   filter_quote: "USDT"
   min_volume_24h: 10000000  # $10M minimum
   update_interval_hours: 1  # Auto-update symbol list every N hours
+
+# Action Price Strategy (отдельная система)
+action_price:
+  enabled: true  # Работает только при use_testnet: false
+  
+  # Расписание
+  execution_timeframes: ["15m", "1h"]  # Запуск только на закрытии этих ТФ
+  zone_recalc_schedule:
+    daily: "00:00"  # UTC - пересчёт зон 1D
+    update_4h: true  # Обновление на каждом 4H закрытии
+  
+  # Зоны S/R
+  zones:
+    lookback_days: 90
+    fractal_k_1d: 2
+    fractal_k_4h: 2
+    impulse_bars_check: 3  # Проверка импульса после базы
+    impulse_atr_mult: 2.0  # Минимум 2×mTR(1D) для зоны
+    zone_width_mult: 0.5  # zone_width = max(0.5×mTR, 0.15% price)
+    zone_width_min_pct: 0.15  # Минимум 0.15% от цены
+    buffer_mult: 0.25  # buffer для расширения зон
+    merge_distance_mult: 0.75  # Слияние если центры ближе 0.75×mTR
+    max_width_mult: 1.25  # max final_width = 1.25× базовой ширины
+    top_zones_count: 6  # Топ-N зон для торговли
+    broken_closes: 3  # Зона ломается после N закрытий за границей
+  
+  # Anchored VWAP
+  avwap:
+    # Таймфреймы для якорей
+    anchor_15m_primary: "1h"
+    anchor_15m_secondary: "4h"
+    anchor_1h_primary: "4h"
+    anchor_1h_secondary: "1d"
+    
+    # Параметры свингов
+    fractal_k_1h: 3
+    fractal_k_4h: 2
+    impulse_mult: 1.5  # impulse >= 1.5×mTR для якоря
+    impulse_bars_1h: 12  # L баров для проверки импульса
+    impulse_bars_4h: 10
+    
+    # Sticky логика
+    lock_bars_1h: 8  # Гистерезис после установки
+    lock_bars_4h: 4
+    ttl_bars_1h: 60  # ~2.5 суток
+    ttl_bars_4h: 30  # ~5 суток
+    
+    # Переякоривание
+    structure_break_closes: 3  # Для 1H
+    structure_break_closes_4h: 2  # Для 4H
+    structure_distance_mult: 0.25  # >= 0.25×mTR от AVWAP
+    
+    # Конфлюэнс
+    confluence_tolerance_mult: 0.5  # Цена в пределах 0.5×mTR(1H) от AVWAP
+  
+  # EMA фильтры
+  ema:
+    periods: [50, 200]
+    timeframes: ["4h", "1h"]
+    strict_mode: true  # Строгая проверка по обоим ТФ
+    aggressive_mode: false  # Разрешить при конфликте 4H/1H
+  
+  # Паттерны
+  patterns:
+    enabled: ["pin_bar", "engulfing", "inside_bar", "fakey", "ppr"]
+    eps_mult: 0.0001  # eps = 0.0001 × price
+    
+    # Pin-Bar
+    pin_bar:
+      wick_body_ratio: 2.0  # wick >= 2×body
+      wick_range_ratio: 0.6  # wick >= 0.6×range
+      opposite_wick_max: 0.25  # upper_wick <= 0.25×range
+      close_position: 0.6  # close >= (low + 0.6×range)
+    
+    # Engulfing
+    engulfing:
+      body_ratio: 0.8  # body >= 0.8× prev body
+    
+    # Fakey
+    fakey:
+      sequence_bars: 3  # mother, inside, breakout
+  
+  # Входы и управление
+  entry:
+    buffer_atr_mult: 0.25  # buffer = max(0.25×mTR, 0.05% price)
+    buffer_min_pct: 0.05
+    
+    tp1_rr: 1.0  # TP1 = 1R
+    tp2_rr: 2.0  # TP2 = 2R или ближайшая зона
+    partial_tp1: 0.5  # 50% на TP1
+    partial_tp2: 0.5  # 50% на TP2
+    
+    min_rr_zone: 1.0  # Минимум 1R до противоположной зоны
+    breakeven_rr: 1.0  # BE после 1R
+  
+  # Anti-duplicates
+  cooldown:
+    timeframe_1h: 6  # часов
+    timeframe_15m: 2  # часов
+    unique_key: ["symbol", "direction", "zone_id", "pattern", "timeframe"]
+  
+  # Производительность
+  performance:
+    track_partial_exits: true  # Отслеживать частичные фиксации
+    separate_stats: true  # Отдельная статистика от основных стратегий
