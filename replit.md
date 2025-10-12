@@ -2,7 +2,9 @@
 
 This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories. The bot provides real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
 
-The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. The project's ambition is to provide a highly performant and reliable automated trading solution for cryptocurrency futures markets, focusing on data integrity and strategic validation.
+The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms.
+
+**NEW**: The bot now includes a fully integrated **Action Price** strategy system - a production-only price action trading module that operates independently from main strategies with its own statistics, database table, performance tracking, and Telegram commands. Action Price identifies high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
 
 # User Preferences
 
@@ -56,9 +58,10 @@ Preferred communication style: Simple, everyday language.
 - **Time Stops**: Exits trades if no progress within 6-8 bars.
 
 ### Telegram Integration
-- Provides commands (/start, /help, /status, /strategies, /performance, /stats, /validate, /latency, /report) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
+- Provides commands (/start, /help, /status, /strategies, /performance, /stats, /validate, /latency, /report, /ap_stats) and Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
 - **/validate** - Validates all strategies for data availability, OHLCV integrity, price logic, signal generation, and entry/SL/TP correctness across different market regimes.
 - **/performance** - Shows performance metrics with accurate PnL calculations.
+- **/ap_stats** - Shows Action Price statistics with pattern breakdown, partial exits tracking, win rate, and average PnL per pattern type.
 
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals and calculates exit conditions using exact SL/TP levels.
@@ -80,8 +83,20 @@ Preferred communication style: Simple, everyday language.
 - **DB Persistence**: Blocking state survives bot restarts by reloading active signals from database.
 - **Logs**: "🔒 Loaded 6 active signals, blocked 6 symbols" on startup, "⏭️ {symbol} skipped - has active signal" during analysis.
 
+### Action Price Strategy System (Production-Only)
+- **Activation**: Runs ONLY when `use_testnet: false` (production mode) and `action_price.enabled: true`
+- **S/R Zones**: Built from Daily fractal swings (k=3 for 1H, k=2 for 4H, impulse ≥1.5×mTR) and 4H consolidation bases, scored by touches/volume, refined every 4H + 00:00 UTC
+- **AVWAP Sticky**: Anchored to fractal swings with impulse validation, sticky logic uses higher TF anchors (15m→1H/4H, 1H→4H/1D)
+- **EMA Filters**: Strict trend validation using EMA50/200 on both 4H and 1H timeframes
+- **5 Patterns**: Pin-Bar (wick ≥66% range), Engulfing (100% prior range), Inside-Bar (parent setup), Fakey (false break + reversal), PPR (Pullback-Pin-Reversal combo)
+- **Risk Management**: SL at swing extreme + 0.2-0.3×mTR buffer, TP1 at 1.5R (50% exit), TP2 at 2.5-3.0R, R:R filter rejects <1.8
+- **Cooldown System**: Anti-duplicate signals using (symbol, direction, zone_id, pattern, TF) hash with 6h TTL for 1H, 2h for 15m
+- **Execution**: Signals generated on 15m/1H candle closes, zones recalculated at 00:00 UTC and every 4H close
+- **Isolation**: Separate DB table (action_price_signals), independent performance tracker with partial exits, dedicated logger (logs/action_price_*.log), unique Telegram signal format with 🎯 emoji
+
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. A `signals_only_mode` flag allows operation without live trading.
+- **Action Price Config**: Section `action_price` in config.yaml controls execution_timeframes, zone recalculation schedules, pattern parameters, and production-only activation guard.
 
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe coordination for parallel loading and analysis.
