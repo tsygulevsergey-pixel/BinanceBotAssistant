@@ -18,8 +18,10 @@ A fully integrated **Action Price** strategy system is included, operating indep
 - **Root Cause 3**: Нет проверки минимального confidence score - любой сигнал проходит
 - **Root Cause 4**: PPR условие `c0['close'] < c1['low']` слишком простое - даже слабый пробой генерирует сигнал
 - **Fix 1 (CRITICAL)**: Полностью переработана архитектура расчета Entry/Stop/Targets:
-  - Entry теперь ВСЕГДА = current_price (актуальная цена на момент проверки, не историческая c0['close'])
-  - Stop Loss теперь ставится ЗА ЗОНОЙ (zone['high']/zone['low'] + buffer), а не за свечой
+  - Entry теперь ВСЕГДА = current_price (получается через API запрос Binance get_mark_price, не историческая c0['close'])
+  - Stop Loss теперь ставится ЗА ЗОНОЙ (zone['high']/zone['low'] + buffer), а не за свечой:
+    * LONG: stop_loss = zone['low'] - buffer (ниже зоны поддержки)
+    * SHORT: stop_loss = zone['high'] + buffer (выше зоны сопротивления)
   - TP1 = Entry + 1R (где R = |Entry - Stop Loss|)
   - TP2 = Entry + 2R
 - **Fix 2**: Добавлен `min_confidence_score: 150.0` в config.yaml и проверка в engine.py

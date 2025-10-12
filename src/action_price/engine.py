@@ -6,6 +6,9 @@ from typing import List, Dict, Optional
 from datetime import datetime
 import hashlib
 import pytz
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .zones import SRZoneBuilder
 from .avwap import AnchoredVWAP
@@ -19,13 +22,15 @@ from .utils import calculate_mtr, is_price_in_zone
 class ActionPriceEngine:
     """Главный движок Action Price стратегии"""
     
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, binance_client=None):
         """
         Args:
             config: Полная конфигурация из config.yaml['action_price']
+            binance_client: BinanceClient для получения актуальной цены
         """
         self.config = config
         self.enabled = config.get('enabled', True)
+        self.client = binance_client
         
         # Инициализация компонентов
         self.zone_builder = SRZoneBuilder(config['zones'])
@@ -39,7 +44,7 @@ class ActionPriceEngine:
         from src.indicators.vwap import VWAPCalculator
         self.daily_vwap = VWAPCalculator()
     
-    def analyze_symbol(self, symbol: str, df_1d: pd.DataFrame, 
+    async def analyze_symbol(self, symbol: str, df_1d: pd.DataFrame, 
                        df_4h: pd.DataFrame, df_1h: pd.DataFrame, 
                        df_15m: pd.DataFrame, timeframe: str,
                        current_time: datetime) -> List[Dict]:
@@ -69,7 +74,18 @@ class ActionPriceEngine:
         if len(df_exec) < 3 or len(df_4h) < 50 or len(df_1h) < 50:
             return []
         
-        current_price = float(df_exec['close'].iloc[-1])
+        # Получаем АКТУАЛЬНУЮ цену с Binance (mark price)
+        if self.client:
+            try:
+                price_data = await self.client.get_mark_price(symbol)
+                current_price = float(price_data['markPrice'])
+            except Exception as e:
+                logger.error(f"Failed to get current price for {symbol}: {e}")
+                # Fallback на последнюю закрытую свечу (лучше чем краш)
+                current_price = float(df_exec['close'].iloc[-1])
+        else:
+            # Client не передан (backtesting/тесты) - используем close свечи
+            current_price = float(df_exec['close'].iloc[-1])
         
         # 1. Получить зоны S/R
         zones = self.zone_builder.get_zones(symbol, df_1d, df_4h, current_price)

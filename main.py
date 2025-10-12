@@ -208,7 +208,7 @@ class TradingBot:
         if not use_testnet and ap_enabled:
             self.action_price_enabled = True
             ap_config = config.get('action_price', {})
-            self.action_price_engine = ActionPriceEngine(ap_config)
+            self.action_price_engine = ActionPriceEngine(ap_config, self.client)
             
             # Запуск Action Price Performance Tracker
             self.ap_performance_tracker = ActionPricePerformanceTracker(
@@ -802,7 +802,7 @@ class TradingBot:
                     continue
                 
                 # Анализ паттернов - передаём DataFrame отдельно
-                ap_signals = self.action_price_engine.analyze_symbol(
+                ap_signals = await self.action_price_engine.analyze_symbol(
                     symbol,
                     timeframe_data.get('1d'),
                     timeframe_data.get('4h'),
