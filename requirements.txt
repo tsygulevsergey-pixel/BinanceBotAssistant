@@ -18,3 +18,4 @@ sqlalchemy>=2.0.43
 websockets>=15.0.1
 redis>=5.0.0
 pytest
+openpyxl
