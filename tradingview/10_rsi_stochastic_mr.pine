@@ -1,0 +1,61 @@
+// @version=5
+// Strategy #10: RSI/Stochastic Mean Reversion
+// Перекупленность/перепроданность с дивергенциями
+strategy("10. RSI/Stoch MR", overlay=false, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+rsi_length = input.int(14, "RSI Period", minval=5, maxval=30)
+stoch_length = input.int(14, "Stochastic Period", minval=5, maxval=30)
+oversold = input.float(30, "Oversold Level", minval=10, maxval=40)
+overbought = input.float(70, "Overbought Level", minval=60, maxval=90)
+
+// Индикаторы
+rsi = ta.rsi(close, rsi_length)
+stoch_k = ta.stoch(close, high, low, stoch_length)
+stoch_d = ta.sma(stoch_k, 3)
+
+// Условия
+rsi_oversold = rsi < oversold
+rsi_overbought = rsi > overbought
+stoch_oversold = stoch_k < oversold
+stoch_overbought = stoch_k > overbought
+
+// Bullish/Bearish divergence (упрощенно)
+price_lower_low = low < ta.lowest(low[1], 5)
+rsi_higher_low = rsi > ta.lowest(rsi[1], 5)
+bullish_divergence = price_lower_low and rsi_higher_low
+
+price_higher_high = high > ta.highest(high[1], 5)
+rsi_lower_high = rsi < ta.highest(rsi[1], 5)
+bearish_divergence = price_higher_high and rsi_lower_high
+
+// ATR для SL/TP
+atr = ta.atr(14)
+
+// Entry условия
+long_condition = (rsi_oversold or stoch_oversold or bullish_divergence) and strategy.position_size == 0
+short_condition = (rsi_overbought or stoch_overbought or bearish_divergence) and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(rsi, "RSI", color=color.blue, linewidth=2)
+plot(stoch_k, "Stoch K", color=color.orange, linewidth=1)
+plot(stoch_d, "Stoch D", color=color.red, linewidth=1)
+
+hline(overbought, "Overbought", color=color.red, linestyle=hline.style_dashed)
+hline(oversold, "Oversold", color=color.green, linestyle=hline.style_dashed)
+hline(50, "Middle", color=color.gray, linestyle=hline.style_dotted)
+
+bgcolor(rsi_oversold or stoch_oversold ? color.new(color.green, 90) : na)
+bgcolor(rsi_overbought or stoch_overbought ? color.new(color.red, 90) : na)

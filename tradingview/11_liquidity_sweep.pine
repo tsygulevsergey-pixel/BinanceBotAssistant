@@ -1,0 +1,59 @@
+// @version=5
+// Strategy #11: Liquidity Sweep
+// Ловля ложных пробоев (охота за стопами)
+strategy("11. Liquidity Sweep", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+swing_lookback = input.int(10, "Swing Lookback", minval=5, maxval=20)
+sweep_atr_min = input.float(0.1, "Sweep Min ATR", minval=0.05, maxval=0.5, step=0.05)
+sweep_atr_max = input.float(0.3, "Sweep Max ATR", minval=0.2, maxval=1.0, step=0.1)
+volume_threshold = input.float(1.5, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+
+// Индикаторы
+atr = ta.atr(14)
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// Swing High/Low
+swing_high = ta.highest(high, swing_lookback)
+swing_low = ta.lowest(low, swing_lookback)
+
+// Liquidity Sweep (фитиль за уровень + возврат)
+sweep_high = high > swing_high and close < swing_high
+sweep_low = low < swing_low and close > swing_low
+
+// Размер sweep
+sweep_distance_high = high - swing_high
+sweep_distance_low = swing_low - low
+
+valid_sweep_high = sweep_high and sweep_distance_high > atr * sweep_atr_min and sweep_distance_high < atr * sweep_atr_max
+valid_sweep_low = sweep_low and sweep_distance_low > atr * sweep_atr_min and sweep_distance_low < atr * sweep_atr_max
+
+// Entry условия (reverse после sweep)
+long_condition = valid_sweep_low and volume_ratio > volume_threshold and strategy.position_size == 0
+short_condition = valid_sweep_high and volume_ratio > volume_threshold and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=low - atr * 0.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=high + atr * 0.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(swing_high, "Swing High", color=color.red, linewidth=1, style=plot.style_circles)
+plot(swing_low, "Swing Low", color=color.green, linewidth=1, style=plot.style_circles)
+
+plotshape(valid_sweep_high, "Sweep High", shape.triangledown, location.abovebar, color.red, size=size.small)
+plotshape(valid_sweep_low, "Sweep Low", shape.triangleup, location.belowbar, color.green, size=size.small)
+
+if long_condition
+    label.new(bar_index, low, "SWEEP\nLONG", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "SWEEP\nSHORT", style=label.style_label_down, color=color.red, textcolor=color.white)

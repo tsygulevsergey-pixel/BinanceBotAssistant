@@ -1,0 +1,70 @@
+// @version=5
+// Strategy #5: Break & Retest
+// Пробой и ретест уровня
+strategy("05. Break & Retest", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+lookback = input.int(20, "Pivot Lookback", minval=10, maxval=50)
+breakout_atr = input.float(0.25, "Breakout ATR", minval=0.1, maxval=1.0, step=0.05)
+retest_atr = input.float(0.3, "Retest ATR", minval=0.1, maxval=1.0, step=0.05)
+volume_threshold = input.float(1.5, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+
+// Индикаторы
+atr = ta.atr(14)
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// Pivot Points
+pivot_high = ta.pivothigh(high, lookback, lookback)
+pivot_low = ta.pivotlow(low, lookback, lookback)
+
+// Сохраняем последние пивоты
+var float last_resistance = na
+var float last_support = na
+var bool resistance_broken = false
+var bool support_broken = false
+
+if not na(pivot_high)
+    last_resistance := pivot_high
+    resistance_broken := false
+
+if not na(pivot_low)
+    last_support := pivot_low
+    support_broken := false
+
+// Breakout detection
+if not na(last_resistance) and close > last_resistance and not resistance_broken
+    resistance_broken := true
+
+if not na(last_support) and close < last_support and not support_broken
+    support_broken := true
+
+// Retest detection
+retest_resistance = resistance_broken and math.abs(close - last_resistance) < atr * retest_atr and close > last_resistance
+retest_support = support_broken and math.abs(close - last_support) < atr * retest_atr and close < last_support
+
+// Entry условия
+long_condition = retest_support and volume_ratio > volume_threshold and strategy.position_size == 0
+short_condition = retest_resistance and volume_ratio > volume_threshold and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=last_support - atr * 1.0, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=last_resistance + atr * 1.0, limit=close - atr * 2.0)
+
+// Visualization
+plot(last_resistance, "Resistance", color=color.red, linewidth=2, style=plot.style_circles)
+plot(last_support, "Support", color=color.green, linewidth=2, style=plot.style_circles)
+
+if long_condition
+    label.new(bar_index, low, "RETEST\nLONG", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "RETEST\nSHORT", style=label.style_label_down, color=color.red, textcolor=color.white)

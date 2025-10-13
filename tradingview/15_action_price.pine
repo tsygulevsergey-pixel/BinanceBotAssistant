@@ -1,0 +1,159 @@
+// @version=5
+// ACTION PRICE STRATEGY
+// S/R зоны + Anchored VWAP + EMA фильтры + 5 паттернов Price Action
+strategy("15. Action Price", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+sr_lookback = input.int(20, "S/R Lookback", minval=10, maxval=50)
+sr_touches = input.int(2, "Min S/R Touches", minval=1, maxval=5)
+ema_fast = input.int(20, "EMA Fast", minval=10, maxval=50)
+ema_slow = input.int(50, "EMA Slow", minval=20, maxval=100)
+min_score = input.float(5.0, "Min Pattern Score", minval=3.0, maxval=8.0, step=0.5)
+
+// ATR
+atr = ta.atr(14)
+
+// EMA тренд
+ema20 = ta.ema(close, ema_fast)
+ema50 = ta.ema(close, ema_slow)
+uptrend = ema20 > ema50
+downtrend = ema20 < ema50
+
+// S/R зоны (упрощенно через Pivot Points)
+resistance = ta.pivothigh(high, sr_lookback, sr_lookback)
+support = ta.pivotlow(low, sr_lookback, sr_lookback)
+
+var float key_resistance = na
+var float key_support = na
+
+if not na(resistance)
+    key_resistance := resistance
+
+if not na(support)
+    key_support := support
+
+// VWAP (дневной)
+vwap_value = ta.vwap(close)
+
+// === 5 ПАТТЕРНОВ PRICE ACTION ===
+
+// 1. Pin Bar (молот/повешенный)
+body = math.abs(close - open)
+upper_wick = high - math.max(close, open)
+lower_wick = math.min(close, open) - low
+total_range = high - low
+
+bullish_pin = lower_wick > body * 2 and lower_wick > upper_wick * 2 and close > open
+bearish_pin = upper_wick > body * 2 and upper_wick > lower_wick * 2 and close < open
+
+// 2. Engulfing (поглощение)
+bullish_engulfing = close[1] < open[1] and close > open and open <= close[1] and close >= open[1]
+bearish_engulfing = close[1] > open[1] and close < open and open >= close[1] and close <= open[1]
+
+// 3. Inside Bar
+inside_bar = high < high[1] and low > low[1]
+bullish_inside_break = inside_bar[1] and close > high[1]
+bearish_inside_break = inside_bar[1] and close < low[1]
+
+// 4. Rejection от S/R
+at_support = not na(key_support) and math.abs(low - key_support) < atr * 0.3
+at_resistance = not na(key_resistance) and math.abs(high - key_resistance) < atr * 0.3
+
+// 5. VWAP Bounce
+vwap_bounce_long = close < vwap_value and close > open and low < vwap_value
+vwap_bounce_short = close > vwap_value and close < open and high > vwap_value
+
+// === SCORING SYSTEM ===
+
+calc_long_score() =>
+    score = 0.0
+    
+    // Pattern score
+    if bullish_pin
+        score := score + 2.0
+    if bullish_engulfing
+        score := score + 2.0
+    if bullish_inside_break
+        score := score + 1.5
+    if at_support
+        score := score + 2.0
+    if vwap_bounce_long
+        score := score + 1.5
+    
+    // Trend alignment
+    if uptrend
+        score := score + 1.5
+    
+    // Price position
+    if close > vwap_value
+        score := score + 1.0
+    
+    score
+
+calc_short_score() =>
+    score = 0.0
+    
+    if bearish_pin
+        score := score + 2.0
+    if bearish_engulfing
+        score := score + 2.0
+    if bearish_inside_break
+        score := score + 1.5
+    if at_resistance
+        score := score + 2.0
+    if vwap_bounce_short
+        score := score + 1.5
+    
+    if downtrend
+        score := score + 1.5
+    
+    if close < vwap_value
+        score := score + 1.0
+    
+    score
+
+long_score = calc_long_score()
+short_score = calc_short_score()
+
+// Entry условия
+long_condition = long_score >= min_score and strategy.position_size == 0
+short_condition = short_score >= min_score and strategy.position_size == 0
+
+// Position Management (1R и 2R)
+if long_condition
+    sl = not na(key_support) ? key_support : close - atr * 1.5
+    tp1 = close + (close - sl) * 1.0  // 1R
+    tp2 = close + (close - sl) * 2.0  // 2R
+    
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=sl, limit=tp2)
+
+if short_condition
+    sl = not na(key_resistance) ? key_resistance : close + atr * 1.5
+    tp1 = close - (sl - close) * 1.0  // 1R
+    tp2 = close - (sl - close) * 2.0  // 2R
+    
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=sl, limit=tp2)
+
+// Visualization
+plot(ema20, "EMA 20", color=color.orange, linewidth=2)
+plot(ema50, "EMA 50", color=color.blue, linewidth=2)
+plot(vwap_value, "VWAP", color=color.purple, linewidth=1, style=plot.style_circles)
+plot(key_resistance, "Resistance", color=color.red, linewidth=2, style=plot.style_circles)
+plot(key_support, "Support", color=color.green, linewidth=2, style=plot.style_circles)
+
+bgcolor(uptrend ? color.new(color.green, 95) : downtrend ? color.new(color.red, 95) : na)
+
+// Pattern markers
+plotshape(bullish_pin, "Bullish Pin", shape.triangleup, location.belowbar, color.green, size=size.tiny)
+plotshape(bearish_pin, "Bearish Pin", shape.triangledown, location.abovebar, color.red, size=size.tiny)
+
+if long_condition
+    label.new(bar_index, low, "AP LONG\n" + str.tostring(long_score, "#.#"), style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "AP SHORT\n" + str.tostring(short_score, "#.#"), style=label.style_label_down, color=color.red, textcolor=color.white)

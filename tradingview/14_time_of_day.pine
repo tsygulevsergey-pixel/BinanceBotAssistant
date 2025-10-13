@@ -1,0 +1,75 @@
+// @version=5
+// Strategy #14: Time of Day
+// Сессионные паттерны (EU/US открытие)
+strategy("14. Time of Day", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+volume_threshold = input.float(1.5, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+breakout_atr = input.float(0.3, "Breakout ATR", minval=0.1, maxval=1.0, step=0.05)
+
+// Сессионные окна (UTC)
+is_asian_session = (hour >= 0 and hour < 2) or (hour >= 22 and hour < 24)
+is_london_session = (hour >= 7 and hour < 9)
+is_ny_session = (hour >= 13 and hour < 15)
+
+// Breakout window (высокая ликвидность)
+is_breakout_window = is_london_session or is_ny_session
+
+// Mean Reversion window (низкая ликвидность)
+is_mr_window = is_asian_session
+
+// Индикаторы
+atr = ta.atr(14)
+ema_20 = ta.ema(close, 20)
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// Range для Mean Reversion
+range_high = ta.highest(high, 10)
+range_low = ta.lowest(low, 10)
+
+// BREAKOUT стратегия в активные сессии
+momentum = close - close[1]
+strong_momentum = math.abs(momentum) > atr * breakout_atr
+
+breakout_long = is_breakout_window and momentum > 0 and strong_momentum and close > ema_20 and volume_ratio > volume_threshold
+breakout_short = is_breakout_window and momentum < 0 and strong_momentum and close < ema_20 and volume_ratio > volume_threshold
+
+// MEAN REVERSION в тихие часы
+mr_long = is_mr_window and close < range_low and close < ema_20
+mr_short = is_mr_window and close > range_high and close > ema_20
+
+// Entry условия
+long_condition = (breakout_long or mr_long) and strategy.position_size == 0
+short_condition = (breakout_short or mr_short) and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    if is_breakout_window
+        strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+    else
+        strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.0, limit=ema_20)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    if is_breakout_window
+        strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+    else
+        strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.0, limit=ema_20)
+
+// Visualization
+plot(ema_20, "EMA 20", color=color.blue, linewidth=2)
+plot(range_high, "Range High", color=color.red, linewidth=1, style=plot.style_circles)
+plot(range_low, "Range Low", color=color.green, linewidth=1, style=plot.style_circles)
+
+bgcolor(is_london_session ? color.new(color.orange, 95) : is_ny_session ? color.new(color.blue, 95) : is_asian_session ? color.new(color.purple, 95) : na)
+
+if long_condition
+    label.new(bar_index, low, is_breakout_window ? "BREAKOUT ↑" : "MR ↑", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, is_breakout_window ? "BREAKOUT ↓" : "MR ↓", style=label.style_label_down, color=color.red, textcolor=color.white)

@@ -1,0 +1,56 @@
+// @version=5
+// Strategy #1: Donchian Breakout
+// Пробой канала Дончиана с фильтрами
+strategy("01. Donchian Breakout", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+period = input.int(20, "Donchian Period", minval=10, maxval=50)
+min_close_distance_atr = input.float(0.25, "Min Close Distance (ATR)", minval=0.1, maxval=1.0, step=0.05)
+volume_threshold = input.float(1.5, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+atr_period = input.int(14, "ATR Period", minval=5, maxval=30)
+
+// Индикаторы
+atr = ta.atr(atr_period)
+upper_band = ta.highest(high, period)
+lower_band = ta.lowest(low, period)
+middle_band = (upper_band + lower_band) / 2
+
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// Условия пробоя
+upper_breakout = close > upper_band[1] and close[1] <= upper_band[1]
+lower_breakout = close < lower_band[1] and close[1] >= lower_band[1]
+
+// Фильтр расстояния
+close_distance = math.abs(close - upper_band) / atr
+valid_distance = close_distance >= min_close_distance_atr
+
+// Entry условия
+long_condition = upper_breakout and volume_ratio > volume_threshold and valid_distance and strategy.position_size == 0
+short_condition = lower_breakout and volume_ratio > volume_threshold and valid_distance and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(upper_band, "Upper Band", color=color.red, linewidth=2)
+plot(lower_band, "Lower Band", color=color.green, linewidth=2)
+plot(middle_band, "Middle", color=color.gray, linewidth=1, style=plot.style_circles)
+
+barcolor(volume_ratio > volume_threshold ? color.new(color.yellow, 70) : na)
+
+if long_condition
+    label.new(bar_index, low, "LONG", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "SHORT", style=label.style_label_down, color=color.red, textcolor=color.white)

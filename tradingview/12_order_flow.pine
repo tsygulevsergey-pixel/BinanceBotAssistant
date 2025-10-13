@@ -1,0 +1,62 @@
+// @version=5
+// Strategy #12: Order Flow
+// Анализ потока ордеров (упрощенная версия через Volume Delta)
+strategy("12. Order Flow", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+delta_ma_period = input.int(10, "Delta MA Period", minval=5, maxval=30)
+delta_threshold = input.float(1.5, "Delta Threshold", minval=1.0, maxval=3.0, step=0.1)
+volume_threshold = input.float(1.5, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+
+// Volume Delta (упрощенно: Close > Open = buying, Close < Open = selling)
+volume_delta = close > open ? volume : close < open ? -volume : 0
+cumulative_delta = ta.cum(volume_delta)
+delta_ma = ta.sma(volume_delta, delta_ma_period)
+
+// Нормализованный Delta
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+delta_normalized = volume_delta / volume_ma
+
+// ATR
+atr = ta.atr(14)
+
+// Сильный дисбаланс
+strong_buying = delta_normalized > delta_threshold
+strong_selling = delta_normalized < -delta_threshold
+
+// EMA для тренда
+ema_20 = ta.ema(close, 20)
+uptrend = close > ema_20
+downtrend = close < ema_20
+
+// Entry условия
+long_condition = strong_buying and uptrend and volume_ratio > volume_threshold and strategy.position_size == 0
+short_condition = strong_selling and downtrend and volume_ratio > volume_threshold and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(ema_20, "EMA 20", color=color.blue, linewidth=2)
+
+// Delta histogram
+hline(0, "Zero", color=color.gray)
+plot(delta_normalized, "Volume Delta", color=delta_normalized > 0 ? color.green : color.red, linewidth=2, style=plot.style_histogram)
+plot(delta_threshold, "Threshold", color=color.green, linewidth=1, style=plot.style_circles)
+plot(-delta_threshold, "-Threshold", color=color.red, linewidth=1, style=plot.style_circles)
+
+if long_condition
+    label.new(bar_index, low, "BUY FLOW", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "SELL FLOW", style=label.style_label_down, color=color.red, textcolor=color.white)

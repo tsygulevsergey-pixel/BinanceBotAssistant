@@ -1,0 +1,73 @@
+// @version=5
+// Strategy #7: VWAP Mean Reversion
+// Возврат к VWAP из экстремумов
+strategy("07. VWAP Mean Reversion", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+sigma_multiplier = input.float(2.0, "Sigma Multiplier", minval=1.0, maxval=3.0, step=0.5)
+reclaim_bars = input.int(2, "Reclaim Bars", minval=1, maxval=5)
+time_stop_bars = input.int(8, "Time Stop (bars)", minval=3, maxval=20)
+
+// VWAP и стандартное отклонение
+vwap_value = ta.vwap(close)
+vwap_stdev = ta.stdev(close - vwap_value, 20)
+
+upper_band = vwap_value + vwap_stdev * sigma_multiplier
+lower_band = vwap_value - vwap_stdev * sigma_multiplier
+
+// ATR для SL/TP
+atr = ta.atr(14)
+
+// Условия экстремума
+at_upper_extreme = close > upper_band
+at_lower_extreme = close < lower_band
+
+// Reclaim (возврат к VWAP)
+var int reclaim_long_count = 0
+var int reclaim_short_count = 0
+
+if at_lower_extreme and close > vwap_value
+    reclaim_long_count := reclaim_long_count + 1
+else
+    reclaim_long_count := 0
+
+if at_upper_extreme and close < vwap_value
+    reclaim_short_count := reclaim_short_count + 1
+else
+    reclaim_short_count := 0
+
+// Entry условия
+long_condition = reclaim_long_count >= reclaim_bars and strategy.position_size == 0
+short_condition = reclaim_short_count >= reclaim_bars and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.0, limit=vwap_value)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.0, limit=vwap_value)
+
+// Time stop
+if strategy.position_size > 0 and ta.barssince(long_condition) >= time_stop_bars
+    strategy.close("Long", comment="Time Stop")
+
+if strategy.position_size < 0 and ta.barssince(short_condition) >= time_stop_bars
+    strategy.close("Short", comment="Time Stop")
+
+// Visualization
+plot(vwap_value, "VWAP", color=color.yellow, linewidth=2)
+plot(upper_band, "Upper Band", color=color.red, linewidth=1)
+plot(lower_band, "Lower Band", color=color.green, linewidth=1)
+
+bgcolor(at_upper_extreme ? color.new(color.red, 90) : at_lower_extreme ? color.new(color.green, 90) : na)
+
+if long_condition
+    label.new(bar_index, low, "MR LONG", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "MR SHORT", style=label.style_label_down, color=color.red, textcolor=color.white)

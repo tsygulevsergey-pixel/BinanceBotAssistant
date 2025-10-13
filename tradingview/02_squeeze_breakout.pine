@@ -1,0 +1,75 @@
+// @version=5
+// Strategy #2: Squeeze Breakout
+// Сжатие и расширение волатильности
+strategy("02. Squeeze Breakout", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+bb_length = input.int(20, "BB Length", minval=10, maxval=50)
+bb_mult = input.float(2.0, "BB Multiplier", minval=1.0, maxval=3.0, step=0.1)
+kc_length = input.int(20, "KC Length", minval=10, maxval=50)
+kc_mult = input.float(1.5, "KC Multiplier", minval=0.5, maxval=3.0, step=0.1)
+min_squeeze_bars = input.int(12, "Min Squeeze Duration", minval=5, maxval=30)
+breakout_atr = input.float(0.25, "Breakout ATR", minval=0.1, maxval=1.0, step=0.05)
+
+// Bollinger Bands
+bb_basis = ta.sma(close, bb_length)
+bb_dev = ta.stdev(close, bb_length)
+bb_upper = bb_basis + bb_dev * bb_mult
+bb_lower = bb_basis - bb_dev * bb_mult
+
+// Keltner Channels
+kc_basis = ta.ema(close, kc_length)
+kc_range = ta.atr(kc_length)
+kc_upper = kc_basis + kc_range * kc_mult
+kc_lower = kc_basis - kc_range * kc_mult
+
+// Squeeze Detection
+squeeze_on = bb_lower > kc_lower and bb_upper < kc_upper
+squeeze_off = bb_lower < kc_lower or bb_upper > kc_upper
+
+// Счетчик сжатия
+var int squeeze_count = 0
+if squeeze_on
+    squeeze_count := squeeze_count + 1
+else
+    squeeze_count := 0
+
+// ATR
+atr = ta.atr(14)
+
+// Momentum
+momentum = close - close[1]
+
+// Breakout условия
+valid_squeeze = squeeze_count >= min_squeeze_bars
+breakout_up = squeeze_off and momentum > atr * breakout_atr and valid_squeeze
+breakout_down = squeeze_off and momentum < -atr * breakout_atr and valid_squeeze
+
+long_condition = breakout_up and strategy.position_size == 0
+short_condition = breakout_down and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(bb_upper, "BB Upper", color=color.blue, linewidth=1)
+plot(bb_lower, "BB Lower", color=color.blue, linewidth=1)
+plot(kc_upper, "KC Upper", color=color.orange, linewidth=1)
+plot(kc_lower, "KC Lower", color=color.orange, linewidth=1)
+
+bgcolor(squeeze_on ? color.new(color.red, 90) : na, title="Squeeze")
+
+if long_condition
+    label.new(bar_index, low, "SQUEEZE\nBREAK ↑", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "SQUEEZE\nBREAK ↓", style=label.style_label_down, color=color.red, textcolor=color.white)

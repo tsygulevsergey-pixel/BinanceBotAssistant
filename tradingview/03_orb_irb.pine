@@ -1,0 +1,71 @@
+// @version=5
+// Strategy #3: ORB/IRB (Opening/Initial Range Breakout)
+// Пробой начального диапазона
+strategy("03. ORB/IRB", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+range_hours = input.int(1, "Range Hours", minval=1, maxval=4)
+breakout_atr = input.float(0.25, "Breakout ATR", minval=0.1, maxval=1.0, step=0.05)
+volume_threshold = input.float(1.5, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+
+// Сессионное время (UTC)
+is_asian_open = (hour >= 0 and hour < 0 + range_hours)
+is_london_open = (hour >= 7 and hour < 7 + range_hours)
+is_ny_open = (hour >= 13 and hour < 13 + range_hours)
+
+is_range_period = is_asian_open or is_london_open or is_ny_open
+
+// Вычисление диапазона
+var float range_high = na
+var float range_low = na
+var bool range_set = false
+
+if is_range_period
+    if na(range_high) or not range_set
+        range_high := high
+        range_low := low
+        range_set := true
+    else
+        range_high := math.max(range_high, high)
+        range_low := math.min(range_low, low)
+else
+    range_set := false
+
+// ATR
+atr = ta.atr(14)
+
+// Volume
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// Breakout условия
+valid_range = not na(range_high) and not na(range_low) and not is_range_period
+upper_breakout = valid_range and close > range_high and close[1] <= range_high
+lower_breakout = valid_range and close < range_low and close[1] >= range_low
+
+long_condition = upper_breakout and volume_ratio > volume_threshold and strategy.position_size == 0
+short_condition = lower_breakout and volume_ratio > volume_threshold and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=range_low, limit=close + (close - range_low) * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=range_high, limit=close - (range_high - close) * 2.0)
+
+// Visualization
+plot(range_high, "Range High", color=color.red, linewidth=2, style=plot.style_stepline)
+plot(range_low, "Range Low", color=color.green, linewidth=2, style=plot.style_stepline)
+
+bgcolor(is_range_period ? color.new(color.blue, 95) : na, title="Range Period")
+
+if long_condition
+    label.new(bar_index, low, "ORB ↑", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "ORB ↓", style=label.style_label_down, color=color.red, textcolor=color.white)

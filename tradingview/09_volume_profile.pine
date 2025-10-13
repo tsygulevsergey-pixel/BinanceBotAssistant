@@ -1,0 +1,70 @@
+// @version=5
+// Strategy #9: Volume Profile
+// Торговля от уровней VAH/VAL/POC
+strategy("09. Volume Profile", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+lookback = input.int(50, "Volume Profile Lookback", minval=20, maxval=100)
+num_rows = input.int(24, "Number of Price Rows", minval=10, maxval=50)
+acceptance_atr = input.float(0.25, "Acceptance ATR", minval=0.1, maxval=0.5, step=0.05)
+acceptance_closes = input.int(2, "Acceptance Closes", minval=1, maxval=5)
+
+// ATR
+atr = ta.atr(14)
+
+// Вычисление POC (упрощенная версия)
+price_range = ta.highest(high, lookback) - ta.lowest(low, lookback)
+row_size = price_range / num_rows
+
+// POC приблизительно как VWAP
+poc = ta.vwap(close)
+
+// VAH/VAL (упрощенно через стандартное отклонение)
+stdev = ta.stdev(close, lookback)
+vah = poc + stdev * 0.7
+val = poc - stdev * 0.7
+
+// Rejection/Acceptance
+var int above_vah_closes = 0
+var int below_val_closes = 0
+
+if close > vah
+    above_vah_closes := above_vah_closes + 1
+else
+    above_vah_closes := 0
+
+if close < val
+    below_val_closes := below_val_closes + 1
+else
+    below_val_closes := 0
+
+// Acceptance (пробой и закрепление)
+vah_acceptance = above_vah_closes >= acceptance_closes
+val_acceptance = below_val_closes >= acceptance_closes
+
+// Entry условия
+long_condition = val_acceptance and strategy.position_size == 0
+short_condition = vah_acceptance and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=val - atr * 1.0, limit=poc)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=vah + atr * 1.0, limit=poc)
+
+// Visualization
+plot(vah, "VAH", color=color.red, linewidth=2)
+plot(poc, "POC", color=color.yellow, linewidth=2, style=plot.style_circles)
+plot(val, "VAL", color=color.green, linewidth=2)
+
+if long_condition
+    label.new(bar_index, low, "VAL ACCEPT", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "VAH ACCEPT", style=label.style_label_down, color=color.red, textcolor=color.white)

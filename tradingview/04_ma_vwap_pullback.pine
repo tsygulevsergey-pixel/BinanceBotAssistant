@@ -1,0 +1,61 @@
+// @version=5
+// Strategy #4: MA/VWAP Pullback
+// Откат к скользящим средним и VWAP в тренде
+strategy("04. MA/VWAP Pullback", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+ema_fast = input.int(20, "EMA Fast", minval=5, maxval=50)
+ema_slow = input.int(50, "EMA Slow", minval=20, maxval=200)
+pullback_threshold = input.float(0.3, "Pullback ATR", minval=0.1, maxval=1.0, step=0.05)
+volume_threshold = input.float(1.2, "Volume Threshold", minval=1.0, maxval=3.0, step=0.1)
+
+// Индикаторы
+ema_20 = ta.ema(close, ema_fast)
+ema_50 = ta.ema(close, ema_slow)
+vwap = ta.vwap(close)
+atr = ta.atr(14)
+
+// Volume
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// Тренд
+uptrend = ema_20 > ema_50 and close > ema_50
+downtrend = ema_20 < ema_50 and close < ema_50
+
+// Pullback к EMA20
+pullback_to_ema20_long = uptrend and math.abs(close - ema_20) < atr * pullback_threshold and close > ema_20
+pullback_to_ema20_short = downtrend and math.abs(close - ema_20) < atr * pullback_threshold and close < ema_20
+
+// Pullback к VWAP
+pullback_to_vwap_long = uptrend and math.abs(close - vwap) < atr * pullback_threshold and close > vwap
+pullback_to_vwap_short = downtrend and math.abs(close - vwap) < atr * pullback_threshold and close < vwap
+
+// Entry условия
+long_condition = (pullback_to_ema20_long or pullback_to_vwap_long) and volume_ratio > volume_threshold and strategy.position_size == 0
+short_condition = (pullback_to_ema20_short or pullback_to_vwap_short) and volume_ratio > volume_threshold and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(ema_20, "EMA 20", color=color.orange, linewidth=2)
+plot(ema_50, "EMA 50", color=color.blue, linewidth=2)
+plot(vwap, "VWAP", color=color.purple, linewidth=1, style=plot.style_circles)
+
+bgcolor(uptrend ? color.new(color.green, 95) : downtrend ? color.new(color.red, 95) : na)
+
+if long_condition
+    label.new(bar_index, low, "PULLBACK\nLONG", style=label.style_label_up, color=color.green, textcolor=color.white)
+
+if short_condition
+    label.new(bar_index, high, "PULLBACK\nSHORT", style=label.style_label_down, color=color.red, textcolor=color.white)

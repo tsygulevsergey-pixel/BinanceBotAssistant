@@ -1,0 +1,56 @@
+// @version=5
+// Strategy #13: CVD Divergence
+// Дивергенции между ценой и кумулятивным объемом
+strategy("13. CVD Divergence", overlay=false, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// Параметры
+lookback = input.int(20, "Divergence Lookback", minval=10, maxval=50)
+cvd_smooth = input.int(3, "CVD Smoothing", minval=1, maxval=10)
+
+// CVD (упрощенно)
+volume_delta = close > open ? volume : close < open ? -volume : 0
+cvd_raw = ta.cum(volume_delta)
+cvd = ta.sma(cvd_raw, cvd_smooth)
+
+// ATR для SL/TP
+atr = ta.atr(14)
+
+// Поиск дивергенций
+// Bullish divergence: price lower low + CVD higher low
+price_ll = ta.pivotlow(close, lookback, lookback)
+cvd_pivot = ta.valuewhen(price_ll, cvd, 0)
+cvd_prev = ta.valuewhen(price_ll, cvd, 1)
+
+bullish_div = not na(price_ll) and price_ll < ta.valuewhen(price_ll, close, 1) and cvd_pivot > cvd_prev
+
+// Bearish divergence: price higher high + CVD lower high  
+price_hh = ta.pivothigh(close, lookback, lookback)
+cvd_pivot_high = ta.valuewhen(price_hh, cvd, 0)
+cvd_prev_high = ta.valuewhen(price_hh, cvd, 1)
+
+bearish_div = not na(price_hh) and price_hh > ta.valuewhen(price_hh, close, 1) and cvd_pivot_high < cvd_prev_high
+
+// Entry условия
+long_condition = bullish_div and strategy.position_size == 0
+short_condition = bearish_div and strategy.position_size == 0
+
+// Position Management
+if long_condition
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Exit Long", from_entry="Long", stop=close - atr * 1.5, limit=close + atr * 2.0)
+
+if short_condition
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Exit Short", from_entry="Short", stop=close + atr * 1.5, limit=close - atr * 2.0)
+
+// Visualization
+plot(cvd, "CVD", color=color.blue, linewidth=2)
+hline(0, "Zero", color=color.gray)
+
+plotshape(bullish_div, "Bullish Div", shape.triangleup, location.belowbar, color.green, size=size.normal)
+plotshape(bearish_div, "Bearish Div", shape.triangledown, location.abovebar, color.red, size=size.normal)
+
+bgcolor(bullish_div ? color.new(color.green, 90) : bearish_div ? color.new(color.red, 90) : na)
