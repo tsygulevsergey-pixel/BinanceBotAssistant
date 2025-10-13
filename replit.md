@@ -26,7 +26,7 @@ Preferred communication style: Simple, everyday language.
 - **StrategyManager**: Orchestrates multiple strategies across timeframes.
 - **Signal Dataclass**: Standardized signal output.
 - **Implemented Strategies**: 15 active strategies covering breakout, pullback, and mean reversion, with mandatory filters (ADX, ATR%, BBW, expansion block), dual confluence, BTC directional filtering, and a signal scoring threshold.
-- **Action Price Strategy System**: A production-only module using S/R zones, Anchored VWAP, EMA filters, and 5 price action patterns for signal generation with dedicated performance tracking and partial profit-taking. This system includes an advanced Zone Strength System, Proximity Formalization, EMA Pullback Exception, and Pattern Quality System.
+- **Action Price Strategy System**: A production-only module using S/R zones, Anchored VWAP, EMA filters, and 5 price action patterns for signal generation with dedicated performance tracking and partial profit-taking. This system includes an advanced Zone Strength System, Proximity Formalization, EMA Pullback Exception, and Pattern Quality System. **V2 minimum score threshold lowered from 6.5 to 5.0** to increase signal frequency (original threshold was too restrictive due to multiple scoring penalties).
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED.
