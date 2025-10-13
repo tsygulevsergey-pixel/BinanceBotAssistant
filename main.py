@@ -178,7 +178,11 @@ class TradingBot:
             raise Exception("Client not initialized")
         
         rate_limit_status = self.client.get_rate_limit_status()
-        logger.info(f"Rate limit status: {rate_limit_status['current_weight']}/{rate_limit_status['limit']}")
+        logger.info(
+            f"Rate limit status: {rate_limit_status['current_weight']}/{rate_limit_status['safe_limit']} "
+            f"(90% threshold) | Hard limit: {rate_limit_status['hard_limit']} | "
+            f"Usage: {rate_limit_status['percent_used']:.1f}%"
+        )
         
         # Загрузить активные сигналы из БД и заблокировать символы
         self._load_active_signals_on_startup()
