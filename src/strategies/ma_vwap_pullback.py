@@ -129,7 +129,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                     tp1 = entry + atr_distance * 1.0  # 1R
                     tp2 = entry + atr_distance * 2.0  # 2R
                     
-                    base_score = 1.0
+                    base_score = 2.5  # Increased from 1.0 - professional quality pullback
                     confirmations = []
                     
                     cvd_change = indicators.get('cvd_change')
@@ -206,7 +206,7 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                     tp1 = entry - atr_distance * 1.0  # 1R
                     tp2 = entry - atr_distance * 2.0  # 2R
                     
-                    base_score = 1.0
+                    base_score = 2.5  # Increased from 1.0 - professional quality pullback
                     confirmations = []
                     
                     cvd_change = indicators.get('cvd_change')

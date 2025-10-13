@@ -265,7 +265,7 @@ class BreakRetestStrategy(BaseStrategy):
                         take_profit_2=float(tp2),
                         regime=regime,
                         bias=bias,
-                        base_score=1.0,
+                        base_score=2.5,  # Increased from 1.0 - professional quality breakout
                         metadata={
                             'breakout_level': float(breakout_level),
                             'retest_zone_upper': float(retest_zone_upper),
@@ -323,7 +323,7 @@ class BreakRetestStrategy(BaseStrategy):
                         take_profit_2=float(tp2),
                         regime=regime,
                         bias=bias,
-                        base_score=1.0,
+                        base_score=2.5,  # Increased from 1.0 - professional quality breakout
                         metadata={
                             'breakout_level': float(breakout_level),
                             'retest_zone_upper': float(retest_zone_upper),

@@ -21,6 +21,7 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ Added Telegram commands: /regime_stats, /confluence_stats
 - ✅ Partial TP system ready for 30/40/30 implementation (TODO in signal_tracker.py)
 - ✅ **CRITICAL FIX**: Rate limiter infinite loop bug - counters now reset after wait period
+- ✅ **SCORE CALIBRATION**: Increased base_score from 1.0 to 2.5 for Break & Retest and MA/VWAP Pullback strategies. Threshold raised from 2.0 to 4.5 - now requires minimum 2 confirmations (volume/CVD/OI/imbalance) for quality signals
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
