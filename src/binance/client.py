@@ -99,22 +99,28 @@ class BinanceClient:
         try:
             # Проверить наличие кеша
             if os.path.exists(cache_file):
-                with open(cache_file, 'r') as f:
-                    cache_data = json.load(f)
-                    cached_time = datetime.fromisoformat(cache_data['timestamp'])
-                    now = datetime.now(pytz.UTC)
-                    
-                    # Если кеш свежий (< 1 часа), использовать его
-                    if now - cached_time < timedelta(hours=cache_ttl_hours):
-                        self.symbols_info = cache_data['symbols_info']
-                        age_minutes = (now - cached_time).total_seconds() / 60
-                        logger.info(
-                            f"📦 Loaded precision info from cache for {len(self.symbols_info)} symbols "
-                            f"(age: {age_minutes:.1f} min)"
-                        )
-                        return
+                try:
+                    with open(cache_file, 'r') as f:
+                        cache_data = json.load(f)
+                        cached_time = datetime.fromisoformat(cache_data['timestamp'])
+                        now = datetime.now(pytz.UTC)
+                        
+                        # Если кеш свежий (< 1 часа), использовать его
+                        if now - cached_time < timedelta(hours=cache_ttl_hours):
+                            self.symbols_info = cache_data['symbols_info']
+                            age_minutes = (now - cached_time).total_seconds() / 60
+                            logger.info(
+                                f"📦 Loaded precision info from cache for {len(self.symbols_info)} symbols "
+                                f"(age: {age_minutes:.1f} min)"
+                            )
+                            return
+                        else:
+                            logger.info(f"Cache expired ({(now - cached_time).total_seconds() / 3600:.1f}h old), fetching new data")
+                except Exception as e:
+                    logger.warning(f"Failed to read cache file: {e}, fetching new data")
             
             # Кеш отсутствует или устарел - делаем запрос к API
+            logger.info(f"Fetching exchange info from API (cache: {'not found' if not os.path.exists(cache_file) else 'expired'})")
             info = await self.get_exchange_info()
             
             for symbol_info in info.get('symbols', []):
@@ -127,17 +133,27 @@ class BinanceClient:
                 }
             
             # Сохранить в кеш
-            os.makedirs('data', exist_ok=True)
-            with open(cache_file, 'w') as f:
-                json.dump({
-                    'timestamp': datetime.now(pytz.UTC).isoformat(),
-                    'symbols_info': self.symbols_info
-                }, f)
-            
-            logger.info(f"✅ Loaded precision info for {len(self.symbols_info)} symbols (cached to file)")
+            try:
+                os.makedirs('data', exist_ok=True)
+                cache_path = os.path.abspath(cache_file)
+                with open(cache_file, 'w') as f:
+                    json.dump({
+                        'timestamp': datetime.now(pytz.UTC).isoformat(),
+                        'symbols_info': self.symbols_info
+                    }, f, indent=2)
+                
+                # Проверить что файл создан
+                if os.path.exists(cache_file):
+                    file_size = os.path.getsize(cache_file) / 1024  # KB
+                    logger.info(f"✅ Loaded precision info for {len(self.symbols_info)} symbols (cached to {cache_path}, {file_size:.1f} KB)")
+                else:
+                    logger.warning(f"⚠️ Cache file not found after write: {cache_path}")
+            except Exception as e:
+                logger.error(f"Failed to save cache: {e}")
+                logger.info(f"✅ Loaded precision info for {len(self.symbols_info)} symbols (cache save failed)")
             
         except Exception as e:
-            logger.error(f"Failed to load symbols info: {e}")
+            logger.error(f"Failed to load symbols info: {e}", exc_info=True)
     
     def format_price(self, symbol: str, price: float) -> str:
         """Форматировать цену согласно precision символа"""
