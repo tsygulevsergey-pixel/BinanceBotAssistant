@@ -17,11 +17,25 @@ class RateLimiter:
         self.lock = asyncio.Lock()
         self.backoff_base = config.get('binance.rate_limit_backoff_base', 2)
         self.max_retries = config.get('binance.rate_limit_max_retries', 5)
+        
+        # IP ban tracking
+        self.ip_ban_until: Optional[float] = None  # Timestamp когда IP бан снимется
     
     async def acquire(self, weight: int = 1) -> bool:
         while True:
             async with self.lock:
                 now = time.time()
+                
+                # Проверить IP ban
+                if self.ip_ban_until and now < self.ip_ban_until:
+                    wait_time = self.ip_ban_until - now
+                    logger.warning(
+                        f"🚫 IP BAN active, waiting {wait_time:.0f}s before next request "
+                        f"(unbanned at {time.strftime('%H:%M:%S', time.localtime(self.ip_ban_until))})"
+                    )
+                    await asyncio.sleep(wait_time)
+                    self.ip_ban_until = None  # Сбросить после ожидания
+                    continue
                 
                 # Очистить устаревшие запросы
                 while self.requests and self.requests[0][0] < now - self.window_seconds:
@@ -81,8 +95,10 @@ class RateLimiter:
         # Если есть Retry-After - значит IP бан или временная блокировка
         if retry_after:
             wait_seconds = int(retry_after)
+            self.ip_ban_until = time.time() + wait_seconds
+            unban_time = time.strftime('%H:%M:%S', time.localtime(self.ip_ban_until))
             logger.error(
-                f"🚨 BINANCE IP BAN/BLOCK detected! Must wait {wait_seconds}s before next request"
+                f"🚨 BINANCE IP BAN detected! All requests blocked until {unban_time} ({wait_seconds}s)"
             )
     
     def get_current_usage(self) -> Dict[str, Any]:
