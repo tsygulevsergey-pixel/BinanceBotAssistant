@@ -13,7 +13,8 @@ class RateLimiter:
         self.safety_threshold = safety_threshold  # 90% порог безопасности
         self.safe_limit = int(self.weight_limit * safety_threshold)  # 990 для 1100
         self.requests = deque()
-        self.current_weight = 0
+        self.current_weight = 0  # Реальный вес от Binance
+        self.pending_weight = 0  # Вес запросов в полёте (до получения ответа от Binance)
         self.lock = asyncio.Lock()
         self.backoff_base = config.get('binance.rate_limit_backoff_base', 2)
         self.max_retries = config.get('binance.rate_limit_max_retries', 5)
@@ -39,40 +40,53 @@ class RateLimiter:
                 
                 # Очистить устаревшие запросы
                 while self.requests and self.requests[0][0] < now - self.window_seconds:
-                    _, w = self.requests.popleft()
-                    self.current_weight -= w
+                    self.requests.popleft()
                 
-                # Проверка на 90% порог безопасности
-                if self.current_weight + weight > self.safe_limit:
-                    # Найти время до сброса самого старого запроса
-                    wait_time = self.requests[0][0] + self.window_seconds - now if self.requests else 1
-                    percent = ((self.current_weight + weight) / self.weight_limit) * 100
+                # Проверка: current (от Binance) + pending (в полёте) + новый weight
+                total_weight = self.current_weight + self.pending_weight + weight
+                
+                if total_weight > self.safe_limit:
+                    # Найти время до сброса (используем окно 60 сек)
+                    wait_time = 60 - (now % 60) + 1  # Ждём до следующей минуты
+                    percent = (total_weight / self.weight_limit) * 100
                     logger.warning(
                         f"⚠️ Rate limit threshold reached ({percent:.1f}% of limit), "
-                        f"pausing for {wait_time:.1f}s (current: {self.current_weight}/{self.safe_limit})"
+                        f"pausing for {wait_time:.1f}s (current: {self.current_weight}+{self.pending_weight}/{self.safe_limit})"
                     )
                 else:
+                    # Резервируем вес (будет освобождён при получении ответа от Binance)
+                    self.pending_weight += weight
                     self.requests.append((now, weight))
-                    self.current_weight += weight
                     return True
             
             await asyncio.sleep(wait_time)
     
     async def execute_with_backoff(self, func, *args, weight: int = 1, **kwargs):
-        for attempt in range(self.max_retries):
-            try:
-                await self.acquire(weight)
-                result = await func(*args, **kwargs)
-                return result
-            except Exception as e:
-                if '429' in str(e) or '418' in str(e):
-                    wait_time = (self.backoff_base ** attempt) + (time.time() % 1)
-                    logger.warning(f"Rate limit hit (attempt {attempt + 1}/{self.max_retries}), backing off for {wait_time:.2f}s")
-                    await asyncio.sleep(wait_time)
-                else:
-                    raise
-        
-        raise Exception(f"Max retries ({self.max_retries}) exceeded for rate limited request")
+        acquired = False
+        try:
+            for attempt in range(self.max_retries):
+                try:
+                    if not acquired:
+                        await self.acquire(weight)
+                        acquired = True
+                    result = await func(*args, **kwargs)
+                    return result
+                except Exception as e:
+                    if '429' in str(e) or '418' in str(e):
+                        wait_time = (self.backoff_base ** attempt) + (time.time() % 1)
+                        logger.warning(f"Rate limit hit (attempt {attempt + 1}/{self.max_retries}), backing off for {wait_time:.2f}s")
+                        await asyncio.sleep(wait_time)
+                    else:
+                        raise
+            
+            raise Exception(f"Max retries ({self.max_retries}) exceeded for rate limited request")
+        except:
+            # Если запрос не удался и update_from_binance() не был вызван,
+            # освобождаем pending weight чтобы избежать постоянной блокировки
+            if acquired:
+                async with self.lock:
+                    self.pending_weight = max(0, self.pending_weight - weight)
+            raise
     
     async def update_from_binance_headers(self, actual_weight: int, retry_after: Optional[str] = None):
         """
@@ -88,18 +102,27 @@ class RateLimiter:
                 diff = actual_weight - self.current_weight
                 if abs(diff) > 50:  # Логировать только при большом расхождении
                     logger.info(
-                        f"📊 Rate limiter sync: local={self.current_weight}, "
+                        f"📊 Rate limiter sync: local={self.current_weight}+{self.pending_weight}, "
                         f"binance={actual_weight} (diff: {diff:+d})"
                     )
             
-            # ВСЕГДА синхронизировать с Binance (единственный источник правды)
-            # Полностью заменяем локальный счётчик данными от Binance
-            self.current_weight = actual_weight
-            self.requests.clear()  # Очистить локальную историю
+            # Вычислить сколько веса реально добавилось (от Binance)
+            # При сбросе счётчика Binance (новая минута) diff может быть отрицательным
+            weight_added = max(0, actual_weight - self.current_weight)
             
-            # Добавить текущий вес как один "запрос" для tracking
-            if actual_weight > 0:
-                self.requests.append((time.time(), actual_weight))
+            # ВСЕГДА синхронизировать с Binance (единственный источник правды)
+            self.current_weight = actual_weight
+            
+            # Освободить pending weight на величину добавленного веса
+            # Это учитывает что ответ пришёл от ОДНОГО запроса, остальные ещё в полёте
+            self.pending_weight = max(0, self.pending_weight - weight_added)
+            
+            # Если Binance сбросил счётчик (новая минута) - сбросить pending
+            if actual_weight < self.pending_weight:
+                self.pending_weight = 0
+            
+            # Очистить локальную историю
+            self.requests.clear()
         
         # Если есть Retry-After - значит IP бан или временная блокировка
         if retry_after:
@@ -111,11 +134,7 @@ class RateLimiter:
             )
     
     def get_current_usage(self) -> Dict[str, Any]:
-        now = time.time()
-        while self.requests and self.requests[0][0] < now - self.window_seconds:
-            _, w = self.requests.popleft()
-            self.current_weight -= w
-        
+        # current_weight обновляется от Binance, не вычитаем здесь
         return {
             'current_weight': self.current_weight,
             'safe_limit': self.safe_limit,
@@ -130,17 +149,18 @@ class RateLimiter:
         async with self.lock:
             now = time.time()
             
-            # Очистить устаревшие
+            # Очистить устаревшие запросы (только для очистки deque)
             while self.requests and self.requests[0][0] < now - self.window_seconds:
-                _, w = self.requests.popleft()
-                self.current_weight -= w
+                self.requests.popleft()
             
-            # Если добавление weight превысит 90%
-            if self.current_weight + weight > self.safe_limit:
-                wait_time = self.requests[0][0] + self.window_seconds - now if self.requests else 1
-                percent = ((self.current_weight + weight) / self.weight_limit) * 100
+            # Проверка: current + pending + новый weight
+            total_weight = self.current_weight + self.pending_weight + weight
+            
+            if total_weight > self.safe_limit:
+                wait_time = 60 - (now % 60) + 1  # Ждём до следующей минуты
+                percent = (total_weight / self.weight_limit) * 100
                 logger.info(
                     f"🛑 Batch operation paused at {percent:.1f}% limit "
-                    f"({self.current_weight}/{self.safe_limit}), waiting {wait_time:.1f}s for reset"
+                    f"({self.current_weight}+{self.pending_weight}/{self.safe_limit}), waiting {wait_time:.1f}s for reset"
                 )
                 await asyncio.sleep(wait_time)
