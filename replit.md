@@ -20,7 +20,8 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ Created Signal Confluence system (bonus when 2+ strategies agree)
 - ✅ Added Telegram commands: /regime_stats, /confluence_stats
 - ✅ Partial TP system ready for 30/40/30 implementation (TODO in signal_tracker.py)
-- 📋 SQL migration available: migrations/add_professional_fields.sql
+- ✅ **CRITICAL FIX**: Rate limiter infinite loop bug - counters now reset after wait period
+- 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
 

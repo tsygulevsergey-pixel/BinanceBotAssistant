@@ -66,7 +66,16 @@ class RateLimiter:
                     self.requests.append((now, weight))
                     return True
             
+            # Ждем сброса лимита
             await asyncio.sleep(wait_time)
+            
+            # КРИТИЧЕСКИ ВАЖНО: После ожидания принудительно сбросить счетчики
+            # т.к. Binance уже сбросил свои, но мы не получим обновление пока не сделаем запрос
+            async with self.lock:
+                self.current_weight = 0
+                self.pending_weight = 0
+                self.requests.clear()
+                logger.info(f"✅ Rate limit window reset, counters cleared")
     
     async def execute_with_backoff(self, func, *args, weight: int = 1, **kwargs):
         acquired = False
@@ -153,6 +162,9 @@ class RateLimiter:
     
     async def wait_if_near_limit(self, weight: int = 1) -> None:
         """Подождать если близко к лимиту (для batch операций)"""
+        should_wait = False
+        wait_time = 0
+        
         async with self.lock:
             now = time.time()
             
@@ -164,10 +176,21 @@ class RateLimiter:
             total_weight = self.current_weight + self.pending_weight + weight
             
             if total_weight > self.safe_limit:
+                should_wait = True
                 wait_time = 60 - (now % 60) + 1  # Ждём до следующей минуты
                 percent = (total_weight / self.weight_limit) * 100
                 logger.info(
                     f"🛑 Batch operation paused at {percent:.1f}% limit "
                     f"({self.current_weight}+{self.pending_weight}/{self.safe_limit}), waiting {wait_time:.1f}s for reset"
                 )
-                await asyncio.sleep(wait_time)
+        
+        # Ждем ВНЕ lock
+        if should_wait:
+            await asyncio.sleep(wait_time)
+            
+            # КРИТИЧЕСКИ ВАЖНО: После ожидания принудительно сбросить счетчики
+            async with self.lock:
+                self.current_weight = 0
+                self.pending_weight = 0
+                self.requests.clear()
+                logger.info(f"✅ Batch rate limit window reset, counters cleared")
