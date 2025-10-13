@@ -1,169 +1,8 @@
 # Overview
 
-This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories, providing real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications.
+This project is a sophisticated Binance USDT-M Futures Trading Bot designed to generate trading signals based on advanced technical analysis and market regime detection. It incorporates multiple strategies spanning breakout, pullback, and mean reversion categories, providing real-time market data synchronization, technical indicator calculations, a sophisticated signal scoring system, and Telegram integration for notifications. The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities.
 
-The bot operates in two modes: a Signals-Only Mode for generating signals without live trading, and a Live Trading Mode for full trading capabilities. Its key features include a local orderbook engine, historical data loading with fast catchup and periodic gap refill, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms.
-
-A fully integrated **Action Price** strategy system is included, operating independently to identify high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns (Pin-Bar, Engulfing, Inside-Bar, Fakey, PPR) with partial profit-taking capabilities.
-
-# Recent Changes
-
-## October 13, 2025 - LIMIT FILLED Telegram Display Fix
-**BUG RESOLVED**: LIMIT FILLED notifications showed Score: 0.0 and empty Regime due to incorrect field names.
-
-**Problem**:
-- Telegram messages for LIMIT FILLED orders displayed:
-  - `⭐️ Скор: 0.0` (should be actual score like 2.0-3.0)
-  - `🔄 Режим:` (empty, should be TREND/RANGE/etc.)
-- Database saved signals correctly, issue only affected Telegram display
-
-**Root Cause**:
-Wrong field names used when formatting LIMIT FILLED notifications:
-```python
-'score': limit_signal.final_score,  # ❌ field doesn't exist
-'regime': limit_signal.regime,       # ❌ field doesn't exist
-```
-
-**Solution**:
-Fixed to use correct database model fields:
-```python
-'score': limit_signal.score,              # ✅ correct
-'regime': limit_signal.market_regime,     # ✅ correct
-```
-
-**Impact**:
-- LIMIT FILLED notifications now show correct Score and Market Regime
-- Better visibility into signal quality when limit orders execute
-- Database was always correct, only Telegram display was affected
-
-## October 13, 2025 - Critical TIME_STOP Bug Fix: Ignored TP1 Flag
-**URGENT BUG RESOLVED**: TIME_STOP was closing positions AFTER TP1, ignoring `tp1_hit` flag and preventing TP2/breakeven exits.
-
-**Real Case Example (RENDERUSDT)**:
-- 8:54 - Signal created LONG @ 2.8180 | TP1: 2.8983 | TP2: 2.9827
-- 10:31 - TP1 HIT @ 2.8983 (+2.85%) → SL moved to breakeven
-- 10:58 - TIME_STOP closed @ 2.8320 (+0.16%) ❌ **WRONG!**
-- **Expected**: Wait for TP2 or breakeven (SL already safe at entry)
-
-**Root Cause**:
-1. `_check_time_stop()` did NOT check `tp1_hit` flag
-2. Closed positions even with SL in breakeven (protected capital)
-3. Prevented TP2 from executing despite being reachable
-
-**Solution Implemented**:
-1. **TP1 Check**: TIME_STOP now returns `None` immediately if `tp1_hit=True`
-2. **Logic**: Once TP1 hits, SL is in breakeven → position is protected → wait indefinitely for TP2/breakeven
-3. **PnL Calculation**: Fixed to use percentage from entry (was incorrectly using risk division)
-
-**Impact**:
-- TIME_STOP only closes stagnant positions BEFORE TP1
-- After TP1: position waits for TP2 or breakeven without time limit
-- Prevents premature exits on winning trades
-
-## October 13, 2025 - TIME_STOP as Separate Category
-**Problem Resolved**: TIME_STOP exits were incorrectly counted as LOSS regardless of PnL, distorting Win Rate and Average Loss statistics.
-
-**Solution Implemented**:
-1. **Separate Category**: TIME_STOP no longer counted as WIN or LOSS
-2. **Dedicated Counter**: Added `time_stop_count` to track TIME_STOP exits separately
-3. **TIME_STOP PnL**: Added `time_stop_total_pnl` and `time_stop_avg_pnl` for TIME_STOP performance
-4. **Telegram Display**: Updated `/performance` and `/ap_stats` to show TIME_STOP statistics: count and total PnL
-5. **Accurate Win Rate**: Win Rate now excludes TIME_STOP, showing only true wins vs losses
-
-**Impact**:
-- TIME_STOP with positive PnL no longer reduces Win Rate
-- Average Loss no longer diluted by positive TIME_STOP exits
-- Clear visibility of TIME_STOP performance (count + total PnL)
-- More accurate reflection of strategy performance
-
-**TIME_STOP Logic**:
-- Triggers after 8 bars without sufficient progress (minimum 0.5% movement required)
-- **ONLY for positions BEFORE TP1** (after TP1, SL in breakeven = safe to wait)
-- Frees capital from stagnant positions
-- Can exit with positive or negative PnL
-
-**Example**:
-- Before: `TIME_STOP +0.11%` → counted as LOSS, reduced Win Rate ❌
-- After: `TIME_STOP +0.11%` → separate category, Win Rate unaffected ✅
-
-## October 13, 2025 - Breakeven PnL Calculation Fix
-**Problem Resolved**: Breakeven exits after TP1 were showing PnL=0% and incorrectly labeled as "TP1", distorting Average PnL and Average Win statistics.
-
-**Solution Implemented**:
-1. **Save TP1 PnL**: When TP1 is hit, system now saves actual TP1 PnL (e.g., +0.50%) to `signal.tp1_pnl_percent`
-2. **Use Saved PnL on Breakeven**: When price returns to entry (breakeven), use saved TP1 PnL instead of 0%
-3. **Correct Exit Type**: Changed from `exit_type="TP1"` to `exit_type="BREAKEVEN"` for clarity
-4. **Breakeven Counter**: Added `breakeven_count` to statistics tracking
-5. **Telegram Display**: Updated `/performance` and `/ap_stats` to show breakeven count separately
-
-**Impact**:
-- Statistics now accurately reflect trailing stop performance
-- Breakeven exits count as wins with real TP1 profit (e.g., +0.50%)
-- No more artificial 0% dragging down average PnL
-- Clear distinction between TP1, TP2, and breakeven exits
-
-**Example**:
-- Before: `Signal closed: APEUSDT LONG | Entry: 0.4333 → Exit: 0.4333 | PnL: +0.00% (TP1)` ❌
-- After: `Signal closed: APEUSDT LONG | Entry: 0.4333 → Exit: 0.4333 | PnL: +0.50% (BREAKEVEN)` ✅
-
-## October 13, 2025 - Advanced Rate Limiter with Pending Weight & Coin Age Filter
-**Problems Resolved**: 
-1. Rate limiter sync showed massive discrepancies (local=989, binance=1 diff: -988)
-2. Parallel requests caused race conditions and unpredictable weight tracking
-3. Binance minute counter resets (950→10) broke pending weight logic
-4. Young coins (<90 days) caused incomplete data errors and spam alerts
-
-**Solutions Implemented**:
-1. **Pending Weight Mechanism**: Tracks in-flight requests separately from confirmed weight
-   - `acquire()` reserves weight: `pending_weight += weight`
-   - Total check: `current_weight + pending_weight + new_weight > safe_limit`
-   - `update_from_binance()` releases: `pending_weight -= weight_added`
-   
-2. **Binance Counter Reset Protection**: 
-   - Clamps negative diffs: `weight_added = max(0, actual - current)`
-   - Clears pending on reset: `if actual < pending: pending = 0`
-   
-3. **Error Path Cleanup**: 
-   - try/finally in `execute_with_backoff()` releases pending weight on failure
-   - Prevents progressive throttling from failed requests
-   
-4. **90-Day Coin Age Filter**:
-   - Added `get_symbol_age_days()` in BinanceClient (gets first candle via API)
-   - Filters symbols in `_fetch_symbols_by_volume()` before loading data
-   - Config: `universe.min_coin_age_days: 90`
-   - Excludes: OPENUSDT (35d), AVNTUSDT (34d), HOLOUSDT (32d), MONUSDT (3d), YBUSDT (3d), METUSDT (2d)
-
-**Impact**: 
-- Eliminates rate limiter sync chaos (no more -988 diffs)
-- Handles parallel requests correctly with pending weight tracking
-- Survives Binance counter resets without weight explosion
-- No more spam from young coins with incomplete data
-- Clean, predictable API usage tracking
-
-## October 13, 2025 - Complete Rate Limit & IP Ban Protection System
-**Problem Resolved**: Bot was hitting Binance API rate limits (429 errors) and IP bans (418) on startup and during burst catchup, with incorrect weight tracking causing premature limit hits.
-
-**Solution Implemented**:
-1. **90% Safety Threshold**: Rate limiter stops at 990/1100 requests (90%) instead of waiting for 429 errors
-2. **Intelligent Pausing**: Burst catchup and gap refill automatically pause when approaching limit, wait for reset, then continue
-3. **Batch Protection**: Each request checks limit status before execution, preventing rate limit violations
-4. **ExchangeInfo Caching**: Precision data cached to file for 1 hour, eliminating redundant API calls on restarts
-5. **Startup Delay**: 30-second delay on first startup (only if cache missing) to allow rate limits to reset from previous runs
-6. **Accurate Weight Tracking**: Fixed request weights per Binance API docs (exchangeInfo=10, ticker/24hr=40, klines=1-10, depth=2-50)
-7. **Real-time Sync**: Reads X-MBX-USED-WEIGHT-1M header from Binance responses to sync local counter with actual API usage
-8. **IP Ban Detection & Blocking**: Detects Retry-After header, blocks ALL requests until ban expires, preventing useless retries
-
-**Impact**: Bot accurately tracks API usage, detects and waits out IP bans intelligently, and can safely load 270+ symbols. Repeated restarts use cache and start instantly.
-
-## October 12, 2025 - Critical Fix: Main Strategies Execution
-**Problem Resolved**: Main strategies were blocked and never executing due to `_check_signals()` blocking the main loop for 100+ seconds, causing candle close window misses.
-
-**Solution Implemented**:
-1. **Async Non-Blocking Execution**: Refactored `_check_signals()` to use `asyncio.create_task()` with Lock protection, preventing main loop blocking while ensuring single execution
-2. **Timestamp-Based Candle Detection**: Rewrote `TimeframeSync` to use floor timestamp tracking instead of strict wall-clock windows, enabling reliable detection even when checks are delayed
-3. **Runtime Monitoring**: Added execution time logging for performance tracking and regression detection
-
-**Impact**: All 16 main strategies now successfully execute on candle closes, with confirmed market analysis, regime detection, and filter application.
+Key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. An integrated **Action Price** strategy system operates independently, identifying high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns with partial profit-taking capabilities.
 
 # User Preferences
 
@@ -175,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Market Data Infrastructure
 - **BinanceClient**: REST API client with rate limiting and exponential backoff.
-- **DataLoader**: Fetches historical data with caching, including FastCatchupLoader and PeriodicGapRefill for efficient data management.
+- **DataLoader**: Fetches historical data with caching, fast catchup, and periodic gap refill.
 - **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates.
 - **BinanceWebSocket**: Real-time market data streaming.
 
@@ -221,7 +60,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals, calculates exit conditions using precise SL/TP levels, and updates entry prices for accurate PnL. Provides detailed metrics: Average PnL, Average Win, Average Loss.
-- **Breakeven PnL Logic**: When TP1 is hit, the system saves the actual TP1 PnL (e.g., +0.50%). If price returns to breakeven (entry price), the signal closes with the saved TP1 PnL instead of 0%, accurately reflecting the partial profit taken. This ensures statistics show real performance of the trailing stop system.
+- **Breakeven PnL Logic**: When TP1 is hit, the system saves the actual TP1 PnL. If price returns to breakeven, the signal closes with the saved TP1 PnL instead of 0%, accurately reflecting the partial profit taken.
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and specific configurations for the Action Price system.
@@ -237,7 +76,7 @@ Preferred communication style: Simple, everyday language.
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-- **Smart Rate Limiting**: 90% safety threshold (990/1100 requests/min) prevents API bans. Automatic pause and resume when approaching limit.
+- **Smart Rate Limiting**: 90% safety threshold prevents API bans. Automatic pause and resume when approaching limit.
 - **Exponential Backoff**: Retry logic with progressive delays for transient errors.
 - **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
 - **Graceful Shutdown**: Clean resource cleanup and state persistence.
