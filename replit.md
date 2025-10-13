@@ -8,6 +8,31 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## October 13, 2025 - TIME_STOP as Separate Category
+**Problem Resolved**: TIME_STOP exits were incorrectly counted as LOSS regardless of PnL, distorting Win Rate and Average Loss statistics.
+
+**Solution Implemented**:
+1. **Separate Category**: TIME_STOP no longer counted as WIN or LOSS
+2. **Dedicated Counter**: Added `time_stop_count` to track TIME_STOP exits separately
+3. **TIME_STOP PnL**: Added `time_stop_total_pnl` and `time_stop_avg_pnl` for TIME_STOP performance
+4. **Telegram Display**: Updated `/performance` and `/ap_stats` to show TIME_STOP statistics: count and total PnL
+5. **Accurate Win Rate**: Win Rate now excludes TIME_STOP, showing only true wins vs losses
+
+**Impact**:
+- TIME_STOP with positive PnL no longer reduces Win Rate
+- Average Loss no longer diluted by positive TIME_STOP exits
+- Clear visibility of TIME_STOP performance (count + total PnL)
+- More accurate reflection of strategy performance
+
+**TIME_STOP Logic**:
+- Triggers after 8 bars without sufficient progress (minimum 0.5% movement required)
+- Frees capital from stagnant positions
+- Can exit with positive or negative PnL
+
+**Example**:
+- Before: `TIME_STOP +0.11%` → counted as LOSS, reduced Win Rate ❌
+- After: `TIME_STOP +0.11%` → separate category, Win Rate unaffected ✅
+
 ## October 13, 2025 - Breakeven PnL Calculation Fix
 **Problem Resolved**: Breakeven exits after TP1 were showing PnL=0% and incorrectly labeled as "TP1", distorting Average PnL and Average Win statistics.
 

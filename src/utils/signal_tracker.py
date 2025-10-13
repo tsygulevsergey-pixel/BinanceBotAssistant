@@ -553,17 +553,21 @@ class SignalPerformanceTracker:
                     'tp1_count': 0,
                     'tp2_count': 0,
                     'breakeven_count': 0,
+                    'time_stop_count': 0,
                     'win_rate': 0.0,
                     'avg_pnl': 0.0,
                     'total_pnl': 0.0,
                     'avg_win': 0.0,
-                    'avg_loss': 0.0
+                    'avg_loss': 0.0,
+                    'time_stop_total_pnl': 0.0,
+                    'time_stop_avg_pnl': 0.0
                 }
             
             total = len(signals)
             closed = [s for s in signals if str(s.status) in ['WIN', 'LOSS', 'TIME_STOP']]  # type: ignore
             wins = [s for s in closed if str(s.status) == 'WIN']  # type: ignore
-            losses = [s for s in closed if str(s.status) in ['LOSS', 'TIME_STOP']]  # type: ignore
+            losses = [s for s in closed if str(s.status) == 'LOSS']  # type: ignore
+            time_stops = [s for s in closed if str(s.status) == 'TIME_STOP']  # type: ignore
             
             # Подсчет TP1, TP2 и BREAKEVEN
             tp1_count = len([s for s in closed if hasattr(s, 'exit_type') and s.exit_type == 'TP1'])  # type: ignore
@@ -578,6 +582,12 @@ class SignalPerformanceTracker:
             
             wins_with_pnl = [s for s in wins if s.pnl_percent is not None]  # type: ignore
             losses_with_pnl = [s for s in losses if s.pnl_percent is not None]  # type: ignore
+            time_stops_with_pnl = [s for s in time_stops if s.pnl_percent is not None]  # type: ignore
+            
+            # Статистика TIME_STOP отдельно
+            time_stop_count = len(time_stops)
+            time_stop_total_pnl = sum(float(s.pnl_percent) for s in time_stops_with_pnl) if time_stops_with_pnl else 0.0  # type: ignore
+            time_stop_avg_pnl = time_stop_total_pnl / len(time_stops_with_pnl) if time_stops_with_pnl else 0.0
             
             return {
                 'total_signals': total,
@@ -588,11 +598,14 @@ class SignalPerformanceTracker:
                 'tp1_count': tp1_count,
                 'tp2_count': tp2_count,
                 'breakeven_count': breakeven_count,
+                'time_stop_count': time_stop_count,
                 'win_rate': round(win_rate, 2),
                 'avg_pnl': round(avg_pnl, 2),
                 'total_pnl': round(total_pnl, 2),
                 'avg_win': round(sum(float(s.pnl_percent) for s in wins_with_pnl) / len(wins_with_pnl), 2) if wins_with_pnl else 0.0,  # type: ignore
-                'avg_loss': round(sum(float(s.pnl_percent) for s in losses_with_pnl) / len(losses_with_pnl), 2) if losses_with_pnl else 0.0  # type: ignore
+                'avg_loss': round(sum(float(s.pnl_percent) for s in losses_with_pnl) / len(losses_with_pnl), 2) if losses_with_pnl else 0.0,  # type: ignore
+                'time_stop_total_pnl': round(time_stop_total_pnl, 2),
+                'time_stop_avg_pnl': round(time_stop_avg_pnl, 2)
             }
             
         finally:
