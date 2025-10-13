@@ -8,6 +8,26 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## October 13, 2025 - Breakeven PnL Calculation Fix
+**Problem Resolved**: Breakeven exits after TP1 were showing PnL=0% and incorrectly labeled as "TP1", distorting Average PnL and Average Win statistics.
+
+**Solution Implemented**:
+1. **Save TP1 PnL**: When TP1 is hit, system now saves actual TP1 PnL (e.g., +0.50%) to `signal.tp1_pnl_percent`
+2. **Use Saved PnL on Breakeven**: When price returns to entry (breakeven), use saved TP1 PnL instead of 0%
+3. **Correct Exit Type**: Changed from `exit_type="TP1"` to `exit_type="BREAKEVEN"` for clarity
+4. **Breakeven Counter**: Added `breakeven_count` to statistics tracking
+5. **Telegram Display**: Updated `/performance` and `/ap_stats` to show breakeven count separately
+
+**Impact**:
+- Statistics now accurately reflect trailing stop performance
+- Breakeven exits count as wins with real TP1 profit (e.g., +0.50%)
+- No more artificial 0% dragging down average PnL
+- Clear distinction between TP1, TP2, and breakeven exits
+
+**Example**:
+- Before: `Signal closed: APEUSDT LONG | Entry: 0.4333 → Exit: 0.4333 | PnL: +0.00% (TP1)` ❌
+- After: `Signal closed: APEUSDT LONG | Entry: 0.4333 → Exit: 0.4333 | PnL: +0.50% (BREAKEVEN)` ✅
+
 ## October 13, 2025 - Advanced Rate Limiter with Pending Weight & Coin Age Filter
 **Problems Resolved**: 
 1. Rate limiter sync showed massive discrepancies (local=989, binance=1 diff: -988)
@@ -123,6 +143,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals, calculates exit conditions using precise SL/TP levels, and updates entry prices for accurate PnL. Provides detailed metrics: Average PnL, Average Win, Average Loss.
+- **Breakeven PnL Logic**: When TP1 is hit, the system saves the actual TP1 PnL (e.g., +0.50%). If price returns to breakeven (entry price), the signal closes with the saved TP1 PnL instead of 0%, accurately reflecting the partial profit taken. This ensures statistics show real performance of the trailing stop system.
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and specific configurations for the Action Price system.

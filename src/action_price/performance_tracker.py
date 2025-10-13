@@ -269,7 +269,8 @@ class ActionPricePerformanceTracker:
                     'avg_win': 0.0,
                     'avg_loss': 0.0,
                     'tp1_count': 0,
-                    'tp2_count': 0
+                    'tp2_count': 0,
+                    'breakeven_count': 0
                 }
             
             total = len(signals)
@@ -302,7 +303,8 @@ class ActionPricePerformanceTracker:
                 'avg_win': round(sum(float(s.pnl_percent) for s in wins_with_pnl) / len(wins_with_pnl), 2) if wins_with_pnl else 0.0,
                 'avg_loss': round(sum(float(s.pnl_percent) for s in losses_with_pnl) / len(losses_with_pnl), 2) if losses_with_pnl else 0.0,
                 'tp1_count': tp1_count,
-                'tp2_count': tp2_count
+                'tp2_count': tp2_count,
+                'breakeven_count': 0  # AP не использует breakeven логику main strategies
             }
             
         finally:

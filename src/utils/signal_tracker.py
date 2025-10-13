@@ -394,9 +394,10 @@ class SignalPerformanceTracker:
                 
                 # Проверка breakeven (SL перенесен в entry)
                 if current_price <= entry:
-                    pnl_percent = (entry - entry) / entry * 100  # 0%
-                    signal.exit_type = "TP1"  # type: ignore
-                    return ("WIN", entry, pnl_percent, "TP1")
+                    # ИСПОЛЬЗОВАТЬ СОХРАНЁННЫЙ PnL от TP1 вместо 0%
+                    tp1_pnl_saved = float(signal.tp1_pnl_percent) if hasattr(signal, 'tp1_pnl_percent') and signal.tp1_pnl_percent else 0.0  # type: ignore
+                    signal.exit_type = "BREAKEVEN"  # type: ignore
+                    return ("WIN", entry, tp1_pnl_saved, "BREAKEVEN")
             
             elif direction == "SHORT":
                 # Проверка TP2 (приоритет выше)
@@ -407,9 +408,10 @@ class SignalPerformanceTracker:
                 
                 # Проверка breakeven (SL перенесен в entry)
                 if current_price >= entry:
-                    pnl_percent = (entry - entry) / entry * 100  # 0%
-                    signal.exit_type = "TP1"  # type: ignore
-                    return ("WIN", entry, pnl_percent, "TP1")
+                    # ИСПОЛЬЗОВАТЬ СОХРАНЁННЫЙ PnL от TP1 вместо 0%
+                    tp1_pnl_saved = float(signal.tp1_pnl_percent) if hasattr(signal, 'tp1_pnl_percent') and signal.tp1_pnl_percent else 0.0  # type: ignore
+                    signal.exit_type = "BREAKEVEN"  # type: ignore
+                    return ("WIN", entry, tp1_pnl_saved, "BREAKEVEN")
         
         # Если TP1 ЕЩЁ НЕ достигнут - обычная проверка
         else:
@@ -434,6 +436,7 @@ class SignalPerformanceTracker:
                     signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
                     
                     tp1_pnl = (tp1 - entry) / entry * 100
+                    signal.tp1_pnl_percent = tp1_pnl  # type: ignore - СОХРАНИТЬ PnL от TP1
                     logger.info(
                         f"📈 TP1 HIT: {signal.symbol} {signal.direction} "
                         f"| Partial close at {tp1:.4f} (+{tp1_pnl:.2f}%) "
@@ -462,6 +465,7 @@ class SignalPerformanceTracker:
                     signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
                     
                     tp1_pnl = (entry - tp1) / entry * 100
+                    signal.tp1_pnl_percent = tp1_pnl  # type: ignore - СОХРАНИТЬ PnL от TP1
                     logger.info(
                         f"📉 TP1 HIT: {signal.symbol} {signal.direction} "
                         f"| Partial close at {tp1:.4f} (+{tp1_pnl:.2f}%) "
@@ -548,6 +552,7 @@ class SignalPerformanceTracker:
                     'losses': 0,
                     'tp1_count': 0,
                     'tp2_count': 0,
+                    'breakeven_count': 0,
                     'win_rate': 0.0,
                     'avg_pnl': 0.0,
                     'total_pnl': 0.0,
@@ -560,9 +565,10 @@ class SignalPerformanceTracker:
             wins = [s for s in closed if str(s.status) == 'WIN']  # type: ignore
             losses = [s for s in closed if str(s.status) in ['LOSS', 'TIME_STOP']]  # type: ignore
             
-            # Подсчет TP1 и TP2
+            # Подсчет TP1, TP2 и BREAKEVEN
             tp1_count = len([s for s in closed if hasattr(s, 'exit_type') and s.exit_type == 'TP1'])  # type: ignore
             tp2_count = len([s for s in closed if hasattr(s, 'exit_type') and s.exit_type == 'TP2'])  # type: ignore
+            breakeven_count = len([s for s in closed if hasattr(s, 'exit_type') and s.exit_type == 'BREAKEVEN'])  # type: ignore
             
             win_rate = (len(wins) / len(closed) * 100) if closed else 0.0
             
@@ -581,6 +587,7 @@ class SignalPerformanceTracker:
                 'losses': len(losses),
                 'tp1_count': tp1_count,
                 'tp2_count': tp2_count,
+                'breakeven_count': breakeven_count,
                 'win_rate': round(win_rate, 2),
                 'avg_pnl': round(avg_pnl, 2),
                 'total_pnl': round(total_pnl, 2),
