@@ -202,7 +202,7 @@ class TelegramBot:
             await update.message.reply_text(f"❌ Ошибка: {e}")
     
     async def cmd_ap_stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Показать статистику Action Price"""
+        """Показать статистику Action Price (унифицирована с /performance)"""
         if not update.message:
             return
         
@@ -211,49 +211,23 @@ class TelegramBot:
             return
         
         try:
-            # Общая статистика
-            overall = await self.ap_performance_tracker.get_performance_stats(days=7)
+            perf = await self.ap_performance_tracker.get_performance_stats(days=7)
             
-            # Разбивка по паттернам
-            breakdown = await self.ap_performance_tracker.get_pattern_breakdown(days=7)
-            
-            text = "<b>🎯 Action Price - Статистика (7 дней):</b>\n\n"
-            
-            # Общие метрики
-            text += (
-                f"📊 Всего сигналов: {overall['total_signals']}\n"
-                f"✅ Закрыто: {overall['closed_signals']}\n"
-                f"🔄 Активных: {overall['active_signals']}\n\n"
-                f"🏆 Побед: {overall['wins']}\n"
-                f"❌ Поражений: {overall['losses']}\n"
-                f"📊 Win Rate: <b>{overall['win_rate']}%</b>\n\n"
-                f"💰 Средний PnL: <b>{overall['avg_pnl']:+.2f}%</b>\n"
-                f"💵 Общий PnL: <b>{overall['total_pnl']:+.2f}%</b>\n"
-                f"🎯 Частичных фиксаций: {overall['partial_exits']}\n\n"
-                f"🟢 Средняя победа: {overall['avg_win']:+.2f}%\n"
-                f"🔴 Среднее поражение: {overall['avg_loss']:+.2f}%\n\n"
+            text = (
+                f"📊 <b>Производительность Action Price (7 дней)</b>\n\n"
+                f"📈 Всего сигналов: {perf['total_signals']}\n"
+                f"✅ Закрыто: {perf['closed_signals']}\n"
+                f"🔄 Активных: {perf['active_signals']}\n\n"
+                f"🏆 Побед: {perf['wins']}\n"
+                f"❌ Поражений: {perf['losses']}\n"
+                f"📊 Win Rate: <b>{perf['win_rate']}%</b>\n\n"
+                f"🎯 TP1 (0.5R): {perf.get('tp1_count', 0)}\n"
+                f"🎯 TP2 (1.5R): {perf.get('tp2_count', 0)}\n\n"
+                f"💰 Средний PnL: <b>{perf['avg_pnl']:+.2f}%</b>\n"
+                f"💵 Общий PnL: <b>{perf['total_pnl']:+.2f}%</b>\n\n"
+                f"🟢 Средняя победа: {perf['avg_win']:+.2f}%\n"
+                f"🔴 Среднее поражение: {perf['avg_loss']:+.2f}%\n"
             )
-            
-            # Разбивка по паттернам
-            text += "<b>📈 По паттернам:</b>\n\n"
-            
-            pattern_names = {
-                'pin_bar': '📌 Pin-Bar',
-                'engulfing': '🔥 Engulfing',
-                'inside_bar': '📦 Inside-Bar',
-                'fakey': '🎭 Fakey',
-                'ppr': '🔄 ППР'
-            }
-            
-            for pattern, stats in breakdown.items():
-                if stats['total_signals'] > 0:
-                    text += (
-                        f"{pattern_names.get(pattern, pattern)}: "
-                        f"{stats['total_signals']} сиг | "
-                        f"WR: {stats['win_rate']}% | "
-                        f"PnL: {stats['avg_pnl']:+.2f}%\n"
-                    )
-            
             await update.message.reply_text(text, parse_mode='HTML')
         except Exception as e:
             logger.error(f"Error getting AP stats: {e}", exc_info=True)

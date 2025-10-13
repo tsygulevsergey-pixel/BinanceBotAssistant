@@ -65,7 +65,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Telegram Integration
 - Provides commands for status, strategy details, performance, validation, and latency.
-- Delivers Russian language signal alerts with entry/exit levels, regime context, and score breakdown, including dedicated `ap_stats` for Action Price.
+- Delivers Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
+- `/performance` - unified statistics for main strategies (Total signals, Win Rate, TP1/TP2 counts, Average PnL)
+- `/ap_stats` - unified statistics for Action Price (same format as /performance, tracking TP1/TP2 partial exits)
 
 ### Logging System
 - Separate log files for Main Bot and Action Price, located in the `logs/` directory, using Europe/Kyiv timezone.

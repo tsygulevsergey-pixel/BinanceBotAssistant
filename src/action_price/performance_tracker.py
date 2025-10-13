@@ -268,14 +268,18 @@ class ActionPricePerformanceTracker:
                     'total_pnl': 0.0,
                     'avg_win': 0.0,
                     'avg_loss': 0.0,
-                    'partial_exits': 0
+                    'tp1_count': 0,
+                    'tp2_count': 0
                 }
             
             total = len(signals)
             closed = [s for s in signals if s.status in ['WIN', 'LOSS']]
             wins = [s for s in closed if s.status == 'WIN']
             losses = [s for s in closed if s.status == 'LOSS']
-            partial_exits = len([s for s in signals if s.partial_exit_1_at is not None])
+            
+            # Подсчет TP1/TP2 (как в основных стратегиях)
+            tp1_count = len([s for s in closed if s.partial_exit_1_at is not None])
+            tp2_count = len([s for s in closed if s.partial_exit_2_at is not None])
             
             win_rate = (len(wins) / len(closed) * 100) if closed else 0.0
             
@@ -297,7 +301,8 @@ class ActionPricePerformanceTracker:
                 'total_pnl': round(total_pnl, 2),
                 'avg_win': round(sum(float(s.pnl_percent) for s in wins_with_pnl) / len(wins_with_pnl), 2) if wins_with_pnl else 0.0,
                 'avg_loss': round(sum(float(s.pnl_percent) for s in losses_with_pnl) / len(losses_with_pnl), 2) if losses_with_pnl else 0.0,
-                'partial_exits': partial_exits
+                'tp1_count': tp1_count,
+                'tp2_count': tp2_count
             }
             
         finally:
