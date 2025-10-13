@@ -91,7 +91,14 @@ class RateLimiter:
                         f"📊 Rate limiter sync: local={self.current_weight}, "
                         f"binance={actual_weight} (diff: {diff:+d})"
                     )
+                
+                # Обновить счётчик и очистить локальную историю
+                # Полагаемся ТОЛЬКО на данные от Binance
                 self.current_weight = actual_weight
+                self.requests.clear()  # ← Сбросить локальную историю
+                # Добавить текущий вес как один "запрос" для tracking
+                if actual_weight > 0:
+                    self.requests.append((time.time(), actual_weight))
         
         # Если есть Retry-After - значит IP бан или временная блокировка
         if retry_after:

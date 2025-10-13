@@ -1,0 +1,559 @@
+============================================================
+  Trading Bot - Auto Start
+============================================================
+
+[OK] Python is installed
+
+[INFO] Activating virtual environment...
+[INFO] Checking dependencies...
+[OK] Dependencies already installed
+
+============================================================
+  Starting bot...
+============================================================
+
+2025-10-13 03:57:34 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-13 03:57:35 EEST | INFO     | 🎯 Action Price Logger initialized - log file: logs/action_price_2025-10-13_03-57-35.log
+2025-10-13 03:58:00 EEST | WARNING  | trading_bot | Redis unavailable (Timeout connecting to server), using SQLite fallback for signal locks
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | EntryManager initialized with hybrid entry logic
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Donchian Breakout
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Squeeze Breakout
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: ORB/IRB
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: MA/VWAP Pullback
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Break & Retest
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: ATR Momentum
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: VWAP Mean Reversion
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Range Fade
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Volume Profile
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: RSI/Stoch MR
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Liquidity Sweep
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Order Flow
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: CVD Divergence
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Time-of-Day
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Cash-and-Carry
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered strategy: Market Making
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Registered 16 strategies
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Active strategies: 15
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Trading Bot Starting...
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 03:58:00 EEST | WARNING  | trading_bot | 🔔 SIGNALS-ONLY MODE: Bot will generate signals without real trading
+2025-10-13 03:58:00 EEST | WARNING  | trading_bot | 🔔 No API keys required in this mode
+2025-10-13 03:58:00 EEST | WARNING  | trading_bot | ⚠️ Signals-Only Mode: API keys disabled, trading functions unavailable
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | 📦 Loaded precision info from cache for 608 symbols (age: 31.1 min)
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Initializing bot...
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Rate limit status: 0/990 (90% threshold) | Hard limit: 1100 | Usage: 0.0%
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | ✅ No active signals in DB - all symbols available for analysis
+2025-10-13 03:58:00 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-13 03:58:01 EEST | INFO     | trading_bot | Found 514 USDT-M perpetual futures pairs
+2025-10-13 03:58:02 EEST | INFO     | trading_bot | Filtered to 273 pairs with volume >= $10,000,000
+2025-10-13 03:58:02 EEST | INFO     | trading_bot | Excluded 1 stablecoins: USDCUSDT
+2025-10-13 03:58:02 EEST | INFO     | trading_bot | Starting parallel data loading for 272 symbols...
+2025-10-13 03:58:02 EEST | INFO     | trading_bot | Analyzer task started - ready to consume symbols from queue
+2025-10-13 03:58:02 EEST | INFO     | trading_bot | 📊 Analyzing restart state...
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📊 Restart analysis:
+  ✅ Existing symbols with gaps: 0 (0 total requests)
+  🆕 New symbols: 1
+  📈 Total symbols: 272
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | ⚡ No gaps detected - all symbols are new or up-to-date
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Background tasks started (loader + analyzer + symbol updater + periodic gap refill running in parallel)
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Bot will start analyzing symbols as soon as their data is loaded
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📊 Signal Performance Tracker started (check interval: 60s)
+2025-10-13 03:58:03 EEST | INFO     | 🎯 Action Price Engine initialized (Production mode)
+2025-10-13 03:58:03 EEST | INFO     | 🎯 Execution timeframes: ['15m', '1h']
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Symbol analyzer task started
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Symbol loader task started
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | [1/272] Checking BTCUSDT... (0.4%)
+2025-10-13 03:58:03 EEST | INFO     | trading_bot |   [1/4] 🔄 BTCUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:03.743947+00:00 (1 days)
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📊 Symbol auto-update started (interval: 1h)
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📊 Signal Performance Tracker started
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Telegram bot started with polling
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Startup message sent to Telegram
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Initialization complete
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | Starting main loop...
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | All 16 strategies will run simultaneously
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📅 Current time: 00:58:03 UTC
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📅 Next 15m update: 01:00 UTC
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📅 Next 1h update: 01:00 UTC
+2025-10-13 03:58:03 EEST | INFO     | trading_bot | 📅 Next 4h update: 04:00 UTC
+2025-10-13 03:58:04 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 15m
+2025-10-13 03:58:04 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 15m
+2025-10-13 03:58:04 EEST | INFO     | trading_bot |   [2/4] 🔄 BTCUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:04 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:03.743947+00:00 (1 days)
+2025-10-13 03:58:04 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 1h
+2025-10-13 03:58:04 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 1h
+2025-10-13 03:58:04 EEST | INFO     | trading_bot |   [3/4] 🔄 BTCUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:04 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:03.743947+00:00 (1 days)
+2025-10-13 03:58:05 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 4h
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 4h
+2025-10-13 03:58:05 EEST | INFO     | trading_bot |   [4/4] 🔄 BTCUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:03.743947+00:00 (1 days)
+2025-10-13 03:58:05 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 1d
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 1d
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | ✓ BTCUSDT loaded and ready for analysis
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | ✅ BTCUSDT ready for analysis (1 symbols analyzing)
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | [2/272] Checking ETHUSDT... (0.7%)
+2025-10-13 03:58:05 EEST | INFO     | trading_bot |   [1/4] 🔄 ETHUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:05.635632+00:00 (1 days)
+2025-10-13 03:58:05 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 15m
+2025-10-13 03:58:05 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 15m
+2025-10-13 03:58:06 EEST | INFO     | trading_bot |   [2/4] 🔄 ETHUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:06 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:05.635632+00:00 (1 days)
+2025-10-13 03:58:06 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 1h
+2025-10-13 03:58:06 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 1h
+2025-10-13 03:58:06 EEST | INFO     | trading_bot |   [3/4] 🔄 ETHUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:06 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:05.635632+00:00 (1 days)
+2025-10-13 03:58:06 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 4h
+2025-10-13 03:58:06 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 4h
+2025-10-13 03:58:06 EEST | INFO     | trading_bot |   [4/4] 🔄 ETHUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:06 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:05.635632+00:00 (1 days)
+2025-10-13 03:58:07 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 1d
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 1d
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | ✓ ETHUSDT loaded and ready for analysis
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | ✅ ETHUSDT ready for analysis (2 symbols analyzing)
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | [3/272] Checking BCHUSDT... (1.1%)
+2025-10-13 03:58:07 EEST | INFO     | trading_bot |   [1/4] 🔄 BCHUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:07.312466+00:00 (1 days)
+2025-10-13 03:58:07 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 15m
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 15m
+2025-10-13 03:58:07 EEST | INFO     | trading_bot |   [2/4] 🔄 BCHUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:07 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:07.312466+00:00 (1 days)
+2025-10-13 03:58:08 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 1h
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 1h
+2025-10-13 03:58:08 EEST | INFO     | trading_bot |   [3/4] 🔄 BCHUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:07.312466+00:00 (1 days)
+2025-10-13 03:58:08 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 4h
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 4h
+2025-10-13 03:58:08 EEST | INFO     | trading_bot |   [4/4] 🔄 BCHUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:07.312466+00:00 (1 days)
+2025-10-13 03:58:08 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 1d
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 1d
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | ✓ BCHUSDT loaded and ready for analysis
+2025-10-13 03:58:08 EEST | INFO     | trading_bot | [4/272] Checking XRPUSDT... (1.5%)
+2025-10-13 03:58:08 EEST | INFO     | trading_bot |   [1/4] 🔄 XRPUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:09 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:08.996021+00:00 (1 days)
+2025-10-13 03:58:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 15m
+2025-10-13 03:58:09 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 15m
+2025-10-13 03:58:09 EEST | INFO     | trading_bot |   [2/4] 🔄 XRPUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:09 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:08.996021+00:00 (1 days)
+2025-10-13 03:58:09 EEST | INFO     | trading_bot | ✅ BCHUSDT ready for analysis (3 symbols analyzing)
+2025-10-13 03:58:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 1h
+2025-10-13 03:58:09 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 1h
+2025-10-13 03:58:09 EEST | INFO     | trading_bot |   [3/4] 🔄 XRPUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:09 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:08.996021+00:00 (1 days)
+2025-10-13 03:58:10 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 4h
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 4h
+2025-10-13 03:58:10 EEST | INFO     | trading_bot |   [4/4] 🔄 XRPUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:08.996021+00:00 (1 days)
+2025-10-13 03:58:10 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 1d
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 1d
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | ✓ XRPUSDT loaded and ready for analysis
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | ✅ XRPUSDT ready for analysis (4 symbols analyzing)
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | [5/272] Checking LTCUSDT... (1.8%)
+2025-10-13 03:58:10 EEST | INFO     | trading_bot |   [1/4] 🔄 LTCUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:10.551922+00:00 (1 days)
+2025-10-13 03:58:10 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 15m
+2025-10-13 03:58:10 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 15m
+2025-10-13 03:58:11 EEST | INFO     | trading_bot |   [2/4] 🔄 LTCUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:11 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:10.551922+00:00 (1 days)
+2025-10-13 03:58:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 1h
+2025-10-13 03:58:11 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 1h
+2025-10-13 03:58:11 EEST | INFO     | trading_bot |   [3/4] 🔄 LTCUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:11 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:10.551922+00:00 (1 days)
+2025-10-13 03:58:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 4h
+2025-10-13 03:58:11 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 4h
+2025-10-13 03:58:11 EEST | INFO     | trading_bot |   [4/4] 🔄 LTCUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:11 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:10.551922+00:00 (1 days)
+2025-10-13 03:58:12 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 1d
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 1d
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | ✓ LTCUSDT loaded and ready for analysis
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | ✅ LTCUSDT ready for analysis (5 symbols analyzing)
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | [6/272] Checking TRXUSDT... (2.2%)
+2025-10-13 03:58:12 EEST | INFO     | trading_bot |   [1/4] 🔄 TRXUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:12.247563+00:00 (1 days)
+2025-10-13 03:58:12 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 15m
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 15m
+2025-10-13 03:58:12 EEST | INFO     | trading_bot |   [2/4] 🔄 TRXUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:12 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:12.247563+00:00 (1 days)
+2025-10-13 03:58:13 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 1h
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 1h
+2025-10-13 03:58:13 EEST | INFO     | trading_bot |   [3/4] 🔄 TRXUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:12.247563+00:00 (1 days)
+2025-10-13 03:58:13 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 4h
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 4h
+2025-10-13 03:58:13 EEST | INFO     | trading_bot |   [4/4] 🔄 TRXUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:12.247563+00:00 (1 days)
+2025-10-13 03:58:13 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 1d
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 1d
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | ✓ TRXUSDT loaded and ready for analysis
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | ✅ TRXUSDT ready for analysis (6 symbols analyzing)
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | 📊 Loading: 6/272 (2.2%) | Queue: 0 ready | Ready: 6 symbols | Failed: 0 | 15 strategies | 0 signals | Rate: 25.5%
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | [7/272] Checking ETCUSDT... (2.6%)
+2025-10-13 03:58:13 EEST | INFO     | trading_bot |   [1/4] 🔄 ETCUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:13 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:13.953180+00:00 (1 days)
+2025-10-13 03:58:14 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 15m
+2025-10-13 03:58:14 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 15m
+2025-10-13 03:58:14 EEST | INFO     | trading_bot |   [2/4] 🔄 ETCUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:14 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:13.953180+00:00 (1 days)
+2025-10-13 03:58:15 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 1h
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 1h
+2025-10-13 03:58:15 EEST | INFO     | trading_bot |   [3/4] 🔄 ETCUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:13.953180+00:00 (1 days)
+2025-10-13 03:58:15 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 4h
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 4h
+2025-10-13 03:58:15 EEST | INFO     | trading_bot |   [4/4] 🔄 ETCUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:13.953180+00:00 (1 days)
+2025-10-13 03:58:15 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 1d
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 1d
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | ✓ ETCUSDT loaded and ready for analysis
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | ✅ ETCUSDT ready for analysis (7 symbols analyzing)
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | [8/272] Checking LINKUSDT... (2.9%)
+2025-10-13 03:58:15 EEST | INFO     | trading_bot |   [1/4] 🔄 LINKUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:15 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:15.834996+00:00 (1 days)
+2025-10-13 03:58:16 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 15m
+2025-10-13 03:58:16 EEST | INFO     | trading_bot | Saved 0 klines for LINKUSDT 15m
+2025-10-13 03:58:16 EEST | INFO     | trading_bot |   [2/4] 🔄 LINKUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:16 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:15.834996+00:00 (1 days)
+2025-10-13 03:58:16 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 1h
+2025-10-13 03:58:16 EEST | INFO     | trading_bot | Saved 0 klines for LINKUSDT 1h
+2025-10-13 03:58:16 EEST | INFO     | trading_bot |   [3/4] 🔄 LINKUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:16 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:15.834996+00:00 (1 days)
+2025-10-13 03:58:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 4h
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | Saved 0 klines for LINKUSDT 4h
+2025-10-13 03:58:17 EEST | INFO     | trading_bot |   [4/4] 🔄 LINKUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:15.834996+00:00 (1 days)
+2025-10-13 03:58:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 1d
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | Saved 0 klines for LINKUSDT 1d
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | ✓ LINKUSDT loaded and ready for analysis
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | ✅ LINKUSDT ready for analysis (8 symbols analyzing)
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | [9/272] Checking XLMUSDT... (3.3%)
+2025-10-13 03:58:17 EEST | INFO     | trading_bot |   [1/4] 🔄 XLMUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | Downloading historical klines for XLMUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:17.651841+00:00 (1 days)
+2025-10-13 03:58:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XLMUSDT 15m
+2025-10-13 03:58:17 EEST | INFO     | trading_bot | Saved 0 klines for XLMUSDT 15m
+2025-10-13 03:58:18 EEST | INFO     | trading_bot |   [2/4] 🔄 XLMUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:18 EEST | INFO     | trading_bot | Downloading historical klines for XLMUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:17.651841+00:00 (1 days)
+2025-10-13 03:58:18 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XLMUSDT 1h
+2025-10-13 03:58:18 EEST | INFO     | trading_bot | Saved 0 klines for XLMUSDT 1h
+2025-10-13 03:58:18 EEST | INFO     | trading_bot |   [3/4] 🔄 XLMUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:18 EEST | INFO     | trading_bot | Downloading historical klines for XLMUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:17.651841+00:00 (1 days)
+2025-10-13 03:58:18 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XLMUSDT 4h
+2025-10-13 03:58:18 EEST | INFO     | trading_bot | Saved 0 klines for XLMUSDT 4h
+2025-10-13 03:58:19 EEST | INFO     | trading_bot |   [4/4] 🔄 XLMUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | Downloading historical klines for XLMUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:17.651841+00:00 (1 days)
+2025-10-13 03:58:19 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XLMUSDT 1d
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | Saved 0 klines for XLMUSDT 1d
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | ✓ XLMUSDT loaded and ready for analysis
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | ✅ XLMUSDT ready for analysis (9 symbols analyzing)
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | [10/272] Checking ADAUSDT... (3.7%)
+2025-10-13 03:58:19 EEST | INFO     | trading_bot |   [1/4] 🔄 ADAUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | Downloading historical klines for ADAUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:19.422512+00:00 (1 days)
+2025-10-13 03:58:19 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 15m
+2025-10-13 03:58:19 EEST | INFO     | trading_bot | Saved 0 klines for ADAUSDT 15m
+2025-10-13 03:58:20 EEST | INFO     | trading_bot |   [2/4] 🔄 ADAUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:20 EEST | INFO     | trading_bot | Downloading historical klines for ADAUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:19.422512+00:00 (1 days)
+2025-10-13 03:58:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 1h
+2025-10-13 03:58:20 EEST | INFO     | trading_bot | Saved 0 klines for ADAUSDT 1h
+2025-10-13 03:58:20 EEST | INFO     | trading_bot |   [3/4] 🔄 ADAUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:20 EEST | INFO     | trading_bot | Downloading historical klines for ADAUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:19.422512+00:00 (1 days)
+2025-10-13 03:58:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 4h
+2025-10-13 03:58:20 EEST | INFO     | trading_bot | Saved 0 klines for ADAUSDT 4h
+2025-10-13 03:58:20 EEST | INFO     | trading_bot |   [4/4] 🔄 ADAUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:20 EEST | INFO     | trading_bot | Downloading historical klines for ADAUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:19.422512+00:00 (1 days)
+2025-10-13 03:58:21 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 1d
+2025-10-13 03:58:21 EEST | INFO     | trading_bot | Saved 0 klines for ADAUSDT 1d
+2025-10-13 03:58:21 EEST | INFO     | trading_bot | ✓ ADAUSDT loaded and ready for analysis
+2025-10-13 03:58:21 EEST | INFO     | trading_bot | [11/272] Checking XMRUSDT... (4.0%)
+2025-10-13 03:58:21 EEST | INFO     | trading_bot |   [1/4] 🔄 XMRUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:21 EEST | INFO     | trading_bot | Downloading historical klines for XMRUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:21.333029+00:00 (1 days)
+2025-10-13 03:58:21 EEST | INFO     | trading_bot | ✅ ADAUSDT ready for analysis (10 symbols analyzing)
+2025-10-13 03:58:21 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 15m
+2025-10-13 03:58:21 EEST | INFO     | trading_bot | Saved 0 klines for XMRUSDT 15m
+2025-10-13 03:58:22 EEST | INFO     | trading_bot |   [2/4] 🔄 XMRUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:22 EEST | INFO     | trading_bot | Downloading historical klines for XMRUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:21.333029+00:00 (1 days)
+2025-10-13 03:58:22 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 1h
+2025-10-13 03:58:22 EEST | INFO     | trading_bot | Saved 0 klines for XMRUSDT 1h
+2025-10-13 03:58:22 EEST | INFO     | trading_bot |   [3/4] 🔄 XMRUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:22 EEST | INFO     | trading_bot | Downloading historical klines for XMRUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:21.333029+00:00 (1 days)
+2025-10-13 03:58:22 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 4h
+2025-10-13 03:58:22 EEST | INFO     | trading_bot | Saved 0 klines for XMRUSDT 4h
+2025-10-13 03:58:22 EEST | INFO     | trading_bot |   [4/4] 🔄 XMRUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:22 EEST | INFO     | trading_bot | Downloading historical klines for XMRUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:21.333029+00:00 (1 days)
+2025-10-13 03:58:23 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 1d
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | Saved 0 klines for XMRUSDT 1d
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | ✓ XMRUSDT loaded and ready for analysis
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | ✅ XMRUSDT ready for analysis (11 symbols analyzing)
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | [12/272] Checking DASHUSDT... (4.4%)
+2025-10-13 03:58:23 EEST | INFO     | trading_bot |   [1/4] 🔄 DASHUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | Downloading historical klines for DASHUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:23.191062+00:00 (1 days)
+2025-10-13 03:58:23 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 15m
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | Saved 0 klines for DASHUSDT 15m
+2025-10-13 03:58:23 EEST | INFO     | trading_bot |   [2/4] 🔄 DASHUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:23 EEST | INFO     | trading_bot | Downloading historical klines for DASHUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:23.191062+00:00 (1 days)
+2025-10-13 03:58:24 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 1h
+2025-10-13 03:58:24 EEST | INFO     | trading_bot | Saved 0 klines for DASHUSDT 1h
+2025-10-13 03:58:24 EEST | INFO     | trading_bot |   [3/4] 🔄 DASHUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:24 EEST | INFO     | trading_bot | Downloading historical klines for DASHUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:23.191062+00:00 (1 days)
+2025-10-13 03:58:24 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 4h
+2025-10-13 03:58:24 EEST | INFO     | trading_bot | Saved 0 klines for DASHUSDT 4h
+2025-10-13 03:58:24 EEST | INFO     | trading_bot |   [4/4] 🔄 DASHUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:24 EEST | INFO     | trading_bot | Downloading historical klines for DASHUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:23.191062+00:00 (1 days)
+2025-10-13 03:58:24 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 1d
+2025-10-13 03:58:24 EEST | INFO     | trading_bot | Saved 0 klines for DASHUSDT 1d
+2025-10-13 03:58:24 EEST | INFO     | trading_bot | ✓ DASHUSDT loaded and ready for analysis
+2025-10-13 03:58:25 EEST | INFO     | trading_bot | [13/272] Checking ZECUSDT... (4.8%)
+2025-10-13 03:58:25 EEST | INFO     | trading_bot |   [1/4] 🔄 ZECUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:25 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:25.054618+00:00 (1 days)
+2025-10-13 03:58:25 EEST | INFO     | trading_bot | 📊 Loading: 12/272 (4.4%) | Queue: 1 ready | Ready: 11 symbols | Failed: 0 | 15 strategies | 0 signals | Rate: 48.3%
+2025-10-13 03:58:25 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 15m
+2025-10-13 03:58:25 EEST | INFO     | trading_bot | Saved 0 klines for ZECUSDT 15m
+2025-10-13 03:58:25 EEST | INFO     | trading_bot |   [2/4] 🔄 ZECUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:25 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:25.054618+00:00 (1 days)
+2025-10-13 03:58:25 EEST | INFO     | trading_bot | ✅ DASHUSDT ready for analysis (12 symbols analyzing)
+2025-10-13 03:58:26 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 1h
+2025-10-13 03:58:26 EEST | INFO     | trading_bot | Saved 0 klines for ZECUSDT 1h
+2025-10-13 03:58:26 EEST | INFO     | trading_bot |   [3/4] 🔄 ZECUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:26 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:25.054618+00:00 (1 days)
+2025-10-13 03:58:26 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 4h
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | Saved 0 klines for ZECUSDT 4h
+2025-10-13 03:58:38 EEST | INFO     | trading_bot |   [4/4] 🔄 ZECUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:25.054618+00:00 (1 days)
+2025-10-13 03:58:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 1d
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | Saved 0 klines for ZECUSDT 1d
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | ✓ ZECUSDT loaded and ready for analysis
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | [14/272] Checking XTZUSDT... (5.1%)
+2025-10-13 03:58:38 EEST | INFO     | trading_bot |   [1/4] 🔄 XTZUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | Downloading historical klines for XTZUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:38.495926+00:00 (1 days)
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | ✅ ZECUSDT ready for analysis (13 symbols analyzing)
+2025-10-13 03:58:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XTZUSDT 15m
+2025-10-13 03:58:38 EEST | INFO     | trading_bot | Saved 0 klines for XTZUSDT 15m
+2025-10-13 03:58:39 EEST | INFO     | trading_bot |   [2/4] 🔄 XTZUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:39 EEST | INFO     | trading_bot | Downloading historical klines for XTZUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:38.495926+00:00 (1 days)
+2025-10-13 03:58:39 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XTZUSDT 1h
+2025-10-13 03:58:39 EEST | INFO     | trading_bot | Saved 0 klines for XTZUSDT 1h
+2025-10-13 03:58:39 EEST | INFO     | trading_bot |   [3/4] 🔄 XTZUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:39 EEST | INFO     | trading_bot | Downloading historical klines for XTZUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:38.495926+00:00 (1 days)
+2025-10-13 03:58:40 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XTZUSDT 4h
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | Saved 0 klines for XTZUSDT 4h
+2025-10-13 03:58:40 EEST | INFO     | trading_bot |   [4/4] 🔄 XTZUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | Downloading historical klines for XTZUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:38.495926+00:00 (1 days)
+2025-10-13 03:58:40 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XTZUSDT 1d
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | Saved 0 klines for XTZUSDT 1d
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | ✓ XTZUSDT loaded and ready for analysis
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | [15/272] Checking BNBUSDT... (5.5%)
+2025-10-13 03:58:40 EEST | INFO     | trading_bot |   [1/4] 🔄 BNBUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:40.546814+00:00 (1 days)
+2025-10-13 03:58:40 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 15m
+2025-10-13 03:58:40 EEST | INFO     | trading_bot | Saved 0 klines for BNBUSDT 15m
+2025-10-13 03:58:41 EEST | INFO     | trading_bot |   [2/4] 🔄 BNBUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:41 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:40.546814+00:00 (1 days)
+2025-10-13 03:58:41 EEST | INFO     | trading_bot | ✅ XTZUSDT ready for analysis (14 symbols analyzing)
+2025-10-13 03:58:41 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 1h
+2025-10-13 03:58:41 EEST | INFO     | trading_bot | Saved 0 klines for BNBUSDT 1h
+2025-10-13 03:58:41 EEST | INFO     | trading_bot |   [3/4] 🔄 BNBUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:41 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:40.546814+00:00 (1 days)
+2025-10-13 03:58:42 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 4h
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | Saved 0 klines for BNBUSDT 4h
+2025-10-13 03:58:42 EEST | INFO     | trading_bot |   [4/4] 🔄 BNBUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:40.546814+00:00 (1 days)
+2025-10-13 03:58:42 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 1d
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | Saved 0 klines for BNBUSDT 1d
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | ✓ BNBUSDT loaded and ready for analysis
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | ✅ BNBUSDT ready for analysis (15 symbols analyzing)
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | [16/272] Checking ATOMUSDT... (5.9%)
+2025-10-13 03:58:42 EEST | INFO     | trading_bot |   [1/4] 🔄 ATOMUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:42.596657+00:00 (1 days)
+2025-10-13 03:58:42 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 15m
+2025-10-13 03:58:42 EEST | INFO     | trading_bot | Saved 0 klines for ATOMUSDT 15m
+2025-10-13 03:58:43 EEST | INFO     | trading_bot |   [2/4] 🔄 ATOMUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:43 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:42.596657+00:00 (1 days)
+2025-10-13 03:58:43 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 1h
+2025-10-13 03:58:43 EEST | INFO     | trading_bot | Saved 0 klines for ATOMUSDT 1h
+2025-10-13 03:58:43 EEST | INFO     | trading_bot |   [3/4] 🔄 ATOMUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:43 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:42.596657+00:00 (1 days)
+2025-10-13 03:58:44 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 4h
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | Saved 0 klines for ATOMUSDT 4h
+2025-10-13 03:58:44 EEST | INFO     | trading_bot |   [4/4] 🔄 ATOMUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:42.596657+00:00 (1 days)
+2025-10-13 03:58:44 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 1d
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | Saved 0 klines for ATOMUSDT 1d
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | ✓ ATOMUSDT loaded and ready for analysis
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | [17/272] Checking IOTAUSDT... (6.2%)
+2025-10-13 03:58:44 EEST | INFO     | trading_bot |   [1/4] 🔄 IOTAUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | Downloading historical klines for IOTAUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:44.562153+00:00 (1 days)
+2025-10-13 03:58:44 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - IOTAUSDT 15m
+2025-10-13 03:58:44 EEST | INFO     | trading_bot | Saved 0 klines for IOTAUSDT 15m
+2025-10-13 03:58:45 EEST | INFO     | trading_bot |   [2/4] 🔄 IOTAUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:45 EEST | INFO     | trading_bot | Downloading historical klines for IOTAUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:44.562153+00:00 (1 days)
+2025-10-13 03:58:45 EEST | INFO     | trading_bot | ✅ ATOMUSDT ready for analysis (16 symbols analyzing)
+2025-10-13 03:58:45 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - IOTAUSDT 1h
+2025-10-13 03:58:45 EEST | INFO     | trading_bot | Saved 0 klines for IOTAUSDT 1h
+2025-10-13 03:58:45 EEST | INFO     | trading_bot |   [3/4] 🔄 IOTAUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:45 EEST | INFO     | trading_bot | Downloading historical klines for IOTAUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:44.562153+00:00 (1 days)
+2025-10-13 03:58:46 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - IOTAUSDT 4h
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | Saved 0 klines for IOTAUSDT 4h
+2025-10-13 03:58:46 EEST | INFO     | trading_bot |   [4/4] 🔄 IOTAUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | Downloading historical klines for IOTAUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:44.562153+00:00 (1 days)
+2025-10-13 03:58:46 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - IOTAUSDT 1d
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | Saved 0 klines for IOTAUSDT 1d
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | ✓ IOTAUSDT loaded and ready for analysis
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | ✅ IOTAUSDT ready for analysis (17 symbols analyzing)
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | 📊 Loading: 17/272 (6.2%) | Queue: 0 ready | Ready: 17 symbols | Failed: 0 | 15 strategies | 0 signals | Rate: 65.5%
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | [18/272] Checking BATUSDT... (6.6%)
+2025-10-13 03:58:46 EEST | INFO     | trading_bot |   [1/4] 🔄 BATUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:46.473925+00:00 (1 days)
+2025-10-13 03:58:46 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 15m
+2025-10-13 03:58:46 EEST | INFO     | trading_bot | Saved 0 klines for BATUSDT 15m
+2025-10-13 03:58:47 EEST | INFO     | trading_bot |   [2/4] 🔄 BATUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:47 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:46.473925+00:00 (1 days)
+2025-10-13 03:58:47 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 1h
+2025-10-13 03:58:47 EEST | INFO     | trading_bot | Saved 0 klines for BATUSDT 1h
+2025-10-13 03:58:47 EEST | INFO     | trading_bot |   [3/4] 🔄 BATUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:47 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:46.473925+00:00 (1 days)
+2025-10-13 03:58:48 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 4h
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | Saved 0 klines for BATUSDT 4h
+2025-10-13 03:58:48 EEST | INFO     | trading_bot |   [4/4] 🔄 BATUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:46.473925+00:00 (1 days)
+2025-10-13 03:58:48 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 1d
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | Saved 0 klines for BATUSDT 1d
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | ✓ BATUSDT loaded and ready for analysis
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | [19/272] Checking VETUSDT... (7.0%)
+2025-10-13 03:58:48 EEST | INFO     | trading_bot |   [1/4] 🔄 VETUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | Downloading historical klines for VETUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:48.665922+00:00 (1 days)
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | ✅ BATUSDT ready for analysis (18 symbols analyzing)
+2025-10-13 03:58:48 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - VETUSDT 15m
+2025-10-13 03:58:48 EEST | INFO     | trading_bot | Saved 0 klines for VETUSDT 15m
+2025-10-13 03:58:49 EEST | INFO     | trading_bot |   [2/4] 🔄 VETUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:49 EEST | INFO     | trading_bot | Downloading historical klines for VETUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:48.665922+00:00 (1 days)
+2025-10-13 03:58:49 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - VETUSDT 1h
+2025-10-13 03:58:49 EEST | INFO     | trading_bot | Saved 0 klines for VETUSDT 1h
+2025-10-13 03:58:50 EEST | INFO     | trading_bot |   [3/4] 🔄 VETUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | Downloading historical klines for VETUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:48.665922+00:00 (1 days)
+2025-10-13 03:58:50 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - VETUSDT 4h
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | Saved 0 klines for VETUSDT 4h
+2025-10-13 03:58:50 EEST | INFO     | trading_bot |   [4/4] 🔄 VETUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | Downloading historical klines for VETUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:48.665922+00:00 (1 days)
+2025-10-13 03:58:50 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - VETUSDT 1d
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | Saved 0 klines for VETUSDT 1d
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | ✓ VETUSDT loaded and ready for analysis
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | [20/272] Checking NEOUSDT... (7.4%)
+2025-10-13 03:58:50 EEST | INFO     | trading_bot |   [1/4] 🔄 NEOUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:50 EEST | INFO     | trading_bot | Downloading historical klines for NEOUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:50.794413+00:00 (1 days)
+2025-10-13 03:58:51 EEST | INFO     | trading_bot | ✅ VETUSDT ready for analysis (19 symbols analyzing)
+2025-10-13 03:58:51 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEOUSDT 15m
+2025-10-13 03:58:51 EEST | INFO     | trading_bot | Saved 0 klines for NEOUSDT 15m
+2025-10-13 03:58:51 EEST | INFO     | trading_bot |   [2/4] 🔄 NEOUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:51 EEST | INFO     | trading_bot | Downloading historical klines for NEOUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:50.794413+00:00 (1 days)
+2025-10-13 03:58:51 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEOUSDT 1h
+2025-10-13 03:58:51 EEST | INFO     | trading_bot | Saved 0 klines for NEOUSDT 1h
+2025-10-13 03:58:52 EEST | INFO     | trading_bot |   [3/4] 🔄 NEOUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | Downloading historical klines for NEOUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:50.794413+00:00 (1 days)
+2025-10-13 03:58:52 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEOUSDT 4h
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | Saved 0 klines for NEOUSDT 4h
+2025-10-13 03:58:52 EEST | INFO     | trading_bot |   [4/4] 🔄 NEOUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | Downloading historical klines for NEOUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:50.794413+00:00 (1 days)
+2025-10-13 03:58:52 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEOUSDT 1d
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | Saved 0 klines for NEOUSDT 1d
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | ✓ NEOUSDT loaded and ready for analysis
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | [21/272] Checking QTUMUSDT... (7.7%)
+2025-10-13 03:58:52 EEST | INFO     | trading_bot |   [1/4] 🔄 QTUMUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:52 EEST | INFO     | trading_bot | Downloading historical klines for QTUMUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:52.797794+00:00 (1 days)
+2025-10-13 03:58:53 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - QTUMUSDT 15m
+2025-10-13 03:58:53 EEST | INFO     | trading_bot | Saved 0 klines for QTUMUSDT 15m
+2025-10-13 03:58:53 EEST | INFO     | trading_bot |   [2/4] 🔄 QTUMUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:53 EEST | INFO     | trading_bot | Downloading historical klines for QTUMUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:52.797794+00:00 (1 days)
+2025-10-13 03:58:53 EEST | INFO     | trading_bot | ✅ NEOUSDT ready for analysis (20 symbols analyzing)
+2025-10-13 03:58:53 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - QTUMUSDT 1h
+2025-10-13 03:58:53 EEST | INFO     | trading_bot | Saved 0 klines for QTUMUSDT 1h
+2025-10-13 03:58:53 EEST | INFO     | trading_bot |   [3/4] 🔄 QTUMUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:53 EEST | INFO     | trading_bot | Downloading historical klines for QTUMUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:52.797794+00:00 (1 days)
+2025-10-13 03:58:54 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - QTUMUSDT 4h
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | Saved 0 klines for QTUMUSDT 4h
+2025-10-13 03:58:54 EEST | INFO     | trading_bot |   [4/4] 🔄 QTUMUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | Downloading historical klines for QTUMUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:52.797794+00:00 (1 days)
+2025-10-13 03:58:54 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - QTUMUSDT 1d
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | Saved 0 klines for QTUMUSDT 1d
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | ✓ QTUMUSDT loaded and ready for analysis
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | ✅ QTUMUSDT ready for analysis (21 symbols analyzing)
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | [22/272] Checking THETAUSDT... (8.1%)
+2025-10-13 03:58:54 EEST | INFO     | trading_bot |   [1/4] 🔄 THETAUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:54.721824+00:00 (1 days)
+2025-10-13 03:58:54 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 15m
+2025-10-13 03:58:54 EEST | INFO     | trading_bot | Saved 0 klines for THETAUSDT 15m
+2025-10-13 03:58:55 EEST | INFO     | trading_bot |   [2/4] 🔄 THETAUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:55 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:54.721824+00:00 (1 days)
+2025-10-13 03:58:55 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 1h
+2025-10-13 03:58:55 EEST | INFO     | trading_bot | Saved 0 klines for THETAUSDT 1h
+2025-10-13 03:58:55 EEST | INFO     | trading_bot |   [3/4] 🔄 THETAUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:55 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:54.721824+00:00 (1 days)
+2025-10-13 03:58:56 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 4h
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | Saved 0 klines for THETAUSDT 4h
+2025-10-13 03:58:56 EEST | INFO     | trading_bot |   [4/4] 🔄 THETAUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:54.721824+00:00 (1 days)
+2025-10-13 03:58:56 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 1d
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | Saved 0 klines for THETAUSDT 1d
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | ✓ THETAUSDT loaded and ready for analysis
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | 📊 Loading: 22/272 (8.1%) | Queue: 1 ready | Ready: 21 symbols | Failed: 0 | 15 strategies | 0 signals | Rate: 83.7%
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | [23/272] Checking ALGOUSDT... (8.5%)
+2025-10-13 03:58:56 EEST | INFO     | trading_bot |   [1/4] 🔄 ALGOUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:56.683689+00:00 (1 days)
+2025-10-13 03:58:56 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 15m
+2025-10-13 03:58:56 EEST | INFO     | trading_bot | Saved 0 klines for ALGOUSDT 15m
+2025-10-13 03:58:57 EEST | INFO     | trading_bot |   [2/4] 🔄 ALGOUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:57 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:56.683689+00:00 (1 days)
+2025-10-13 03:58:57 EEST | INFO     | trading_bot | ✅ THETAUSDT ready for analysis (22 symbols analyzing)
+2025-10-13 03:58:57 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 1h
+2025-10-13 03:58:57 EEST | INFO     | trading_bot | Saved 0 klines for ALGOUSDT 1h
+2025-10-13 03:58:57 EEST | INFO     | trading_bot |   [3/4] 🔄 ALGOUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:57 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:56.683689+00:00 (1 days)
+2025-10-13 03:58:58 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 4h
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | Saved 0 klines for ALGOUSDT 4h
+2025-10-13 03:58:58 EEST | INFO     | trading_bot |   [4/4] 🔄 ALGOUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:56.683689+00:00 (1 days)
+2025-10-13 03:58:58 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 1d
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | Saved 0 klines for ALGOUSDT 1d
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | ✓ ALGOUSDT loaded and ready for analysis
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | ✅ ALGOUSDT ready for analysis (23 symbols analyzing)
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | [24/272] Checking COMPUSDT... (8.8%)
+2025-10-13 03:58:58 EEST | INFO     | trading_bot |   [1/4] 🔄 COMPUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:58:58.590278+00:00 (1 days)
+2025-10-13 03:58:58 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 15m
+2025-10-13 03:58:58 EEST | INFO     | trading_bot | Saved 0 klines for COMPUSDT 15m
+2025-10-13 03:58:59 EEST | INFO     | trading_bot |   [2/4] 🔄 COMPUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:58:59 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:58.590278+00:00 (1 days)
+2025-10-13 03:58:59 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 1h
+2025-10-13 03:58:59 EEST | INFO     | trading_bot | Saved 0 klines for COMPUSDT 1h
+2025-10-13 03:59:00 EEST | INFO     | trading_bot |   [3/4] 🔄 COMPUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:59:00 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:58.590278+00:00 (1 days)
+2025-10-13 03:59:00 EEST | WARNING  | trading_bot | ⚠️ Rate limit threshold reached (90.1% of limit), pausing for 0.8s (current: 981/990)
+2025-10-13 03:59:00 EEST | WARNING  | trading_bot | ⚠️ Rate limit threshold reached (90.1% of limit), pausing for 0.0s (current: 981/990)
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=981, binance=10 (diff: -971)
+2025-10-13 03:59:01 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 4h
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | Saved 0 klines for COMPUSDT 4h
+2025-10-13 03:59:01 EEST | INFO     | trading_bot |   [4/4] 🔄 COMPUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:58:58.590278+00:00 (1 days)
+2025-10-13 03:59:01 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 1d
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | Saved 0 klines for COMPUSDT 1d
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | ✓ COMPUSDT loaded and ready for analysis
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | ✅ COMPUSDT ready for analysis (24 symbols analyzing)
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | [25/272] Checking DOGEUSDT... (9.2%)
+2025-10-13 03:59:01 EEST | INFO     | trading_bot |   [1/4] 🔄 DOGEUSDT 15m - gap detected, updating from 2025-10-13 00:46
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 15m from 2025-10-13 00:46:00+00:00 to 2025-10-13 00:59:01.586024+00:00 (1 days)
+2025-10-13 03:59:01 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 15m
+2025-10-13 03:59:01 EEST | INFO     | trading_bot | Saved 0 klines for DOGEUSDT 15m
+2025-10-13 03:59:02 EEST | INFO     | trading_bot |   [2/4] 🔄 DOGEUSDT 1h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:59:02 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 1h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:59:01.586024+00:00 (1 days)
+2025-10-13 03:59:02 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0, binance=40 (diff: +40)
+2025-10-13 03:59:02 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 1h
+2025-10-13 03:59:02 EEST | INFO     | trading_bot | Saved 0 klines for DOGEUSDT 1h
+2025-10-13 03:59:02 EEST | INFO     | trading_bot |   [3/4] 🔄 DOGEUSDT 4h - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:59:02 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 4h from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:59:01.586024+00:00 (1 days)
+2025-10-13 03:59:03 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 4h
+2025-10-13 03:59:03 EEST | INFO     | trading_bot | Saved 0 klines for DOGEUSDT 4h
+2025-10-13 03:59:03 EEST | INFO     | trading_bot |   [4/4] 🔄 DOGEUSDT 1d - gap detected, updating from 2025-10-13 00:01
+2025-10-13 03:59:03 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 1d from 2025-10-13 00:01:00+00:00 to 2025-10-13 00:59:01.586024+00:00 (1 days)
+2025-10-13 03:59:03 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 1d
+2025-10-13 03:59:03 EEST | INFO     | trading_bot | Saved 0 klines for DOGEUSDT 1d
+2025-10-13 03:59:03 EEST | INFO     | trading_bot | ✓ DOGEUSDT loaded and ready for analysis
+2
