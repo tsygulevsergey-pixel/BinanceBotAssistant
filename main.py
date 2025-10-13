@@ -113,6 +113,15 @@ class TradingBot:
             self.client = BinanceClient()
             await self.client.__aenter__()  # Открываем сессию
             
+            # Задержка на старте для защиты от rate limit (только если кеш отсутствует)
+            import os
+            cache_file = 'data/exchange_info_cache.json'
+            if not os.path.exists(cache_file):
+                startup_delay = config.get('binance.startup_delay_seconds', 30)
+                if startup_delay > 0:
+                    logger.info(f"⏱️ Initial startup delay: {startup_delay}s (rate limit protection)")
+                    await asyncio.sleep(startup_delay)
+            
             # Загрузить информацию о символах (precision) для правильного форматирования цен
             await self.client.load_symbols_info()
             

@@ -87,9 +87,36 @@ class BinanceClient:
         return await self._request('GET', '/fapi/v1/exchangeInfo', weight=1)
     
     async def load_symbols_info(self):
-        """Загрузить информацию о символах (precision) в кэш"""
+        """Загрузить информацию о символах (precision) в кэш (с кешированием в файл)"""
+        import json
+        import os
+        from datetime import datetime, timedelta
+        import pytz
+        
+        cache_file = 'data/exchange_info_cache.json'
+        cache_ttl_hours = 1  # Кеш на 1 час
+        
         try:
+            # Проверить наличие кеша
+            if os.path.exists(cache_file):
+                with open(cache_file, 'r') as f:
+                    cache_data = json.load(f)
+                    cached_time = datetime.fromisoformat(cache_data['timestamp'])
+                    now = datetime.now(pytz.UTC)
+                    
+                    # Если кеш свежий (< 1 часа), использовать его
+                    if now - cached_time < timedelta(hours=cache_ttl_hours):
+                        self.symbols_info = cache_data['symbols_info']
+                        age_minutes = (now - cached_time).total_seconds() / 60
+                        logger.info(
+                            f"📦 Loaded precision info from cache for {len(self.symbols_info)} symbols "
+                            f"(age: {age_minutes:.1f} min)"
+                        )
+                        return
+            
+            # Кеш отсутствует или устарел - делаем запрос к API
             info = await self.get_exchange_info()
+            
             for symbol_info in info.get('symbols', []):
                 symbol = symbol_info['symbol']
                 self.symbols_info[symbol] = {
@@ -98,7 +125,17 @@ class BinanceClient:
                     'status': symbol_info.get('status'),
                     'contractType': symbol_info.get('contractType')
                 }
-            logger.info(f"Loaded precision info for {len(self.symbols_info)} symbols")
+            
+            # Сохранить в кеш
+            os.makedirs('data', exist_ok=True)
+            with open(cache_file, 'w') as f:
+                json.dump({
+                    'timestamp': datetime.now(pytz.UTC).isoformat(),
+                    'symbols_info': self.symbols_info
+                }, f)
+            
+            logger.info(f"✅ Loaded precision info for {len(self.symbols_info)} symbols (cached to file)")
+            
         except Exception as e:
             logger.error(f"Failed to load symbols info: {e}")
     
