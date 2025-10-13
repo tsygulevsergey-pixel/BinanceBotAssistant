@@ -1,0 +1,124 @@
+============================================================
+  Trading Bot - Auto Start
+============================================================
+
+[OK] Python is installed
+
+[INFO] Activating virtual environment...
+[INFO] Checking dependencies...
+[OK] Dependencies already installed
+
+============================================================
+  Starting bot...
+============================================================
+
+2025-10-13 19:34:04 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-13 19:34:10 EEST | INFO     | 🎯 Action Price Logger initialized - log file: logs/action_price_2025-10-13_19-34-10.log
+2025-10-13 19:34:36 EEST | WARNING  | trading_bot | Redis unavailable (Timeout connecting to server), using SQLite fallback for signal locks
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | EntryManager initialized with hybrid entry logic
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Donchian Breakout
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Squeeze Breakout
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: ORB/IRB
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: MA/VWAP Pullback
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Break & Retest
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: ATR Momentum
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: VWAP Mean Reversion
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Range Fade
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Volume Profile
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: RSI/Stoch MR
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Liquidity Sweep
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Order Flow
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: CVD Divergence
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Time-of-Day
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Cash-and-Carry
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered strategy: Market Making
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Registered 16 strategies
+2025-10-13 19:34:36 EEST | INFO     | trading_bot |
+📊 Всего стратегий: 16
+✅ Включено: 2
+❌ Выключено: 14
+
+🟢 Активные стратегии:
+  - Donchian Breakout
+  - Cash-and-Carry
+
+🔴 Выключенные стратегии:
+  - Squeeze Breakout
+  - ORB/IRB
+  - MA/VWAP Pullback
+  - Break & Retest
+  - ATR Momentum
+  - VWAP Mean Reversion
+  - Range Fade
+  - Volume Profile
+  - RSI/Stoch MR
+  - Liquidity Sweep
+  - Order Flow
+  - CVD Divergence
+  - Time-of-Day
+  - Market Making
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Trading Bot Starting...
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 19:34:36 EEST | WARNING  | trading_bot | 🔔 SIGNALS-ONLY MODE: Bot will generate signals without real trading
+2025-10-13 19:34:36 EEST | WARNING  | trading_bot | 🔔 No API keys required in this mode
+2025-10-13 19:34:36 EEST | WARNING  | trading_bot | ⚠️ Signals-Only Mode: API keys disabled, trading functions unavailable
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Cache expired (15.1h old), fetching new data
+2025-10-13 19:34:36 EEST | INFO     | trading_bot | Fetching exchange info from API (cache: expired)
+2025-10-13 19:34:37 EEST | INFO     | trading_bot | ✅ Loaded precision info for 609 symbols (cached to D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\data\exchange_info_cache.json, 88.8 KB)
+2025-10-13 19:34:37 EEST | INFO     | trading_bot | Initializing bot...
+2025-10-13 19:34:37 EEST | INFO     | trading_bot | Rate limit status: 1/990 (90% threshold) | Hard limit: 1100 | Usage: 0.1%
+2025-10-13 19:34:38 EEST | INFO     | trading_bot | 🔒 Loaded 8 active signals (Main: 7, AP: 1)
+2025-10-13 19:34:38 EEST | INFO     | trading_bot |    • Main strategies: 7 symbols blocked
+2025-10-13 19:34:38 EEST | INFO     | trading_bot |    • Action Price: 1 symbols blocked
+2025-10-13 19:34:38 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-13 19:34:38 EEST | INFO     | trading_bot | Found 515 USDT-M perpetual futures pairs
+2025-10-13 19:34:38 EEST | INFO     | trading_bot | Filtered to 305 pairs with volume >= $10,000,000
+2025-10-13 19:34:38 EEST | INFO     | trading_bot | Excluded 1 stablecoins: USDCUSDT
+2025-10-13 19:34:38 EEST | INFO     | trading_bot | Filtering coins by minimum age (90 days)...
+2025-10-13 19:35:00 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=125+1, binance=1 (diff: -124)
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | Excluded 304 young coins (age < 90 days):
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | Starting parallel data loading for 0 symbols...
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | Analyzer task started - ready to consume symbols from queue
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | 📊 Analyzing restart state...
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | 📊 Restart analysis:
+  ✅ Existing symbols with gaps: 0 (0 total requests)
+  🆕 New symbols: 0
+  📈 Total symbols: 0
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | ⚡ No gaps detected - all symbols are new or up-to-date
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | Background tasks started (loader + analyzer + symbol updater + periodic gap refill running in parallel)
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | Bot will start analyzing symbols as soon as their data is loaded
+2025-10-13 19:35:57 EEST | INFO     | trading_bot | 📊 Signal Performance Tracker started (check interval: 60s)
+2025-10-13 19:35:57 EEST | INFO     | 🎯 Action Price Engine initialized (Production mode)
+2025-10-13 19:35:57 EEST | INFO     | 🎯 Execution timeframes: ['15m', '1h']
+2025-10-13 19:35:58 EEST | INFO     | trading_bot | Symbol analyzer task started
+2025-10-13 19:35:58 EEST | INFO     | trading_bot | Symbol loader task started
+2025-10-13 19:35:58 EEST | INFO     | trading_bot | Loader task complete. Loaded 0/0 symbols
+2025-10-13 19:35:58 EEST | INFO     | trading_bot | 📊 Symbol auto-update started (interval: 1h)
+2025-10-13 19:35:58 EEST | INFO     | trading_bot | 📊 Signal Performance Tracker started
+2025-10-13 19:35:58 EEST | INFO     | trading_bot | 🔍 Backfill check: checking 7 active signals against historical candles
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 🔓 Main: NEOUSDT unblocked (signal closed)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | ✅ Signal closed (historical): NEOUSDT LONG | Breakeven after TP1 (+0.00%)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 🔓 Locks released (SQLite): TIAUSDT (1 locks)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 🔓 Main: TIAUSDT unblocked (signal closed)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | ❌ Signal closed (historical): TIAUSDT LONG | SL (-3.14%)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | ✅ Backfill complete: closed 2/7 signals
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | Telegram bot started with polling
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 🔓 Locks released (SQLite): 1MBABYDOGEUSDT (1 locks)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 🔓 Main: 1MBABYDOGEUSDT unblocked (signal closed)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | ⏱️ Signal closed: 1MBABYDOGEUSDT LONG | Entry: 0.0012 → Exit: 0.0011 | PnL: -1.90% (TIME_STOP)
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | Startup message sent to Telegram
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | Initialization complete
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | Starting main loop...
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | All 16 strategies will run simultaneously
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 📅 Current time: 16:35:59 UTC
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 📅 Next 15m update: 16:45 UTC
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 📅 Next 1h update: 17:00 UTC
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | 📅 Next 4h update: 20:00 UTC
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | All symbols processed, analyzer task complete
+2025-10-13 19:35:59 EEST | INFO     | trading_bot | Analyzer task stopped. 0 symbols ready for analysis
+2025-10-13 19:36:00 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=225+2, binance=1 (diff: -224)
+2025-10-13 19:36:58 EEST | INFO     | trading_bot | 🔄 Periodic gap refill started (interval: 15 minutes)
+2025-10-13 19:36:59 EEST | INFO     | trading_bot | 📊 Loading: 0/0 (0.0%) | Queue: 0 ready | Ready: 0 symbols | Failed: 0 | 2 strategies | 0 signals | Rate: 0.2%
+2025-10-13 19:37:59 EEST | INFO     | trading_bot | 📊 Loading: 0/0 (0.0%) | Queue: 0 ready | Ready: 0 symbols | Failed: 0 | 2 strategies | 0 signals | Rate: 0.5%
+2025-10-13 19:39:00 EEST | INFO     | trading_bot | 📊 Loading: 0/0 (0.0%) | Queue: 0 ready | Ready: 0 symbols | Failed: 0 | 2 strategies | 0 signals | Rate: 0.5%
