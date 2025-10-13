@@ -167,6 +167,17 @@ class PeriodicGapRefill:
         async with semaphore:
             try:
                 for tf, gap_info in gaps.items():
+                    # Проверить rate limit перед запросом (90% порог)
+                    if hasattr(self.data_loader, 'client') and hasattr(self.data_loader.client, 'rate_limiter'):
+                        usage = self.data_loader.client.rate_limiter.get_current_usage()
+                        if usage.get('is_near_limit', False):
+                            logger.info(
+                                f"⏸️ Pausing gap refill: rate limit at "
+                                f"{usage['percent_of_safe']:.1f}% of safe threshold"
+                            )
+                            # Подождать сброса лимита
+                            await self.data_loader.client.rate_limiter.wait_if_near_limit(weight=5)
+                    
                     # Загрузить gap
                     df = await self.data_loader.download_historical_klines(
                         symbol, tf,

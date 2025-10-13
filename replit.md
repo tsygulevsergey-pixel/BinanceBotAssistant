@@ -8,6 +8,16 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## October 13, 2025 - Smart Rate Limiting (90% Threshold)
+**Problem Resolved**: Bot was hitting Binance API rate limits (429 errors) on startup and during burst catchup, causing crashes and failed data loads.
+
+**Solution Implemented**:
+1. **90% Safety Threshold**: Rate limiter now stops at 990/1100 requests (90%) instead of waiting for 429 errors
+2. **Intelligent Pausing**: Burst catchup and gap refill automatically pause when approaching limit, wait for reset, then continue
+3. **Batch Protection**: Each request checks limit status before execution, preventing rate limit violations
+
+**Impact**: Bot can now safely load 270+ symbols without hitting rate limits, with automatic pause/resume for safe operation.
+
 ## October 12, 2025 - Critical Fix: Main Strategies Execution
 **Problem Resolved**: Main strategies were blocked and never executing due to `_check_signals()` blocking the main loop for 100+ seconds, causing candle close window misses.
 
@@ -89,7 +99,10 @@ Preferred communication style: Simple, everyday language.
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-Includes rate limiting with exponential backoff, auto-reconnection for WebSockets, orderbook resynchronization, and graceful shutdown.
+- **Smart Rate Limiting**: 90% safety threshold (990/1100 requests/min) prevents API bans. Automatic pause and resume when approaching limit.
+- **Exponential Backoff**: Retry logic with progressive delays for transient errors.
+- **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
+- **Graceful Shutdown**: Clean resource cleanup and state persistence.
 
 # External Dependencies
 
