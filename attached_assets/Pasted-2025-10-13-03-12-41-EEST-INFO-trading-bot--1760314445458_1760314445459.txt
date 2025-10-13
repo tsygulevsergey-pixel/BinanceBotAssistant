@@ -1,0 +1,24 @@
+2025-10-13 03:12:41 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 03:12:41 EEST | INFO     | trading_bot | Trading Bot Starting...
+2025-10-13 03:12:41 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 03:12:41 EEST | WARNING  | trading_bot | 🔔 SIGNALS-ONLY MODE: Bot will generate signals without real trading
+2025-10-13 03:12:41 EEST | WARNING  | trading_bot | 🔔 No API keys required in this mode
+2025-10-13 03:12:41 EEST | WARNING  | trading_bot | ⚠️ Signals-Only Mode: API keys disabled, trading functions unavailable
+2025-10-13 03:12:42 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.73s
+2025-10-13 03:12:44 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.73s
+2025-10-13 03:12:47 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-13 03:12:52 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-13 03:13:01 EEST | INFO     | trading_bot | Loaded precision info for 608 symbols
+2025-10-13 03:13:01 EEST | INFO     | trading_bot | Initializing bot...
+2025-10-13 03:13:01 EEST | ERROR    | trading_bot | Fatal error: 'limit'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 132, in start
+    await self._initialize()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 181, in _initialize
+    logger.info(f"Rate limit status: {rate_limit_status['current_weight']}/{rate_limit_status['limit']}")
+                                                                            ~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'limit'
+2025-10-13 03:13:01 EEST | INFO     | trading_bot | Stopping bot...
+2025-10-13 03:13:02 EEST | INFO     | trading_bot | Telegram bot stopped
+2025-10-13 03:13:02 EEST | INFO     | trading_bot | BinanceClient session closed
+2025-10-13 03:13:02 EEST | INFO     | trading_bot | Bot stopped
