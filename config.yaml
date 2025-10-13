@@ -68,8 +68,8 @@ market_detector:
 
 # Scoring System
 scoring:
-  base_threshold: 6.0  # PROFESSIONAL: Only quality signals (was 2.0)
-  enter_threshold: 6.0  # Threshold for entry - minimum 6.0 for 60%+ win rate (was 2.0)
+  base_threshold: 2.0
+  enter_threshold: 2.0  # Threshold for entry (используется в коде как enter_threshold)
   
   volume_multiplier: 1.5
   volume_mult: 1.5  # Threshold для volume ratio (используется в коде)
