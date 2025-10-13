@@ -571,8 +571,8 @@ class TradingBot:
                     'stop_loss': limit_signal.stop_loss,
                     'tp1': limit_signal.take_profit_1,
                     'tp2': limit_signal.take_profit_2,
-                    'score': limit_signal.final_score,
-                    'regime': limit_signal.regime,
+                    'score': limit_signal.score,
+                    'regime': limit_signal.market_regime,
                     'entry_type': 'LIMIT FILLED'
                 })
         

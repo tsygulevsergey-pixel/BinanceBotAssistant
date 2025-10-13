@@ -8,6 +8,34 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## October 13, 2025 - LIMIT FILLED Telegram Display Fix
+**BUG RESOLVED**: LIMIT FILLED notifications showed Score: 0.0 and empty Regime due to incorrect field names.
+
+**Problem**:
+- Telegram messages for LIMIT FILLED orders displayed:
+  - `⭐️ Скор: 0.0` (should be actual score like 2.0-3.0)
+  - `🔄 Режим:` (empty, should be TREND/RANGE/etc.)
+- Database saved signals correctly, issue only affected Telegram display
+
+**Root Cause**:
+Wrong field names used when formatting LIMIT FILLED notifications:
+```python
+'score': limit_signal.final_score,  # ❌ field doesn't exist
+'regime': limit_signal.regime,       # ❌ field doesn't exist
+```
+
+**Solution**:
+Fixed to use correct database model fields:
+```python
+'score': limit_signal.score,              # ✅ correct
+'regime': limit_signal.market_regime,     # ✅ correct
+```
+
+**Impact**:
+- LIMIT FILLED notifications now show correct Score and Market Regime
+- Better visibility into signal quality when limit orders execute
+- Database was always correct, only Telegram display was affected
+
 ## October 13, 2025 - Critical TIME_STOP Bug Fix: Ignored TP1 Flag
 **URGENT BUG RESOLVED**: TIME_STOP was closing positions AFTER TP1, ignoring `tp1_hit` flag and preventing TP2/breakeven exits.
 
