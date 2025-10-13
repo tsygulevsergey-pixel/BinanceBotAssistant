@@ -1,0 +1,267 @@
+// @version=5
+// Adaptive Market Flow Strategy
+// Концепция: Адаптивная стратегия, которая подстраивается под волатильность и состояние рынка
+strategy("Adaptive Market Flow", overlay=true, 
+         initial_capital=10000, default_qty_type=strategy.percent_of_equity, 
+         default_qty_value=100, commission_type=strategy.commission.percent, 
+         commission_value=0.04)
+
+// ==================== ПАРАМЕТРЫ ====================
+
+// Adaptive Settings
+volatility_lookback = input.int(14, "Volatility Lookback", minval=5, maxval=30)
+adaptive_multiplier = input.float(1.5, "Adaptive Multiplier", minval=0.5, maxval=3.0, step=0.1)
+
+// Entry Thresholds
+min_momentum_strength = input.float(1.2, "Min Momentum Strength", minval=0.5, maxval=3.0, step=0.1)
+min_volume_ratio = input.float(1.3, "Min Volume Ratio", minval=1.0, maxval=3.0, step=0.1)
+
+// Risk Management
+use_trailing_stop = input.bool(true, "Use Adaptive Trailing Stop")
+risk_reward_ratio = input.float(2.0, "Risk/Reward Ratio", minval=1.0, maxval=5.0, step=0.5)
+
+// ==================== ADAPTIVE INDICATORS ====================
+
+// ATR для адаптации (основа всей стратегии)
+atr = ta.atr(volatility_lookback)
+atr_pct = (atr / close) * 100
+
+// Adaptive EMA (период меняется с волатильностью)
+// Низкая волатильность → длинные периоды (медленнее)
+// Высокая волатильность → короткие периоды (быстрее)
+volatility_ratio = atr / ta.sma(atr, 50)
+adaptive_fast_period = math.round(9 * (1 / volatility_ratio))
+adaptive_slow_period = math.round(21 * (1 / volatility_ratio))
+
+// Ограничиваем диапазон
+adaptive_fast = math.max(5, math.min(adaptive_fast_period, 15))
+adaptive_slow = math.max(15, math.min(adaptive_slow_period, 40))
+
+ema_fast = ta.ema(close, adaptive_fast)
+ema_slow = ta.ema(close, adaptive_slow)
+
+// Volume адаптивный
+volume_ma = ta.sma(volume, 20)
+volume_ratio = volume / volume_ma
+
+// ==================== MARKET STATE DETECTION ====================
+
+// Определяем состояние рынка (TRENDING или RANGING)
+price_range = ta.highest(high, 20) - ta.lowest(low, 20)
+price_range_ma = ta.sma(price_range, 20)
+market_efficiency = price_range / price_range_ma
+
+is_trending = market_efficiency > 1.2
+is_ranging = market_efficiency < 0.8
+
+// ==================== MOMENTUM CALCULATION ====================
+
+// ATR-нормализованный momentum (универсален для любой монеты)
+raw_momentum = close - close[3]
+atr_normalized_momentum = raw_momentum / atr
+
+// Сила momentum (абсолютная)
+momentum_strength = math.abs(atr_normalized_momentum)
+
+// Направление
+momentum_bullish = atr_normalized_momentum > 0
+momentum_bearish = atr_normalized_momentum < 0
+
+// ==================== DYNAMIC ZONES ====================
+
+// Динамические зоны на основе ATR (подстраиваются под волатильность)
+middle_zone = ta.ema(close, 20)
+upper_zone = middle_zone + atr * adaptive_multiplier
+lower_zone = middle_zone - atr * adaptive_multiplier
+
+// Breakout detection (адаптивный)
+upper_breakout = close > upper_zone and close[1] <= upper_zone[1]
+lower_breakout = close < lower_zone and close[1] >= lower_zone[1]
+
+// ==================== CONFLUENCE SCORING ====================
+
+calc_long_score() =>
+    score = 0.0
+    
+    // 1. Momentum (главный фактор)
+    if momentum_bullish and momentum_strength > min_momentum_strength
+        score := score + 3.0
+    else if momentum_bullish and momentum_strength > min_momentum_strength * 0.7
+        score := score + 1.5
+    
+    // 2. EMA alignment
+    if ema_fast > ema_slow
+        score := score + 1.5
+    
+    // 3. Volume confirmation
+    if volume_ratio > min_volume_ratio
+        score := score + 1.5
+    else if volume_ratio > min_volume_ratio * 0.8
+        score := score + 0.5
+    
+    // 4. Zone breakout (опционально)
+    if upper_breakout
+        score := score + 1.0
+    
+    // 5. Market state bonus
+    if is_trending and ema_fast > ema_slow
+        score := score + 1.0
+    else if is_ranging and lower_breakout
+        score := score + 0.5
+    
+    score
+
+calc_short_score() =>
+    score = 0.0
+    
+    if momentum_bearish and momentum_strength > min_momentum_strength
+        score := score + 3.0
+    else if momentum_bearish and momentum_strength > min_momentum_strength * 0.7
+        score := score + 1.5
+    
+    if ema_fast < ema_slow
+        score := score + 1.5
+    
+    if volume_ratio > min_volume_ratio
+        score := score + 1.5
+    else if volume_ratio > min_volume_ratio * 0.8
+        score := score + 0.5
+    
+    if lower_breakout
+        score := score + 1.0
+    
+    if is_trending and ema_fast < ema_slow
+        score := score + 1.0
+    else if is_ranging and upper_breakout
+        score := score + 0.5
+    
+    score
+
+// ==================== ENTRY CONDITIONS ====================
+
+long_score = calc_long_score()
+short_score = calc_short_score()
+
+// Минимальный score для входа (адаптивный)
+min_entry_score = is_trending ? 4.0 : 5.0
+
+long_condition = long_score >= min_entry_score and strategy.position_size == 0
+short_condition = short_score >= min_entry_score and strategy.position_size == 0
+
+// ==================== POSITION MANAGEMENT ====================
+
+// Adaptive SL/TP based on ATR
+var float long_entry = na
+var float long_sl = na
+var float long_tp = na
+var float short_entry = na
+var float short_sl = na
+var float short_tp = na
+
+// LONG Entry
+if long_condition
+    long_entry := close
+    long_sl := close - atr * 1.5
+    long_tp := close + (close - long_sl) * risk_reward_ratio
+    
+    strategy.entry("Long", strategy.long,
+                   alert_message='{"action":"buy","score":' + str.tostring(long_score) + '}')
+    
+    if use_trailing_stop
+        strategy.exit("Exit Long", from_entry="Long", 
+                     limit=long_tp, trail_price=long_entry, 
+                     trail_offset=atr * 1.5)
+    else
+        strategy.exit("Exit Long", from_entry="Long", 
+                     limit=long_tp, stop=long_sl)
+
+// SHORT Entry
+if short_condition
+    short_entry := close
+    short_sl := close + atr * 1.5
+    short_tp := close - (short_sl - close) * risk_reward_ratio
+    
+    strategy.entry("Short", strategy.short,
+                   alert_message='{"action":"sell","score":' + str.tostring(short_score) + '}')
+    
+    if use_trailing_stop
+        strategy.exit("Exit Short", from_entry="Short", 
+                     limit=short_tp, trail_price=short_entry, 
+                     trail_offset=atr * 1.5)
+    else
+        strategy.exit("Exit Short", from_entry="Short", 
+                     limit=short_tp, stop=short_sl)
+
+// Dynamic Exit (momentum reversal)
+if strategy.position_size > 0 and momentum_bearish and momentum_strength > 1.5
+    strategy.close("Long", comment="Momentum Reversal")
+
+if strategy.position_size < 0 and momentum_bullish and momentum_strength > 1.5
+    strategy.close("Short", comment="Momentum Reversal")
+
+// ==================== VISUALIZATION ====================
+
+// Dynamic zones
+plot(upper_zone, "Upper Zone", color=color.new(color.red, 70), linewidth=2)
+plot(middle_zone, "Middle Zone", color=color.new(color.gray, 70), linewidth=1)
+plot(lower_zone, "Lower Zone", color=color.new(color.green, 70), linewidth=2)
+
+// Adaptive EMA
+plot(ema_fast, "Adaptive EMA Fast", color=color.orange, linewidth=2)
+plot(ema_slow, "Adaptive EMA Slow", color=color.blue, linewidth=2)
+
+// Market state background
+bgcolor(is_trending ? color.new(color.green, 95) : 
+        is_ranging ? color.new(color.orange, 95) : 
+        color.new(color.gray, 98), title="Market State")
+
+// Volume highlighting
+barcolor(volume_ratio > min_volume_ratio ? color.new(color.yellow, 60) : na)
+
+// Entry signals
+if long_condition
+    label.new(bar_index, low, 
+              "LONG\n" + str.tostring(long_score, "#.#") + "\nATR: " + str.tostring(atr_pct, "#.##") + "%", 
+              style=label.style_label_up, color=color.new(color.green, 20), 
+              textcolor=color.white, size=size.normal)
+
+if short_condition
+    label.new(bar_index, high, 
+              "SHORT\n" + str.tostring(short_score, "#.#") + "\nATR: " + str.tostring(atr_pct, "#.##") + "%", 
+              style=label.style_label_down, color=color.new(color.red, 20), 
+              textcolor=color.white, size=size.normal)
+
+// Momentum indicator (subplot)
+hline(0, "Zero Line", color=color.gray)
+plot(atr_normalized_momentum, "ATR-Normalized Momentum", 
+     color=atr_normalized_momentum > 0 ? color.green : color.red, 
+     linewidth=2, style=plot.style_histogram)
+
+// ==================== INFO PANEL ====================
+
+var table info_table = table.new(position.top_right, 2, 7, bgcolor=color.new(color.black, 80))
+
+if barstate.islast
+    table.cell(info_table, 0, 0, "Market State", text_color=color.white)
+    table.cell(info_table, 1, 0, is_trending ? "TRENDING" : is_ranging ? "RANGING" : "NEUTRAL", 
+               text_color=is_trending ? color.green : is_ranging ? color.orange : color.gray)
+    
+    table.cell(info_table, 0, 1, "ATR%", text_color=color.white)
+    table.cell(info_table, 1, 1, str.tostring(atr_pct, "#.##") + "%", text_color=color.yellow)
+    
+    table.cell(info_table, 0, 2, "Adaptive Fast", text_color=color.white)
+    table.cell(info_table, 1, 2, str.tostring(adaptive_fast), text_color=color.orange)
+    
+    table.cell(info_table, 0, 3, "Adaptive Slow", text_color=color.white)
+    table.cell(info_table, 1, 3, str.tostring(adaptive_slow), text_color=color.blue)
+    
+    table.cell(info_table, 0, 4, "Momentum", text_color=color.white)
+    table.cell(info_table, 1, 4, str.tostring(atr_normalized_momentum, "#.##"), 
+               text_color=atr_normalized_momentum > 0 ? color.green : color.red)
+    
+    table.cell(info_table, 0, 5, "Volume Ratio", text_color=color.white)
+    table.cell(info_table, 1, 5, str.tostring(volume_ratio, "#.##"), 
+               text_color=volume_ratio > min_volume_ratio ? color.green : color.gray)
+    
+    table.cell(info_table, 0, 6, "Min Score", text_color=color.white)
+    table.cell(info_table, 1, 6, str.tostring(min_entry_score, "#.#"), text_color=color.white)
