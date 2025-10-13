@@ -97,7 +97,7 @@ class BinanceClient:
         return await self.rate_limiter.execute_with_backoff(_do_request, weight=weight)
     
     async def get_exchange_info(self) -> Dict:
-        return await self._request('GET', '/fapi/v1/exchangeInfo', weight=1)
+        return await self._request('GET', '/fapi/v1/exchangeInfo', weight=10)
     
     async def load_symbols_info(self):
         """Загрузить информацию о символах (precision) в кэш (с кешированием в файл)"""
@@ -201,7 +201,17 @@ class BinanceClient:
         if end_time:
             params['endTime'] = end_time
         
-        return await self._request('GET', '/fapi/v1/klines', params=params, weight=1)
+        # Вес зависит от limit: 1-100 = 1, 101-500 = 2, 501-1000 = 5, >1000 = 10
+        if limit <= 100:
+            weight = 1
+        elif limit <= 500:
+            weight = 2
+        elif limit <= 1000:
+            weight = 5
+        else:
+            weight = 10
+        
+        return await self._request('GET', '/fapi/v1/klines', params=params, weight=weight)
     
     async def get_agg_trades(self, symbol: str, limit: int = 500,
                              start_time: Optional[int] = None, end_time: Optional[int] = None,
@@ -224,7 +234,19 @@ class BinanceClient:
             'symbol': symbol,
             'limit': limit
         }
-        return await self._request('GET', '/fapi/v1/depth', params=params, weight=1)
+        # Вес: 2 для limit <= 50, 5 для 51-100, 10 для 101-500, 20 для 501-1000
+        if limit <= 50:
+            weight = 2
+        elif limit <= 100:
+            weight = 5
+        elif limit <= 500:
+            weight = 10
+        elif limit <= 1000:
+            weight = 20
+        else:
+            weight = 50
+        
+        return await self._request('GET', '/fapi/v1/depth', params=params, weight=weight)
     
     async def get_open_interest(self, symbol: str) -> Dict:
         params = {'symbol': symbol}
@@ -275,7 +297,9 @@ class BinanceClient:
         params = {}
         if symbol:
             params['symbol'] = symbol
-        return await self._request('GET', '/fapi/v1/ticker/24hr', params=params, weight=1)
+        # Вес: 1 для одного символа, 40 для всех символов
+        weight = 1 if symbol else 40
+        return await self._request('GET', '/fapi/v1/ticker/24hr', params=params, weight=weight)
     
     async def get_mark_price(self, symbol: str) -> Dict:
         """Получить текущую mark price для символа"""

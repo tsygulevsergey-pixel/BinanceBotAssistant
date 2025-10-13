@@ -8,17 +8,20 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
-## October 13, 2025 - Smart Rate Limiting (90% Threshold) + Startup Protection
-**Problem Resolved**: Bot was hitting Binance API rate limits (429 errors) on startup and during burst catchup, causing crashes and failed data loads.
+## October 13, 2025 - Complete Rate Limit & IP Ban Protection System
+**Problem Resolved**: Bot was hitting Binance API rate limits (429 errors) and IP bans (418) on startup and during burst catchup, with incorrect weight tracking causing premature limit hits.
 
 **Solution Implemented**:
-1. **90% Safety Threshold**: Rate limiter now stops at 990/1100 requests (90%) instead of waiting for 429 errors
+1. **90% Safety Threshold**: Rate limiter stops at 990/1100 requests (90%) instead of waiting for 429 errors
 2. **Intelligent Pausing**: Burst catchup and gap refill automatically pause when approaching limit, wait for reset, then continue
 3. **Batch Protection**: Each request checks limit status before execution, preventing rate limit violations
 4. **ExchangeInfo Caching**: Precision data cached to file for 1 hour, eliminating redundant API calls on restarts
 5. **Startup Delay**: 30-second delay on first startup (only if cache missing) to allow rate limits to reset from previous runs
+6. **Accurate Weight Tracking**: Fixed request weights per Binance API docs (exchangeInfo=10, ticker/24hr=40, klines=1-10, depth=2-50)
+7. **Real-time Sync**: Reads X-MBX-USED-WEIGHT-1M header from Binance responses to sync local counter with actual API usage
+8. **IP Ban Detection & Blocking**: Detects Retry-After header, blocks ALL requests until ban expires, preventing useless retries
 
-**Impact**: Bot can now safely load 270+ symbols without hitting rate limits. Repeated restarts use cache and start instantly without API requests.
+**Impact**: Bot accurately tracks API usage, detects and waits out IP bans intelligently, and can safely load 270+ symbols. Repeated restarts use cache and start instantly.
 
 ## October 12, 2025 - Critical Fix: Main Strategies Execution
 **Problem Resolved**: Main strategies were blocked and never executing due to `_check_signals()` blocking the main loop for 100+ seconds, causing candle close window misses.
