@@ -1,0 +1,323 @@
+============================================================
+  Trading Bot - Auto Start
+============================================================
+
+[OK] Python is installed
+
+[INFO] Activating virtual environment...
+[INFO] Checking dependencies...
+[OK] Dependencies already installed
+
+============================================================
+  Starting bot...
+============================================================
+
+2025-10-13 03:35:55 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-13 03:35:56 EEST | INFO     | 🎯 Action Price Logger initialized - log file: logs/action_price_2025-10-13_03-35-56.log
+2025-10-13 03:36:22 EEST | WARNING  | trading_bot | Redis unavailable (Timeout connecting to server), using SQLite fallback for signal locks
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | EntryManager initialized with hybrid entry logic
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Donchian Breakout
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Squeeze Breakout
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: ORB/IRB
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: MA/VWAP Pullback
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Break & Retest
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: ATR Momentum
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: VWAP Mean Reversion
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Range Fade
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Volume Profile
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: RSI/Stoch MR
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Liquidity Sweep
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Order Flow
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: CVD Divergence
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Time-of-Day
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Cash-and-Carry
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered strategy: Market Making
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Registered 16 strategies
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Active strategies: 15
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Trading Bot Starting...
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | ============================================================
+2025-10-13 03:36:22 EEST | WARNING  | trading_bot | 🔔 SIGNALS-ONLY MODE: Bot will generate signals without real trading
+2025-10-13 03:36:22 EEST | WARNING  | trading_bot | 🔔 No API keys required in this mode
+2025-10-13 03:36:22 EEST | WARNING  | trading_bot | ⚠️ Signals-Only Mode: API keys disabled, trading functions unavailable
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | 📦 Loaded precision info from cache for 608 symbols (age: 9.5 min)
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Initializing bot...
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Rate limit status: 0/990 (90% threshold) | Hard limit: 1100 | Usage: 0.0%
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | 🔒 Loaded 2 active signals (Main: 0, AP: 2)
+2025-10-13 03:36:22 EEST | INFO     | trading_bot |    • Main strategies: 0 symbols blocked
+2025-10-13 03:36:22 EEST | INFO     | trading_bot |    • Action Price: 1 symbols blocked
+2025-10-13 03:36:22 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-13 03:36:22 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 135s before next request
+2025-10-13 03:36:22 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.84s
+2025-10-13 03:36:24 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 133s before next request
+2025-10-13 03:36:24 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.96s
+2025-10-13 03:36:28 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 130s before next request
+2025-10-13 03:36:28 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.20s
+2025-10-13 03:36:33 EEST | INFO     | trading_bot | Found 514 USDT-M perpetual futures pairs
+2025-10-13 03:36:33 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=5, binance=44 (diff: +39)
+2025-10-13 03:36:33 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 124s before next request
+2025-10-13 03:36:33 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.69s
+2025-10-13 03:36:35 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=45, binance=84 (diff: +39)
+2025-10-13 03:36:35 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 122s before next request
+2025-10-13 03:36:35 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.65s
+2025-10-13 03:36:38 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=85, binance=124 (diff: +39)
+2025-10-13 03:36:38 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 119s before next request
+2025-10-13 03:36:38 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.56s
+2025-10-13 03:36:43 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=125, binance=164 (diff: +39)
+2025-10-13 03:36:43 EEST | INFO     | trading_bot | Filtered to 272 pairs with volume >= $10,000,000
+2025-10-13 03:36:43 EEST | INFO     | trading_bot | Excluded 1 stablecoins: USDCUSDT
+2025-10-13 03:36:43 EEST | INFO     | trading_bot | Starting parallel data loading for 271 symbols...
+2025-10-13 03:36:43 EEST | INFO     | trading_bot | Analyzer task started - ready to consume symbols from queue
+2025-10-13 03:36:43 EEST | INFO     | trading_bot | 📊 Analyzing restart state...
+2025-10-13 03:36:44 EEST | INFO     | trading_bot | 📊 Restart analysis:
+  ✅ Existing symbols with gaps: 270 (923 total requests)
+  🆕 New symbols: 1
+  📈 Total symbols: 271
+2025-10-13 03:36:44 EEST | INFO     | trading_bot | ⚡ BURST CATCHUP starting:
+  📦 Symbols with gaps: 270
+  📊 Total gaps: 923
+  🕐 15m gaps: 270 (758 candles)
+  🕑 1h gaps: 191 (198 candles)
+  🕓 4h gaps: 193 (194 candles)
+  🕔 1d gaps: 269 (269 candles)
+2025-10-13 03:36:44 EEST | INFO     | trading_bot | ⚡ Starting BURST CATCHUP mode:
+  📦 Symbols to update: 270
+  📊 Total requests: 923
+  🔄 Parallel workers: 1
+  ⏱️  Estimated time: 278 seconds
+2025-10-13 03:36:44 EEST | INFO     | trading_bot | Symbol analyzer task started
+2025-10-13 03:36:44 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:44 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 113s before next request
+2025-10-13 03:36:44 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.57s
+2025-10-13 03:36:46 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 111s before next request
+2025-10-13 03:36:46 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.41s
+2025-10-13 03:36:49 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 15m
+2025-10-13 03:36:49 EEST | INFO     | trading_bot | Saved 2 klines for BTCUSDT 15m
+2025-10-13 03:36:49 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:49 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 108s before next request
+2025-10-13 03:36:49 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.58s
+2025-10-13 03:36:51 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 106s before next request
+2025-10-13 03:36:51 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.44s
+2025-10-13 03:36:54 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 1d
+2025-10-13 03:36:54 EEST | INFO     | trading_bot | Saved 1 klines for BTCUSDT 1d
+2025-10-13 03:36:54 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:54 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 15m
+2025-10-13 03:36:54 EEST | INFO     | trading_bot | Saved 2 klines for ETHUSDT 15m
+2025-10-13 03:36:54 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:54 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 1d
+2025-10-13 03:36:54 EEST | INFO     | trading_bot | Saved 1 klines for ETHUSDT 1d
+2025-10-13 03:36:54 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:55 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 103s before next request
+2025-10-13 03:36:55 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.14s
+2025-10-13 03:36:56 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 15m
+2025-10-13 03:36:56 EEST | INFO     | trading_bot | Saved 2 klines for BCHUSDT 15m
+2025-10-13 03:36:56 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:56 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 101s before next request
+2025-10-13 03:36:56 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.87s
+2025-10-13 03:36:59 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 1d
+2025-10-13 03:36:59 EEST | INFO     | trading_bot | Saved 1 klines for BCHUSDT 1d
+2025-10-13 03:36:59 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:59 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 15m
+2025-10-13 03:36:59 EEST | INFO     | trading_bot | Saved 2 klines for XRPUSDT 15m
+2025-10-13 03:36:59 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:36:59 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 1d
+2025-10-13 03:36:59 EEST | INFO     | trading_bot | Saved 1 klines for XRPUSDT 1d
+2025-10-13 03:36:59 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:01 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=305, binance=10 (diff: -295)
+2025-10-13 03:37:01 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 15m
+2025-10-13 03:37:01 EEST | INFO     | trading_bot | Saved 2 klines for LTCUSDT 15m
+2025-10-13 03:37:02 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:02 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 1d
+2025-10-13 03:37:02 EEST | INFO     | trading_bot | Saved 1 klines for LTCUSDT 1d
+2025-10-13 03:37:02 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:02 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=21, binance=0 (diff: -21)
+2025-10-13 03:37:02 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 95s before next request
+2025-10-13 03:37:02 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.63s
+2025-10-13 03:37:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=1, binance=30 (diff: +29)
+2025-10-13 03:37:04 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 15m
+2025-10-13 03:37:04 EEST | INFO     | trading_bot | Saved 2 klines for TRXUSDT 15m
+2025-10-13 03:37:04 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=31, binance=0 (diff: -31)
+2025-10-13 03:37:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 93s before next request
+2025-10-13 03:37:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.87s
+2025-10-13 03:37:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=1, binance=40 (diff: +39)
+2025-10-13 03:37:07 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 1d
+2025-10-13 03:37:07 EEST | INFO     | trading_bot | Saved 1 klines for TRXUSDT 1d
+2025-10-13 03:37:07 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 90s before next request
+2025-10-13 03:37:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.36s
+2025-10-13 03:37:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 15m
+2025-10-13 03:37:09 EEST | INFO     | trading_bot | Saved 2 klines for ETCUSDT 15m
+2025-10-13 03:37:09 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 1d
+2025-10-13 03:37:09 EEST | INFO     | trading_bot | Saved 1 klines for ETCUSDT 1d
+2025-10-13 03:37:09 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 88s before next request
+2025-10-13 03:37:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.66s
+2025-10-13 03:37:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 15m
+2025-10-13 03:37:11 EEST | INFO     | trading_bot | Saved 2 klines for LINKUSDT 15m
+2025-10-13 03:37:11 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:11 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=91, binance=0 (diff: -91)
+2025-10-13 03:37:11 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 86s before next request
+2025-10-13 03:37:11 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.93s
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=1, binance=100 (diff: +99)
+2025-10-13 03:37:14 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 1d
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | Saved 1 klines for LINKUSDT 1d
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | Downloading historical klines for XLMUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:14 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XLMUSDT 15m
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | Saved 2 klines for XLMUSDT 15m
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | Downloading historical klines for XLMUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:14 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XLMUSDT 1d
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | Saved 1 klines for XLMUSDT 1d
+2025-10-13 03:37:14 EEST | INFO     | trading_bot | Downloading historical klines for ADAUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:15 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 15m
+2025-10-13 03:37:15 EEST | INFO     | trading_bot | Saved 2 klines for ADAUSDT 15m
+2025-10-13 03:37:15 EEST | INFO     | trading_bot | Downloading historical klines for ADAUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:15 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 1d
+2025-10-13 03:37:15 EEST | INFO     | trading_bot | Saved 1 klines for ADAUSDT 1d
+2025-10-13 03:37:15 EEST | INFO     | trading_bot | Downloading historical klines for XMRUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:15 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 15m
+2025-10-13 03:37:15 EEST | INFO     | trading_bot | Saved 2 klines for XMRUSDT 15m
+2025-10-13 03:37:15 EEST | INFO     | trading_bot | Downloading historical klines for XMRUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:16 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 1d
+2025-10-13 03:37:16 EEST | INFO     | trading_bot | Saved 1 klines for XMRUSDT 1d
+2025-10-13 03:37:16 EEST | INFO     | trading_bot | Downloading historical klines for DASHUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:16 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 15m
+2025-10-13 03:37:16 EEST | INFO     | trading_bot | Saved 2 klines for DASHUSDT 15m
+2025-10-13 03:37:16 EEST | INFO     | trading_bot | Downloading historical klines for DASHUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:16 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 1d
+2025-10-13 03:37:16 EEST | INFO     | trading_bot | Saved 1 klines for DASHUSDT 1d
+2025-10-13 03:37:16 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 15m
+2025-10-13 03:37:17 EEST | INFO     | trading_bot | Saved 2 klines for ZECUSDT 15m
+2025-10-13 03:37:17 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 1d
+2025-10-13 03:37:17 EEST | INFO     | trading_bot | Saved 1 klines for ZECUSDT 1d
+2025-10-13 03:37:17 EEST | INFO     | trading_bot | Downloading historical klines for XTZUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XTZUSDT 15m
+2025-10-13 03:37:17 EEST | INFO     | trading_bot | Saved 2 klines for XTZUSDT 15m
+2025-10-13 03:37:17 EEST | INFO     | trading_bot | Downloading historical klines for XTZUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:18 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XTZUSDT 1d
+2025-10-13 03:37:18 EEST | INFO     | trading_bot | Saved 1 klines for XTZUSDT 1d
+2025-10-13 03:37:18 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:18 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 15m
+2025-10-13 03:37:18 EEST | INFO     | trading_bot | Saved 2 klines for BNBUSDT 15m
+2025-10-13 03:37:18 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:18 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 79s before next request
+2025-10-13 03:37:18 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.85s
+2025-10-13 03:37:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 1d
+2025-10-13 03:37:20 EEST | INFO     | trading_bot | Saved 1 klines for BNBUSDT 1d
+2025-10-13 03:37:21 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:21 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=251, binance=0 (diff: -251)
+2025-10-13 03:37:21 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 77s before next request
+2025-10-13 03:37:21 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.32s
+2025-10-13 03:37:22 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0, binance=260 (diff: +260)
+2025-10-13 03:37:22 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 15m
+2025-10-13 03:37:22 EEST | INFO     | trading_bot | Saved 2 klines for ATOMUSDT 15m
+2025-10-13 03:37:22 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:23 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 1d
+2025-10-13 03:37:23 EEST | INFO     | trading_bot | Saved 1 klines for ATOMUSDT 1d
+2025-10-13 03:37:23 EEST | INFO     | trading_bot | Downloading historical klines for IOTAUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:23 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - IOTAUSDT 15m
+2025-10-13 03:37:23 EEST | INFO     | trading_bot | Saved 2 klines for IOTAUSDT 15m
+2025-10-13 03:37:23 EEST | INFO     | trading_bot | Downloading historical klines for IOTAUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:23 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - IOTAUSDT 1d
+2025-10-13 03:37:23 EEST | INFO     | trading_bot | Saved 1 klines for IOTAUSDT 1d
+2025-10-13 03:37:23 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:24 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 15m
+2025-10-13 03:37:24 EEST | INFO     | trading_bot | Saved 2 klines for BATUSDT 15m
+2025-10-13 03:37:24 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:24 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 1d
+2025-10-13 03:37:24 EEST | INFO     | trading_bot | Saved 1 klines for BATUSDT 1d
+2025-10-13 03:37:24 EEST | INFO     | trading_bot | Downloading historical klines for VETUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:24 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - VETUSDT 15m
+2025-10-13 03:37:24 EEST | INFO     | trading_bot | Saved 2 klines for VETUSDT 15m
+2025-10-13 03:37:24 EEST | INFO     | trading_bot | Downloading historical klines for VETUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:25 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - VETUSDT 1d
+2025-10-13 03:37:25 EEST | INFO     | trading_bot | Saved 1 klines for VETUSDT 1d
+2025-10-13 03:37:25 EEST | INFO     | trading_bot | Downloading historical klines for NEOUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:25 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEOUSDT 15m
+2025-10-13 03:37:25 EEST | INFO     | trading_bot | Saved 2 klines for NEOUSDT 15m
+2025-10-13 03:37:25 EEST | INFO     | trading_bot | Downloading historical klines for NEOUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:25 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEOUSDT 1d
+2025-10-13 03:37:25 EEST | INFO     | trading_bot | Saved 1 klines for NEOUSDT 1d
+2025-10-13 03:37:25 EEST | INFO     | trading_bot | Downloading historical klines for QTUMUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:26 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - QTUMUSDT 15m
+2025-10-13 03:37:26 EEST | INFO     | trading_bot | Saved 2 klines for QTUMUSDT 15m
+2025-10-13 03:37:26 EEST | INFO     | trading_bot | Downloading historical klines for QTUMUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:26 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - QTUMUSDT 1d
+2025-10-13 03:37:26 EEST | INFO     | trading_bot | Saved 1 klines for QTUMUSDT 1d
+2025-10-13 03:37:26 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:26 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 15m
+2025-10-13 03:37:26 EEST | INFO     | trading_bot | Saved 2 klines for THETAUSDT 15m
+2025-10-13 03:37:26 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:27 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 1d
+2025-10-13 03:37:27 EEST | INFO     | trading_bot | Saved 1 klines for THETAUSDT 1d
+2025-10-13 03:37:27 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:27 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 15m
+2025-10-13 03:37:27 EEST | INFO     | trading_bot | Saved 2 klines for ALGOUSDT 15m
+2025-10-13 03:37:27 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:27 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=401, binance=0 (diff: -401)
+2025-10-13 03:37:27 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 70s before next request
+2025-10-13 03:37:27 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.81s
+2025-10-13 03:37:29 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0, binance=410 (diff: +410)
+2025-10-13 03:37:29 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 1d
+2025-10-13 03:37:29 EEST | INFO     | trading_bot | Saved 1 klines for ALGOUSDT 1d
+2025-10-13 03:37:29 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:30 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 15m
+2025-10-13 03:37:30 EEST | INFO     | trading_bot | Saved 2 klines for COMPUSDT 15m
+2025-10-13 03:37:30 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:30 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 1d
+2025-10-13 03:37:30 EEST | INFO     | trading_bot | Saved 1 klines for COMPUSDT 1d
+2025-10-13 03:37:30 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:30 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 15m
+2025-10-13 03:37:30 EEST | INFO     | trading_bot | Saved 2 klines for DOGEUSDT 15m
+2025-10-13 03:37:30 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:31 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=441, binance=0 (diff: -441)
+2025-10-13 03:37:31 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 67s before next request
+2025-10-13 03:37:31 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.21s
+2025-10-13 03:37:32 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0, binance=450 (diff: +450)
+2025-10-13 03:37:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 1d
+2025-10-13 03:37:32 EEST | INFO     | trading_bot | Saved 1 klines for DOGEUSDT 1d
+2025-10-13 03:37:32 EEST | INFO     | trading_bot | Downloading historical klines for KAVAUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:33 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - KAVAUSDT 15m
+2025-10-13 03:37:33 EEST | INFO     | trading_bot | Saved 2 klines for KAVAUSDT 15m
+2025-10-13 03:37:33 EEST | INFO     | trading_bot | Downloading historical klines for KAVAUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:33 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - KAVAUSDT 1d
+2025-10-13 03:37:33 EEST | INFO     | trading_bot | Saved 1 klines for KAVAUSDT 1d
+2025-10-13 03:37:33 EEST | INFO     | trading_bot | Downloading historical klines for SNXUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:33 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SNXUSDT 15m
+2025-10-13 03:37:33 EEST | INFO     | trading_bot | Saved 2 klines for SNXUSDT 15m
+2025-10-13 03:37:33 EEST | INFO     | trading_bot | Downloading historical klines for SNXUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SNXUSDT 1d
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Saved 1 klines for SNXUSDT 1d
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Downloading historical klines for DOTUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOTUSDT 15m
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Saved 2 klines for DOTUSDT 15m
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Downloading historical klines for DOTUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOTUSDT 1d
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Saved 1 klines for DOTUSDT 1d
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Downloading historical klines for CRVUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CRVUSDT 15m
+2025-10-13 03:37:34 EEST | INFO     | trading_bot | Saved 2 klines for CRVUSDT 15m
+2025-10-13 03:37:35 EEST | INFO     | trading_bot | Downloading historical klines for CRVUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:35 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CRVUSDT 1d
+2025-10-13 03:37:35 EEST | INFO     | trading_bot | Saved 1 klines for CRVUSDT 1d
+2025-10-13 03:37:35 EEST | INFO     | trading_bot | Downloading historical klines for TRBUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:35 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=531, binance=0 (diff: -531)
+2025-10-13 03:37:35 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN/BLOCK detected! Must wait 62s before next request
+2025-10-13 03:37:35 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.64s
+2025-10-13 03:37:37 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0, binance=540 (diff: +540)
+2025-10-13 03:37:37 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRBUSDT 15m
+2025-10-13 03:37:37 EEST | INFO     | trading_bot | Saved 2 klines for TRBUSDT 15m
+2025-10-13 03:37:37 EEST | INFO     | trading_bot | Downloading historical klines for TRBUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:37 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRBUSDT 1d
+2025-10-13 03:37:37 EEST | INFO     | trading_bot | Saved 1 klines for TRBUSDT 1d
+2025-10-13 03:37:37 EEST | INFO     | trading_bot | Downloading historical klines for RUNEUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - RUNEUSDT 15m
+2025-10-13 03:37:38 EEST | INFO     | trading_bot | Saved 2 klines for RUNEUSDT 15m
+2025-10-13 03:37:38 EEST | INFO     | trading_bot | Downloading historical klines for RUNEUSDT 1d from 2025-10-13 00:00:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2025-10-13 03:37:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - RUNEUSDT 1d
+2025-10-13 03:37:38 EEST | INFO     | trading_bot | Saved 1 klines for RUNEUSDT 1d
+2025-10-13 03:37:38 EEST | INFO     | trading_bot | Downloading historical klines for SUSHIUSDT 15m from 2025-10-13 00:15:00+00:00 to 2025-10-13 00:36:43.434664+00:00 (1 days)
+2
