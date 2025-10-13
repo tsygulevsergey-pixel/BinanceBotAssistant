@@ -428,17 +428,24 @@ class SignalPerformanceTracker:
                     signal.exit_type = "TP2"  # type: ignore
                     return ("WIN", tp2, pnl_percent, "TP2")
                 
-                # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ
+                # Проверка TP1 - ЧАСТИЧНОЕ ЗАКРЫТИЕ (30%)
                 if tp1 and current_price >= tp1:
+                    # TODO: Реализовать полную схему 30/40/30
+                    # Сейчас: breakeven после TP1
+                    # Нужно: 30% @ TP1, затем 40% @ TP2, затем 30% trailing
+                    
                     # Установить флаг TP1 и перенести SL в breakeven
                     signal.tp1_hit = True  # type: ignore
                     signal.tp1_closed_at = datetime.now(pytz.UTC)  # type: ignore
                     signal.stop_loss = entry  # type: ignore - ПЕРЕНОС SL В BREAKEVEN
                     
-                    tp1_pnl = (tp1 - entry) / entry * 100
+                    tp1_size = 0.30  # 30% на TP1 (новая схема)
+                    tp1_pnl = (tp1 - entry) / entry * 100 * tp1_size
                     signal.tp1_pnl_percent = tp1_pnl  # type: ignore - СОХРАНИТЬ PnL от TP1
+                    signal.tp1_size = tp1_size  # type: ignore
+                    
                     logger.info(
-                        f"📈 TP1 HIT: {signal.symbol} {signal.direction} "
+                        f"📈 TP1 HIT (30%): {signal.symbol} {signal.direction} "
                         f"| Partial close at {tp1:.4f} (+{tp1_pnl:.2f}%) "
                         f"| SL moved to breakeven {entry:.4f}"
                     )

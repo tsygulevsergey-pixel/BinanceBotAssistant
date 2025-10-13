@@ -124,6 +124,13 @@ btc_filter:
   expansion_atr_mult: 1.5  # ATR multiplier для expansion detection
   lookback_bars: 10  # Lookback period для ATR average
 
+# Signal Confluence (когда 2+ стратегий согласны)
+confluence:
+  double_bonus: 1.5  # +1.5 к score когда 2 стратегии согласны
+  triple_bonus: 3.0  # +3.0 к score когда 3 стратегии
+  quad_bonus: 5.0    # +5.0 к score когда 4+ стратегий
+  max_entry_gap_pct: 0.3  # Максимальный gap между entry ценами (%)
+
 # Time of Day Gating
 tod_gating:
   eu_session: ["07:00", "09:00"]
@@ -145,33 +152,11 @@ strategies:
   # Глобальный список (DEPRECATED - теперь используйте enabled флаг для каждой стратегии)
   enabled: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   
-  # #1 Donchian Breakout
-  donchian:
-    enabled: true  # true/false - включить/выключить стратегию
-    period: 20
-    timeframe: "1h"
-    context_timeframe: "4h"
-    min_close_distance_atr: 0.25
-    volume_threshold: 1.5
+  # ═══════════════════════════════════════════════════════════
+  # CORE STRATEGIES (5) - Профессиональный подход
+  # ═══════════════════════════════════════════════════════════
   
-  # #2 Squeeze Breakout
-  squeeze:
-    enabled: true
-    lookback: 90
-    bb_percentile: 25
-    min_duration: 12
-    breakout_atr: 0.25
-    max_distance_ema20: 1.5
-  
-  # #3 ORB/IRB
-  orb:
-    enabled: true
-    slots: ["00:00-01:00", "07:00-08:00", "13:30-14:30"]
-    width_percentile: 30
-    atr_multiplier: 0.8
-    breakout_atr: 0.25
-  
-  # #4 MA/VWAP Pullback
+  # #4 MA/VWAP Pullback ⭐ CORE - Тренд-следование
   pullback:
     enabled: true
     ma_periods: [20, 50]
@@ -179,7 +164,7 @@ strategies:
     retest_atr: 0.3
     volume_threshold: 1.2
   
-  # #5 Break & Retest
+  # #5 Break & Retest ⭐ CORE - Структурная торговля
   retest:
     enabled: true
     breakout_atr: 0.25
@@ -187,66 +172,96 @@ strategies:
     volume_threshold: 1.5
     split_ratio: 0.5  # 50% limit, 50% confirm
   
-  # #6 ATR Momentum
-  momentum:
-    enabled: true
-    impulse_atr: 1.4
-    close_percentile: 20  # top 20%
-    min_distance_resistance: 1.5
-    pullback_ema: [9, 20]
-  
-  # #7 VWAP Mean Reversion
-  vwap_mr:
-    enabled: true
-    sigma_bands: [1, 2]
-    reclaim_bars: 2
-    time_stop: [6, 8]
-  
-  # #8 Range Fade
-  range_fade:
-    enabled: true
-    min_tests: 2
-    time_stop: [6, 8]
-  
-  # #9 Volume Profile
+  # #9 Volume Profile ⭐ CORE - Институциональные уровни
   volume_profile:
     enabled: true
     bin_size_percent: 0.1
     acceptance_close_atr: 0.25
     acceptance_closes: 2
   
-  # #10 RSI/Stochastic MR
-  oscillator_mr:
-    enabled: true
-    rsi_period: 14
-    stoch_period: 14
-    oversold_percentile: 20
-    overbought_percentile: 80
-    lookback: 90
-  
-  # #11 Liquidity Sweep
+  # #11 Liquidity Sweep ⭐ CORE - Основное преимущество в крипте
   liquidity_sweep:
     enabled: true
     sweep_min_atr: 0.1
     sweep_max_atr: 0.3
     volume_threshold: 1.5
   
-  # #12 Order Flow
+  # #12 Order Flow ⭐ CORE - Smart money tracking
   order_flow:
     enabled: true
     imbalance_threshold: 0.6
     oi_delta_threshold: 5.0
     volume_threshold: 1.5
   
-  # #13 CVD Divergence
+  # ═══════════════════════════════════════════════════════════
+  # ОТКЛЮЧЕННЫЕ СТРАТЕГИИ (могут быть использованы как фильтры)
+  # ═══════════════════════════════════════════════════════════
+  
+  # #1 Donchian Breakout - ОТКЛЮЧЕНО (переобучена, запаздывает)
+  donchian:
+    enabled: false
+    period: 20
+    timeframe: "1h"
+    context_timeframe: "4h"
+    min_close_distance_atr: 0.25
+    volume_threshold: 1.5
+  
+  # #2 Squeeze Breakout - ОТКЛЮЧЕНО (много ложных пробоев без volume)
+  squeeze:
+    enabled: false
+    lookback: 90
+    bb_percentile: 25
+    min_duration: 12
+    breakout_atr: 0.25
+    max_distance_ema20: 1.5
+  
+  # #3 ORB/IRB - ОТКЛЮЧЕНО (не работает в 24/7 рынке)
+  orb:
+    enabled: false
+    slots: ["00:00-01:00", "07:00-08:00", "13:30-14:30"]
+    width_percentile: 30
+    atr_multiplier: 0.8
+    breakout_atr: 0.25
+  
+  # #6 ATR Momentum - ОТКЛЮЧЕНО (редкие сигналы, использовать как фильтр)
+  momentum:
+    enabled: false
+    impulse_atr: 1.4
+    close_percentile: 20  # top 20%
+    min_distance_resistance: 1.5
+    pullback_ema: [9, 20]
+  
+  # #7 VWAP Mean Reversion - ОТКЛЮЧЕНО (работает только в range, опасен в трендах)
+  vwap_mr:
+    enabled: false
+    sigma_bands: [1, 2]
+    reclaim_bars: 2
+    time_stop: [6, 8]
+  
+  # #8 Range Fade - ОТКЛЮЧЕНО (опасен в трендах, нужен строгий range filter)
+  range_fade:
+    enabled: false
+    min_tests: 2
+    time_stop: [6, 8]
+  
+  # #10 RSI/Stochastic MR - ОТКЛЮЧЕНО (не работает в крипте, может быть перекуплена месяцами)
+  oscillator_mr:
+    enabled: false
+    rsi_period: 14
+    stoch_period: 14
+    oversold_percentile: 20
+    overbought_percentile: 80
+    lookback: 90
+  
+  # #13 CVD Divergence - ОТКЛЮЧЕНО (может быть фильтром, но не основная стратегия)
   cvd_divergence:
-    enabled: true
+    enabled: false
     lookback_bars: 20
     divergence_threshold: 0.3
   
-  # #14 Time of Day
+  # #14 Time of Day - ОТКЛЮЧЕНО (нет реальных сессий в крипте 24/7)
   time_of_day:
-    enabled: true
+    enabled: false
     breakout_windows: [[7, 9], [13, 15]]
     mr_windows: [[0, 2], [22, 24]]
     volume_threshold: 1.5

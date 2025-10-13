@@ -35,6 +35,9 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("stats", self.cmd_stats))
         self.app.add_handler(CommandHandler("ap_stats", self.cmd_ap_stats))
         self.app.add_handler(CommandHandler("validate", self.cmd_validate))
+        # Новые профессиональные команды
+        self.app.add_handler(CommandHandler("regime_stats", self.cmd_regime_stats))
+        self.app.add_handler(CommandHandler("confluence_stats", self.cmd_confluence_stats))
         
         await self.app.initialize()
         await self.app.start()
@@ -62,13 +65,17 @@ class TelegramBot:
             return
         welcome_text = (
             "🤖 <b>Торговый бот запущен</b>\n\n"
-            "Доступные команды:\n"
+            "📊 <b>Основные команды:</b>\n"
             "/help - Справка\n"
             "/status - Статус бота\n"
             "/strategies - Список стратегий\n"
             "/performance - Производительность (7 дней)\n"
             "/stats - Статистика по стратегиям\n"
-            "/ap_stats - Action Price статистика\n"
+            "/ap_stats - Action Price статистика\n\n"
+            "📈 <b>Профессиональная аналитика:</b>\n"
+            "/regime_stats - Статистика по режимам рынка\n"
+            "/confluence_stats - Эффективность confluence\n\n"
+            "⚙️ <b>Диагностика:</b>\n"
             "/validate - Проверка стратегий\n"
             "/latency - Задержки системы\n"
             "/report - Статистика сигналов\n"
@@ -430,3 +437,161 @@ class TelegramBot:
         )
         
         return message
+    
+    async def cmd_regime_stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Статистика по режимам рынка"""
+        if not update.message:
+            return
+        
+        if not self.performance_tracker:
+            await update.message.reply_text("⚠️ Трекер производительности не запущен")
+            return
+        
+        try:
+            from src.database.models import Signal
+            from datetime import timedelta
+            import pytz
+            from datetime import datetime
+            
+            session = self.performance_tracker.db.get_session()
+            start_date = datetime.now(pytz.UTC) - timedelta(days=7)
+            
+            signals = session.query(Signal).filter(
+                Signal.created_at >= start_date,
+                Signal.status.in_(['WIN', 'LOSS', 'TIME_STOP'])
+            ).all()
+            
+            if not signals:
+                await update.message.reply_text("📊 Пока нет данных по режимам рынка")
+                session.close()
+                return
+            
+            regime_data = {}
+            for sig in signals:
+                regime = sig.market_regime or "UNKNOWN"
+                if regime not in regime_data:
+                    regime_data[regime] = {'total': 0, 'wins': 0, 'pnl': []}
+                
+                regime_data[regime]['total'] += 1
+                if sig.status == 'WIN':
+                    regime_data[regime]['wins'] += 1
+                if sig.pnl_percent:
+                    regime_data[regime]['pnl'].append(sig.pnl_percent)
+            
+            session.close()
+            
+            text = "📊 <b>Market Regime Performance (7d)</b>\n\n"
+            
+            regime_emojis = {
+                'TRENDING': '📈',
+                'RANGING': '↔️',
+                'VOLATILE': '⚡',
+                'CHOPPY': '🌊',
+                'UNDECIDED': '❓'
+            }
+            
+            for regime in sorted(regime_data.keys()):
+                data = regime_data[regime]
+                win_rate = (data['wins'] / data['total'] * 100) if data['total'] > 0 else 0
+                avg_pnl = sum(data['pnl']) / len(data['pnl']) if data['pnl'] else 0
+                
+                emoji = regime_emojis.get(regime, '📊')
+                text += (
+                    f"{emoji} <b>{regime}</b>\n"
+                    f"├─ Signals: {data['total']}\n"
+                    f"├─ Win Rate: {win_rate:.1f}%\n"
+                    f"└─ Avg PnL: {avg_pnl:+.2f}%\n\n"
+                )
+            
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting regime stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_confluence_stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Статистика по confluence сигналов"""
+        if not update.message:
+            return
+        
+        if not self.performance_tracker:
+            await update.message.reply_text("⚠️ Трекер производительности не запущен")
+            return
+        
+        try:
+            from src.database.models import Signal
+            from datetime import timedelta
+            import pytz
+            from datetime import datetime
+            
+            session = self.performance_tracker.db.get_session()
+            start_date = datetime.now(pytz.UTC) - timedelta(days=7)
+            
+            signals = session.query(Signal).filter(
+                Signal.created_at >= start_date,
+                Signal.status.in_(['WIN', 'LOSS', 'TIME_STOP'])
+            ).all()
+            
+            if not signals:
+                await update.message.reply_text("📊 Пока нет данных по confluence")
+                session.close()
+                return
+            
+            conf_data = {}
+            for sig in signals:
+                count = sig.confluence_count or 1
+                if count not in conf_data:
+                    conf_data[count] = {'total': 0, 'wins': 0, 'pnl': []}
+                
+                conf_data[count]['total'] += 1
+                if sig.status == 'WIN':
+                    conf_data[count]['wins'] += 1
+                if sig.pnl_percent:
+                    conf_data[count]['pnl'].append(sig.pnl_percent)
+            
+            session.close()
+            
+            text = "✨ <b>Signal Confluence Performance (7d)</b>\n\n"
+            
+            for count in sorted(conf_data.keys()):
+                data = conf_data[count]
+                win_rate = (data['wins'] / data['total'] * 100) if data['total'] > 0 else 0
+                avg_pnl = sum(data['pnl']) / len(data['pnl']) if data['pnl'] else 0
+                
+                if count == 1:
+                    label = "Single Strategy"
+                    emoji = "📌"
+                elif count == 2:
+                    label = "Double Confluence"
+                    emoji = "🔥"
+                elif count == 3:
+                    label = "Triple Confluence"
+                    emoji = "⭐"
+                else:
+                    label = f"{count}+ Confluence"
+                    emoji = "🚀"
+                
+                text += (
+                    f"{emoji} <b>{label}</b>\n"
+                    f"├─ Signals: {data['total']}\n"
+                    f"├─ Win Rate: {win_rate:.1f}%\n"
+                    f"└─ Avg PnL: {avg_pnl:+.2f}%\n\n"
+                )
+            
+            if len(conf_data) > 1:
+                single_wr = (conf_data[1]['wins'] / conf_data[1]['total'] * 100) if 1 in conf_data and conf_data[1]['total'] > 0 else 0
+                multi_wins = sum(data['wins'] for c, data in conf_data.items() if c > 1)
+                multi_total = sum(data['total'] for c, data in conf_data.items() if c > 1)
+                multi_wr = (multi_wins / multi_total * 100) if multi_total > 0 else 0
+                
+                improvement = multi_wr - single_wr
+                text += (
+                    f"💡 <b>Insights:</b>\n"
+                    f"Confluence improves Win Rate by <b>{improvement:+.1f}%</b>\n"
+                )
+            
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting confluence stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
