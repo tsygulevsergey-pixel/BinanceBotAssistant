@@ -76,8 +76,21 @@ class BinanceClient:
             if not self.session:
                 raise Exception("Session not initialized")
             async with self.session.request(method, url, params=params, headers=headers) as response:
+                # Извлечь информацию о лимитах из заголовков
+                used_weight = response.headers.get('X-MBX-USED-WEIGHT-1M')
+                retry_after = response.headers.get('Retry-After')
+                
+                # Обновить rate limiter реальными данными от Binance
+                if used_weight:
+                    actual_weight = int(used_weight)
+                    self.rate_limiter.update_from_binance_headers(actual_weight, retry_after)
+                
+                # Проверить статус ответа
                 if response.status == 429 or response.status == 418:
-                    raise Exception(f"Rate limit error: {response.status}")
+                    if retry_after:
+                        raise Exception(f"Rate limit/IP ban (status {response.status}), retry after {retry_after}s")
+                    else:
+                        raise Exception(f"Rate limit error: {response.status}")
                 response.raise_for_status()
                 return await response.json()
         
