@@ -326,7 +326,7 @@ universe:
   fetch_all_pairs: true  # Fetch all USDT-M pairs from Binance
   filter_quote: "USDT"
   min_volume_24h: 10000000  # $10M minimum
-  min_coin_age_days: 90  # Минимальный возраст монеты на рынке (дней)
+  min_coin_age_days: 0  # ОТКЛЮЧЕНО - фильтр по объёму уже отсекает неликвидные монеты
   update_interval_hours: 1  # Auto-update symbol list every N hours
   
   # Исключить стейблкоины (нулевая волатильность, бесполезны для торговли)
