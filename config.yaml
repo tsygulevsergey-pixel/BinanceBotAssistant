@@ -142,10 +142,12 @@ initial_balance:
 
 # Strategy Parameters
 strategies:
+  # Глобальный список (DEPRECATED - теперь используйте enabled флаг для каждой стратегии)
   enabled: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   
   # #1 Donchian Breakout
   donchian:
+    enabled: true  # true/false - включить/выключить стратегию
     period: 20
     timeframe: "1h"
     context_timeframe: "4h"
@@ -154,6 +156,7 @@ strategies:
   
   # #2 Squeeze Breakout
   squeeze:
+    enabled: true
     lookback: 90
     bb_percentile: 25
     min_duration: 12
@@ -162,6 +165,7 @@ strategies:
   
   # #3 ORB/IRB
   orb:
+    enabled: true
     slots: ["00:00-01:00", "07:00-08:00", "13:30-14:30"]
     width_percentile: 30
     atr_multiplier: 0.8
@@ -169,6 +173,7 @@ strategies:
   
   # #4 MA/VWAP Pullback
   pullback:
+    enabled: true
     ma_periods: [20, 50]
     fib_levels: [0.382, 0.618]
     retest_atr: 0.3
@@ -176,6 +181,7 @@ strategies:
   
   # #5 Break & Retest
   retest:
+    enabled: true
     breakout_atr: 0.25
     zone_atr: [0.2, 0.3]
     volume_threshold: 1.5
@@ -183,6 +189,7 @@ strategies:
   
   # #6 ATR Momentum
   momentum:
+    enabled: true
     impulse_atr: 1.4
     close_percentile: 20  # top 20%
     min_distance_resistance: 1.5
@@ -190,30 +197,61 @@ strategies:
   
   # #7 VWAP Mean Reversion
   vwap_mr:
+    enabled: true
     sigma_bands: [1, 2]
     reclaim_bars: 2
     time_stop: [6, 8]
   
   # #8 Range Fade
   range_fade:
+    enabled: true
     min_tests: 2
     time_stop: [6, 8]
   
   # #9 Volume Profile
   volume_profile:
+    enabled: true
     bin_size_percent: 0.1
     acceptance_close_atr: 0.25
     acceptance_closes: 2
   
   # #10 RSI/Stochastic MR
   oscillator_mr:
+    enabled: true
     rsi_period: 14
     stoch_period: 14
     oversold_percentile: 20
     overbought_percentile: 80
     lookback: 90
   
-  # #11 Funding Arbitrage (monitoring only for MVP)
+  # #11 Liquidity Sweep
+  liquidity_sweep:
+    enabled: true
+    sweep_min_atr: 0.1
+    sweep_max_atr: 0.3
+    volume_threshold: 1.5
+  
+  # #12 Order Flow
+  order_flow:
+    enabled: true
+    imbalance_threshold: 0.6
+    oi_delta_threshold: 5.0
+    volume_threshold: 1.5
+  
+  # #13 CVD Divergence
+  cvd_divergence:
+    enabled: true
+    lookback_bars: 20
+    divergence_threshold: 0.3
+  
+  # #14 Time of Day
+  time_of_day:
+    enabled: true
+    breakout_windows: [[7, 9], [13, 15]]
+    mr_windows: [[0, 2], [22, 24]]
+    volume_threshold: 1.5
+  
+  # #15 Funding Arbitrage (monitoring only for MVP)
   funding:
     enabled: false
     extreme_threshold: 0.1

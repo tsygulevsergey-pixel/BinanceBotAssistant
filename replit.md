@@ -4,6 +4,8 @@ This project is a sophisticated Binance USDT-M Futures Trading Bot designed to g
 
 Key features include a local orderbook engine, historical data loading, multi-timeframe analysis (15m, 1h, 4h), market regime detection (TREND/SQUEEZE/RANGE/CHOP), BTC correlation filtering, an advanced scoring system, and robust risk management with stop-loss, take-profit, and time-stop mechanisms. An integrated **Action Price** strategy system operates independently, identifying high-probability setups using Support/Resistance zones, Anchored VWAP, EMA trend filters, and 5 classic price action patterns with partial profit-taking capabilities.
 
+**NEW:** Config-based strategy control - each strategy can be individually enabled/disabled via `enabled: true/false` flags in config.yaml without code changes.
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -64,6 +66,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and specific configurations for the Action Price system.
+- **Strategy Enable/Disable System**: Each strategy has an `enabled: true/false` flag in config.yaml for easy activation control without code changes. Status displayed at startup showing active/inactive strategies.
 
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe coordination.

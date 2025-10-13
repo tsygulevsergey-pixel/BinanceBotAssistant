@@ -67,7 +67,8 @@ class BaseStrategy(ABC):
     def __init__(self, name: str, config: Dict):
         self.name = name
         self.config = config
-        self.enabled = True
+        # Читать enabled флаг из конфига стратегии, по умолчанию True
+        self.enabled = config.get('enabled', True)
         self.signals_generated = 0
         
     @abstractmethod

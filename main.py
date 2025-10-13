@@ -327,7 +327,10 @@ class TradingBot:
         
         self.strategy_manager.register_all(strategies)
         logger.info(f"Registered {len(strategies)} strategies")
-        logger.info(f"Active strategies: {self.strategy_manager.get_enabled_count()}")
+        
+        # Вывести детальный статус стратегий
+        status = self.strategy_manager.get_strategies_status()
+        logger.info(f"\n{status}")
     
     async def _run_main_loop(self):
         logger.info("Starting main loop...")

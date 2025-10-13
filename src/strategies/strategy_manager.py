@@ -180,3 +180,31 @@ class StrategyManager:
     def get_total_signals_count(self) -> int:
         """Получить общее количество сгенерированных сигналов"""
         return sum(s.signals_generated for s in self.strategies)
+    
+    def get_strategies_status(self) -> str:
+        """Получить статус всех стратегий в читаемом формате"""
+        enabled_strategies = []
+        disabled_strategies = []
+        
+        for strategy in self.strategies:
+            if strategy.is_enabled():
+                enabled_strategies.append(strategy.name)
+            else:
+                disabled_strategies.append(strategy.name)
+        
+        status_lines = []
+        status_lines.append(f"📊 Всего стратегий: {len(self.strategies)}")
+        status_lines.append(f"✅ Включено: {len(enabled_strategies)}")
+        status_lines.append(f"❌ Выключено: {len(disabled_strategies)}")
+        
+        if enabled_strategies:
+            status_lines.append(f"\n🟢 Активные стратегии:")
+            for name in enabled_strategies:
+                status_lines.append(f"  - {name}")
+        
+        if disabled_strategies:
+            status_lines.append(f"\n🔴 Выключенные стратегии:")
+            for name in disabled_strategies:
+                status_lines.append(f"  - {name}")
+        
+        return "\n".join(status_lines)
