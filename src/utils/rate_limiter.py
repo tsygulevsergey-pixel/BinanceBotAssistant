@@ -74,7 +74,7 @@ class RateLimiter:
         
         raise Exception(f"Max retries ({self.max_retries}) exceeded for rate limited request")
     
-    def update_from_binance_headers(self, actual_weight: int, retry_after: Optional[str] = None):
+    async def update_from_binance_headers(self, actual_weight: int, retry_after: Optional[str] = None):
         """
         Обновить rate limiter реальными данными из заголовков Binance
         
@@ -82,15 +82,16 @@ class RateLimiter:
             actual_weight: Реальный вес из заголовка X-MBX-USED-WEIGHT-1M
             retry_after: Время ожидания из заголовка Retry-After (при бане)
         """
-        # Синхронизировать локальный счётчик с реальным от Binance
-        if actual_weight != self.current_weight:
-            diff = actual_weight - self.current_weight
-            if abs(diff) > 10:  # Только если расхождение больше 10
-                logger.info(
-                    f"📊 Rate limiter sync: local={self.current_weight}, "
-                    f"binance={actual_weight} (diff: {diff:+d})"
-                )
-            self.current_weight = actual_weight
+        async with self.lock:  # ← THREAD-SAFE обновление
+            # Синхронизировать локальный счётчик с реальным от Binance
+            if actual_weight != self.current_weight:
+                diff = actual_weight - self.current_weight
+                if abs(diff) > 10:  # Только если расхождение больше 10
+                    logger.info(
+                        f"📊 Rate limiter sync: local={self.current_weight}, "
+                        f"binance={actual_weight} (diff: {diff:+d})"
+                    )
+                self.current_weight = actual_weight
         
         # Если есть Retry-After - значит IP бан или временная блокировка
         if retry_after:

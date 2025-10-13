@@ -83,7 +83,7 @@ class BinanceClient:
                 # Обновить rate limiter реальными данными от Binance
                 if used_weight:
                     actual_weight = int(used_weight)
-                    self.rate_limiter.update_from_binance_headers(actual_weight, retry_after)
+                    await self.rate_limiter.update_from_binance_headers(actual_weight, retry_after)
                 
                 # Проверить статус ответа
                 if response.status == 429 or response.status == 418:
