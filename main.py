@@ -48,7 +48,7 @@ from src.indicators.swing_levels import calculate_swing_levels
 from src.indicators.open_interest import OpenInterestCalculator
 from src.indicators.orderbook import OrderbookAnalyzer
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 # Action Price imports
@@ -953,8 +953,18 @@ class TradingBot:
         )
         
         # Добавить успешно обработанные символы в ready queue
+        # НО! Проверяем возраст символа перед добавлением
+        min_age_days = config.get('universe.min_coin_age_days', 90)
         for symbol in existing_gaps.keys():
             if symbol not in self.coordinator._failed_symbols:
+                # Проверка возраста для символов из БД (могли быть загружены до внедрения фильтра)
+                if min_age_days > 0:
+                    age = await self.client.get_symbol_age_days(symbol)
+                    if age > 0 and age < min_age_days:
+                        logger.debug(f"⏩ Fast Catchup: skipping {symbol} - too young ({age} days < {min_age_days} days)")
+                        self.coordinator.mark_symbol_failed(symbol, f"Too young ({age}d < {min_age_days}d)")
+                        continue
+                
                 await self.coordinator.add_ready_symbol(symbol)
                 self.catchup_done_symbols.add(symbol)  # Track processed symbols
                 logger.info(f"⚡ {symbol} caught up and ready")
@@ -1213,9 +1223,26 @@ class TradingBot:
                     f"entry_price={signal.entry_price:.4f}"
                 )
             else:
-                logger.warning(
-                    f"⚠️  Could not find PENDING signal in DB for {signal.symbol} {signal.direction}"
-                )
+                # Проверить был ли сигнал закрыт ранее (TIME_STOP/SL/TP)
+                closed_signal = session.query(Signal).filter(
+                    and_(
+                        Signal.symbol == signal.symbol,
+                        Signal.direction == signal.direction,
+                        Signal.strategy_name == signal.strategy_name,
+                        Signal.exit_price.isnot(None),  # Сигнал закрыт
+                        Signal.created_at >= datetime.now(pytz.UTC) - timedelta(hours=3)  # В последние 3 часа
+                    )
+                ).first()
+                
+                if closed_signal:
+                    logger.debug(
+                        f"📌 LIMIT order for {signal.symbol} {signal.direction} already closed "
+                        f"(exit: {closed_signal.exit_type}, created: {closed_signal.created_at.strftime('%H:%M')})"
+                    )
+                else:
+                    logger.warning(
+                        f"⚠️  Could not find PENDING signal in DB for {signal.symbol} {signal.direction}"
+                    )
         except Exception as e:
             session.rollback()
             logger.error(f"Failed to update LIMIT entry in DB: {e}", exc_info=True)

@@ -21,6 +21,9 @@ class RateLimiter:
         
         # IP ban tracking
         self.ip_ban_until: Optional[float] = None  # Timestamp когда IP бан снимется
+        
+        # Warning debounce (показывать warning максимум раз в 60 секунд)
+        self.last_threshold_warning_time: float = 0
     
     async def acquire(self, weight: int = 1) -> bool:
         while True:
@@ -49,10 +52,14 @@ class RateLimiter:
                     # Найти время до сброса (используем окно 60 сек)
                     wait_time = 60 - (now % 60) + 1  # Ждём до следующей минуты
                     percent = (total_weight / self.weight_limit) * 100
-                    logger.warning(
-                        f"⚠️ Rate limit threshold reached ({percent:.1f}% of limit), "
-                        f"pausing for {wait_time:.1f}s (current: {self.current_weight}+{self.pending_weight}/{self.safe_limit})"
-                    )
+                    
+                    # Debounce: показывать warning максимум раз в 60 секунд
+                    if now - self.last_threshold_warning_time >= 60:
+                        logger.warning(
+                            f"⚠️ Rate limit threshold reached ({percent:.1f}% of limit), "
+                            f"pausing for {wait_time:.1f}s (current: {self.current_weight}+{self.pending_weight}/{self.safe_limit})"
+                        )
+                        self.last_threshold_warning_time = now
                 else:
                     # Резервируем вес (будет освобождён при получении ответа от Binance)
                     self.pending_weight += weight
