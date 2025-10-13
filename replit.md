@@ -49,7 +49,7 @@ Preferred communication style: Simple, everyday language.
 - **Stop Distance Validation**: Prevents excessive risk.
 - **Hybrid Entry System**: Adaptive MARKET/LIMIT execution based on strategy type.
 - **Time Stops**: Exits trades if no progress within a set number of bars.
-- **Symbol Blocking System**: Prevents multiple signals on the same symbol, with independent blocking for main strategies and Action Price. Automatically excludes stablecoins from analysis.
+- **Symbol Blocking System (Per-Strategy)**: Each strategy independently blocks symbols when it has an active signal. Multiple strategies can work on the same symbol simultaneously (e.g., if Donchian has BTCUSDT signal, CVD Divergence can still generate BTCUSDT signal). Enables accurate per-strategy statistics and performance tracking. Action Price has independent blocking.
 
 ### Telegram Integration
 - Provides commands for status, strategy details, performance, validation, and latency.

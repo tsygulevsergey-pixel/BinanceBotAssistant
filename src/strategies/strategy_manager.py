@@ -26,7 +26,8 @@ class StrategyManager:
             self.register_strategy(strategy)
     
     async def check_all_signals(self, symbol: str, timeframe_data: Dict[str, pd.DataFrame],
-                         regime: str, bias: str, indicators: Dict) -> List[Signal]:
+                         regime: str, bias: str, indicators: Dict,
+                         blocked_symbols_by_strategy: dict = None) -> List[Signal]:
         """
         Проверить все стратегии на сигналы
         
@@ -36,6 +37,7 @@ class StrategyManager:
             regime: Рыночный режим
             bias: Направление тренда H4
             indicators: Рассчитанные индикаторы
+            blocked_symbols_by_strategy: dict[strategy_name, set(symbols)] - заблокированные символы для каждой стратегии
             
         Returns:
             Список сгенерированных сигналов
@@ -44,11 +46,21 @@ class StrategyManager:
         checked_count = 0
         skipped_count = 0
         
+        if blocked_symbols_by_strategy is None:
+            blocked_symbols_by_strategy = {}
+        
         for strategy in self.strategies:
             if not strategy.is_enabled():
                 strategy_logger.debug(f"  ⏭️  {strategy.name} - отключена")
                 skipped_count += 1
                 continue
+            
+            # Проверить блокировку для ЭТОЙ конкретной стратегии
+            if strategy.name in blocked_symbols_by_strategy:
+                if symbol in blocked_symbols_by_strategy[strategy.name]:
+                    strategy_logger.debug(f"  🔒 {strategy.name} - {symbol} заблокирован (есть активный сигнал)")
+                    skipped_count += 1
+                    continue
             
             # Получить данные для таймфрейма стратегии
             tf = strategy.get_timeframe()

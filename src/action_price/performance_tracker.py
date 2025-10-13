@@ -98,10 +98,10 @@ class ActionPricePerformanceTracker:
                           f"{signal.direction} | Reason: {exit_result['reason']} | "
                           f"PnL: {exit_result.get('pnl_percent', 0):.2f}%")
                 
-                # Callback для разблокировки символа
+                # Callback для разблокировки символа (Action Price использует собственную блокировку, не стратегии)
                 if self.on_signal_closed_callback:
                     try:
-                        # Вызываем callback (синхронный)
+                        # Вызываем callback (синхронный) - для AP не нужен strategy_name
                         self.on_signal_closed_callback(signal.symbol)
                     except Exception as e:
                         logger.error(f"Error in AP close callback: {e}")

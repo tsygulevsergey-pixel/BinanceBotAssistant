@@ -140,7 +140,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 (+{pnl_percent:.2f}%)")
                             return True
@@ -157,7 +157,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"✅ Signal closed (historical): {symbol} LONG | Breakeven after TP1 (+{pnl_percent:.2f}%)")
                             return True
@@ -176,7 +176,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"❌ Signal closed (historical): {symbol} LONG | SL ({pnl_percent:.2f}%)")
                             return True
@@ -193,7 +193,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"✅ Signal closed (historical): {symbol} LONG | TP2 direct (+{pnl_percent:.2f}%)")
                             return True
@@ -224,7 +224,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 (+{pnl_percent:.2f}%)")
                             return True
@@ -241,7 +241,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"✅ Signal closed (historical): {symbol} SHORT | Breakeven after TP1 (+{pnl_percent:.2f}%)")
                             return True
@@ -260,7 +260,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"❌ Signal closed (historical): {symbol} SHORT | SL ({pnl_percent:.2f}%)")
                             return True
@@ -277,7 +277,7 @@ class SignalPerformanceTracker:
                             
                             self.lock_manager.release_lock(symbol)
                             if self.on_signal_closed_callback:
-                                self.on_signal_closed_callback(symbol)
+                                self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
                             logger.info(f"✅ Signal closed (historical): {symbol} SHORT | TP2 direct (+{pnl_percent:.2f}%)")
                             return True
