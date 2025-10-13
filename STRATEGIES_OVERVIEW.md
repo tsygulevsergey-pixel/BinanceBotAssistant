@@ -52,6 +52,13 @@ lookback_days: 14               # Для расчета перцентилей
 4. ✅ **volume >= 1.5x** rolling average (20) - объем подтверждает
 5. ✅ **H4 bias != Bearish** - контекст не против
 
+### Условия сигнала SHORT:
+1. ✅ **Режим = TREND** (обязательно)
+2. ✅ **BB width был низким** (p30-40) до пробоя - признак сжатия
+3. ✅ **close < lower_band** - 0.25 ATR - четкий пробой вниз
+4. ✅ **volume >= 1.5x** rolling average (20) - объем подтверждает
+5. ✅ **H4 bias != Bullish** - контекст не против
+
 ### Используемые индикаторы:
 - Donchian Channel (20 период)
 - ATR (14)
@@ -93,6 +100,14 @@ max_distance_ema20: 1.5       # Максимальное расстояние о
 4. ✅ **distance_from_ema20 <= 1.5 ATR** - не слишком далеко
 5. ✅ **ADX >= 20** - достаточный импульс для breakout
 6. ✅ **H4 bias != Bearish**
+
+### Условия сигнала SHORT:
+1. ✅ **Режим = SQUEEZE** (обязательно)
+2. ✅ **BB width < KC width** минимум 12 баров подряд
+3. ✅ **close < EMA20 - 0.25 ATR** - пробой вниз
+4. ✅ **distance_from_ema20 <= 1.5 ATR** - не слишком далеко
+5. ✅ **ADX >= 20** - достаточный импульс для breakout
+6. ✅ **H4 bias != Bullish**
 
 ### Используемые индикаторы:
 - Bollinger Bands (20, std=2.0)
@@ -143,6 +158,14 @@ volume_threshold: 1.5
 5. ✅ **close > IB_high + 0.25 ATR** - четкий пробой
 6. ✅ **volume >= 1.5x** average
 
+### Условия сигнала SHORT:
+1. ✅ **Текущее время в одном из слотов** (UTC)
+2. ✅ **IB_width < 1.3 ATR** - узкий диапазон
+3. ✅ **IB_width < p30** за 60 дней - сжатие волатильности
+4. ✅ **H4 ADX > 20** - тренд на старшем ТФ
+5. ✅ **close < IB_low - 0.25 ATR** - четкий пробой вниз
+6. ✅ **volume >= 1.5x** average
+
 ### Используемые индикаторы:
 - Initial Balance calculation (4 bars на 15m)
 - ATR (14)
@@ -183,8 +206,19 @@ volume_threshold: 1.2         # Объем >= 1.2x
 3. ✅ **ADX > 20** - тренд подтвержден
 4. ✅ **Цена в зоне 0.382-0.618 Fibonacci** - правильная глубина отката
 5. ✅ **Цена около EMA20 ± 0.3 ATR** ИЛИ **около VWAP ± 0.3 ATR**
-6. ✅ **volume >= 1.2x** (адаптивный порог)
-7. ✅ **H4 bias != Bearish**
+6. ✅ **close > EMA20** - закрытие над уровнем
+7. ✅ **volume >= 1.2x** (адаптивный порог)
+8. ✅ **H4 bias != Bearish**
+
+### Условия сигнала SHORT:
+1. ✅ **Режим = TREND**
+2. ✅ **EMA50 slope < 0** - нисходящий тренд
+3. ✅ **ADX > 20** - тренд подтвержден
+4. ✅ **Цена в зоне 0.382-0.618 Fibonacci** - правильная глубина отката
+5. ✅ **Цена около EMA20 ± 0.3 ATR** ИЛИ **около VWAP ± 0.3 ATR**
+6. ✅ **close < EMA20** - закрытие под уровнем
+7. ✅ **volume >= 1.2x** (адаптивный порог)
+8. ✅ **H4 bias != Bullish**
 
 ### Используемые индикаторы:
 - EMA (20, 50)
@@ -230,6 +264,15 @@ adx_threshold: 20             # ADX >= 20
 5. ✅ **Касание зоны ретеста** [level - 0.3 ATR, level + 0.3 ATR] за последние 5 баров
 6. ✅ **Reclaim уровня** (close > level после касания)
 7. ✅ **H4 bias != Bearish**
+
+### Условия сигнала SHORT (ТЕКУЩИЕ):
+1. ✅ **Найден swing_low** (buffer=3)
+2. ✅ **close < swing_low - 0.25 ATR** - пробой вниз
+3. ✅ **volume >= 1.5x** average
+4. ✅ **ADX >= 20**
+5. ✅ **Касание зоны ретеста** [level - 0.3 ATR, level + 0.3 ATR] за последние 5 баров
+6. ✅ **Reclaim уровня** (close < level после касания)
+7. ✅ **H4 bias != Bullish**
 
 ### ПРОБЛЕМЫ:
 - ❌ **0.25 ATR слишком мало** - ловит слабые пробои
@@ -300,10 +343,21 @@ breakout_atr: [0.2, 0.3]
 3. ✅ **Импульс-бар найден** (за последние 5 баров):
    - bar_range >= 1.4x median ATR
    - close в верхних 20% бара (> 80% от low)
-4. ✅ **Пробой high импульса** >= 0.2-0.3 ATR
+4. ✅ **Пробой high импульса** >= 0.2-0.3 ATR ИЛИ **pullback к EMA9/20** с закрытием выше
 5. ✅ **volume > 2x** average - сильный объем
 6. ✅ **До resistance >= 1.5 ATR** - есть пространство
 7. ✅ **H4 bias != Bearish**
+
+### Условия сигнала SHORT:
+1. ✅ **Режим = TREND**
+2. ✅ **ADX >= 25** (сильный импульс)
+3. ✅ **Импульс-бар найден** (за последние 5 баров):
+   - bar_range >= 1.4x median ATR
+   - close в нижних 20% бара (< 20% от low)
+4. ✅ **Пробой low импульса** >= 0.2-0.3 ATR ИЛИ **pullback к EMA9/20** с закрытием ниже
+5. ✅ **volume > 2x** average - сильный объем
+6. ✅ **До support >= 1.5 ATR** - есть пространство вниз
+7. ✅ **H4 bias != Bullish**
 
 ### Используемые индикаторы:
 - ATR (14) с rolling median (20)
@@ -356,9 +410,23 @@ time_stop: [6, 8]             # Баров без прогресса
    - BB width < p30
    - EMA20/50 плоские (slope < 2%)
 3. ✅ **BTC bias = Neutral** - BTC не импульсит
-4. ✅ **Цена около VWAP-2σ или VAL** - экстремум
-5. ✅ **Reclaim внутрь value area** за 2 бара
-6. ✅ **Expansion block check** - не было недавнего импульса
+4. ✅ **Цена около VWAP-2σ или VAL** - экстремум (distance > 2σ)
+5. ✅ **Confluence:** VAL ≈ H4 swing low (< 0.3 ATR)
+6. ✅ **Reclaim внутрь value area** за 2 бара
+7. ✅ **volume > 1.5x** median
+
+### Условия сигнала SHORT:
+1. ✅ **Режим = RANGE или CHOP** (обязательно!)
+2. ✅ **ОБЯЗАТЕЛЬНЫЕ проверки LOW VOLATILITY:**
+   - ADX < 20
+   - ATR% < p40
+   - BB width < p30
+   - EMA20/50 плоские (slope < 2%)
+3. ✅ **BTC bias = Neutral** - BTC не импульсит
+4. ✅ **Цена около VWAP+2σ или VAH** - экстремум (distance > 2σ)
+5. ✅ **Confluence:** VAH ≈ H4 swing high (< 0.3 ATR)
+6. ✅ **Reclaim внутрь value area** за 2 бара
+7. ✅ **volume > 1.5x** median
 
 ### Используемые индикаторы:
 - Daily VWAP (± 1σ, ± 2σ)
@@ -404,9 +472,21 @@ lookback_bars: 100
 3. ✅ **Confluence подтвержден:**
    - Минимум 2 источника для каждой границы
    - Уровни близки (< 0.2 ATR)
-4. ✅ **Цена около support** - готовность к отбою
-5. ✅ **Reclaim внутрь рейнджа** (hold 2 бара)
-6. ✅ **IB не чрезмерно широкий**
+4. ✅ **Цена около support** (< 0.3 ATR)
+5. ✅ **RSI < 30** (oversold)
+6. ✅ **Reclaim внутрь рейнджа** (hold 2 бара)
+
+### Условия сигнала SHORT:
+1. ✅ **Режим = RANGE**
+2. ✅ **Найдены качественные границы:**
+   - Resistance: >= 2 теста VAH ИЛИ H4_high
+   - Support: >= 2 теста VAL ИЛИ H4_low
+3. ✅ **Confluence подтвержден:**
+   - Минимум 2 источника для каждой границы
+   - Уровни близки (< 0.2 ATR)
+4. ✅ **Цена около resistance** (< 0.3 ATR)
+5. ✅ **RSI > 70** (overbought)
+6. ✅ **Reclaim внутрь рейнджа** (hold 2 бара)
 
 ### Используемые индикаторы:
 - H4 swing high/low (реальные, не расчетные)
@@ -503,6 +583,14 @@ reclaim_bars: 2
 5. ✅ **Цена около края рейнджа ∩ VWAP/VA** - confluence зоны
 6. ✅ **Опционально: Bullish divergence** (price LL, RSI HL)
 
+### Условия сигнала SHORT:
+1. ✅ **Режим = RANGE или CHOP**
+2. ✅ **ADX < 25** - слабый тренд
+3. ✅ **RSI > p80** (адаптивный overbought)
+4. ✅ **Stochastic крест вниз** (K пересек D сверху)
+5. ✅ **Цена около края рейнджа ∩ VWAP/VA** - confluence зоны
+6. ✅ **Опционально: Bearish divergence** (price HH, RSI LH)
+
 ### Используемые индикаторы:
 - RSI (14) с адаптивными порогами
 - Stochastic (14, K and D)
@@ -594,9 +682,17 @@ refill_check_window: 5       # Баров для refill проверки
 ```
 
 ### Условия сигнала LONG:
-1. ✅ **Цена около VAH/VAL/POC** (< 0.3 ATR)
+1. ✅ **Цена около VAL/POC** (< 0.3 ATR)
 2. ✅ **Depth imbalance > +0.6** - bid сторона доминирует
 3. ✅ **CVD направлен вверх** - агрессоры покупают
+4. ✅ **OI Delta > +5%** (30-60 мин) - позиции открываются
+5. ✅ **volume > 1.5x** average
+6. ✅ **Reclaim/acceptance** ценой подтвержден
+
+### Условия сигнала SHORT:
+1. ✅ **Цена около VAH/POC** (< 0.3 ATR)
+2. ✅ **Depth imbalance < -0.6** - ask сторона доминирует
+3. ✅ **CVD направлен вниз** - агрессоры продают
 4. ✅ **OI Delta > +5%** (30-60 мин) - позиции открываются
 5. ✅ **volume > 1.5x** average
 6. ✅ **Reclaim/acceptance** ценой подтвержден
@@ -635,26 +731,34 @@ divergence_threshold: 0.3    # 30% изменение CVD (МЯГКО!)
 
 ### Типы сигналов:
 
-#### BEARISH DIVERGENCE (short):
-- Цена: HH (Higher High)
-- CVD: LH (Lower High)
-- cvd_drop > 30%
-- volume >= median
-- **Base Score: 2.5** ← СЛИШКОМ ВЫСОКО!
+#### УСЛОВИЯ СИГНАЛА LONG (4 типа):
 
-#### BULLISH DIVERGENCE (long):
+**1. BULLISH DIVERGENCE:**
 - Цена: LL (Lower Low)
 - CVD: HL (Higher Low)
 - cvd_rise > 30%
 - volume >= median
 - **Base Score: 2.5** ← СЛИШКОМ ВЫСОКО!
 
-#### CONFIRMATION LONG:
+**2. CONFIRMATION LONG:**
 - Пробой вверх + CVD растет
+- close > recent_high (30 bars)
+- CVD[-1] > CVD[-5]
 - **Base Score: 2.0** ← ВЫСОКО!
 
-#### CONFIRMATION SHORT:
+#### УСЛОВИЯ СИГНАЛА SHORT (4 типа):
+
+**3. BEARISH DIVERGENCE:**
+- Цена: HH (Higher High)
+- CVD: LH (Lower High)
+- cvd_drop > 30%
+- volume >= median
+- **Base Score: 2.5** ← СЛИШКОМ ВЫСОКО!
+
+**4. CONFIRMATION SHORT:**
 - Пробой вниз + CVD падает
+- close < recent_low (30 bars)
+- CVD[-1] < CVD[-5]
 - **Base Score: 2.0** ← ВЫСОКО!
 
 ### Regime multiplier:
@@ -719,22 +823,34 @@ volume_threshold: 1.5
 volatility_threshold_percentile: 50
 ```
 
-### Условия сигнала:
+### Общие условия:
 1. ✅ **Текущий час в одном из активных окон** (UTC)
 2. ✅ **volume > 1.5x** median (100 bars)
 3. ✅ **ATR% > p50** - волатильность выше медианы
-4. ✅ **Для breakout окон:** применить breakout логику
-5. ✅ **Для MR окон:** применить mean reversion логику
 
-### Breakout сигнал (в жирные окна):
-- Пробой недавнего high/low
-- Объем подтверждает
-- **Base Score:** 2.5
+### Условия LONG (зависит от окна):
 
-### Mean Reversion сигнал (в тонкие окна):
-- Экстремум около VWAP/VA
-- Разворот индикаторов
-- **Base Score:** 2.0
+**Breakout LONG (жирные окна 7-9, 13-15 UTC):**
+- ✅ Пробой недавнего high
+- ✅ Объем подтверждает
+- ✅ **Base Score:** 2.5
+
+**Mean Reversion LONG (тонкие окна 0-2, 22-24 UTC):**
+- ✅ Экстремум около VWAP-2σ/VAL
+- ✅ Разворот индикаторов вверх
+- ✅ **Base Score:** 2.0
+
+### Условия SHORT (зависит от окна):
+
+**Breakout SHORT (жирные окна 7-9, 13-15 UTC):**
+- ✅ Пробой недавнего low
+- ✅ Объем подтверждает
+- ✅ **Base Score:** 2.5
+
+**Mean Reversion SHORT (тонкие окна 0-2, 22-24 UTC):**
+- ✅ Экстремум около VWAP+2σ/VAH
+- ✅ Разворот индикаторов вниз
+- ✅ **Base Score:** 2.0
 
 ### Используемые индикаторы:
 - ATR % (14)
