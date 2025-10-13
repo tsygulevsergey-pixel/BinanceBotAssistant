@@ -8,6 +8,30 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## October 13, 2025 - Critical TIME_STOP Bug Fix: Ignored TP1 Flag
+**URGENT BUG RESOLVED**: TIME_STOP was closing positions AFTER TP1, ignoring `tp1_hit` flag and preventing TP2/breakeven exits.
+
+**Real Case Example (RENDERUSDT)**:
+- 8:54 - Signal created LONG @ 2.8180 | TP1: 2.8983 | TP2: 2.9827
+- 10:31 - TP1 HIT @ 2.8983 (+2.85%) → SL moved to breakeven
+- 10:58 - TIME_STOP closed @ 2.8320 (+0.16%) ❌ **WRONG!**
+- **Expected**: Wait for TP2 or breakeven (SL already safe at entry)
+
+**Root Cause**:
+1. `_check_time_stop()` did NOT check `tp1_hit` flag
+2. Closed positions even with SL in breakeven (protected capital)
+3. Prevented TP2 from executing despite being reachable
+
+**Solution Implemented**:
+1. **TP1 Check**: TIME_STOP now returns `None` immediately if `tp1_hit=True`
+2. **Logic**: Once TP1 hits, SL is in breakeven → position is protected → wait indefinitely for TP2/breakeven
+3. **PnL Calculation**: Fixed to use percentage from entry (was incorrectly using risk division)
+
+**Impact**:
+- TIME_STOP only closes stagnant positions BEFORE TP1
+- After TP1: position waits for TP2 or breakeven without time limit
+- Prevents premature exits on winning trades
+
 ## October 13, 2025 - TIME_STOP as Separate Category
 **Problem Resolved**: TIME_STOP exits were incorrectly counted as LOSS regardless of PnL, distorting Win Rate and Average Loss statistics.
 
@@ -26,6 +50,7 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 **TIME_STOP Logic**:
 - Triggers after 8 bars without sufficient progress (minimum 0.5% movement required)
+- **ONLY for positions BEFORE TP1** (after TP1, SL in breakeven = safe to wait)
 - Frees capital from stagnant positions
 - Can exit with positive or negative PnL
 

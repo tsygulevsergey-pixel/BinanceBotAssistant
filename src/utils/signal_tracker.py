@@ -480,7 +480,17 @@ class SignalPerformanceTracker:
         return None
     
     def _check_time_stop(self, signal: Signal, current_price: float) -> Optional[tuple]:
-        """Проверить time-stop (выход по времени если нет прогресса)"""
+        """
+        Проверить time-stop (выход по времени если нет прогресса)
+        
+        TIME_STOP НЕ срабатывает если TP1 уже достигнут (tp1_hit=True),
+        так как в этом случае SL уже в breakeven и позиция защищена.
+        """
+        # КРИТИЧНО: Если TP1 достигнут - TIME_STOP НЕ срабатывает
+        tp1_hit = bool(signal.tp1_hit) if hasattr(signal, 'tp1_hit') and signal.tp1_hit is not None else False  # type: ignore
+        if tp1_hit:
+            return None  # SL в breakeven, ждём TP2/breakeven без лимита времени
+        
         now = datetime.now(pytz.UTC)
         
         # Ensure signal.created_at is timezone-aware
@@ -505,25 +515,22 @@ class SignalPerformanceTracker:
         entry = float(signal.entry_price)  # type: ignore
         sl = float(signal.stop_loss)  # type: ignore
         direction = str(signal.direction)  # type: ignore
-        risk = abs(entry - sl)
         
         atr_threshold = 0.5
         
         if direction == "LONG":
             required_move = entry * (atr_threshold / 100)
             if current_price < entry + required_move:
-                pnl = current_price - entry
-                pnl_r = pnl / risk if risk > 0 else 0
+                pnl_percent = (current_price - entry) / entry * 100
                 signal.exit_type = "TIME_STOP"  # type: ignore
-                return ("TIME_STOP", current_price, pnl_r, "TIME_STOP")
+                return ("TIME_STOP", current_price, pnl_percent, "TIME_STOP")
         
         elif direction == "SHORT":
             required_move = entry * (atr_threshold / 100)
             if current_price > entry - required_move:
-                pnl = entry - current_price
-                pnl_r = pnl / risk if risk > 0 else 0
+                pnl_percent = (entry - current_price) / entry * 100
                 signal.exit_type = "TIME_STOP"  # type: ignore
-                return ("TIME_STOP", current_price, pnl_r, "TIME_STOP")
+                return ("TIME_STOP", current_price, pnl_percent, "TIME_STOP")
         
         return None
     
