@@ -8,6 +8,40 @@ A fully integrated **Action Price** strategy system is included, operating indep
 
 # Recent Changes
 
+## October 13, 2025 - Advanced Rate Limiter with Pending Weight & Coin Age Filter
+**Problems Resolved**: 
+1. Rate limiter sync showed massive discrepancies (local=989, binance=1 diff: -988)
+2. Parallel requests caused race conditions and unpredictable weight tracking
+3. Binance minute counter resets (950→10) broke pending weight logic
+4. Young coins (<90 days) caused incomplete data errors and spam alerts
+
+**Solutions Implemented**:
+1. **Pending Weight Mechanism**: Tracks in-flight requests separately from confirmed weight
+   - `acquire()` reserves weight: `pending_weight += weight`
+   - Total check: `current_weight + pending_weight + new_weight > safe_limit`
+   - `update_from_binance()` releases: `pending_weight -= weight_added`
+   
+2. **Binance Counter Reset Protection**: 
+   - Clamps negative diffs: `weight_added = max(0, actual - current)`
+   - Clears pending on reset: `if actual < pending: pending = 0`
+   
+3. **Error Path Cleanup**: 
+   - try/finally in `execute_with_backoff()` releases pending weight on failure
+   - Prevents progressive throttling from failed requests
+   
+4. **90-Day Coin Age Filter**:
+   - Added `get_symbol_age_days()` in BinanceClient (gets first candle via API)
+   - Filters symbols in `_fetch_symbols_by_volume()` before loading data
+   - Config: `universe.min_coin_age_days: 90`
+   - Excludes: OPENUSDT (35d), AVNTUSDT (34d), HOLOUSDT (32d), MONUSDT (3d), YBUSDT (3d), METUSDT (2d)
+
+**Impact**: 
+- Eliminates rate limiter sync chaos (no more -988 diffs)
+- Handles parallel requests correctly with pending weight tracking
+- Survives Binance counter resets without weight explosion
+- No more spam from young coins with incomplete data
+- Clean, predictable API usage tracking
+
 ## October 13, 2025 - Complete Rate Limit & IP Ban Protection System
 **Problem Resolved**: Bot was hitting Binance API rate limits (429 errors) and IP bans (418) on startup and during burst catchup, with incorrect weight tracking causing premature limit hits.
 

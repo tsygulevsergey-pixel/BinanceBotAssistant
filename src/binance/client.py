@@ -308,3 +308,35 @@ class BinanceClient:
     
     def get_rate_limit_status(self) -> Dict:
         return self.rate_limiter.get_current_usage()
+    
+    async def get_symbol_age_days(self, symbol: str) -> int:
+        """Определить возраст монеты по первой доступной свече
+        
+        Args:
+            symbol: Символ для проверки
+        
+        Returns:
+            int: Количество дней с момента листинга, 0 если ошибка
+        """
+        try:
+            # Получить первую свечу (1d таймфрейм для точности)
+            # startTime=0 означает "с самого начала"
+            klines = await self.get_klines(
+                symbol=symbol,
+                interval='1d',
+                limit=1,
+                start_time=0  # С самого начала истории
+            )
+            
+            if klines and len(klines) > 0:
+                # Первая свеча = klines[0][0] (timestamp в ms)
+                first_candle_ts = int(klines[0][0])
+                first_candle_time = datetime.fromtimestamp(first_candle_ts / 1000, tz=pytz.UTC)
+                now = datetime.now(pytz.UTC)
+                age_delta = now - first_candle_time
+                return age_delta.days
+            
+            return 0
+        except Exception as e:
+            logger.debug(f"Failed to get age for {symbol}: {e}")
+            return 0

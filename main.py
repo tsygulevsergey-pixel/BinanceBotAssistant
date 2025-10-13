@@ -178,6 +178,27 @@ class TradingBot:
             if excluded_count > 0:
                 logger.info(f"Excluded {excluded_count} stablecoins: {', '.join([s for s in stablecoins if s in volume_map])}")
         
+        # Фильтр по возрасту монет (минимум 90 дней на рынке)
+        min_age_days = config.get('universe.min_coin_age_days', 90)
+        if min_age_days > 0:
+            logger.info(f"Filtering coins by minimum age ({min_age_days} days)...")
+            aged_symbols = []
+            young_symbols = []
+            
+            for symbol in symbols:
+                age = await self.client.get_symbol_age_days(symbol)
+                if age >= min_age_days:
+                    aged_symbols.append(symbol)
+                elif age > 0:
+                    young_symbols.append((symbol, age))
+            
+            excluded_count = len(symbols) - len(aged_symbols)
+            if excluded_count > 0:
+                young_list = ', '.join([f"{s} ({age}d)" for s, age in sorted(young_symbols, key=lambda x: x[1])[:10]])
+                logger.info(f"Excluded {excluded_count} young coins (age < {min_age_days} days): {young_list}{'...' if len(young_symbols) > 10 else ''}")
+            
+            symbols = aged_symbols
+        
         return symbols
     
     async def _initialize(self):
