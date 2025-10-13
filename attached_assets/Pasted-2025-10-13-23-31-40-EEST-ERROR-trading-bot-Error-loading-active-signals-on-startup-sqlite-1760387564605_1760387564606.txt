@@ -1,0 +1,84 @@
+2025-10-13 23:31:40 EEST | ERROR    | trading_bot | Error loading active signals on startup: (sqlite3.OperationalError) no such column: signals.context_timeframe
+[SQL: SELECT signals.id AS signals_id, signals.context_hash AS signals_context_hash, signals.symbol AS signals_symbol, signals.strategy_id AS signals_strategy_id, signals.strategy_name AS signals_strategy_name, signals.direction AS signals_direction, signals.entry_price AS signals_entry_price, signals.stop_loss AS signals_stop_loss, signals.take_profit_1 AS signals_take_profit_1, signals.take_profit_2 AS signals_take_profit_2, signals.score AS signals_score, signals.market_regime AS signals_market_regime, signals.timeframe AS signals_timeframe, signals.context_timeframe AS signals_context_timeframe, signals.signal_timeframe AS signals_signal_timeframe, signals.confirmation_timeframe AS signals_confirmation_timeframe, signals.confluence_count AS signals_confluence_count, signals.confluence_strategies AS signals_confluence_strategies, signals.confluence_bonus AS signals_confluence_bonus, signals.sl_type AS signals_sl_type, signals.sl_level AS signals_sl_level, signals.sl_offset AS signals_sl_offset, signals.tp1_type AS signals_tp1_type, signals.tp2_type AS signals_tp2_type, signals.max_favorable_excursion AS signals_max_favorable_excursion, signals.max_adverse_excursion AS signals_max_adverse_excursion, signals.bars_to_tp1 AS signals_bars_to_tp1, signals.bars_to_exit AS signals_bars_to_exit, signals.tp1_size AS signals_tp1_size, signals.tp2_size AS signals_tp2_size, signals.runner_size AS signals_runner_size, signals.tp1_pnl_percent AS signals_tp1_pnl_percent, signals.tp2_hit AS signals_tp2_hit, signals.tp2_closed_at AS signals_tp2_closed_at, signals.tp2_pnl_percent AS signals_tp2_pnl_percent, signals.trailing_active AS signals_trailing_active, signals.trailing_high_water_mark AS signals_trailing_high_water_mark, signals.runner_exit_price AS signals_runner_exit_price, signals.runner_pnl_percent AS signals_runner_pnl_percent, signals.created_at AS signals_created_at, signals.status AS signals_status, signals.telegram_message_id AS signals_telegram_message_id, signals.tp1_hit AS signals_tp1_hit, signals.tp1_closed_at AS signals_tp1_closed_at, signals.exit_price AS signals_exit_price, signals.exit_reason AS signals_exit_reason, signals.exit_type AS signals_exit_type, signals.pnl AS signals_pnl, signals.pnl_percent AS signals_pnl_percent, signals.closed_at AS signals_closed_at, signals.meta_data AS signals_meta_data
+FROM signals
+WHERE signals.status IN (?, ?)]
+[parameters: ('ACTIVE', 'PENDING')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such column: signals.context_timeframe
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1414, in _load_active_signals_on_startup
+    ).all()
+      ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: signals.context_timeframe
+[SQL: SELECT signals.id AS signals_id, signals.context_hash AS signals_context_hash, signals.symbol AS signals_symbol, signals.strategy_id AS signals_strategy_id, signals.strategy_name AS signals_strategy_name, signals.direction AS signals_direction, signals.entry_price AS signals_entry_price, signals.stop_loss AS signals_stop_loss, signals.take_profit_1 AS signals_take_profit_1, signals.take_profit_2 AS signals_take_profit_2, signals.score AS signals_score, signals.market_regime AS signals_market_regime, signals.timeframe AS signals_timeframe, signals.context_timeframe AS signals_context_timeframe, signals.signal_timeframe AS signals_signal_timeframe, signals.confirmation_timeframe AS signals_confirmation_timeframe, signals.confluence_count AS signals_confluence_count, signals.confluence_strategies AS signals_confluence_strategies, signals.confluence_bonus AS signals_confluence_bonus, signals.sl_type AS signals_sl_type, signals.sl_level AS signals_sl_level, signals.sl_offset AS signals_sl_offset, signals.tp1_type AS signals_tp1_type, signals.tp2_type AS signals_tp2_type, signals.max_favorable_excursion AS signals_max_favorable_excursion, signals.max_adverse_excursion AS signals_max_adverse_excursion, signals.bars_to_tp1 AS signals_bars_to_tp1, signals.bars_to_exit AS signals_bars_to_exit, signals.tp1_size AS signals_tp1_size, signals.tp2_size AS signals_tp2_size, signals.runner_size AS signals_runner_size, signals.tp1_pnl_percent AS signals_tp1_pnl_percent, signals.tp2_hit AS signals_tp2_hit, signals.tp2_closed_at AS signals_tp2_closed_at, signals.tp2_pnl_percent AS signals_tp2_pnl_percent, signals.trailing_active AS signals_trailing_active, signals.trailing_high_water_mark AS signals_trailing_high_water_mark, signals.runner_exit_price AS signals_runner_exit_price, signals.runner_pnl_percent AS signals_runner_pnl_percent, signals.created_at AS signals_created_at, signals.status AS signals_status, signals.telegram_message_id AS signals_telegram_message_id, signals.tp1_hit AS signals_tp1_hit, signals.tp1_closed_at AS signals_tp1_closed_at, signals.exit_price AS signals_exit_price, signals.exit_reason AS signals_exit_reason, signals.exit_type AS signals_exit_type, signals.pnl AS signals_pnl, signals.pnl_percent AS signals_pnl_percent, signals.closed_at AS signals_closed_at, signals.meta_data AS signals_meta_data
+FROM signals
+WHERE signals.status IN (?, ?)]
+[parameters: ('ACTIVE', 'PENDING')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-13 23:31:40 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-13 23:31:41 EEST | INFO     | trading_bot | Found 515 USDT-M perpetual futures pairs
+2025-10-13 23:31:42 EEST | INFO     | trading_bot | Filtered to 308 pairs with volume >= $10,000,000
+2025-10-13 23:31:42 EEST | INFO     | trading_bot | Excluded 1 stablecoins: USDCUSDT
+2025-10-13 23:31:42 EEST | INFO     | trading_bot | Starting parallel data loading for 307 symbols...
+2025-10-13 23:31:42 EEST | INFO     | trading_bot | Analyzer task started - ready to consume symbols from queue
+2025-10-13 23:31:42 EEST | INFO     | trading_bot | 📊 Analyzing restart state...
+2025-10-13 23:31:56 EEST | INFO     | trading_bot | 📊 Restart analysis:
+  ✅ Existing symbols with gaps: 299 (905 total requests)
+  🆕 New symbols: 8
+  📈 Total symbols: 307
+2025-10-13 23:31:56 EEST | INFO     | trading_bot | ⚡ BURST CATCHUP starting:
+  📦 Symbols with gaps: 299
+  📊 Total gaps: 905
+  🕐 15m gaps: 299 (12699 candles)
+  🕑 1h gaps: 297 (3199 candles)
+  🕓 4h gaps: 297 (850 candles)
+  🕔 1d gaps: 12 (13 candles)
+2025-10-13 23:31:56 EEST | INFO     | trading_bot | ⚡ Starting BURST CATCHUP mode:
+  📦 Symbols to update: 299
+  📊 Total requests: 905
+  🔄 Parallel workers: 2
+  ⏱️  Estimated time: 137 seconds
+2025-10-13 23:31:56 EEST | INFO     | trading_bot | Symbol analyzer task started
