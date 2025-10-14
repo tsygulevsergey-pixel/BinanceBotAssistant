@@ -13,7 +13,7 @@ database:
 binance:
   use_testnet: true  # true = использовать Binance Testnet (для теста на Replit)
   signals_only_mode: true  # true = только сигналы без торговли (не нужны API ключи)
-  rest_weight_limit: 1100  # per minute
+  rest_weight_limit: 2400  # FUTURES API limit = 2400/min (было 1100 для SPOT), safety 90% = 2160
   startup_delay_seconds: 30  # Задержка при первом запуске если нет кеша (защита от rate limit)
   ws_reconnect_delay: 5
   rate_limit_backoff_base: 2
@@ -24,13 +24,13 @@ binance:
 # Fast Catchup - Быстрая догрузка gaps при рестарте
 fast_catchup:
   enabled: true  # Быстрая докачка при рестарте (15-20 сек вместо 5-6 минут)
-  max_parallel: 2  # УМЕНЬШЕНО С auto (4-12) до 2 для снижения нагрузки на API
+  max_parallel: 1  # КРИТИЧНО: Снижено до 1 для защиты от IP ban (было 2)
   min_gap_size: 1  # Минимальный размер gap для burst режима (в свечах)
 
 # Periodic Gap Refill - Периодическая быстрая докачка gaps во время работы
 periodic_gap_refill:
   enabled: true  # Включить/выключить периодическую докачку
-  max_parallel: 3  # УМЕНЬШЕНО С 8 до 3 для снижения нагрузки на API
+  max_parallel: 1  # КРИТИЧНО: Снижено до 1 для защиты от IP ban (было 3)
   lookback_minutes: 120  # Проверять gaps за последние N минут (2 часа)
   # Расписание:
   # - Каждые 15 мин → докачка 15m свечей

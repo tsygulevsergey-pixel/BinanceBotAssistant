@@ -60,13 +60,16 @@ class RateLimiter:
                             f"pausing for {wait_time:.1f}s (current: {self.current_weight}+{self.pending_weight}/{self.safe_limit})"
                         )
                         self.last_threshold_warning_time = now
+                    
+                    # КРИТИЧНО: Ждем сброса лимита ВНУТРИ цикла
+                    # Освобождаем lock перед сном
                 else:
                     # Резервируем вес (будет освобождён при получении ответа от Binance)
                     self.pending_weight += weight
                     self.requests.append((now, weight))
                     return True
             
-            # Ждем сброса лимита
+            # Ждем сброса лимита (wait_time установлен в if блоке выше)
             await asyncio.sleep(wait_time)
             
             # КРИТИЧЕСКИ ВАЖНО: После ожидания принудительно сбросить счетчики

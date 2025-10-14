@@ -1,0 +1,323 @@
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.96s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.96s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.96s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.96s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.96s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.96s
+2025-10-14 12:33:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2470+0, binance=2540 (diff: +70)
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2540+0, binance=2480 (diff: -60)
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2520+0, binance=2600 (diff: +80)
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.97s
+2025-10-14 12:33:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2580+0, binance=2640 (diff: +60)
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2610+0, binance=2680 (diff: +70)
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.98s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.99s
+2025-10-14 12:33:04 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:00 (56s)
+2025-10-14 12:33:04 EEST | WARNING  | trading_bot | Rate limit hit (attempt 1/5), backing off for 1.99s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.14s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.14s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.19s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.19s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.19s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.19s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.20s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.20s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.20s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.20s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.21s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.21s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1200s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.22s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:34:01 (54s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.22s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1320s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.22s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2921+0, binance=0 (diff: -2921)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.22s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2931 (diff: +2931)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1440s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2931+0, binance=0 (diff: -2931)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1320s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2951 (diff: +2951)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1560s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1560s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2941+0, binance=0 (diff: -2941)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.23s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2961 (diff: +2961)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1680s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.24s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1800s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.24s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2971+0, binance=0 (diff: -2971)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.24s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2981 (diff: +2981)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1920s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.24s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2981+0, binance=0 (diff: -2981)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1440s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.24s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.24s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.25s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1920s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.25s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2982 (diff: +2982)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1920s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.25s
+2025-10-14 12:33:07 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2982+0, binance=0 (diff: -2982)
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1800s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.25s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1680s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.25s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.25s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1440s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.26s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.26s
+2025-10-14 12:33:07 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1080s)
+2025-10-14 12:33:07 EEST | WARNING  | trading_bot | Rate limit hit (attempt 2/5), backing off for 2.26s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.53s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1918s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.56s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1678s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.63s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1678s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.66s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.66s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1198s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.66s
+2025-10-14 12:33:09 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2992 (diff: +2992)
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:07:09 (2040s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.66s
+2025-10-14 12:33:09 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2992+0, binance=0 (diff: -2992)
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.66s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.67s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1198s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.67s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1078s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.69s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.69s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1198s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.69s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1078s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.69s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1078s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.72s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1798s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.72s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.72s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1078s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1558s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1678s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1078s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.73s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.75s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1798s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.75s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1798s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.75s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1918s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.76s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1078s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.76s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.76s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1918s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.76s
+2025-10-14 12:33:09 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2993 (diff: +2993)
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:09:09 (2160s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.76s
+2025-10-14 12:33:09 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2993+0, binance=0 (diff: -2993)
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.76s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:07:09 (2040s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.78s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1438s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.78s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1198s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.78s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.78s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:07:09 (2040s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.79s
+2025-10-14 12:33:09 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1318s)
+2025-10-14 12:33:09 EEST | WARNING  | trading_bot | Rate limit hit (attempt 3/5), backing off for 4.79s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.34s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1793s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.40s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1553s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.53s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1793s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.59s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.59s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1793s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.59s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1793s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.59s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.59s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1433s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.60s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1433s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.60s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1313s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.65s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.65s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1913s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.65s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1433s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.65s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1193s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1553s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1313s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:57:07 (1433s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1913s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:53:07 (1193s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.73s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1553s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.74s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.77s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1313s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1313s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1673s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1913s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=0+0, binance=2994 (diff: +2994)
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:11:14 (2280s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.78s
+2025-10-14 12:33:14 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=2994+0, binance=0 (diff: -2994)
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:51:07 (1073s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.84s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:59:07 (1553s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.84s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:05:07 (1913s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.84s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 12:55:07 (1313s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.84s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:01:07 (1673s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.84s
+2025-10-14 12:33:14 EEST | ERROR    | trading_bot | 🚨 BINANCE IP BAN detected! All requests blocked until 13:03:07 (1793s)
+2025-10-14 12:33:14 EEST | WARNING  | trading_bot | Rate limit hit (attempt 4/5), backing off for 8.84s
+2025-10-14 12:33:19 EEST | WARNING  | trading_bot | 🚫 IP BAN active, waiting 1788s before next request (unbanned at 13:03:07)
