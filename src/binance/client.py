@@ -235,15 +235,14 @@ class BinanceClient:
             'symbol': symbol,
             'limit': limit
         }
-        # Вес: 2 для limit <= 50, 5 для 51-100, 10 для 101-500, 20 для 501-1000
-        if limit <= 50:
+        # Вес согласно официальной документации Binance:
+        # 1-100 = 2, 101-500 = 5, 501-1000 = 10, 1001-5000 = 50
+        if limit <= 100:
             weight = 2
-        elif limit <= 100:
-            weight = 5
         elif limit <= 500:
-            weight = 10
+            weight = 5
         elif limit <= 1000:
-            weight = 20
+            weight = 10
         else:
             weight = 50
         

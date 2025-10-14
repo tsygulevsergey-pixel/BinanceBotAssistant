@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## API Weight Calculation Fix (October 15, 2025)
+- **Problem**: IP bans due to incorrect API weight calculations - RateLimiter underestimated request weights by 5-10x
+- **Root Cause**: `get_klines()` and `get_depth()` used wrong weight boundaries (e.g., "1-100=1" instead of "1-99=1")
+- **Solution**: Corrected weight formulas to match official Binance Futures API documentation:
+  - **klines**: 1-99=1, 100-499=2, 500-1000=5, >1000=10
+  - **depth**: 1-100=2, 101-500=5, 501-1000=10, 1001-5000=50
+- **Result**: No IP bans, rate limiter syncing with ±60-130 diff (normal range), verified with 60s production test
+- **Files**: `src/binance/client.py` (lines 207-216, 241-250)
+
 ## VWAP RuntimeWarning Fix (October 15, 2025)
 - **Fixed**: RuntimeWarning in VWAP calculations ("'<' not supported between instances of 'Timestamp' and 'int'")
 - **Solution**: Added `pd.to_numeric()` conversion and explicit `.astype(float)` in `calculate_vwap_bands()` method
