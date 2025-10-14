@@ -142,17 +142,49 @@ class ActionPriceEngine:
             self.cooldown.register_signal(symbol, direction, 'body_cross', 'body_cross',
                                          self.timeframe, datetime.now())
         
-        # Вернуть упрощённый формат для основного бота
+        # Вернуть полный формат для основного бота (совместимость с БД)
         return {
-            'signal_id': signal_data['signal_id'],
+            # Базовые поля
+            'context_hash': signal_data['signal_id'],  # Используем signal_id как context_hash
+            'symbol': symbol,
+            'timeframe': self.timeframe,
             'direction': direction,
-            'entry': levels['entry'],
-            'sl': levels['sl'],
-            'tp1': levels['tp1'],
-            'tp2': levels['tp2'],
-            'mode': mode,
-            'score': score_total,
-            'pattern': 'body_cross'
+            'pattern_type': 'body_cross',
+            
+            # Для совместимости с БД (старые поля zone-based)
+            'zone_id': 'ema200_body_cross',
+            'zone_low': float(levels['sl']),  # SL как zone_low
+            'zone_high': float(levels['entry']),  # Entry как zone_high
+            
+            # Уровни входа/выхода
+            'entry_price': float(levels['entry']),
+            'stop_loss': float(levels['sl']),
+            'take_profit_1': float(levels['tp1']),
+            'take_profit_2': float(levels['tp2']),
+            
+            # EMA данные
+            'ema_50_4h': None,
+            'ema_200_4h': None,
+            'ema_50_1h': None,
+            'ema_200_1h': None,
+            
+            # Confluences (пустые для EMA200)
+            'avwap_primary': None,
+            'avwap_secondary': None,
+            'daily_vwap': None,
+            'confluence_flags': {},
+            
+            # Score и режим
+            'confidence_score': float(score_total),
+            'regime': '',
+            
+            # Мета данные
+            'meta_data': {
+                'score_components': score_components,
+                'mode': mode,
+                'rr1': self.tp1_rr,
+                'rr2': self.tp2_rr
+            }
         }
     
     def _calculate_indicators(self, df: pd.DataFrame) -> Optional[pd.DataFrame]:
