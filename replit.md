@@ -27,6 +27,10 @@ Preferred communication style: Simple, everyday language.
 - **Signal Dataclass**: Standardized signal output with confluence tracking.
 - **5 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile.
 - **Action Price System**: Rewritten on EMA200 Body Cross logic with an 11-component scoring system for STANDARD, SCALP, and SKIP regimes. Includes JSONL logging for ML analysis and real-time MFE/MAE tracking.
+  - **Event-Driven Execution**: Runs AFTER 15m candles are loaded and saved (not timer-based). Supports partial loading - analyzes only symbols with successfully updated candles.
+  - **Entry Price**: Uses close price of confirming candle (not mark price).
+  - **TP Calculation**: TP1 = Entry ± R, TP2 = Entry ± 2R where R = |Entry - SL|.
+  - **Telegram Signals**: 🟢 for LONG, 🔴 for SHORT.
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED.
