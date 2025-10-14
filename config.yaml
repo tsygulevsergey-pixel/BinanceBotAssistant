@@ -355,16 +355,26 @@ universe:
     - "DAIUSDT"
     - "EURUSDT"
 
-# Action Price Strategy (отдельная система)
+# Action Price Strategy - EMA200 Body Cross (новая логика)
 action_price:
-  enabled: true  # Работает только при use_testnet: false
-  version: "v2"  # "v1" (старая логика) или "v2" (улучшенная логика)
+  enabled: true
   
-  # Расписание
-  execution_timeframes: ["15m", "1h"]  # Запуск только на закрытии этих ТФ
-  zone_recalc_schedule:
-    daily: "00:00"  # UTC - пересчёт зон 1D
-    update_4h: true  # Обновление на каждом 4H закрытии
+  # Основные параметры
+  timeframe: "15m"  # Таймфрейм работы
+  
+  # Индикаторы
+  atr_length: 14  # Период ATR
+  atr_multiplier: 1.5  # Множитель для ATR полос (от EMA200)
+  swing_length: 20  # Период для Swing High/Low
+  
+  # Score пороги
+  score_standard_min: 3  # Минимальный score для STANDARD режима
+  score_scalp_min: 1  # Минимальный score для SCALP режима
+  
+  # TP/SL параметры
+  tp1_rr: 1.0  # TP1 = 1R (Risk)
+  tp2_rr: 2.0  # TP2 = 2R (только для STANDARD)
+  sl_buffer_atr: 0.1  # Буфер SL = 0.1×ATR от экстремума инициатора
   
   # Зоны S/R
   zones:
@@ -503,11 +513,10 @@ action_price:
     v2:
       min_rr_zone_v2: 1.2  # Минимум R:R до противоположной зоны (до body, не центра)
   
-  # Anti-duplicates
+  # Cooldown (анти-дубликаты)
   cooldown:
-    timeframe_1h: 6  # часов
-    timeframe_15m: 2  # часов
-    unique_key: ["symbol", "direction", "zone_id", "pattern", "timeframe"]
+    enabled: true
+    cooldown_bars: 20  # Блокировка на N баров после сигнала
   
   # Фильтры
   filters:

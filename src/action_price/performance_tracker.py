@@ -31,6 +31,9 @@ class ActionPricePerformanceTracker:
         self.check_interval = check_interval
         self.running = False
         self.on_signal_closed_callback = on_signal_closed_callback
+        
+        # MFE/MAE tracking (в памяти)
+        self.signal_mfe_mae = {}  # {signal_id: {'mfe_r': float, 'mae_r': float}}
     
     async def start(self):
         """Запустить фоновую задачу трекинга"""
@@ -78,11 +81,14 @@ class ActionPricePerformanceTracker:
             session.close()
     
     async def _check_signal(self, signal: ActionPriceSignal, session):
-        """Проверить один сигнал на выход"""
+        """Проверить один сигнал на выход с MFE/MAE tracking"""
         try:
             symbol_str = str(signal.symbol)
             price_data = await self.binance_client.get_mark_price(symbol_str)
             current_price = float(price_data['markPrice'])
+            
+            # Обновить MFE/MAE
+            self._update_mfe_mae(signal, current_price)
             
             exit_result = await self._check_exit_conditions(signal, current_price)
             
@@ -94,20 +100,87 @@ class ActionPricePerformanceTracker:
                 signal.status = exit_result['status']
                 signal.closed_at = datetime.now(pytz.UTC)
                 
+                # Получить MFE/MAE для логирования
+                mfe_mae = self.signal_mfe_mae.get(signal.id, {'mfe_r': 0.0, 'mae_r': 0.0})
+                
+                # Записать в JSONL лог (если есть signal_id в context_hash)
+                await self._log_signal_exit(signal, mfe_mae)
+                
+                # Удалить из tracking
+                if signal.id in self.signal_mfe_mae:
+                    del self.signal_mfe_mae[signal.id]
+                
                 logger.info(f"🎯 AP Signal closed: {signal.symbol} {signal.pattern_type} "
                           f"{signal.direction} | Reason: {exit_result['reason']} | "
-                          f"PnL: {exit_result.get('pnl_percent', 0):.2f}%")
+                          f"PnL: {exit_result.get('pnl_percent', 0):.2f}% | "
+                          f"MFE: {mfe_mae['mfe_r']:.2f}R | MAE: {mfe_mae['mae_r']:.2f}R")
                 
-                # Callback для разблокировки символа (Action Price использует собственную блокировку, не стратегии)
+                # Callback для разблокировки символа
                 if self.on_signal_closed_callback:
                     try:
-                        # Вызываем callback (синхронный) - для AP не нужен strategy_name
                         self.on_signal_closed_callback(signal.symbol)
                     except Exception as e:
                         logger.error(f"Error in AP close callback: {e}")
         
         except Exception as e:
             logger.error(f"Error checking AP signal {signal.id}: {e}", exc_info=True)
+    
+    def _update_mfe_mae(self, signal: ActionPriceSignal, current_price: float):
+        """
+        Обновить Maximum Favorable/Adverse Excursion в R
+        
+        Args:
+            signal: Сигнал
+            current_price: Текущая цена
+        """
+        entry = float(signal.entry_price)
+        sl = float(signal.stop_loss)
+        direction = signal.direction
+        risk_r = abs(entry - sl)
+        
+        # Рассчитать текущий P&L в R
+        if direction == 'LONG':
+            current_pnl_r = (current_price - entry) / risk_r
+        else:  # SHORT
+            current_pnl_r = (entry - current_price) / risk_r
+        
+        # Инициализировать если новый
+        if signal.id not in self.signal_mfe_mae:
+            self.signal_mfe_mae[signal.id] = {
+                'mfe_r': 0.0,
+                'mae_r': 0.0
+            }
+        
+        # Обновить MFE (максимальная благоприятная)
+        if current_pnl_r > self.signal_mfe_mae[signal.id]['mfe_r']:
+            self.signal_mfe_mae[signal.id]['mfe_r'] = current_pnl_r
+        
+        # Обновить MAE (максимальная неблагоприятная)
+        if current_pnl_r < self.signal_mfe_mae[signal.id]['mae_r']:
+            self.signal_mfe_mae[signal.id]['mae_r'] = current_pnl_r
+    
+    async def _log_signal_exit(self, signal: ActionPriceSignal, mfe_mae: Dict[str, float]):
+        """
+        Записать выход из сделки в JSONL лог
+        
+        Args:
+            signal: Сигнал
+            mfe_mae: Dict с mfe_r и mae_r
+        """
+        try:
+            # Импортируем signal_logger
+            from .signal_logger import ActionPriceSignalLogger
+            
+            # Создать или получить экземпляр logger (упрощённо, можно использовать singleton)
+            # Для простоты пропустим логирование exit update если нет доступа к logger
+            # В реальности нужно передавать logger через конструктор или singleton
+            
+            # TODO: Полная интеграция с signal_logger для update_signal_exit
+            # Пока просто логируем в обычный лог
+            logger.debug(f"Signal {signal.id} exit logged - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
+            
+        except Exception as e:
+            logger.error(f"Error logging signal exit: {e}", exc_info=True)
     
     async def _check_exit_conditions(self, signal: ActionPriceSignal, 
                                      current_price: float) -> Optional[Dict]:

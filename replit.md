@@ -27,6 +27,9 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ **EMA200 INDICATOR (Oct 14)**: Created TradingView indicator with 7 professional filters (tradingview/16_ema200_body_cross.pine)
 - ✅ **EMA200 STRATEGY (Oct 14)**: Created TradingView strategy for backtesting (tradingview/16_ema200_body_cross_STRATEGY.pine)
 - ✅ **PROFESSIONAL FILTERS (Oct 14)**: Updated indicator with slope200, color confirmation, pre-touch, oversized initiator, fan ready, distance filters
+- ✅ **ACTION PRICE REWRITE (Oct 14)**: Полная переработка на EMA200 Body Cross логику с 11 score компонентами
+- ✅ **JSONL LOGGING (Oct 14)**: Детальное логирование сигналов (50+ полей) для ML анализа
+- ✅ **MFE/MAE TRACKING (Oct 14)**: Real-time tracking Maximum Favorable/Adverse Excursion в R
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
@@ -62,7 +65,7 @@ Preferred communication style: Simple, everyday language.
 - Donchian (#1), Squeeze (#2), ORB (#3), ATR Momentum (#6), VWAP MR (#7), Range Fade (#8), RSI/Stoch (#10), CVD Divergence (#13), Time of Day (#14)
 - Reason: переобучены, не работают в крипте 24/7, или слишком редкие сигналы
 
-**Action Price System**: Independent production module using S/R zones, Anchored VWAP, EMA filters, and 5 price action patterns with advanced Zone Strength System (V2 with score threshold 5.0).
+**Action Price System**: Полностью переработан на EMA200 Body Cross Strategy с профессиональной системой скоринга (11 компонентов). Режимы: STANDARD (score ≥3), SCALP (score 1-2), SKIP (≤0). JSONL логирование с 50+ метриками для ML analysis. MFE/MAE tracking в реальном времени.
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED.
