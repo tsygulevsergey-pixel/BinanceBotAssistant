@@ -93,19 +93,21 @@ class RateLimiter:
                 except Exception as e:
                     error_str = str(e)
                     
-                    # КРИТИЧНО: Если IP BAN обнаружен - НЕ РЕТРАИТЬ!
-                    # acquire() уже установил ip_ban_until и будет автоматически ждать
+                    # КРИТИЧНО: IP BAN (418) - освободить acquired и retry
+                    # update_from_binance_headers() уже установил ip_ban_until
+                    # Следующий acquire() автоматически подождёт окончания бана
                     if '418' in error_str:
                         logger.warning(
-                            f"🚫 IP BAN detected in request, stopping retries. "
-                            f"Next acquire() will wait until ban expires."
+                            f"🚫 IP BAN (418) detected in request. "
+                            f"Releasing lock, next acquire() will wait until ban expires."
                         )
-                        # Освободить acquired флаг чтобы следующий запрос вызвал acquire()
+                        # Освободить acquired чтобы следующая итерация вызвала acquire()
                         if acquired:
                             async with self.lock:
                                 self.pending_weight = max(0, self.pending_weight - weight)
                             acquired = False
-                        raise  # Прокинуть exception наверх, не ретраить
+                        # НЕ raise! Продолжаем retry loop - acquire() подождёт бан
+                        continue
                     
                     # 429 (обычный rate limit) - делаем backoff retry
                     if '429' in error_str:
@@ -115,8 +117,15 @@ class RateLimiter:
                             f"backing off for {wait_time:.2f}s"
                         )
                         await asyncio.sleep(wait_time)
-                    else:
-                        raise
+                        # Освободить acquired для retry
+                        if acquired:
+                            async with self.lock:
+                                self.pending_weight = max(0, self.pending_weight - weight)
+                            acquired = False
+                        continue
+                    
+                    # Все остальные ошибки - пробрасываем
+                    raise
             
             raise Exception(f"Max retries ({self.max_retries}) exceeded for rate limited request")
         except:

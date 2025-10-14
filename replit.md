@@ -30,6 +30,10 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ **ACTION PRICE REWRITE (Oct 14)**: Полная переработка на EMA200 Body Cross логику с 11 score компонентами
 - ✅ **JSONL LOGGING (Oct 14)**: Детальное логирование сигналов (50+ полей) для ML анализа
 - ✅ **MFE/MAE TRACKING (Oct 14)**: Real-time tracking Maximum Favorable/Adverse Excursion в R
+- ✅ **RATE LIMITER FIX v2 (Oct 14 21:30)**: Снижен порог с 90% до 75% (1800/2400) для большего буфера безопасности
+- ✅ **IP BAN HANDLING FIX (Oct 14 21:30)**: При 418 не падает, а ждёт окончания бана и делает retry (continue вместо raise)
+- ✅ **BURST CATCHUP BATCHING (Oct 14 21:30)**: Разбивка на батчи по 20 символов с паузой 0.5s между батчами вместо массовой параллельной загрузки
+- ✅ **OPEN_TIME FIX (Oct 14 21:30)**: Удалён set_index('open_time') из DataLoader - теперь open_time остаётся как колонка для Action Price validation
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
