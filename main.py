@@ -361,24 +361,7 @@ class TradingBot:
                 else:
                     logger.debug("⏳ Previous signal check still running, skipping this cycle")
             
-            # Action Price анализ (только на закрытии 15m/1H свечей)
-            # Проверяем каждую секунду для точного детектирования closes
-            if self.action_price_enabled and len(self.ready_symbols) > 0:
-                current_time_utc = datetime.now(pytz.UTC)
-                
-                # Проверка закрытия 15m или 1H
-                if TimeframeSync.should_update_timeframe('15m', current_time=current_time_utc, consumer_id='action_price') or TimeframeSync.should_update_timeframe('1h', current_time=current_time_utc, consumer_id='action_price'):
-                    await self._check_action_price_signals(current_time_utc)
-                
-                # Пересчёт зон: каждый день в 00:00 UTC
-                if current_time.hour == 0 and current_time.minute == 0:
-                    ap_logger.info("🔄 Daily zone recalculation at 00:00 UTC")
-                    # Зоны пересчитываются автоматически при force_recalc в analyze_symbol
-                
-                # Обновление зон: на каждом 4H закрытии
-                if TimeframeSync.should_update_timeframe('4h', consumer_id='action_price'):
-                    ap_logger.info("🔄 4H zone update")
-            
+            # Action Price теперь вызывается в _check_signals() ПОСЛЕ загрузки свечей
             # Статус каждую минуту или каждые 10 сек если загрузка идёт
             status_interval = 10 if self.coordinator and not self.coordinator.is_loading_complete() else 60
             if iteration % status_interval == 0 and self.client:
@@ -410,6 +393,9 @@ class TradingBot:
         Args:
             symbols: Список символов для обновления
             timeframes: Список таймфреймов для обновления
+            
+        Returns:
+            Dict[str, List[str]]: Словарь {timeframe: [успешно обновленные символы]}
         """
         start_time = datetime.now()
         
@@ -417,10 +403,10 @@ class TradingBot:
             """Обновить один символ на одном таймфрейме"""
             try:
                 await self.data_loader.update_missing_candles(symbol, tf)
-                return True
+                return (symbol, tf, True)
             except Exception as e:
                 logger.debug(f"Could not update {symbol} {tf}: {e}")
-                return False
+                return (symbol, tf, False)
         
         # Создать задачи для всех символов и таймфреймов
         tasks = []
@@ -431,8 +417,16 @@ class TradingBot:
         # Запустить все параллельно
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
+        # Собрать успешно обновленные символы по таймфреймам
+        updated_by_tf = {tf: [] for tf in timeframes}
+        for result in results:
+            if isinstance(result, tuple) and len(result) == 3:
+                symbol, tf, success = result
+                if success:
+                    updated_by_tf[tf].append(symbol)
+        
         elapsed = (datetime.now() - start_time).total_seconds()
-        success_count = sum(1 for r in results if r is True)
+        success_count = sum(len(symbols) for symbols in updated_by_tf.values())
         total_requests = len(symbols) * len(timeframes)
         
         logger.info(
@@ -440,6 +434,8 @@ class TradingBot:
             f"in {elapsed:.2f}s ({total_requests/elapsed:.1f} req/s) | "
             f"{len(symbols)} symbols × {len(timeframes)} TFs"
         )
+        
+        return updated_by_tf
     
     async def _check_signals_wrapper(self):
         """Обёртка для _check_signals с Lock и логированием времени выполнения"""
@@ -498,8 +494,27 @@ class TradingBot:
                 logger.debug(f"Could not update BTCUSDT: {e}")
         
         # 2. ПАРАЛЛЕЛЬНО обновить все символы (Runtime Fast Catchup)
+        updated_by_tf = {}
         if symbols_to_update:
-            await self._parallel_update_candles(symbols_to_update, updated_timeframes)
+            updated_by_tf = await self._parallel_update_candles(symbols_to_update, updated_timeframes)
+        
+        # 2.5. ЗАПУСК ACTION PRICE после сохранения 15m свечей
+        if self.action_price_enabled and ('15m' in updated_timeframes or '1h' in updated_timeframes):
+            # Определить символы с успешно обновленными 15m свечами
+            symbols_for_ap = []
+            if '15m' in updated_by_tf:
+                symbols_for_ap.extend(updated_by_tf['15m'])
+            if '1h' in updated_by_tf and '15m' not in updated_by_tf:
+                # Если 1h закрылась но 15m не обновлялась, использовать 1h символы
+                symbols_for_ap.extend(updated_by_tf['1h'])
+            
+            # Убрать дубликаты
+            symbols_for_ap = list(set(symbols_for_ap))
+            
+            if symbols_for_ap:
+                tf_4h_close = TimeframeSync.should_update_timeframe('4h', consumer_id='action_price')
+                force_zone_recalc = (now.hour == 0 and now.minute == 0) or tf_4h_close
+                await self._check_action_price_signals(now, symbols_for_ap, force_zone_recalc)
         
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
@@ -832,27 +847,34 @@ class TradingBot:
                 strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < {self.signal_scorer.enter_threshold}")
                 continue  # Пропустить сигналы с score < threshold
     
-    async def _check_action_price_signals(self, current_time: datetime):
-        """Проверить Action Price сигналы для всех готовых символов"""
+    async def _check_action_price_signals(self, current_time: datetime, symbols_with_updated_candles: list = None, force_zone_recalc: bool = False):
+        """Проверить Action Price сигналы для символов с обновленными 15m свечами
+        
+        Args:
+            current_time: Текущее время
+            symbols_with_updated_candles: Список символов с успешно загруженными 15m/1h свечами
+            force_zone_recalc: Принудительный пересчет зон
+        """
         if not self.action_price_engine or not self.data_loader:
             return
         
-        symbols_to_check = self.ready_symbols.copy()
+        # Если не указаны символы - использовать все готовые
+        if symbols_with_updated_candles is None:
+            symbols_to_check = self.ready_symbols.copy()
+        else:
+            symbols_to_check = symbols_with_updated_candles
+        
         if not symbols_to_check:
             return
         
         # Определить текущий таймфрейм
-        tf_15m_close = TimeframeSync.should_update_timeframe('15m', consumer_id='action_price_check')
         tf_1h_close = TimeframeSync.should_update_timeframe('1h', consumer_id='action_price_check')
-        tf_4h_close = TimeframeSync.should_update_timeframe('4h', consumer_id='action_price_check')
-        
-        if not (tf_15m_close or tf_1h_close):
-            return
-        
         current_tf = '1h' if tf_1h_close else '15m'
-        force_zone_recalc = (current_time.hour == 0 and current_time.minute == 0) or tf_4h_close
         
-        ap_logger.info(f"🎯 Checking Action Price signals on {current_tf} close (force_recalc={force_zone_recalc})")
+        ap_logger.info(
+            f"🎯 Checking Action Price signals on {current_tf} close (force_recalc={force_zone_recalc})\n"
+            f"  📊 Symbols with updated candles: {len(symbols_to_check)}"
+        )
         
         signals_found = 0
         for symbol in symbols_to_check:
