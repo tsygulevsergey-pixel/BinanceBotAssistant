@@ -349,7 +349,7 @@ class SignalPerformanceTracker:
                 
                 # Вызвать callback для разблокировки символа
                 if self.on_signal_closed_callback:
-                    self.on_signal_closed_callback(symbol_str)
+                    self.on_signal_closed_callback(symbol_str, signal.strategy_name)
                 
                 status_emoji = "✅" if exit_reason == "WIN" else "❌" if exit_reason == "LOSS" else "⏱️"
                 logger.info(
