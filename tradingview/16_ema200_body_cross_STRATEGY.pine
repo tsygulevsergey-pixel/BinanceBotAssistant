@@ -96,9 +96,11 @@ confirm_below_short = high[1] < ema200[1]
 base_long = initiator_cross_long and confirm_above_long
 base_short = initiator_cross_short and confirm_below_short
 
-// Мягкие требования
-confirm_depth_long = (close[1] - ema200[1]) >= (min_confirm_depth * atr[1])
-confirm_depth_short = (ema200[1] - close[1]) >= (min_confirm_depth * atr[1])
+// Мягкие требования - сначала вычисляем расстояния
+confirm_depth_value_long = close[1] - ema200[1]
+confirm_depth_value_short = ema200[1] - close[1]
+confirm_depth_long = confirm_depth_value_long >= (min_confirm_depth * atr[1])
+confirm_depth_short = confirm_depth_value_short >= (min_confirm_depth * atr[1])
 
 distance_to_upper = atr_upper[1] - close[1]
 distance_to_lower = close[1] - atr_lower[1]
@@ -156,9 +158,9 @@ retest_short = high[1] >= ema200[1] * 0.998 and high[1] < ema200[1] ? 1 : 0
 pre_touch_long = low[3] <= ema200[3] and low[3] > ema200[3] * 0.995 ? -1 : 0
 pre_touch_short = high[3] >= ema200[3] and high[3] < ema200[3] * 1.005 ? -1 : 0
 
-// Слабое подтверждение
-weak_confirm_long = close[1] < open[1] and confirm_depth_long < (0.4 * atr[1]) ? -1 : 0
-weak_confirm_short = close[1] > open[1] and confirm_depth_short < (0.4 * atr[1]) ? -1 : 0
+// Слабое подтверждение (используем расстояние, а не bool)
+weak_confirm_long = close[1] < open[1] and confirm_depth_value_long < (0.4 * atr[1]) ? -1 : 0
+weak_confirm_short = close[1] > open[1] and confirm_depth_value_short < (0.4 * atr[1]) ? -1 : 0
 
 // У края ATR
 near_edge_long = distance_to_upper < (0.3 * atr[1]) ? -1 : 0
