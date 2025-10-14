@@ -201,10 +201,11 @@ class BinanceClient:
         if end_time:
             params['endTime'] = end_time
         
-        # Вес зависит от limit: 1-100 = 1, 101-500 = 2, 501-1000 = 5, >1000 = 10
-        if limit <= 100:
+        # Вес зависит от limit (официальная документация Binance):
+        # 1-99 = 1, 100-499 = 2, 500-1000 = 5, >1000 = 10
+        if limit < 100:
             weight = 1
-        elif limit <= 500:
+        elif limit < 500:
             weight = 2
         elif limit <= 1000:
             weight = 5
