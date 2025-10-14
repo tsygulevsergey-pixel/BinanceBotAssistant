@@ -74,11 +74,16 @@ Preferred communication style: Simple, everyday language.
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-- **Smart Rate Limiting**: 55% safety threshold (1320/2400) with a buffer to prevent API bans.
-- **IP BAN Prevention**: Event-based coordination with single-log notification.
-- **Gap Refill Safety**: Conditional execution based on startup time and rate usage.
-- **Burst Catchup Safety**: Checks rate usage and applies pauses after batches.
-- **Exponential Backoff**: Retry logic for transient errors.
+- **Smart Rate Limiting**: 55% safety threshold (1320/2400) with 1080 requests buffer to compensate ±430 sync error. Prevents API bans.
+- **IP BAN Prevention v4**: Event-based coordination with single-log notification (no duplicate spam). All pending requests blocked immediately via ip_ban_event flag.
+- **Periodic Gap Refill Safety**: 
+  - Batching: 20 symbols per batch with 1s pause between batches
+  - Startup delay: Disabled first 15 minutes after bot start
+  - Pre-check: Only runs if rate usage < 30%
+  - Per-batch check: Pauses 3s if rate > 50%, skips batch if rate > 70%
+- **Burst Catchup Safety**: Rate usage checked after each batch (20 symbols), extra 2s pause if > 50%.
+- **Action Price TP2 Fix**: None check before float() conversion for SCALP/SKIP modes.
+- **Exponential Backoff**: Retry logic with progressive delays for transient errors.
 - **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
 - **Graceful Shutdown**: Clean resource cleanup and state persistence.
 

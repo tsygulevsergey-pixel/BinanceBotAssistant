@@ -123,7 +123,7 @@ class PeriodicGapRefill:
     
     async def refill_gaps(self, gaps: Dict[str, Dict[str, dict]]) -> Dict[str, int]:
         """
-        Параллельная докачка gaps
+        Батчированная докачка gaps с контролем rate limiter
         
         Returns:
             {'success': count, 'failed': count}
@@ -132,36 +132,83 @@ class PeriodicGapRefill:
             return {'success': 0, 'failed': 0}
         
         total_gaps = sum(len(tfs) for tfs in gaps.values())
+        symbols_list = list(gaps.items())
         
-        # Вычислить оптимальный параллелизм
-        optimal_parallel = min(self.max_parallel, max(4, total_gaps // 5))
+        # Батчирование: по 20 символов за раз
+        BATCH_SIZE = 20
+        BATCH_PAUSE = 1.0  # Секунды между батчами
+        
+        total_batches = (len(symbols_list) + BATCH_SIZE - 1) // BATCH_SIZE
         
         logger.info(
             f"⚡ PERIODIC GAP REFILL starting:\n"
             f"  📊 Symbols: {len(gaps)}\n"
             f"  📈 Total gaps: {total_gaps}\n"
-            f"  🔄 Parallel workers: {optimal_parallel}"
+            f"  📦 Batches: {total_batches} (size: {BATCH_SIZE})"
         )
         
-        semaphore = asyncio.Semaphore(optimal_parallel)
-        tasks = []
+        success_count = 0
+        failed_count = 0
         
-        for symbol, timeframe_gaps in gaps.items():
-            task = self._refill_symbol_gaps(symbol, timeframe_gaps, semaphore)
-            tasks.append(task)
-        
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        success = sum(1 for r in results if r is True)
-        failed = len(results) - success
+        for batch_num in range(total_batches):
+            start_idx = batch_num * BATCH_SIZE
+            end_idx = min(start_idx + BATCH_SIZE, len(symbols_list))
+            batch = symbols_list[start_idx:end_idx]
+            
+            # Проверить rate usage ПЕРЕД батчем
+            if hasattr(self.data_loader, 'client') and hasattr(self.data_loader.client, 'rate_limiter'):
+                usage = self.data_loader.client.rate_limiter.get_current_usage()
+                current_percent = usage.get('percent', 0)
+                
+                # Если rate > 50%, ждём 3 секунды
+                if current_percent > 50:
+                    logger.warning(
+                        f"⚠️ Rate usage high before batch {batch_num+1}/{total_batches}: "
+                        f"{current_percent:.1f}%, pausing 3s"
+                    )
+                    await asyncio.sleep(3.0)
+                
+                # Если rate > 70%, ПРОПУСКАЕМ батч (безопасность)
+                if current_percent > 70:
+                    logger.error(
+                        f"🚫 Rate usage critical: {current_percent:.1f}% > 70%, "
+                        f"skipping batch {batch_num+1}/{total_batches}"
+                    )
+                    failed_count += len(batch)
+                    continue
+            
+            # Обработать батч параллельно (max 4 одновременно)
+            semaphore = asyncio.Semaphore(4)
+            tasks = []
+            
+            for symbol, timeframe_gaps in batch:
+                task = self._refill_symbol_gaps(symbol, timeframe_gaps, semaphore)
+                tasks.append(task)
+            
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            batch_success = sum(1 for r in results if r is True)
+            batch_failed = len(results) - batch_success
+            
+            success_count += batch_success
+            failed_count += batch_failed
+            
+            logger.info(
+                f"  📦 Batch {batch_num+1}/{total_batches}: "
+                f"✅ {batch_success} / ❌ {batch_failed}"
+            )
+            
+            # Пауза между батчами
+            if batch_num < total_batches - 1:
+                await asyncio.sleep(BATCH_PAUSE)
         
         logger.info(
             f"⚡ PERIODIC GAP REFILL complete:\n"
-            f"  ✅ Success: {success} symbols\n"
-            f"  ❌ Failed: {failed} symbols"
+            f"  ✅ Success: {success_count} symbols\n"
+            f"  ❌ Failed: {failed_count} symbols"
         )
         
-        return {'success': success, 'failed': failed}
+        return {'success': success_count, 'failed': failed_count}
     
     async def _refill_symbol_gaps(self, symbol: str, gaps: Dict[str, dict], semaphore) -> bool:
         """
