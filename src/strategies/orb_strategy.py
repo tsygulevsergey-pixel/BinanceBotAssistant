@@ -76,7 +76,7 @@ class ORBStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_days * 24 * 4}")
             return None
         
-        current_timestamp = df.index[-1]
+        current_timestamp = df['open_time'].iloc[-1]
         
         # Проверка: находимся ли мы в одном из слотов
         if not self._is_in_slot(current_timestamp):

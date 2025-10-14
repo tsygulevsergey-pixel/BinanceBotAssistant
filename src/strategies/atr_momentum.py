@@ -107,7 +107,7 @@ class ATRMomentumStrategy(BaseStrategy):
         
         # Проверка объёма
         # Адаптивный порог объема по времени суток
-        adaptive_volume_threshold = get_adaptive_volume_threshold(df.index[-1], self.volume_threshold)
+        adaptive_volume_threshold = get_adaptive_volume_threshold(df['open_time'].iloc[-1], self.volume_threshold)
         
         if volume_ratio < adaptive_volume_threshold:
             strategy_logger.debug(f"    ❌ Объем низкий: {volume_ratio:.2f}x < {adaptive_volume_threshold:.2f}x (адаптивный)")

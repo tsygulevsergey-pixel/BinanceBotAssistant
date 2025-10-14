@@ -35,6 +35,7 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ **BURST CATCHUP BATCHING (Oct 14 21:30)**: Разбивка на батчи по 20 символов с паузой 0.5s между батчами вместо массовой параллельной загрузки
 - ✅ **OPEN_TIME FIX (Oct 14 21:30)**: Удалён set_index('open_time') из DataLoader - теперь open_time остаётся как колонка для Action Price validation
 - ✅ **CALLBACK FIX (Oct 14 21:40)**: Исправлен вызов on_signal_closed_callback в signal_tracker.py - добавлен недостающий аргумент strategy_name
+- ✅ **DF.INDEX FIX (Oct 14 21:48)**: Заменены все df.index[-1] на df['open_time'].iloc[-1] в стратегиях (ma_vwap_pullback, donchian, atr_momentum, liquidity_sweep, orb, time_of_day) - исправлена ошибка после удаления set_index()
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences

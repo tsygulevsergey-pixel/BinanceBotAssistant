@@ -91,7 +91,7 @@ class LiquiditySweepStrategy(BaseStrategy):
         # ATR для измерений
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
-        current_timestamp = df.index[-1]
+        current_timestamp = df['open_time'].iloc[-1]
         
         # Периодическая очистка старых sweeps (предотвращает memory leak)
         self._cleanup_old_sweeps(current_timestamp, max_age_minutes=60)

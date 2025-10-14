@@ -55,7 +55,7 @@ class TimeOfDayStrategy(BaseStrategy):
             return None
         
         # Текущее время в UTC
-        current_time = df.index[-1]
+        current_time = df['open_time'].iloc[-1]
         if not isinstance(current_time, pd.Timestamp):
             current_time = pd.Timestamp(current_time, tz='UTC')
         else:
@@ -176,7 +176,7 @@ class TimeOfDayStrategy(BaseStrategy):
                 metadata={
                     'type': 'time_of_day_breakout',
                     'session': 'active',
-                    'hour': df.index[-1].hour if isinstance(df.index[-1], pd.Timestamp) else 0
+                    'hour': current_time.hour if isinstance(current_time, pd.Timestamp) else 0
                 }
             )
         else:
@@ -208,7 +208,7 @@ class TimeOfDayStrategy(BaseStrategy):
                 metadata={
                     'type': 'time_of_day_breakout',
                     'session': 'active',
-                    'hour': df.index[-1].hour if isinstance(df.index[-1], pd.Timestamp) else 0
+                    'hour': current_time.hour if isinstance(current_time, pd.Timestamp) else 0
                 }
             )
     
@@ -255,7 +255,7 @@ class TimeOfDayStrategy(BaseStrategy):
                 metadata={
                     'type': 'time_of_day_mr',
                     'session': 'quiet',
-                    'hour': df.index[-1].hour if isinstance(df.index[-1], pd.Timestamp) else 0
+                    'hour': current_time.hour if isinstance(current_time, pd.Timestamp) else 0
                 }
             )
         
@@ -289,7 +289,7 @@ class TimeOfDayStrategy(BaseStrategy):
                 metadata={
                     'type': 'time_of_day_mr',
                     'session': 'quiet',
-                    'hour': df.index[-1].hour if isinstance(df.index[-1], pd.Timestamp) else 0
+                    'hour': current_time.hour if isinstance(current_time, pd.Timestamp) else 0
                 }
             )
         

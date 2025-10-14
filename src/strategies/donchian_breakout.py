@@ -102,7 +102,7 @@ class DonchianBreakoutStrategy(BaseStrategy):
         volume_ratio = current_volume / avg_volume if avg_volume > 0 else 0
         
         # Адаптивный порог объема по времени суток
-        adaptive_volume_threshold = get_adaptive_volume_threshold(df.index[-1], self.volume_threshold)
+        adaptive_volume_threshold = get_adaptive_volume_threshold(df['open_time'].iloc[-1], self.volume_threshold)
         
         # Проверка пробоя верхней границы (LONG)
         if (current_high > current_upper and 
