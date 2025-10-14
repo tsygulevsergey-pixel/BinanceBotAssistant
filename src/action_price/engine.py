@@ -185,7 +185,7 @@ class ActionPriceEngine:
             'entry_price': float(levels['entry']),
             'stop_loss': float(levels['sl']),
             'take_profit_1': float(levels['tp1']),
-            'take_profit_2': float(levels['tp2']),
+            'take_profit_2': float(levels['tp2']) if levels['tp2'] is not None else None,
             
             # EMA данные
             'ema_50_4h': None,
