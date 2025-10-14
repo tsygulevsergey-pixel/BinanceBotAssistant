@@ -1,0 +1,346 @@
+//@version=5
+strategy("EMA200 Body Cross STRATEGY", 
+         shorttitle="EMA200 BC Strategy",
+         overlay=true,
+         initial_capital=1000,
+         default_qty_type=strategy.percent_of_equity,
+         default_qty_value=100,
+         commission_type=strategy.commission.percent,
+         commission_value=0.04,
+         slippage=2,
+         pyramiding=0)
+
+// ==================== НАСТРОЙКИ ====================
+
+// EMA параметры
+ema5_len = input.int(5, "EMA 5", minval=1, group="EMA Settings")
+ema9_len = input.int(9, "EMA 9", minval=1, group="EMA Settings")
+ema13_len = input.int(13, "EMA 13", minval=1, group="EMA Settings")
+ema21_len = input.int(21, "EMA 21", minval=1, group="EMA Settings")
+ema200_len = input.int(200, "EMA 200", minval=1, group="EMA Settings")
+
+// ATR параметры
+atr_len = input.int(14, "ATR Length", minval=1, group="ATR Settings")
+atr_mult = input.float(1.5, "ATR Multiplier", minval=0.1, step=0.1, group="ATR Settings")
+
+// Мягкие требования (фильтры)
+min_confirm_depth = input.float(0.25, "Min Confirm Depth (×ATR)", minval=0, step=0.05, group="Soft Requirements")
+min_distance_to_atr_edge = input.float(0.35, "Min Distance to ATR Edge (×ATR)", minval=0, step=0.05, group="Soft Requirements")
+max_entry_distance_from_ema200 = input.float(0.9, "Max Entry Distance from EMA200 (×ATR)", minval=0, step=0.1, group="Soft Requirements")
+
+// Усилители скора
+strong_bar_body = input.float(0.6, "Strong Bar Body (×ATR)", minval=0, step=0.1, group="Score Boosters")
+strong_bar_close_dist = input.float(0.35, "Strong Bar Close Distance (×ATR)", minval=0, step=0.05, group="Score Boosters")
+good_atr_reserve = input.float(0.5, "Good ATR Reserve (×ATR)", minval=0, step=0.1, group="Score Boosters")
+
+// Swing параметры
+swing_len = input.int(20, "Swing Length", minval=5, group="Swing Settings")
+
+// Take Profit
+tp1_rr = input.float(1.0, "TP1 R:R", minval=0.1, step=0.1, group="Take Profit")
+tp2_rr = input.float(2.0, "TP2 R:R", minval=0.1, step=0.1, group="Take Profit")
+
+// Порог для стандартного входа
+score_threshold = input.int(2, "Min Score for Standard Entry", minval=0, group="Decision")
+
+// Стратегия управления позицией
+use_partial_tp = input.bool(true, "Use Partial TP (50% TP1, 50% TP2)", group="Position Management")
+use_be_after_tp1 = input.bool(true, "Move SL to BE after TP1", group="Position Management")
+scalp_mode_size = input.float(50, "Scalp Mode Position Size (%)", minval=10, maxval=100, step=10, group="Position Management")
+
+// Визуализация
+show_ema = input.bool(true, "Show EMA Lines", group="Display")
+show_atr_bands = input.bool(true, "Show ATR Bands", group="Display")
+show_tp = input.bool(true, "Show TP/SL Levels", group="Display")
+
+// ==================== РАСЧЁТ ИНДИКАТОРОВ ====================
+
+// EMA
+ema5 = ta.ema(close, ema5_len)
+ema9 = ta.ema(close, ema9_len)
+ema13 = ta.ema(close, ema13_len)
+ema21 = ta.ema(close, ema21_len)
+ema200 = ta.ema(close, ema200_len)
+
+// ATR
+atr = ta.atr(atr_len)
+atr_upper = ema200 + atr * atr_mult
+atr_lower = ema200 - atr * atr_mult
+
+// Swing High/Low
+swing_high = ta.highest(high, swing_len)
+swing_low = ta.lowest(low, swing_len)
+
+// ==================== ВИЗУАЛИЗАЦИЯ ====================
+
+plot(show_ema ? ema200 : na, "EMA 200", color.yellow, 2)
+plot(show_ema ? ema5 : na, "EMA 5", color.new(color.blue, 70), 1)
+plot(show_ema ? ema9 : na, "EMA 9", color.new(color.blue, 70), 1)
+plot(show_ema ? ema13 : na, "EMA 13", color.new(color.blue, 70), 1)
+plot(show_ema ? ema21 : na, "EMA 21", color.new(color.blue, 70), 1)
+
+plot(show_atr_bands ? atr_upper : na, "ATR Upper", color.new(color.red, 70), 1, plot.style_circles)
+plot(show_atr_bands ? atr_lower : na, "ATR Lower", color.new(color.lime, 70), 1, plot.style_circles)
+
+// ==================== ЛОГИКА СИГНАЛОВ ====================
+
+// Инициатор (свеча [2])
+initiator_cross_long = open[2] < ema200[2] and close[2] > ema200[2]
+initiator_cross_short = open[2] > ema200[2] and close[2] < ema200[2]
+
+// Подтверждение (свеча [1])
+confirm_above_long = low[1] > ema200[1]
+confirm_below_short = high[1] < ema200[1]
+
+// Базовые условия
+base_long = initiator_cross_long and confirm_above_long
+base_short = initiator_cross_short and confirm_below_short
+
+// Мягкие требования
+confirm_depth_long = (close[1] - ema200[1]) >= (min_confirm_depth * atr[1])
+confirm_depth_short = (ema200[1] - close[1]) >= (min_confirm_depth * atr[1])
+
+distance_to_upper = atr_upper[1] - close[1]
+distance_to_lower = close[1] - atr_lower[1]
+dist_to_edge_long = distance_to_upper >= (min_distance_to_atr_edge * atr[1])
+dist_to_edge_short = distance_to_lower >= (min_distance_to_atr_edge * atr[1])
+
+entry_dist_long = math.abs(close[1] - ema200[1]) <= (max_entry_distance_from_ema200 * atr[1])
+entry_dist_short = math.abs(close[1] - ema200[1]) <= (max_entry_distance_from_ema200 * atr[1])
+
+soft_req_long = confirm_depth_long and dist_to_edge_long and entry_dist_long
+soft_req_short = confirm_depth_short and dist_to_edge_short and entry_dist_short
+
+// Сигналы
+signal_long = base_long and soft_req_long
+signal_short = base_short and soft_req_short
+
+// ==================== СКОРИНГ ====================
+
+// EMA200 направление
+ema200_slope = ema200 - ema200[1]
+score_ema200_long = ema200_slope > 0 ? 1 : (ema200_slope < 0 ? -1 : 0)
+score_ema200_short = ema200_slope < 0 ? 1 : (ema200_slope > 0 ? -1 : 0)
+
+// EMA веер
+fan_long = ema5 > ema9 and ema9 > ema13 and ema13 > ema21 ? 1 : 0
+fan_short = ema5 < ema9 and ema9 < ema13 and ema13 < ema21 ? 1 : 0
+
+// ATR запас
+score_atr_reserve_long = distance_to_upper >= (good_atr_reserve * atr[1]) ? 1 : 0
+score_atr_reserve_short = distance_to_lower >= (good_atr_reserve * atr[1]) ? 1 : 0
+
+// Сильный бар
+bar_body = math.abs(close[1] - open[1])
+bar_close_dist_long = close[1] - ema200[1]
+bar_close_dist_short = ema200[1] - close[1]
+
+strong_body_long = bar_body >= (strong_bar_body * atr[1]) ? 1 : 0
+strong_close_long = bar_close_dist_long >= (strong_bar_close_dist * atr[1]) ? 1 : 0
+strong_bar_score_long = strong_body_long + strong_close_long
+
+strong_body_short = bar_body >= (strong_bar_body * atr[1]) ? 1 : 0
+strong_close_short = bar_close_dist_short >= (strong_bar_close_dist * atr[1]) ? 1 : 0
+strong_bar_score_short = strong_body_short + strong_close_short
+
+// Swing пробой
+breakout_high_long = close[1] > swing_high[2] ? 1 : 0
+breakout_low_short = close[1] < swing_low[2] ? 1 : 0
+
+// Retest
+retest_long = low[1] <= ema200[1] * 1.002 and low[1] > ema200[1] ? 1 : 0
+retest_short = high[1] >= ema200[1] * 0.998 and high[1] < ema200[1] ? 1 : 0
+
+// ШТРАФЫ
+// Pre-touch
+pre_touch_long = low[3] <= ema200[3] and low[3] > ema200[3] * 0.995 ? -1 : 0
+pre_touch_short = high[3] >= ema200[3] and high[3] < ema200[3] * 1.005 ? -1 : 0
+
+// Слабое подтверждение
+weak_confirm_long = close[1] < open[1] and confirm_depth_long < (0.4 * atr[1]) ? -1 : 0
+weak_confirm_short = close[1] > open[1] and confirm_depth_short < (0.4 * atr[1]) ? -1 : 0
+
+// У края ATR
+near_edge_long = distance_to_upper < (0.3 * atr[1]) ? -1 : 0
+near_edge_short = distance_to_lower < (0.3 * atr[1]) ? -1 : 0
+
+penalties_long = pre_touch_long + weak_confirm_long + near_edge_long
+penalties_short = pre_touch_short + weak_confirm_short + near_edge_short
+
+// ИТОГОВЫЙ SCORE
+score_long = score_ema200_long + fan_long + score_atr_reserve_long + strong_bar_score_long + 
+             breakout_high_long + retest_long + penalties_long
+
+score_short = score_ema200_short + fan_short + score_atr_reserve_short + strong_bar_score_short + 
+              breakout_low_short + retest_short + penalties_short
+
+// Режим входа
+entry_mode_long = score_long >= score_threshold ? "STANDARD" : (score_long >= 0 ? "SCALP" : "SKIP")
+entry_mode_short = score_short >= score_threshold ? "STANDARD" : (score_short >= 0 ? "SCALP" : "SKIP")
+
+// ==================== РАСЧЁТ SL И TP ====================
+
+// Entry = close подтверждающей свечи (свеча [1])
+entry_long = close[1]
+entry_short = close[1]
+
+// Stop Loss за экстремум ИНИЦИАТОРА (свеча [2]) с буфером
+sl_buffer = 0.1 * atr[2]
+sl_long = low[2] - sl_buffer
+sl_short = high[2] + sl_buffer
+
+// Risk
+risk_long = entry_long - sl_long
+risk_short = sl_short - entry_short
+
+// Take Profit
+tp1_long = entry_long + risk_long * tp1_rr
+tp2_long = entry_long + risk_long * tp2_rr
+
+tp1_short = entry_short - risk_short * tp1_rr
+tp2_short = entry_short - risk_short * tp2_rr
+
+// Breakeven
+be_offset_long = entry_long * 0.0008
+be_offset_short = entry_short * 0.0008
+be_long = entry_long + be_offset_long
+be_short = entry_short - be_offset_short
+
+// ==================== СТРАТЕГИЯ ====================
+
+// Размер позиции в зависимости от режима
+var float position_size = 100.0
+
+if signal_long and score_long >= 0
+    position_size := entry_mode_long == "SCALP" ? scalp_mode_size : 100.0
+    
+    if use_partial_tp
+        // Частичное закрытие: 50% на TP1, 50% на TP2
+        strategy.entry("LONG", strategy.long, qty=position_size, comment=entry_mode_long)
+        strategy.exit("TP1_LONG", from_entry="LONG", limit=tp1_long, stop=sl_long, qty_percent=50, comment="TP1 50%")
+        strategy.exit("TP2_LONG", from_entry="LONG", limit=tp2_long, stop=be_long, qty_percent=50, comment="TP2 50%")
+    else
+        // Простой режим: один выход
+        target_price = entry_mode_long == "SCALP" ? tp1_long : tp2_long
+        strategy.entry("LONG", strategy.long, qty=position_size, comment=entry_mode_long)
+        strategy.exit("EXIT_LONG", from_entry="LONG", limit=target_price, stop=sl_long)
+
+if signal_short and score_short >= 0
+    position_size := entry_mode_short == "SCALP" ? scalp_mode_size : 100.0
+    
+    if use_partial_tp
+        // Частичное закрытие: 50% на TP1, 50% на TP2
+        strategy.entry("SHORT", strategy.short, qty=position_size, comment=entry_mode_short)
+        strategy.exit("TP1_SHORT", from_entry="SHORT", limit=tp1_short, stop=sl_short, qty_percent=50, comment="TP1 50%")
+        strategy.exit("TP2_SHORT", from_entry="SHORT", limit=tp2_short, stop=be_short, qty_percent=50, comment="TP2 50%")
+    else
+        // Простой режим: один выход
+        target_price = entry_mode_short == "SCALP" ? tp1_short : tp2_short
+        strategy.entry("SHORT", strategy.short, qty=position_size, comment=entry_mode_short)
+        strategy.exit("EXIT_SHORT", from_entry="SHORT", limit=target_price, stop=sl_short)
+
+// ==================== ВИЗУАЛИЗАЦИЯ TP/SL ====================
+
+var line entry_line_long = na
+var line tp1_line_long = na
+var line tp2_line_long = na
+var line be_line_long = na
+var line sl_line_long = na
+
+var line entry_line_short = na
+var line tp1_line_short = na
+var line tp2_line_short = na
+var line be_line_short = na
+var line sl_line_short = na
+
+if show_tp and signal_long and score_long >= 0
+    // Entry
+    entry_line_long := line.new(bar_index[1], entry_long, bar_index, entry_long, 
+                                color=color.new(color.blue, 50), width=1, style=line.style_dashed)
+    
+    // TP1
+    tp1_line_long := line.new(bar_index[1], tp1_long, bar_index, tp1_long, 
+                              color=color.new(color.lime, 30), width=2)
+    label.new(bar_index, tp1_long, entry_mode_long == "SCALP" ? "TP1 (100%)" : "TP1 (50%)", 
+              color=color.new(color.lime, 70), textcolor=color.white, 
+              style=label.style_label_left, size=size.tiny)
+    
+    // BE
+    be_line_long := line.new(bar_index[1], be_long, bar_index, be_long, 
+                             color=color.new(color.orange, 60), width=1, style=line.style_dotted)
+    label.new(bar_index, be_long, "BE", color=color.new(color.orange, 80), 
+              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    
+    // TP2 только для STANDARD
+    if entry_mode_long == "STANDARD"
+        tp2_line_long := line.new(bar_index[1], tp2_long, bar_index, tp2_long, 
+                                  color=color.new(color.lime, 30), width=2)
+        label.new(bar_index, tp2_long, "TP2 (50%)", color=color.new(color.lime, 70), 
+                  textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    
+    // SL
+    sl_line_long := line.new(bar_index[1], sl_long, bar_index, sl_long, 
+                             color=color.new(color.red, 30), width=2)
+    label.new(bar_index, sl_long, "SL", color=color.new(color.red, 70), 
+              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+
+if show_tp and signal_short and score_short >= 0
+    // Entry
+    entry_line_short := line.new(bar_index[1], entry_short, bar_index, entry_short, 
+                                 color=color.new(color.blue, 50), width=1, style=line.style_dashed)
+    
+    // TP1
+    tp1_line_short := line.new(bar_index[1], tp1_short, bar_index, tp1_short, 
+                               color=color.new(color.red, 30), width=2)
+    label.new(bar_index, tp1_short, entry_mode_short == "SCALP" ? "TP1 (100%)" : "TP1 (50%)", 
+              color=color.new(color.red, 70), textcolor=color.white, 
+              style=label.style_label_left, size=size.tiny)
+    
+    // BE
+    be_line_short := line.new(bar_index[1], be_short, bar_index, be_short, 
+                              color=color.new(color.orange, 60), width=1, style=line.style_dotted)
+    label.new(bar_index, be_short, "BE", color=color.new(color.orange, 80), 
+              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    
+    // TP2 только для STANDARD
+    if entry_mode_short == "STANDARD"
+        tp2_line_short := line.new(bar_index[1], tp2_short, bar_index, tp2_short, 
+                                   color=color.new(color.red, 30), width=2)
+        label.new(bar_index, tp2_short, "TP2 (50%)", color=color.new(color.red, 70), 
+                  textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    
+    // SL
+    sl_line_short := line.new(bar_index[1], sl_short, bar_index, sl_short, 
+                              color=color.new(color.lime, 30), width=2)
+    label.new(bar_index, sl_short, "SL", color=color.new(color.lime, 70), 
+              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+
+// ==================== TABLE С СТАТИСТИКОЙ ====================
+
+var table stats_table = table.new(position.top_right, 2, 8, border_width=1)
+
+if barstate.islast
+    table.cell(stats_table, 0, 0, "Parameter", bgcolor=color.new(color.gray, 70), text_color=color.white)
+    table.cell(stats_table, 1, 0, "Value", bgcolor=color.new(color.gray, 70), text_color=color.white)
+    
+    table.cell(stats_table, 0, 1, "EMA200 Slope")
+    table.cell(stats_table, 1, 1, ema200_slope > 0 ? "UP ↑" : (ema200_slope < 0 ? "DOWN ↓" : "FLAT →"), 
+               text_color=ema200_slope > 0 ? color.lime : (ema200_slope < 0 ? color.red : color.gray))
+    
+    table.cell(stats_table, 0, 2, "EMA Fan")
+    table.cell(stats_table, 1, 2, fan_long == 1 ? "BULLISH ↑" : (fan_short == 1 ? "BEARISH ↓" : "NEUTRAL"))
+    
+    table.cell(stats_table, 0, 3, "ATR Value")
+    table.cell(stats_table, 1, 3, str.tostring(atr, "#.##"))
+    
+    table.cell(stats_table, 0, 4, "Distance to EMA200")
+    table.cell(stats_table, 1, 4, str.tostring(math.abs(close - ema200), "#.##"))
+    
+    table.cell(stats_table, 0, 5, "ATR Upper Band")
+    table.cell(stats_table, 1, 5, str.tostring(atr_upper, "#.##"))
+    
+    table.cell(stats_table, 0, 6, "ATR Lower Band")
+    table.cell(stats_table, 1, 6, str.tostring(atr_lower, "#.##"))
+    
+    table.cell(stats_table, 0, 7, "Swing High/Low")
+    table.cell(stats_table, 1, 7, "H:" + str.tostring(swing_high, "#.##") + " L:" + str.tostring(swing_low, "#.##"))
