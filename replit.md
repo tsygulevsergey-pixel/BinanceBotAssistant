@@ -76,11 +76,16 @@ The system initializes by loading configurations, connecting to Binance, startin
 ## Error Handling & Resilience
 - **Smart Rate Limiting**: 55% safety threshold (1320/2400) with 1080 requests buffer to compensate ±430 sync error. Prevents API bans.
 - **IP BAN Prevention v4**: Event-based coordination with single-log notification (no duplicate spam). All pending requests blocked immediately via ip_ban_event flag.
-- **Periodic Gap Refill Safety**: 
-  - Batching: 20 symbols per batch with 1s pause between batches
+- **Periodic Gap Refill with Request Weight Calculator**: 
+  - Pre-calculates total requests needed before execution
+  - Respects 55% threshold with available capacity check
+  - MIN_BATCH_SIZE: 50 requests minimum to start
+  - FIFO ordering: First detected gaps sent first
+  - Single batch: If total ≤ capacity, sends all at once
+  - Multi-batch with wait: If total > capacity, splits and waits 60s for rate reset
+  - Safety mini-batches: 20 symbols per mini-batch with 1s pause
   - Startup delay: Disabled first 15 minutes after bot start
   - Pre-check: Only runs if rate usage < 30%
-  - Per-batch check: Pauses 3s if rate > 50%, skips batch if rate > 70%
 - **Burst Catchup Safety**: Rate usage checked after each batch (20 symbols), extra 2s pause if > 50%.
 - **Action Price TP2 Fix**: None check before float() conversion for SCALP/SKIP modes.
 - **Exponential Backoff**: Retry logic with progressive delays for transient errors.

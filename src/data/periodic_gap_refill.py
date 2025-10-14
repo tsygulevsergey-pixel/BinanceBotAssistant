@@ -121,9 +121,43 @@ class PeriodicGapRefill:
         
         return gaps
     
+    def calculate_request_weight(self, gaps: Dict[str, Dict[str, dict]]) -> int:
+        """
+        Подсчитывает общее количество запросов для докачки всех gaps
+        
+        Returns:
+            Количество запросов (weight)
+        """
+        total_requests = 0
+        for symbol, timeframe_gaps in gaps.items():
+            # Каждый таймфрейм = 1 запрос (download_historical_klines)
+            total_requests += len(timeframe_gaps)
+        
+        return total_requests
+    
+    def get_available_capacity(self) -> int:
+        """
+        Вычисляет доступный capacity для отправки запросов
+        
+        Returns:
+            Количество доступных запросов до порога 55%
+        """
+        if not hasattr(self.data_loader, 'client') or not hasattr(self.data_loader.client, 'rate_limiter'):
+            return 0
+        
+        usage = self.data_loader.client.rate_limiter.get_current_usage()
+        current_count = usage.get('used', 0)
+        max_count = usage.get('limit', 2400)
+        safe_threshold = 0.55  # 55%
+        
+        safe_count = int(max_count * safe_threshold)
+        available = safe_count - current_count
+        
+        return max(0, available)
+    
     async def refill_gaps(self, gaps: Dict[str, Dict[str, dict]]) -> Dict[str, int]:
         """
-        Батчированная докачка gaps с контролем rate limiter
+        Интеллектуальная докачка gaps с калькулятором веса запросов
         
         Returns:
             {'success': count, 'failed': count}
@@ -131,57 +165,63 @@ class PeriodicGapRefill:
         if not gaps:
             return {'success': 0, 'failed': 0}
         
-        total_gaps = sum(len(tfs) for tfs in gaps.values())
-        symbols_list = list(gaps.items())
+        # 1. Рассчитать вес запросов
+        total_requests = self.calculate_request_weight(gaps)
+        total_symbols = len(gaps)
         
-        # Батчирование: по 20 символов за раз
-        BATCH_SIZE = 20
-        BATCH_PAUSE = 1.0  # Секунды между батчами
+        # 2. Получить доступный capacity
+        available_capacity = self.get_available_capacity()
         
-        total_batches = (len(symbols_list) + BATCH_SIZE - 1) // BATCH_SIZE
+        # 3. Проверить MIN_BATCH_SIZE
+        MIN_BATCH_SIZE = 50
+        if available_capacity < MIN_BATCH_SIZE:
+            logger.info(
+                f"⏸️ Gap refill skipped: capacity too low\n"
+                f"  📊 Available: {available_capacity} requests\n"
+                f"  ⚠️ Minimum: {MIN_BATCH_SIZE} requests"
+            )
+            return {'success': 0, 'failed': 0}
         
         logger.info(
             f"⚡ PERIODIC GAP REFILL starting:\n"
-            f"  📊 Symbols: {len(gaps)}\n"
-            f"  📈 Total gaps: {total_gaps}\n"
-            f"  📦 Batches: {total_batches} (size: {BATCH_SIZE})"
+            f"  📊 Symbols: {total_symbols}\n"
+            f"  📈 Total requests: {total_requests}\n"
+            f"  💾 Available capacity: {available_capacity}\n"
+            f"  🎯 Strategy: {'Single batch' if total_requests <= available_capacity else 'Multiple batches with wait'}"
         )
+        
+        # 4. Определить стратегию выполнения
+        symbols_list = list(gaps.items())  # FIFO порядок
+        
+        if total_requests <= available_capacity:
+            # ✅ Всё влезает - отправляем за один раз (батчами для safety)
+            return await self._execute_batch(symbols_list, batch_num=1, total_batches=1)
+        else:
+            # ⚠️ Не влезает - разбиваем на части
+            return await self._execute_with_wait(symbols_list, available_capacity)
+    
+    async def _execute_batch(self, symbols_list: List[tuple], batch_num: int, total_batches: int) -> Dict[str, int]:
+        """
+        Выполняет докачку одного списка символов (батчами по 20 для safety)
+        """
+        BATCH_SIZE = 20
+        BATCH_PAUSE = 1.0
         
         success_count = 0
         failed_count = 0
         
-        for batch_num in range(total_batches):
-            start_idx = batch_num * BATCH_SIZE
+        total_mini_batches = (len(symbols_list) + BATCH_SIZE - 1) // BATCH_SIZE
+        
+        for mini_batch_num in range(total_mini_batches):
+            start_idx = mini_batch_num * BATCH_SIZE
             end_idx = min(start_idx + BATCH_SIZE, len(symbols_list))
-            batch = symbols_list[start_idx:end_idx]
+            mini_batch = symbols_list[start_idx:end_idx]
             
-            # Проверить rate usage ПЕРЕД батчем
-            if hasattr(self.data_loader, 'client') and hasattr(self.data_loader.client, 'rate_limiter'):
-                usage = self.data_loader.client.rate_limiter.get_current_usage()
-                current_percent = usage.get('percent', 0)
-                
-                # Если rate > 50%, ждём 3 секунды
-                if current_percent > 50:
-                    logger.warning(
-                        f"⚠️ Rate usage high before batch {batch_num+1}/{total_batches}: "
-                        f"{current_percent:.1f}%, pausing 3s"
-                    )
-                    await asyncio.sleep(3.0)
-                
-                # Если rate > 70%, ПРОПУСКАЕМ батч (безопасность)
-                if current_percent > 70:
-                    logger.error(
-                        f"🚫 Rate usage critical: {current_percent:.1f}% > 70%, "
-                        f"skipping batch {batch_num+1}/{total_batches}"
-                    )
-                    failed_count += len(batch)
-                    continue
-            
-            # Обработать батч параллельно (max 4 одновременно)
+            # Обработать мини-батч параллельно (max 4 одновременно)
             semaphore = asyncio.Semaphore(4)
             tasks = []
             
-            for symbol, timeframe_gaps in batch:
+            for symbol, timeframe_gaps in mini_batch:
                 task = self._refill_symbol_gaps(symbol, timeframe_gaps, semaphore)
                 tasks.append(task)
             
@@ -193,22 +233,107 @@ class PeriodicGapRefill:
             success_count += batch_success
             failed_count += batch_failed
             
+            if total_batches == -1:
+                # Неизвестное количество батчей (циклический режим)
+                logger.info(
+                    f"  📦 Batch {batch_num} - Mini {mini_batch_num+1}/{total_mini_batches}: "
+                    f"✅ {batch_success} / ❌ {batch_failed}"
+                )
+            elif total_batches > 1:
+                # Известное количество батчей
+                logger.info(
+                    f"  📦 Batch {batch_num}/{total_batches} - Mini {mini_batch_num+1}/{total_mini_batches}: "
+                    f"✅ {batch_success} / ❌ {batch_failed}"
+                )
+            else:
+                # Один батч
+                logger.info(
+                    f"  📦 Mini-batch {mini_batch_num+1}/{total_mini_batches}: "
+                    f"✅ {batch_success} / ❌ {batch_failed}"
+                )
+            
+            # Пауза между мини-батчами
+            if mini_batch_num < total_mini_batches - 1:
+                await asyncio.sleep(BATCH_PAUSE)
+        
+        return {'success': success_count, 'failed': failed_count}
+    
+    async def _execute_with_wait(self, symbols_list: List[tuple], available_capacity: int) -> Dict[str, int]:
+        """
+        Выполняет докачку с ожиданием сброса rate limit
+        Использует ТОЧНЫЙ расчет веса и циклические wait при необходимости
+        """
+        total_success = 0
+        total_failed = 0
+        remaining_symbols = symbols_list.copy()
+        batch_num = 0
+        
+        while remaining_symbols:
+            batch_num += 1
+            
+            # Пересчитать available capacity перед каждым батчем
+            current_capacity = self.get_available_capacity()
+            
+            if current_capacity < 10:  # Safety минимум
+                logger.warning(
+                    f"  ⚠️ Capacity too low ({current_capacity}), waiting 60s for rate reset..."
+                )
+                await asyncio.sleep(60)
+                continue
+            
+            # Аккумулировать символы строго под capacity (ТОЧНЫЙ вес)
+            batch_symbols = []
+            accumulated_weight = 0
+            
+            for symbol, timeframe_gaps in remaining_symbols:
+                symbol_weight = len(timeframe_gaps)  # Точный вес: 1-4 requests
+                
+                if accumulated_weight + symbol_weight <= current_capacity:
+                    batch_symbols.append((symbol, timeframe_gaps))
+                    accumulated_weight += symbol_weight
+                else:
+                    # Превысим capacity - остановить аккумуляцию
+                    break
+            
+            if not batch_symbols:
+                # Ни один символ не влез - ждём reset
+                logger.warning(
+                    f"  ⚠️ No symbols fit in capacity ({current_capacity}), waiting 60s..."
+                )
+                await asyncio.sleep(60)
+                continue
+            
+            # Убрать отправленные символы из remaining
+            remaining_symbols = remaining_symbols[len(batch_symbols):]
+            
             logger.info(
-                f"  📦 Batch {batch_num+1}/{total_batches}: "
-                f"✅ {batch_success} / ❌ {batch_failed}"
+                f"  🔄 Batch {batch_num}:\n"
+                f"    Symbols: {len(batch_symbols)}\n"
+                f"    Weight: {accumulated_weight} requests\n"
+                f"    Capacity: {current_capacity}\n"
+                f"    Remaining: {len(remaining_symbols)} symbols"
             )
             
-            # Пауза между батчами
-            if batch_num < total_batches - 1:
-                await asyncio.sleep(BATCH_PAUSE)
+            # Отправить батч (total_batches=-1 означает "неизвестно заранее")
+            result = await self._execute_batch(batch_symbols, batch_num=batch_num, total_batches=-1)
+            total_success += result['success']
+            total_failed += result['failed']
+            
+            # Если остались символы - ждать reset перед следующим батчем
+            if remaining_symbols:
+                logger.info(
+                    f"  ⏳ Waiting 60s for rate limit reset before next batch..."
+                )
+                await asyncio.sleep(60)
         
         logger.info(
             f"⚡ PERIODIC GAP REFILL complete:\n"
-            f"  ✅ Success: {success_count} symbols\n"
-            f"  ❌ Failed: {failed_count} symbols"
+            f"  ✅ Success: {total_success} symbols\n"
+            f"  ❌ Failed: {total_failed} symbols\n"
+            f"  📦 Total batches: {batch_num}"
         )
         
-        return {'success': success_count, 'failed': failed_count}
+        return {'success': total_success, 'failed': total_failed}
     
     async def _refill_symbol_gaps(self, symbol: str, gaps: Dict[str, dict], semaphore) -> bool:
         """
