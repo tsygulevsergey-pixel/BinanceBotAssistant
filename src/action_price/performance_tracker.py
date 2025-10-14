@@ -287,14 +287,16 @@ class ActionPricePerformanceTracker:
         # Если есть частичный выход на TP1
         if signal.partial_exit_1_at and signal.partial_exit_1_price:
             tp1_price = float(signal.partial_exit_1_price)
-            partial_pct = 0.5  # 50% на TP1
+            # Профессиональный подход: 30% @ TP1, 40% @ TP2, 30% trailing
+            tp1_pct = 0.30  # 30% на TP1
+            tp2_pct = 0.40  # 40% на TP2
             
             if direction == 'LONG':
-                pnl_tp1 = ((tp1_price - entry) / entry) * 100 * partial_pct
-                pnl_tp2 = ((final_exit_price - entry) / entry) * 100 * (1 - partial_pct)
+                pnl_tp1 = ((tp1_price - entry) / entry) * 100 * tp1_pct
+                pnl_tp2 = ((final_exit_price - entry) / entry) * 100 * tp2_pct
             else:  # SHORT
-                pnl_tp1 = ((entry - tp1_price) / entry) * 100 * partial_pct
-                pnl_tp2 = ((entry - final_exit_price) / entry) * 100 * (1 - partial_pct)
+                pnl_tp1 = ((entry - tp1_price) / entry) * 100 * tp1_pct
+                pnl_tp2 = ((entry - final_exit_price) / entry) * 100 * tp2_pct
             
             return pnl_tp1 + pnl_tp2
         else:
