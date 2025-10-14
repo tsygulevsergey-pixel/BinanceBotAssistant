@@ -69,8 +69,6 @@ class ActionPriceSignalLogger:
         tp1_price: float,
         tp2_price: Optional[float],
         risk_r: float,
-        spread_at_entry: Optional[float] = None,
-        slippage_entry: Optional[float] = None,
         
         # EMA/ATR на инициаторе (бар [2])
         initiator_ema5: float,
@@ -142,6 +140,8 @@ class ActionPriceSignalLogger:
         bars_in_trade: Optional[int] = None,
         
         # Опциональные
+        spread_at_entry: Optional[float] = None,
+        slippage_entry: Optional[float] = None,
         initiator_volume: Optional[float] = None,
         confirm_volume: Optional[float] = None,
         atr_regime: Optional[float] = None
