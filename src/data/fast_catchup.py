@@ -244,7 +244,20 @@ class FastCatchupLoader:
             tasks = [load_symbol_gaps(symbol, gaps) for symbol, gaps in batch]
             await asyncio.gather(*tasks)
             
-            # Пауза между батчами (кроме последнего)
+            # КРИТИЧНО: Проверить rate usage после каждого батча
+            if hasattr(self.data_loader, 'client') and hasattr(self.data_loader.client, 'rate_limiter'):
+                usage = self.data_loader.client.rate_limiter.get_current_usage()
+                current_percent = usage.get('percent_of_safe', 0)
+                
+                # Если rate > 50% от safe threshold - увеличить паузу
+                if current_percent > 50:
+                    extra_pause = 2.0  # Дополнительная пауза 2 секунды
+                    logger.info(
+                        f"⏸️ Rate usage {current_percent:.1f}% > 50%, adding {extra_pause}s pause"
+                    )
+                    await asyncio.sleep(extra_pause)
+            
+            # Стандартная пауза между батчами (кроме последнего)
             if batch_num < total_batches - 1:
                 logger.debug(f"⏸️ Batch pause {BATCH_PAUSE}s before next batch")
                 await asyncio.sleep(BATCH_PAUSE)

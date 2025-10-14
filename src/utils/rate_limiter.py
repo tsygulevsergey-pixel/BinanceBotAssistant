@@ -21,6 +21,8 @@ class RateLimiter:
         
         # IP ban tracking
         self.ip_ban_until: Optional[float] = None  # Timestamp когда IP бан снимется
+        self.ip_ban_event = asyncio.Event()  # Event для немедленного уведомления всех pending requests
+        self.ip_ban_logged = False  # Флаг чтобы логировать IP BAN только один раз
         
         # Warning debounce (показывать warning максимум раз в 60 секунд)
         self.last_threshold_warning_time: float = 0
@@ -33,12 +35,19 @@ class RateLimiter:
                 # Проверить IP ban
                 if self.ip_ban_until and now < self.ip_ban_until:
                     wait_time = self.ip_ban_until - now
-                    logger.warning(
-                        f"🚫 IP BAN active, waiting {wait_time:.0f}s before next request "
-                        f"(unbanned at {time.strftime('%H:%M:%S', time.localtime(self.ip_ban_until))})"
-                    )
+                    
+                    # Логировать только один раз
+                    if not self.ip_ban_logged:
+                        logger.warning(
+                            f"🚫 IP BAN active, all pending requests blocked! "
+                            f"Waiting {wait_time:.0f}s (unbanned at {time.strftime('%H:%M:%S', time.localtime(self.ip_ban_until))})"
+                        )
+                        self.ip_ban_logged = True
+                    
                     await asyncio.sleep(wait_time)
                     self.ip_ban_until = None  # Сбросить после ожидания
+                    self.ip_ban_logged = False  # Сбросить флаг
+                    self.ip_ban_event.set()  # Уведомить всех ожидающих
                     continue
                 
                 # Очистить устаревшие запросы
@@ -93,19 +102,19 @@ class RateLimiter:
                 except Exception as e:
                     error_str = str(e)
                     
-                    # КРИТИЧНО: IP BAN (418) - освободить acquired и retry
+                    # КРИТИЧНО: IP BAN (418) - освободить acquired и немедленно остановить все requests
                     # update_from_binance_headers() уже установил ip_ban_until
                     # Следующий acquire() автоматически подождёт окончания бана
                     if '418' in error_str:
-                        logger.warning(
-                            f"🚫 IP BAN (418) detected in request. "
-                            f"Releasing lock, next acquire() will wait until ban expires."
-                        )
                         # Освободить acquired чтобы следующая итерация вызвала acquire()
                         if acquired:
                             async with self.lock:
                                 self.pending_weight = max(0, self.pending_weight - weight)
                             acquired = False
+                        
+                        # КРИТИЧНО: НЕ логировать здесь (будет 50+ сообщений от pending tasks)
+                        # Логирование происходит только в acquire() один раз
+                        
                         # НЕ raise! Продолжаем retry loop - acquire() подождёт бан
                         continue
                     
@@ -175,7 +184,11 @@ class RateLimiter:
         # Если есть Retry-After - значит IP бан или временная блокировка
         if retry_after:
             wait_seconds = int(retry_after)
-            self.ip_ban_until = time.time() + wait_seconds
+            async with self.lock:
+                self.ip_ban_until = time.time() + wait_seconds
+                self.ip_ban_logged = False  # Сбросить флаг для нового бана
+                self.ip_ban_event.clear()  # Очистить event
+            
             unban_time = time.strftime('%H:%M:%S', time.localtime(self.ip_ban_until))
             logger.error(
                 f"🚨 BINANCE IP BAN detected! All requests blocked until {unban_time} ({wait_seconds}s)"
