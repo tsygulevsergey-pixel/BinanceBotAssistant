@@ -75,6 +75,31 @@ class ActionPriceEngine:
         if len(df) < 250:  # Нужно минимум для EMA200
             return None
         
+        # КРИТИЧНО: Валидация и подготовка датафрейма
+        # 1. Создать копию чтобы не менять original
+        df = df.copy()
+        
+        # 2. Убедиться что есть open_time колонка
+        if 'open_time' not in df.columns:
+            logger.error(f"{symbol} - No 'open_time' column in dataframe!")
+            return None
+        
+        # 3. Сортировать по open_time (ASC - от старых к новым)
+        df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+        
+        # 4. ДИАГНОСТИКА: Логировать последние 3 свечи для проверки
+        if len(df) >= 3:
+            for i in [-3, -2, -1]:
+                candle_time = df['open_time'].iloc[i]
+                candle_open = df['open'].iloc[i]
+                candle_close = df['close'].iloc[i]
+                candle_low = df['low'].iloc[i]
+                candle_high = df['high'].iloc[i]
+                logger.info(
+                    f"🕐 {symbol} Candle[{i}]: {candle_time} | "
+                    f"O:{candle_open:.5f} H:{candle_high:.5f} L:{candle_low:.5f} C:{candle_close:.5f}"
+                )
+        
         # Рассчитать индикаторы
         indicators = self._calculate_indicators(df)
         if indicators is None:
@@ -229,7 +254,19 @@ class ActionPriceEngine:
         Returns:
             (direction, initiator_idx, confirm_idx) или None
         """
-        # Индексы: инициатор = -3 ([2]), подтверждение = -2 ([1]), текущий = -1 ([0])
+        # КРИТИЧНО: Использовать timestamp-based selection вместо фиксированных индексов!
+        # 
+        # Когда свеча закрывается (например 20:00):
+        # - Последняя ЗАКРЫТАЯ свеча = -2 (подтверждение, 19:45-20:00)
+        # - Предыдущая свеча = -3 (инициатор, 19:30-19:45)
+        # - Текущая незакрытая = -1 (НЕ используем!)
+        #
+        # Проверяем что у нас минимум 3 свечи (инициатор, подтверждение, текущая)
+        if len(indicators) < 3:
+            return None
+        
+        # Индексы: инициатор = -3, подтверждение = -2
+        # Текущая -1 может быть незакрытой, поэтому не используем
         initiator_idx = -3
         confirm_idx = -2
         
@@ -237,6 +274,7 @@ class ActionPriceEngine:
         init_open = indicators['open'].iloc[initiator_idx]
         init_close = indicators['close'].iloc[initiator_idx]
         ema200_init = indicators['ema200'].iloc[initiator_idx]
+        init_time = indicators['open_time'].iloc[initiator_idx] if 'open_time' in indicators.columns else None
         
         # Данные подтверждения
         conf_open = indicators['open'].iloc[confirm_idx]
@@ -244,6 +282,14 @@ class ActionPriceEngine:
         conf_high = indicators['high'].iloc[confirm_idx]
         conf_low = indicators['low'].iloc[confirm_idx]
         ema200_conf = indicators['ema200'].iloc[confirm_idx]
+        conf_time = indicators['open_time'].iloc[confirm_idx] if 'open_time' in indicators.columns else None
+        
+        # ДИАГНОСТИКА: Логировать timestamp и OHLC для проверки
+        logger.info(
+            f"🔍 Candle Selection | "
+            f"Initiator[-3]: {init_time} O:{init_open:.5f} C:{init_close:.5f} EMA200:{ema200_init:.5f} | "
+            f"Confirm[-2]: {conf_time} O:{conf_open:.5f} H:{conf_high:.5f} L:{conf_low:.5f} C:{conf_close:.5f} EMA200:{ema200_conf:.5f}"
+        )
         
         # === LONG PATTERN ===
         # Инициатор: body пересекает EMA200 снизу вверх (закрытие выше)
