@@ -28,7 +28,7 @@ Preferred communication style: Simple, everyday language.
 - **5 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile.
 - **Action Price System**: Rewritten on EMA200 Body Cross logic with an 11-component scoring system for STANDARD, SCALP, and SKIP regimes. Includes JSONL logging for ML analysis and real-time MFE/MAE tracking.
   - **Event-Driven Execution**: Runs AFTER 15m candles are loaded and saved (not timer-based). Supports partial loading - analyzes only symbols with successfully updated candles.
-  - **31-Second Delay**: Waits 31 seconds after 15m candle close for Binance to finalize data (prevents analyzing unstable/temporary prices).
+  - **31-Second Delay**: Waits 31 seconds after ANY candle close (15m/1h/4h/1d) for Binance to finalize data (prevents analyzing unstable/temporary prices).
   - **Entry Price**: Uses close price of confirming candle (not mark price).
   - **TP Calculation**: TP1 = Entry ± R, TP2 = Entry ± 2R where R = |Entry - SL|.
   - **Telegram Signals**: 🟢 for LONG, 🔴 for SHORT.

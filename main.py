@@ -467,6 +467,8 @@ class TradingBot:
             updated_timeframes.append('1h')
         if TimeframeSync.should_update_timeframe('4h', current_time=now, consumer_id='strategies'):
             updated_timeframes.append('4h')
+        if TimeframeSync.should_update_timeframe('1d', current_time=now, consumer_id='strategies'):
+            updated_timeframes.append('1d')
         
         # Если ни одна свеча не закрылась - пропускаем проверку стратегий
         if not updated_timeframes:
@@ -475,9 +477,10 @@ class TradingBot:
         
         logger.info(f"🕯️  Candles closed: {', '.join(updated_timeframes)} - checking strategies")
         
-        # ЗАДЕРЖКА 31 сек после закрытия 15m свечи для стабилизации данных Binance
-        if '15m' in updated_timeframes:
-            logger.info(f"⏳ Waiting 31 seconds for Binance to finalize 15m candle data...")
+        # ЗАДЕРЖКА 31 сек после закрытия ЛЮБОЙ свечи для стабилизации данных Binance
+        if updated_timeframes:
+            tf_list = ', '.join(updated_timeframes)
+            logger.info(f"⏳ Waiting 31 seconds for Binance to finalize {tf_list} candle data...")
             await asyncio.sleep(31)
             logger.info(f"✅ Delay completed - now loading stable candle data")
         
