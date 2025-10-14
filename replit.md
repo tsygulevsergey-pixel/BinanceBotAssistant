@@ -20,8 +20,11 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ Created Signal Confluence system (bonus when 2+ strategies agree)
 - ✅ Added Telegram commands: /regime_stats, /confluence_stats
 - ✅ Partial TP system ready for 30/40/30 implementation (TODO in signal_tracker.py)
-- ✅ **CRITICAL FIX**: Rate limiter infinite loop bug - counters now reset after wait period
-- ✅ **SCORE CALIBRATION**: Increased base_score from 1.0 to 2.5 for Break & Retest and MA/VWAP Pullback strategies. Threshold raised from 2.0 to 4.5 - now requires minimum 2 confirmations (volume/CVD/OI/imbalance) for quality signals
+- ✅ **CRITICAL FIX (Oct 14)**: Rate limiter bug - properly stops requests at 90% threshold (2160/2400)
+- ✅ **API LIMIT FIX (Oct 14)**: Updated to Futures API limit 2400/min (was 1100 for SPOT)
+- ✅ **PARALLELISM FIX (Oct 14)**: Reduced to 1 worker (from 2-3) to prevent IP ban
+- ✅ **SCORE THRESHOLD (Oct 14)**: Lowered from 4.5 to 3.0 for better signal frequency
+- ✅ **NEW TV INDICATOR (Oct 14)**: EMA200 Body Cross strategy with scoring system (tradingview/16_ema200_body_cross.pine)
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
