@@ -24,7 +24,9 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ **API LIMIT FIX (Oct 14)**: Updated to Futures API limit 2400/min (was 1100 for SPOT)
 - ✅ **PARALLELISM FIX (Oct 14)**: Reduced to 1 worker (from 2-3) to prevent IP ban
 - ✅ **SCORE THRESHOLD (Oct 14)**: Lowered from 4.5 to 3.0 for better signal frequency
-- ✅ **NEW TV INDICATOR (Oct 14)**: EMA200 Body Cross strategy with scoring system (tradingview/16_ema200_body_cross.pine)
+- ✅ **EMA200 INDICATOR (Oct 14)**: Created TradingView indicator with 7 professional filters (tradingview/16_ema200_body_cross.pine)
+- ✅ **EMA200 STRATEGY (Oct 14)**: Created TradingView strategy for backtesting (tradingview/16_ema200_body_cross_STRATEGY.pine)
+- ✅ **PROFESSIONAL FILTERS (Oct 14)**: Updated indicator with slope200, color confirmation, pre-touch, oversized initiator, fan ready, distance filters
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
