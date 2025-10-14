@@ -195,14 +195,16 @@ entry_mode_short = score_short >= score_threshold ? "STANDARD" : (score_short >=
 
 // ==================== РАСЧЁТ SL И TP ====================
 
-// Stop Loss за EMA200 с небольшим буфером (0.1×ATR)
-sl_buffer = 0.1 * atr[1]
-sl_long = ema200[1] - sl_buffer
-sl_short = ema200[1] + sl_buffer
-
-// Entry = close подтверждающей свечи
+// Entry = close подтверждающей свечи (свеча [1])
 entry_long = close[1]
 entry_short = close[1]
+
+// Stop Loss за экстремум ИНИЦИАТОРА (свеча [2]) с небольшим буфером
+// LONG: чуть ниже low инициатора
+// SHORT: чуть выше high инициатора
+sl_buffer = 0.1 * atr[2]  // буфер ~10% ATR от тени
+sl_long = low[2] - sl_buffer
+sl_short = high[2] + sl_buffer
 
 // Risk (R) = расстояние от entry до SL
 risk_long = entry_long - sl_long
@@ -214,6 +216,12 @@ tp2_long = entry_long + risk_long * tp2_rr
 
 tp1_short = entry_short - risk_short * tp1_rr
 tp2_short = entry_short - risk_short * tp2_rr
+
+// Breakeven level (после TP1)
+// BE = Entry + комиссия (0.04% × 2 для open+close)
+be_offset = entry_long * 0.0008  // 0.08% для покрытия комиссий туда-обратно
+be_long = entry_long + be_offset
+be_short = entry_short - be_offset
 
 // ==================== ВИЗУАЛИЗАЦИЯ СИГНАЛОВ ====================
 
@@ -250,20 +258,27 @@ if show_tp and signal_long and score_long >= 0
     line.new(bar_index[1], entry_long, bar_index, entry_long, 
              color=color.new(color.blue, 50), width=1, style=line.style_dashed)
     
-    // TP1
+    // TP1 (для всех режимов)
     line.new(bar_index[1], tp1_long, bar_index, tp1_long, 
              color=color.new(color.lime, 30), width=2, style=line.style_solid)
-    label.new(bar_index, tp1_long, "TP1", color=color.new(color.lime, 70), 
+    tp1_label_text = entry_mode_long == "SCALP" ? "TP1 (100%)" : "TP1 (50%)"
+    label.new(bar_index, tp1_long, tp1_label_text, color=color.new(color.lime, 70), 
               textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
-    // TP2 только для STANDARD
+    // Breakeven level (перевод SL после TP1)
+    line.new(bar_index[1], be_long, bar_index, be_long, 
+             color=color.new(color.orange, 60), width=1, style=line.style_dotted)
+    label.new(bar_index, be_long, "BE", color=color.new(color.orange, 80), 
+              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    
+    // TP2 только для STANDARD режима
     if entry_mode_long == "STANDARD"
         line.new(bar_index[1], tp2_long, bar_index, tp2_long, 
                  color=color.new(color.lime, 30), width=2, style=line.style_solid)
-        label.new(bar_index, tp2_long, "TP2", color=color.new(color.lime, 70), 
+        label.new(bar_index, tp2_long, "TP2 (50%)", color=color.new(color.lime, 70), 
                   textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
-    // SL
+    // SL (за low инициатора)
     line.new(bar_index[1], sl_long, bar_index, sl_long, 
              color=color.new(color.red, 30), width=2, style=line.style_solid)
     label.new(bar_index, sl_long, "SL", color=color.new(color.red, 70), 
@@ -274,20 +289,27 @@ if show_tp and signal_short and score_short >= 0
     line.new(bar_index[1], entry_short, bar_index, entry_short, 
              color=color.new(color.blue, 50), width=1, style=line.style_dashed)
     
-    // TP1
+    // TP1 (для всех режимов)
     line.new(bar_index[1], tp1_short, bar_index, tp1_short, 
              color=color.new(color.red, 30), width=2, style=line.style_solid)
-    label.new(bar_index, tp1_short, "TP1", color=color.new(color.red, 70), 
+    tp1_label_text_short = entry_mode_short == "SCALP" ? "TP1 (100%)" : "TP1 (50%)"
+    label.new(bar_index, tp1_short, tp1_label_text_short, color=color.new(color.red, 70), 
               textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
-    // TP2 только для STANDARD
+    // Breakeven level (перевод SL после TP1)
+    line.new(bar_index[1], be_short, bar_index, be_short, 
+             color=color.new(color.orange, 60), width=1, style=line.style_dotted)
+    label.new(bar_index, be_short, "BE", color=color.new(color.orange, 80), 
+              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    
+    // TP2 только для STANDARD режима
     if entry_mode_short == "STANDARD"
         line.new(bar_index[1], tp2_short, bar_index, tp2_short, 
                  color=color.new(color.red, 30), width=2, style=line.style_solid)
-        label.new(bar_index, tp2_short, "TP2", color=color.new(color.red, 70), 
+        label.new(bar_index, tp2_short, "TP2 (50%)", color=color.new(color.red, 70), 
                   textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
-    // SL
+    // SL (за high инициатора)
     line.new(bar_index[1], sl_short, bar_index, sl_short, 
              color=color.new(color.lime, 30), width=2, style=line.style_solid)
     label.new(bar_index, sl_short, "SL", color=color.new(color.lime, 70), 
