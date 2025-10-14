@@ -216,10 +216,38 @@ class FastCatchupLoader:
                     logger.error(f"  ❌ {symbol} catchup failed: {e}")
                     failed_count += 1
         
-        # Параллельная загрузка всех gaps
+        # Параллельная загрузка всех gaps С БАТЧИРОВАНИЕМ для безопасности rate limiter
         start_time = datetime.now()
-        tasks = [load_symbol_gaps(symbol, gaps) for symbol, gaps in existing_gaps.items()]
-        await asyncio.gather(*tasks)
+        
+        # Разбить символы на батчи по 20 символов (безопаснее для rate limiter)
+        BATCH_SIZE = 20
+        BATCH_PAUSE = 0.5  # Пауза 0.5 сек между батчами для избежания rate limit spikes
+        
+        symbol_items = list(existing_gaps.items())
+        total_batches = (len(symbol_items) + BATCH_SIZE - 1) // BATCH_SIZE
+        
+        logger.info(
+            f"📦 Splitting {len(symbol_items)} symbols into {total_batches} batches "
+            f"(batch size: {BATCH_SIZE}, pause: {BATCH_PAUSE}s)"
+        )
+        
+        for batch_num in range(total_batches):
+            batch_start = batch_num * BATCH_SIZE
+            batch_end = min(batch_start + BATCH_SIZE, len(symbol_items))
+            batch = symbol_items[batch_start:batch_end]
+            
+            logger.info(
+                f"📊 Processing batch {batch_num+1}/{total_batches} "
+                f"({len(batch)} symbols: {batch[0][0]} ... {batch[-1][0]})"
+            )
+            
+            tasks = [load_symbol_gaps(symbol, gaps) for symbol, gaps in batch]
+            await asyncio.gather(*tasks)
+            
+            # Пауза между батчами (кроме последнего)
+            if batch_num < total_batches - 1:
+                logger.debug(f"⏸️ Batch pause {BATCH_PAUSE}s before next batch")
+                await asyncio.sleep(BATCH_PAUSE)
         
         elapsed = (datetime.now() - start_time).total_seconds()
         

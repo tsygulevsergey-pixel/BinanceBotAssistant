@@ -7,11 +7,11 @@ from src.utils.config import config
 
 
 class RateLimiter:
-    def __init__(self, weight_limit: Optional[int] = None, window_seconds: int = 60, safety_threshold: float = 0.9):
+    def __init__(self, weight_limit: Optional[int] = None, window_seconds: int = 60, safety_threshold: float = 0.75):
         self.weight_limit = weight_limit or config.get('binance.rest_weight_limit', 1100)
         self.window_seconds = window_seconds
-        self.safety_threshold = safety_threshold  # 90% порог безопасности
-        self.safe_limit = int(self.weight_limit * safety_threshold)  # 990 для 1100
+        self.safety_threshold = safety_threshold  # 75% порог безопасности (было 90% - слишком опасно для burst catchup!)
+        self.safe_limit = int(self.weight_limit * safety_threshold)  # 1800 для 2400 (или 825 для 1100)
         self.requests = deque()
         self.current_weight = 0  # Реальный вес от Binance
         self.pending_weight = 0  # Вес запросов в полёте (до получения ответа от Binance)
@@ -91,9 +91,29 @@ class RateLimiter:
                     result = await func(*args, **kwargs)
                     return result
                 except Exception as e:
-                    if '429' in str(e) or '418' in str(e):
+                    error_str = str(e)
+                    
+                    # КРИТИЧНО: Если IP BAN обнаружен - НЕ РЕТРАИТЬ!
+                    # acquire() уже установил ip_ban_until и будет автоматически ждать
+                    if '418' in error_str:
+                        logger.warning(
+                            f"🚫 IP BAN detected in request, stopping retries. "
+                            f"Next acquire() will wait until ban expires."
+                        )
+                        # Освободить acquired флаг чтобы следующий запрос вызвал acquire()
+                        if acquired:
+                            async with self.lock:
+                                self.pending_weight = max(0, self.pending_weight - weight)
+                            acquired = False
+                        raise  # Прокинуть exception наверх, не ретраить
+                    
+                    # 429 (обычный rate limit) - делаем backoff retry
+                    if '429' in error_str:
                         wait_time = (self.backoff_base ** attempt) + (time.time() % 1)
-                        logger.warning(f"Rate limit hit (attempt {attempt + 1}/{self.max_retries}), backing off for {wait_time:.2f}s")
+                        logger.warning(
+                            f"Rate limit 429 (attempt {attempt + 1}/{self.max_retries}), "
+                            f"backing off for {wait_time:.2f}s"
+                        )
                         await asyncio.sleep(wait_time)
                     else:
                         raise
