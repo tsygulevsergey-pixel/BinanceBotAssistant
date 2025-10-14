@@ -7,11 +7,11 @@ from src.utils.config import config
 
 
 class RateLimiter:
-    def __init__(self, weight_limit: Optional[int] = None, window_seconds: int = 60, safety_threshold: float = 0.75):
+    def __init__(self, weight_limit: Optional[int] = None, window_seconds: int = 60, safety_threshold: float = 0.55):
         self.weight_limit = weight_limit or config.get('binance.rest_weight_limit', 1100)
         self.window_seconds = window_seconds
-        self.safety_threshold = safety_threshold  # 75% порог безопасности (было 90% - слишком опасно для burst catchup!)
-        self.safe_limit = int(self.weight_limit * safety_threshold)  # 1800 для 2400 (или 825 для 1100)
+        self.safety_threshold = safety_threshold  # 55% порог безопасности (1320/2400, буфер 1080 запросов для погрешности ±430)
+        self.safe_limit = int(self.weight_limit * safety_threshold)  # 1320 для 2400 (или 605 для 1100)
         self.requests = deque()
         self.current_weight = 0  # Реальный вес от Binance
         self.pending_weight = 0  # Вес запросов в полёте (до получения ответа от Binance)
