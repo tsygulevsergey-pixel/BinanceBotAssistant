@@ -95,11 +95,11 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         vwap_zone_lower = current_vwap - self.retest_atr * current_atr
         
         # Fibonacci retracement расчет
-        recent_swing_high = df['high'].tail(50).max()
-        recent_swing_low = df['low'].tail(50).min()
-        fib_range = recent_swing_high - recent_swing_low
-        fib_382 = recent_swing_high - (fib_range * 0.382)
-        fib_618 = recent_swing_high - (fib_range * 0.618)
+        swing_high = df['high'].tail(50).max()
+        swing_low = df['low'].tail(50).min()
+        fib_range = swing_high - swing_low
+        fib_382 = swing_high - (fib_range * 0.382)
+        fib_618 = swing_high - (fib_range * 0.618)
         
         # LONG pullback (восходящий тренд)
         if ema50_slope > 0 and bias != 'Bearish':
