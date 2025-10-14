@@ -728,7 +728,7 @@ class ActionPriceEngine:
         conf_color = 'green' if conf_close > conf_open else 'red'
         
         # Касание EMA200
-        touch_ema200 = (conf_low <= conf_ema200 <= conf_high)
+        touch_ema200 = bool(conf_low <= conf_ema200 <= conf_high)
         
         # Положение close относительно веера
         if conf_close > max(conf_ema5, conf_ema9, conf_ema13, conf_ema21):
@@ -756,10 +756,10 @@ class ActionPriceEngine:
             trend_tag = 'side'
         
         # Retest tag
-        retest_tag = score_components.get('retest_tag', 0) == 1
+        retest_tag = bool(score_components.get('retest_tag', 0) == 1)
         
         # Break and base tag
-        break_and_base_tag = score_components.get('break_and_base', 0) == 1
+        break_and_base_tag = bool(score_components.get('break_and_base', 0) == 1)
         
         # Swing High/Low
         swing_high_price = float(indicators['swing_high'].iloc[confirm_idx])
