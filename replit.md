@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Semaphore Control for Parallel Updates (October 15, 2025)
+- **Problem**: IP ban at 02:01:00 when 15m+1h candles closed - 580 tasks launched simultaneously via `asyncio.gather()` without limits
+- **Root Cause**: `_parallel_update_candles()` created massive concurrent request queue (2700 weights vs 2400 limit)
+- **Solution**: Added `asyncio.Semaphore(50)` to limit max 50 parallel tasks at once
+- **Result**: Controlled request flow, prevents mass bursts at 00:00/02:00 when multiple timeframes close
+- **Files**: `main.py` (lines 405-417)
+
 ## API Weight Calculation Fix (October 15, 2025)
 - **Problem**: IP bans due to incorrect API weight calculations - RateLimiter underestimated request weights by 5-10x
 - **Root Cause**: `get_klines()` and `get_depth()` used wrong weight boundaries (e.g., "1-100=1" instead of "1-99=1")

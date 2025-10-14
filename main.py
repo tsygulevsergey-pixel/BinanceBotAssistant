@@ -399,14 +399,19 @@ class TradingBot:
         """
         start_time = datetime.now()
         
+        # Semaphore для контроля параллелизма (max 50 одновременно)
+        # Предотвращает массовый поток запросов в 00:00/02:00 когда закрываются все таймфреймы
+        semaphore = asyncio.Semaphore(50)
+        
         async def update_symbol_tf(symbol: str, tf: str):
             """Обновить один символ на одном таймфрейме"""
-            try:
-                await self.data_loader.update_missing_candles(symbol, tf)
-                return (symbol, tf, True)
-            except Exception as e:
-                logger.debug(f"Could not update {symbol} {tf}: {e}")
-                return (symbol, tf, False)
+            async with semaphore:  # Контроль параллелизма
+                try:
+                    await self.data_loader.update_missing_candles(symbol, tf)
+                    return (symbol, tf, True)
+                except Exception as e:
+                    logger.debug(f"Could not update {symbol} {tf}: {e}")
+                    return (symbol, tf, False)
         
         # Создать задачи для всех символов и таймфреймов
         tasks = []
@@ -414,7 +419,7 @@ class TradingBot:
             for tf in timeframes:
                 tasks.append(update_symbol_tf(symbol, tf))
         
-        # Запустить все параллельно
+        # Запустить все параллельно (Semaphore ограничивает до 50 одновременно)
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Собрать успешно обновленные символы по таймфреймам
