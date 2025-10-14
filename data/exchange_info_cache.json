@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-13T23:10:55.919645+00:00",
+  "timestamp": "2025-10-14T09:13:24.508936+00:00",
   "symbols_info": {
     "BTCUSDT": {
       "pricePrecision": 2,
@@ -3688,6 +3688,24 @@
     "EULUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "ENSOUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "status": "PENDING_TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "CLOUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "status": "PENDING_TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "\u6d4b\u8bd5\u6d4b\u8bd5USDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     }
