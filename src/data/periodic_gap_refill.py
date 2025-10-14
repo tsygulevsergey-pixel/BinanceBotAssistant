@@ -25,6 +25,9 @@ class PeriodicGapRefill:
         self.max_parallel = self.config.get('max_parallel', 8)
         self.lookback_minutes = self.config.get('lookback_minutes', 120)  # 2 часа назад
         self.timezone = pytz.timezone(timezone_str)
+        self.startup_time = datetime.now(pytz.UTC)  # Запомнить время старта
+        self.min_startup_delay_minutes = 15  # Не запускаться первые 15 минут
+        self.max_rate_usage_percent = 30  # Запускаться только если rate < 30%
         
         # Таймфреймы для каждого расписания
         self.timeframe_map = {
@@ -204,10 +207,32 @@ class PeriodicGapRefill:
         if not self.enabled:
             return
         
+        now = datetime.now(pytz.UTC)
+        
+        # КРИТИЧНО: Не запускаться первые 15 минут после старта (burst catchup может быть активен)
+        time_since_startup = (now - self.startup_time).total_seconds() / 60
+        if time_since_startup < self.min_startup_delay_minutes:
+            logger.info(
+                f"⏸️ Gap refill skipped: bot running only {time_since_startup:.1f}min "
+                f"(waiting {self.min_startup_delay_minutes}min after startup)"
+            )
+            return
+        
+        # КРИТИЧНО: Проверить rate usage - запускаться только если < 30%
+        if hasattr(self.data_loader, 'client') and hasattr(self.data_loader.client, 'rate_limiter'):
+            usage = self.data_loader.client.rate_limiter.get_current_usage()
+            current_percent = usage.get('percent', 0)
+            
+            if current_percent > self.max_rate_usage_percent:
+                logger.info(
+                    f"⏸️ Gap refill skipped: rate usage too high "
+                    f"({current_percent:.1f}% > {self.max_rate_usage_percent}%)"
+                )
+                return
+        
         # Определить какие таймфреймы проверять
         timeframes = await self.determine_timeframes_to_check()
         
-        now = datetime.now(pytz.UTC)
         logger.info(
             f"🔄 Periodic gap check started:\n"
             f"  🕐 Time: {now.strftime('%H:%M UTC')}\n"
