@@ -8,6 +8,20 @@ The bot prioritizes quality over quantity with proven strategies, incorporates m
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## VWAP RuntimeWarning Fix (October 15, 2025)
+- **Fixed**: RuntimeWarning in VWAP calculations ("'<' not supported between instances of 'Timestamp' and 'int'")
+- **Solution**: Added `pd.to_numeric()` conversion and explicit `.astype(float)` in `calculate_vwap_bands()` method
+- **Result**: Clean execution, no warnings in production logs
+
+## Data Stabilization Fix (October 14, 2025)
+- **31-Second Delay**: Added 31-second delay after ANY candle close (15m/1h/4h/1d) before loading data from Binance
+- **Problem Solved**: Bot was requesting data 6 seconds after candle close, receiving unstable/temporary prices that Binance updates 10-30 seconds later
+- **Timeframe Coverage**: All four timeframes (15m/1h/4h/1d) properly detected and delayed
+- **Timer Behavior**: TimeframeSync checks candle closes by real time BEFORE delay executes, maintaining accurate schedule (00:15/00:30/00:45/00:00)
+- **Design**: Single consolidated delay per check cycle (efficient)
+
 # System Architecture
 
 ## Core Components
