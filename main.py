@@ -1395,20 +1395,27 @@ class TradingBot:
             risk = abs(entry - sl)
             rr_ratio = abs(tp2 - entry) / risk if tp2 and risk > 0 else 2.0
             
+            # Форматировать цены с точностью Binance
+            symbol = ap_signal['symbol']
+            entry_fmt = self.client.format_price(symbol, entry)
+            sl_fmt = self.client.format_price(symbol, sl)
+            
             message = (
                 f"🎯 <b>ACTION PRICE SIGNAL</b>\n\n"
                 f"{direction_emoji} <b>{ap_signal['symbol']} {ap_signal['direction']}</b>\n"
                 f"{emoji} Стратегия: <b>EMA200 Body Cross</b>\n"
                 f"📊 Таймфрейм: <b>{ap_signal['timeframe']}</b>\n"
                 f"⭐ Score: <b>{ap_signal.get('confidence_score', 0):.1f}</b>\n\n"
-                f"💰 Вход: <b>{ap_signal['entry_price']:.4f}</b>\n"
-                f"🛑 Стоп: <b>{ap_signal['stop_loss']:.4f}</b>\n"
+                f"💰 Вход: <b>{entry_fmt}</b>\n"
+                f"🛑 Стоп: <b>{sl_fmt}</b>\n"
             )
             
             if ap_signal.get('take_profit_1'):
-                message += f"🎯 TP1 (30%): <b>{ap_signal['take_profit_1']:.4f}</b>\n"
+                tp1_fmt = self.client.format_price(symbol, ap_signal['take_profit_1'])
+                message += f"🎯 TP1 (30%): <b>{tp1_fmt}</b>\n"
             if tp2:
-                message += f"🎯 TP2 (40%): <b>{tp2:.4f}</b>\n"
+                tp2_fmt = self.client.format_price(symbol, tp2)
+                message += f"🎯 TP2 (40%): <b>{tp2_fmt}</b>\n"
             
             message += f"📈 R:R: <b>1:{rr_ratio:.1f}</b>\n\n"
             

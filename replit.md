@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Price Precision Fix for Action Price (October 15, 2025)
+- **Problem**: Action Price signals showed rounded prices (0.0075 vs actual 0.0075281) - not matching Binance precision
+- **Root Cause**: Telegram message formatting used fixed `.4f` format instead of Binance symbol precision
+- **Solution**: Use `BinanceClient.format_price()` method which applies correct symbol-specific precision from exchange_info
+- **Result**: Prices in signals now match Binance exactly (same decimal length)
+- **Files**: `main.py` (lines 1401-1421)
+
 ## Semaphore Control for Parallel Updates (October 15, 2025)
 - **Problem**: IP ban at 02:01:00 when 15m+1h candles closed - 580 tasks launched simultaneously via `asyncio.gather()` without limits
 - **Root Cause**: `_parallel_update_candles()` created massive concurrent request queue (2700 weights vs 2400 limit)
