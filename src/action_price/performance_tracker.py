@@ -202,41 +202,74 @@ class ActionPricePerformanceTracker:
         
         # Проверка SL
         if direction == 'LONG' and current_price <= sl:
-            pnl_pct = ((current_price - entry) / entry) * 100
-            return {
-                'exit_price': sl,
-                'reason': 'STOP_LOSS',
-                'pnl_percent': pnl_pct,
-                'pnl': pnl_pct,
-                'status': 'LOSS'
-            }
+            # Если TP1 уже достигнут и SL = entry (breakeven), считаем TP1 PnL
+            if signal.partial_exit_1_at and abs(sl - entry) < 0.0001:
+                # Breakeven exit - сохраняем TP1 прибыль
+                total_pnl = self._calculate_total_pnl(signal, sl, entry, is_breakeven=True)
+                return {
+                    'exit_price': sl,
+                    'reason': 'BREAKEVEN',
+                    'pnl_percent': total_pnl,
+                    'pnl': total_pnl,
+                    'status': 'WIN'  # Breakeven считается WIN (сохранили TP1 прибыль)
+                }
+            else:
+                # Обычный SL
+                pnl_pct = ((current_price - entry) / entry) * 100
+                return {
+                    'exit_price': sl,
+                    'reason': 'STOP_LOSS',
+                    'pnl_percent': pnl_pct,
+                    'pnl': pnl_pct,
+                    'status': 'LOSS'
+                }
         elif direction == 'SHORT' and current_price >= sl:
-            pnl_pct = ((entry - current_price) / entry) * 100
-            return {
-                'exit_price': sl,
-                'reason': 'STOP_LOSS',
-                'pnl_percent': pnl_pct,
-                'pnl': pnl_pct,
-                'status': 'LOSS'
-            }
+            # Если TP1 уже достигнут и SL = entry (breakeven), считаем TP1 PnL
+            if signal.partial_exit_1_at and abs(sl - entry) < 0.0001:
+                # Breakeven exit - сохраняем TP1 прибыль
+                total_pnl = self._calculate_total_pnl(signal, sl, entry, is_breakeven=True)
+                return {
+                    'exit_price': sl,
+                    'reason': 'BREAKEVEN',
+                    'pnl_percent': total_pnl,
+                    'pnl': total_pnl,
+                    'status': 'WIN'  # Breakeven считается WIN (сохранили TP1 прибыль)
+                }
+            else:
+                # Обычный SL
+                pnl_pct = ((entry - current_price) / entry) * 100
+                return {
+                    'exit_price': sl,
+                    'reason': 'STOP_LOSS',
+                    'pnl_percent': pnl_pct,
+                    'pnl': pnl_pct,
+                    'status': 'LOSS'
+                }
         
         # Проверка TP1 (частичный выход)
         if tp1 and not signal.partial_exit_1_at:
             if direction == 'LONG' and current_price >= tp1:
                 signal.partial_exit_1_at = datetime.now(pytz.UTC)
                 signal.partial_exit_1_price = tp1
-                logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}")
+                # КРИТИЧНО: Переносим SL в breakeven (entry price) для защиты прибыли
+                signal.stop_loss = entry
+                logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
                 # Не закрываем сигнал, продолжаем на TP2
                 return None
             elif direction == 'SHORT' and current_price <= tp1:
                 signal.partial_exit_1_at = datetime.now(pytz.UTC)
                 signal.partial_exit_1_price = tp1
-                logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}")
+                # КРИТИЧНО: Переносим SL в breakeven (entry price) для защиты прибыли
+                signal.stop_loss = entry
+                logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
                 return None
         
         # Проверка TP2 (полный выход)
         if tp2:
             if direction == 'LONG' and current_price >= tp2:
+                # Записываем TP2 hit для статистики
+                signal.partial_exit_2_at = datetime.now(pytz.UTC)
+                signal.partial_exit_2_price = tp2
                 # Рассчитываем общий PnL с учётом частичных выходов
                 total_pnl = self._calculate_total_pnl(signal, tp2, entry)
                 return {
@@ -247,6 +280,9 @@ class ActionPricePerformanceTracker:
                     'status': 'WIN'
                 }
             elif direction == 'SHORT' and current_price <= tp2:
+                # Записываем TP2 hit для статистики
+                signal.partial_exit_2_at = datetime.now(pytz.UTC)
+                signal.partial_exit_2_price = tp2
                 total_pnl = self._calculate_total_pnl(signal, tp2, entry)
                 return {
                     'exit_price': tp2,
@@ -270,7 +306,8 @@ class ActionPricePerformanceTracker:
         return None
     
     def _calculate_total_pnl(self, signal: ActionPriceSignal, 
-                            final_exit_price: float, entry: float) -> float:
+                            final_exit_price: float, entry: float,
+                            is_breakeven: bool = False) -> float:
         """
         Рассчитать общий PnL с учётом частичных фиксаций
         
@@ -278,6 +315,7 @@ class ActionPricePerformanceTracker:
             signal: Сигнал
             final_exit_price: Финальная цена выхода
             entry: Цена входа
+            is_breakeven: True если выход по breakeven (SL=entry после TP1)
             
         Returns:
             Общий PnL в процентах
@@ -289,16 +327,26 @@ class ActionPricePerformanceTracker:
             tp1_price = float(signal.partial_exit_1_price)
             # Профессиональный подход: 30% @ TP1, 40% @ TP2, 30% trailing
             tp1_pct = 0.30  # 30% на TP1
-            tp2_pct = 0.40  # 40% на TP2
+            tp2_pct = 0.70  # 70% остаток (40% на TP2 + 30% trailing)
             
             if direction == 'LONG':
                 pnl_tp1 = ((tp1_price - entry) / entry) * 100 * tp1_pct
-                pnl_tp2 = ((final_exit_price - entry) / entry) * 100 * tp2_pct
+                
+                # Если breakeven - остаток закрыт по entry (0% PnL)
+                if is_breakeven:
+                    pnl_remainder = 0.0
+                else:
+                    pnl_remainder = ((final_exit_price - entry) / entry) * 100 * tp2_pct
             else:  # SHORT
                 pnl_tp1 = ((entry - tp1_price) / entry) * 100 * tp1_pct
-                pnl_tp2 = ((entry - final_exit_price) / entry) * 100 * tp2_pct
+                
+                # Если breakeven - остаток закрыт по entry (0% PnL)
+                if is_breakeven:
+                    pnl_remainder = 0.0
+                else:
+                    pnl_remainder = ((entry - final_exit_price) / entry) * 100 * tp2_pct
             
-            return pnl_tp1 + pnl_tp2
+            return pnl_tp1 + pnl_remainder
         else:
             # Полный выход без частичных фиксаций
             if direction == 'LONG':
@@ -356,9 +404,10 @@ class ActionPricePerformanceTracker:
             wins = [s for s in closed if s.status == 'WIN']
             losses = [s for s in closed if s.status == 'LOSS']
             
-            # Подсчет TP1/TP2 (как в основных стратегиях)
+            # Подсчет TP1/TP2/Breakeven (как в основных стратегиях)
             tp1_count = len([s for s in closed if s.partial_exit_1_at is not None])
             tp2_count = len([s for s in closed if s.partial_exit_2_at is not None])
+            breakeven_count = len([s for s in closed if s.exit_reason == 'BREAKEVEN'])
             
             win_rate = (len(wins) / len(closed) * 100) if closed else 0.0
             
@@ -382,7 +431,7 @@ class ActionPricePerformanceTracker:
                 'avg_loss': round(sum(float(s.pnl_percent) for s in losses_with_pnl) / len(losses_with_pnl), 2) if losses_with_pnl else 0.0,
                 'tp1_count': tp1_count,
                 'tp2_count': tp2_count,
-                'breakeven_count': 0,  # AP не использует breakeven логику main strategies
+                'breakeven_count': breakeven_count,  # ✅ Теперь используется! SL=entry после TP1
                 'time_stop_count': 0,  # AP не использует time_stop
                 'time_stop_total_pnl': 0.0,
                 'time_stop_avg_pnl': 0.0
