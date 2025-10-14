@@ -255,65 +255,47 @@ var line sl_line_short = na
 
 if show_tp and signal_long and score_long >= 0
     // Entry
-    entry_line_long := line.new(bar_index[1], entry_long, bar_index, entry_long, 
-                                color=color.new(color.blue, 50), width=1, style=line.style_dashed)
+    entry_line_long := line.new(bar_index[1], entry_long, bar_index, entry_long, color=color.new(color.blue, 50), width=1, style=line.style_dashed)
     
     // TP1
-    tp1_line_long := line.new(bar_index[1], tp1_long, bar_index, tp1_long, 
-                              color=color.new(color.lime, 30), width=2)
-    label.new(bar_index, tp1_long, entry_mode_long == "SCALP" ? "TP1 (100%)" : "TP1 (50%)", 
-              color=color.new(color.lime, 70), textcolor=color.white, 
-              style=label.style_label_left, size=size.tiny)
+    tp1_line_long := line.new(bar_index[1], tp1_long, bar_index, tp1_long, color=color.new(color.lime, 30), width=2)
+    tp1_text = entry_mode_long == "SCALP" ? "TP1 (100%)" : "TP1 (50%)"
+    label.new(bar_index, tp1_long, tp1_text, color=color.new(color.lime, 70), textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
     // BE
-    be_line_long := line.new(bar_index[1], be_long, bar_index, be_long, 
-                             color=color.new(color.orange, 60), width=1, style=line.style_dotted)
-    label.new(bar_index, be_long, "BE", color=color.new(color.orange, 80), 
-              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    be_line_long := line.new(bar_index[1], be_long, bar_index, be_long, color=color.new(color.orange, 60), width=1, style=line.style_dotted)
+    label.new(bar_index, be_long, "BE", color=color.new(color.orange, 80), textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
     // TP2 только для STANDARD
     if entry_mode_long == "STANDARD"
-        tp2_line_long := line.new(bar_index[1], tp2_long, bar_index, tp2_long, 
-                                  color=color.new(color.lime, 30), width=2)
-        label.new(bar_index, tp2_long, "TP2 (50%)", color=color.new(color.lime, 70), 
-                  textcolor=color.white, style=label.style_label_left, size=size.tiny)
+        tp2_line_long := line.new(bar_index[1], tp2_long, bar_index, tp2_long, color=color.new(color.lime, 30), width=2)
+        label.new(bar_index, tp2_long, "TP2 (50%)", color=color.new(color.lime, 70), textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
     // SL
-    sl_line_long := line.new(bar_index[1], sl_long, bar_index, sl_long, 
-                             color=color.new(color.red, 30), width=2)
-    label.new(bar_index, sl_long, "SL", color=color.new(color.red, 70), 
-              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    sl_line_long := line.new(bar_index[1], sl_long, bar_index, sl_long, color=color.new(color.red, 30), width=2)
+    label.new(bar_index, sl_long, "SL", color=color.new(color.red, 70), textcolor=color.white, style=label.style_label_left, size=size.tiny)
 
 if show_tp and signal_short and score_short >= 0
     // Entry
-    entry_line_short := line.new(bar_index[1], entry_short, bar_index, entry_short, 
-                                 color=color.new(color.blue, 50), width=1, style=line.style_dashed)
+    entry_line_short := line.new(bar_index[1], entry_short, bar_index, entry_short, color=color.new(color.blue, 50), width=1, style=line.style_dashed)
     
     // TP1
-    tp1_line_short := line.new(bar_index[1], tp1_short, bar_index, tp1_short, 
-                               color=color.new(color.red, 30), width=2)
-    label.new(bar_index, tp1_short, entry_mode_short == "SCALP" ? "TP1 (100%)" : "TP1 (50%)", 
-              color=color.new(color.red, 70), textcolor=color.white, 
-              style=label.style_label_left, size=size.tiny)
+    tp1_line_short := line.new(bar_index[1], tp1_short, bar_index, tp1_short, color=color.new(color.red, 30), width=2)
+    tp1_text_short = entry_mode_short == "SCALP" ? "TP1 (100%)" : "TP1 (50%)"
+    label.new(bar_index, tp1_short, tp1_text_short, color=color.new(color.red, 70), textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
     // BE
-    be_line_short := line.new(bar_index[1], be_short, bar_index, be_short, 
-                              color=color.new(color.orange, 60), width=1, style=line.style_dotted)
-    label.new(bar_index, be_short, "BE", color=color.new(color.orange, 80), 
-              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    be_line_short := line.new(bar_index[1], be_short, bar_index, be_short, color=color.new(color.orange, 60), width=1, style=line.style_dotted)
+    label.new(bar_index, be_short, "BE", color=color.new(color.orange, 80), textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
     // TP2 только для STANDARD
     if entry_mode_short == "STANDARD"
-        tp2_line_short := line.new(bar_index[1], tp2_short, bar_index, tp2_short, 
-                                   color=color.new(color.red, 30), width=2)
-        label.new(bar_index, tp2_short, "TP2 (50%)", color=color.new(color.red, 70), 
-                  textcolor=color.white, style=label.style_label_left, size=size.tiny)
+        tp2_line_short := line.new(bar_index[1], tp2_short, bar_index, tp2_short, color=color.new(color.red, 30), width=2)
+        label.new(bar_index, tp2_short, "TP2 (50%)", color=color.new(color.red, 70), textcolor=color.white, style=label.style_label_left, size=size.tiny)
     
     // SL
-    sl_line_short := line.new(bar_index[1], sl_short, bar_index, sl_short, 
-                              color=color.new(color.lime, 30), width=2)
-    label.new(bar_index, sl_short, "SL", color=color.new(color.lime, 70), 
-              textcolor=color.white, style=label.style_label_left, size=size.tiny)
+    sl_line_short := line.new(bar_index[1], sl_short, bar_index, sl_short, color=color.new(color.lime, 30), width=2)
+    label.new(bar_index, sl_short, "SL", color=color.new(color.lime, 70), textcolor=color.white, style=label.style_label_left, size=size.tiny)
 
 // ==================== TABLE С СТАТИСТИКОЙ ====================
 
@@ -324,8 +306,9 @@ if barstate.islast
     table.cell(stats_table, 1, 0, "Value", bgcolor=color.new(color.gray, 70), text_color=color.white)
     
     table.cell(stats_table, 0, 1, "EMA200 Slope")
-    table.cell(stats_table, 1, 1, ema200_slope > 0 ? "UP ↑" : (ema200_slope < 0 ? "DOWN ↓" : "FLAT →"), 
-               text_color=ema200_slope > 0 ? color.lime : (ema200_slope < 0 ? color.red : color.gray))
+    slope_text = ema200_slope > 0 ? "UP ↑" : (ema200_slope < 0 ? "DOWN ↓" : "FLAT →")
+    slope_color = ema200_slope > 0 ? color.lime : (ema200_slope < 0 ? color.red : color.gray)
+    table.cell(stats_table, 1, 1, slope_text, text_color=slope_color)
     
     table.cell(stats_table, 0, 2, "EMA Fan")
     table.cell(stats_table, 1, 2, fan_long == 1 ? "BULLISH ↑" : (fan_short == 1 ? "BEARISH ↓" : "NEUTRAL"))
