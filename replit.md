@@ -1,50 +1,8 @@
 # Overview
 
-This project is a **professional-grade** Binance USDT-M Futures Trading Bot following institutional trading principles. The bot uses a **focused approach** with 5 CORE strategies instead of attempting to trade everything. It operates in Signals-Only Mode for signal generation and Live Trading Mode for full trading capabilities.
+This project is a professional-grade Binance USDT-M Futures Trading Bot designed for institutional trading principles. It employs a focused approach with 5 core strategies, operating in both Signals-Only Mode for signal generation and Live Trading Mode for full trading capabilities.
 
-**PROFESSIONAL APPROACH (30-летний опыт трейдера, 80%+ Win Rate):**
-- ✅ **Quality over Quantity**: 5 CORE strategies (not 15) - focus on proven edge
-- ✅ **Market Regime Detection**: TRENDING/RANGING/VOLATILE/CHOPPY classification before any signal
-- ✅ **Structure-Based SL/TP**: Stop-loss at swing lows/VAL, not arbitrary ATR multiples
-- ✅ **Signal Confluence**: When 2+ strategies agree → stronger signal with score boost
-- ✅ **Multi-Timeframe Analysis**: 4H context → 1H signals → 15M confirmation → 5M execution
-- ✅ **Partial Profit Taking**: 30% @ TP1 (1R), 40% @ TP2 (2R), 30% trailing runner
-- ✅ **Expected Performance**: 12-16 quality signals/hour, 60-70% Win Rate, 1.8-2.5 Profit Factor
-
-Key features include local orderbook, historical data, multi-TF analysis (4H/1H/15M/5M), market regime detection, BTC filtering, advanced scoring with confluence, structure-based risk management, and comprehensive performance tracking. **Action Price** system operates independently with S/R zones, Anchored VWAP, and 5 price action patterns.
-
-**RECENT CHANGES (Professional Transformation Complete):**
-- ✅ Simplified to 5 CORE strategies (disabled 10 weak ones)
-- ✅ Added Market Regime Detection (TRENDING/RANGING/VOLATILE/CHOPPY)
-- ✅ Extended Signal model with 20+ professional fields (regime, confluence, MAE/MFE, trailing)
-- ✅ Created Signal Confluence system (bonus when 2+ strategies agree)
-- ✅ Added Telegram commands: /regime_stats, /confluence_stats
-- ✅ Partial TP system ready for 30/40/30 implementation (TODO in signal_tracker.py)
-- ✅ **CRITICAL FIX (Oct 14)**: Rate limiter bug - properly stops requests at 90% threshold (2160/2400)
-- ✅ **API LIMIT FIX (Oct 14)**: Updated to Futures API limit 2400/min (was 1100 for SPOT)
-- ✅ **PARALLELISM FIX (Oct 14)**: Reduced to 1 worker (from 2-3) to prevent IP ban
-- ✅ **SCORE THRESHOLD (Oct 14)**: Lowered from 4.5 to 3.0 for better signal frequency
-- ✅ **EMA200 INDICATOR (Oct 14)**: Created TradingView indicator with 7 professional filters (tradingview/16_ema200_body_cross.pine)
-- ✅ **EMA200 STRATEGY (Oct 14)**: Created TradingView strategy for backtesting (tradingview/16_ema200_body_cross_STRATEGY.pine)
-- ✅ **PROFESSIONAL FILTERS (Oct 14)**: Updated indicator with slope200, color confirmation, pre-touch, oversized initiator, fan ready, distance filters
-- ✅ **ACTION PRICE REWRITE (Oct 14)**: Полная переработка на EMA200 Body Cross логику с 11 score компонентами
-- ✅ **JSONL LOGGING (Oct 14)**: Детальное логирование сигналов (50+ полей) для ML анализа
-- ✅ **MFE/MAE TRACKING (Oct 14)**: Real-time tracking Maximum Favorable/Adverse Excursion в R
-- ✅ **RATE LIMITER FIX v2 (Oct 14 21:30)**: Снижен порог с 90% до 75% (1800/2400) для большего буфера безопасности
-- ✅ **IP BAN HANDLING FIX (Oct 14 21:30)**: При 418 не падает, а ждёт окончания бана и делает retry (continue вместо raise)
-- ✅ **BURST CATCHUP BATCHING (Oct 14 21:30)**: Разбивка на батчи по 20 символов с паузой 0.5s между батчами вместо массовой параллельной загрузки
-- ✅ **OPEN_TIME FIX (Oct 14 21:30)**: Удалён set_index('open_time') из DataLoader - теперь open_time остаётся как колонка для Action Price validation
-- ✅ **CALLBACK FIX (Oct 14 21:40)**: Исправлен вызов on_signal_closed_callback в signal_tracker.py - добавлен недостающий аргумент strategy_name
-- ✅ **DF.INDEX FIX (Oct 14 21:48)**: Заменены все df.index[-1] на df['open_time'].iloc[-1] в стратегиях (ma_vwap_pullback, donchian, atr_momentum, liquidity_sweep, orb, time_of_day) - исправлена ошибка после удаления set_index()
-- ✅ **ACTION PRICE TP2 TRACKING FIX (Oct 14 22:00)**: КРИТИЧНО - partial_exit_2_at/price теперь правильно устанавливаются при достижении TP2 (раньше всегда были NULL, TP2 count был 0)
-- ✅ **ACTION PRICE BREAKEVEN LOGIC (Oct 14 22:00)**: После TP1 SL автоматически переносится в breakeven (entry price) для защиты прибыли. Если цена возвращается к entry, закрывается с сохранённым TP1 PnL (не 0%)
-- ✅ **ACTION PRICE PNL CALCULATION FIX (Oct 14 22:00)**: Правильный расчёт partial exits - 30% @ TP1 + 70% остаток (40% TP2 + 30% trailing runner). Breakeven exit сохраняет TP1 прибыль
-- ✅ **ACTION PRICE STATISTICS FIX (Oct 14 22:00)**: /ap_stats теперь корректно показывает TP1/TP2/breakeven counts (раньше TP2 и breakeven всегда были 0)
-- ✅ **RATE LIMITER EMERGENCY FIX (Oct 14 22:30)**: Threshold снижен с 75% до 55% (1320/2400) - буфер 1080 запросов для компенсации погрешности синхронизации ±430
-- ✅ **IP BAN PREVENTION v3 (Oct 14 22:30)**: Добавлен ip_ban_event и ip_ban_logged флаг - логирование IP BAN только один раз вместо 50+ сообщений от pending tasks
-- ✅ **GAP REFILL SAFETY (Oct 14 22:30)**: Periodic gap refill НЕ запускается первые 15 минут после старта и только если rate usage < 30%
-- ✅ **BURST CATCHUP SAFETY (Oct 14 22:30)**: Добавлена проверка rate usage после каждого батча - если > 50%, дополнительная пауза 2s
-- 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
+The bot prioritizes quality over quantity with proven strategies, incorporates market regime detection, structure-based stop-loss/take-profit, signal confluence, and multi-timeframe analysis. Key features include a local orderbook, historical data, advanced scoring, and comprehensive performance tracking. The "Action Price" system independently operates with S/R zones, Anchored VWAP, and price action patterns, aiming for an 80%+ Win Rate and a Profit Factor of 1.8-2.5.
 
 # User Preferences
 
@@ -63,23 +21,12 @@ Preferred communication style: Simple, everyday language.
 ### Database Layer
 - **Technology**: SQLAlchemy ORM with SQLite backend (WAL mode, indexed queries on (symbol, timeframe, timestamp)).
 
-### Strategy Framework (Professional Approach)
+### Strategy Framework
 - **BaseStrategy**: Abstract base class for strategy definition.
 - **StrategyManager**: Orchestrates strategies with regime-based selection.
 - **Signal Dataclass**: Standardized signal output with confluence tracking.
-
-**5 CORE STRATEGIES (Active):**
-1. **Liquidity Sweep** (#11) ⭐⭐⭐ - Primary edge in crypto (stop hunts, false breakouts)
-2. **Break & Retest** (#5) ⭐⭐⭐ - Structure-based trading (quality over quantity)
-3. **Order Flow** (#12) ⭐⭐ - Smart money tracking (Delta, OI, aggressive buyers/sellers)
-4. **MA/VWAP Pullback** (#4) ⭐⭐ - Trend-following (buy pullbacks in uptrend)
-5. **Volume Profile** (#9) ⭐⭐ - Institutional levels (VAH/VAL/POC acceptance/rejection)
-
-**Disabled Strategies (may be used as filters later):**
-- Donchian (#1), Squeeze (#2), ORB (#3), ATR Momentum (#6), VWAP MR (#7), Range Fade (#8), RSI/Stoch (#10), CVD Divergence (#13), Time of Day (#14)
-- Reason: переобучены, не работают в крипте 24/7, или слишком редкие сигналы
-
-**Action Price System**: Полностью переработан на EMA200 Body Cross Strategy с профессиональной системой скоринга (11 компонентов). Режимы: STANDARD (score ≥3), SCALP (score 1-2), SKIP (≤0). JSONL логирование с 50+ метриками для ML analysis. MFE/MAE tracking в реальном времени.
+- **5 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile.
+- **Action Price System**: Rewritten on EMA200 Body Cross logic with an 11-component scoring system for STANDARD, SCALP, and SKIP regimes. Includes JSONL logging for ML analysis and real-time MFE/MAE tracking.
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market into TREND/SQUEEZE/RANGE/CHOP/UNDECIDED.
@@ -90,57 +37,48 @@ Preferred communication style: Simple, everyday language.
 - **IndicatorCache**: High-performance caching for pre-computed indicators.
 
 ### Signal Scoring & Aggregation
-- **Scoring Formula**: Combines base strategy score with market modifiers (volume, CVD, OI Delta, Depth Imbalance, Funding, BTC Opposition).
+- **Scoring Formula**: Combines base strategy score with market modifiers.
 - **BTC Filter**: Filters noise and applies penalties for opposing BTC trends.
-- **Conflict Resolution**: Score-based prioritization and direction-aware locks ensure the highest-scoring signals execute, while preventing conflicting signals for the same direction.
+- **Conflict Resolution**: Score-based prioritization and direction-aware locks.
 
 ### Filtering & Risk Management
-- **S/R Zone-Based Stop-Loss System**: Advanced stop placement using Support/Resistance zones with intelligent fallback and smart distance guard. Fixed take-profits: TP1 at 1R, TP2 at 2R.
-- **Trailing Stop-Loss with Partial TP**: Implemented for advanced profit management.
-- **Stop Distance Validation**: Prevents excessive risk.
-- **Hybrid Entry System**: Adaptive MARKET/LIMIT execution based on strategy type.
-- **Time Stops**: Exits trades if no progress within a set number of bars.
-- **Symbol Blocking System (Per-Strategy)**: Each strategy independently blocks symbols when it has an active signal. Multiple strategies can work on the same symbol simultaneously (e.g., if Donchian has BTCUSDT signal, CVD Divergence can still generate BTCUSDT signal). Enables accurate per-strategy statistics and performance tracking. Action Price has independent blocking.
+- **S/R Zone-Based Stop-Loss System**: Advanced stop placement with intelligent fallback and smart distance guard.
+- **Trailing Stop-Loss with Partial TP**: For advanced profit management (30% @ TP1, 40% @ TP2, 30% trailing).
+- **Hybrid Entry System**: Adaptive MARKET/LIMIT execution.
+- **Time Stops**: Exits trades if no progress.
+- **Symbol Blocking System (Per-Strategy)**: Independent blocking per strategy allows multiple strategies on the same symbol.
 
 ### Telegram Integration
 - Provides commands for status, strategy details, performance, validation, and latency.
 - Delivers Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
-- `/performance` - unified statistics for main strategies (Total signals, Win Rate, TP1/TP2 counts, Average PnL)
-- `/ap_stats` - unified statistics for Action Price (same format as /performance, tracking TP1/TP2 partial exits)
+- Unified `/performance` and `/ap_stats` commands for statistics.
 
 ### Logging System
-- Separate log files for Main Bot and Action Price, located in the `logs/` directory, using Europe/Kyiv timezone.
+- Separate log files for Main Bot and Action Price in `logs/` directory, using Europe/Kyiv timezone.
 
 ### Performance Tracking System
-- **SignalPerformanceTracker**: Monitors active signals, calculates exit conditions using precise SL/TP levels, and updates entry prices for accurate PnL. Provides detailed metrics: Average PnL, Average Win, Average Loss.
-- **ActionPricePerformanceTracker**: Dedicated tracker for Action Price signals with advanced features:
-  - ✅ **Partial Exits**: 30% @ TP1 (1R), 70% remainder (40% @ TP2 + 30% trailing runner)
-  - ✅ **Breakeven Logic**: After TP1, SL automatically moves to entry price for profit protection
-  - ✅ **Breakeven Exit**: If price returns to entry after TP1, closes with saved TP1 PnL (not 0%)
-  - ✅ **TP1/TP2 Tracking**: Properly records partial_exit_1/2_at and prices for statistics
-  - ✅ **MFE/MAE Tracking**: Real-time Maximum Favorable/Adverse Excursion in R
-  - ✅ **JSONL Logging**: Detailed signal data (50+ fields) for ML analysis
+- **SignalPerformanceTracker**: Monitors active signals, calculates exit conditions, and updates PnL.
+- **ActionPricePerformanceTracker**: Tracks Action Price signals with partial exits, breakeven logic, TP1/TP2 tracking, MFE/MAE tracking, and detailed JSONL logging.
 
 ### Configuration Management
-- Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and specific configurations for the Action Price system.
-- **Strategy Enable/Disable System**: Each strategy has an `enabled: true/false` flag in config.yaml for easy activation control without code changes. Status displayed at startup showing active/inactive strategies.
+- Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and `enabled: true/false` flags for strategies.
 
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe coordination.
 - **Loader Task**: Loads historical data, retries on failure, and pushes symbols to a queue.
 - **Analyzer Task**: Consumes symbols from the queue for immediate analysis.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list based on 24h volume.
-- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts, including smart age-based alerting for new coins.
+- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts.
 
 ## Data Flow
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-- **Smart Rate Limiting**: 55% safety threshold (1320/2400) with 1080 requests buffer to compensate ±430 sync error. Prevents API bans.
-- **IP BAN Prevention v3**: Event-based coordination with single-log IP BAN notification (no 50+ duplicate messages). All pending requests blocked immediately.
-- **Gap Refill Safety**: Periodic gap refill disabled first 15 minutes after startup, only runs if rate usage < 30%.
-- **Burst Catchup Safety**: Rate usage checked after each batch, extra 2s pause if > 50%.
-- **Exponential Backoff**: Retry logic with progressive delays for transient errors.
+- **Smart Rate Limiting**: 55% safety threshold (1320/2400) with a buffer to prevent API bans.
+- **IP BAN Prevention**: Event-based coordination with single-log notification.
+- **Gap Refill Safety**: Conditional execution based on startup time and rate usage.
+- **Burst Catchup Safety**: Checks rate usage and applies pauses after batches.
+- **Exponential Backoff**: Retry logic for transient errors.
 - **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
 - **Graceful Shutdown**: Clean resource cleanup and state persistence.
 
