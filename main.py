@@ -724,7 +724,7 @@ class TradingBot:
             # Проверить порог входа
             if self.signal_scorer.should_enter(final_score):
                 logger.debug(f"✅ {signal.strategy_name} | {symbol} {signal.direction} | Score: {final_score:.1f} PASSED threshold")
-                strategy_logger.info(f"\n✅ ПРОШЕЛ ПОРОГ (≥2.0) - ВАЛИДНЫЙ СИГНАЛ!")
+                strategy_logger.info(f"\n✅ ПРОШЕЛ ПОРОГ (≥{self.signal_scorer.enter_threshold}) - ВАЛИДНЫЙ СИГНАЛ!")
                 
                 # Проверить блокировку (политика "1 сигнал на направление на символ")
                 lock_acquired = self.signal_lock_manager.acquire_lock(
@@ -825,11 +825,11 @@ class TradingBot:
             else:
                 logger.debug(
                     f"❌ {signal.strategy_name} | {symbol} {signal.direction} | "
-                    f"Score: {final_score:.1f} < threshold 2.0 | "
+                    f"Score: {final_score:.1f} < threshold {self.signal_scorer.enter_threshold} | "
                     f"Base: {signal.base_score:.1f}, Vol: {signal.volume_ratio:.1f}x, "
                     f"CVD: {signal.cvd_direction}, Late: {signal.late_trend}, BTC: {signal.btc_against}"
                 )
-                strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < 2.0")
+                strategy_logger.warning(f"❌ НЕ ПРОШЕЛ ПОРОГ: Score {final_score:.1f} < {self.signal_scorer.enter_threshold}")
                 continue  # Пропустить сигналы с score < threshold
     
     async def _check_action_price_signals(self, current_time: datetime):
