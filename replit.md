@@ -40,6 +40,10 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ **ACTION PRICE BREAKEVEN LOGIC (Oct 14 22:00)**: После TP1 SL автоматически переносится в breakeven (entry price) для защиты прибыли. Если цена возвращается к entry, закрывается с сохранённым TP1 PnL (не 0%)
 - ✅ **ACTION PRICE PNL CALCULATION FIX (Oct 14 22:00)**: Правильный расчёт partial exits - 30% @ TP1 + 70% остаток (40% TP2 + 30% trailing runner). Breakeven exit сохраняет TP1 прибыль
 - ✅ **ACTION PRICE STATISTICS FIX (Oct 14 22:00)**: /ap_stats теперь корректно показывает TP1/TP2/breakeven counts (раньше TP2 и breakeven всегда были 0)
+- ✅ **RATE LIMITER EMERGENCY FIX (Oct 14 22:30)**: Threshold снижен с 75% до 55% (1320/2400) - буфер 1080 запросов для компенсации погрешности синхронизации ±430
+- ✅ **IP BAN PREVENTION v3 (Oct 14 22:30)**: Добавлен ip_ban_event и ip_ban_logged флаг - логирование IP BAN только один раз вместо 50+ сообщений от pending tasks
+- ✅ **GAP REFILL SAFETY (Oct 14 22:30)**: Periodic gap refill НЕ запускается первые 15 минут после старта и только если rate usage < 30%
+- ✅ **BURST CATCHUP SAFETY (Oct 14 22:30)**: Добавлена проверка rate usage после каждого батча - если > 50%, дополнительная пауза 2s
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
@@ -132,7 +136,10 @@ Preferred communication style: Simple, everyday language.
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel, enabling immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
 
 ## Error Handling & Resilience
-- **Smart Rate Limiting**: 90% safety threshold prevents API bans. Automatic pause and resume when approaching limit.
+- **Smart Rate Limiting**: 55% safety threshold (1320/2400) with 1080 requests buffer to compensate ±430 sync error. Prevents API bans.
+- **IP BAN Prevention v3**: Event-based coordination with single-log IP BAN notification (no 50+ duplicate messages). All pending requests blocked immediately.
+- **Gap Refill Safety**: Periodic gap refill disabled first 15 minutes after startup, only runs if rate usage < 30%.
+- **Burst Catchup Safety**: Rate usage checked after each batch, extra 2s pause if > 50%.
 - **Exponential Backoff**: Retry logic with progressive delays for transient errors.
 - **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
 - **Graceful Shutdown**: Clean resource cleanup and state persistence.
