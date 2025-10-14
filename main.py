@@ -475,6 +475,12 @@ class TradingBot:
         
         logger.info(f"🕯️  Candles closed: {', '.join(updated_timeframes)} - checking strategies")
         
+        # ЗАДЕРЖКА 31 сек после закрытия 15m свечи для стабилизации данных Binance
+        if '15m' in updated_timeframes:
+            logger.info(f"⏳ Waiting 31 seconds for Binance to finalize 15m candle data...")
+            await asyncio.sleep(31)
+            logger.info(f"✅ Delay completed - now loading stable candle data")
+        
         symbols_to_check = self.ready_symbols.copy()
         if not symbols_to_check:
             logger.debug("No symbols ready for analysis yet...")
