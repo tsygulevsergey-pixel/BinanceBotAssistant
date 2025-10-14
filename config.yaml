@@ -68,8 +68,8 @@ market_detector:
 
 # Scoring System
 scoring:
-  base_threshold: 4.5  # PROFESSIONAL: Требуется base 2.5 + минимум 2 подтверждения (volume/CVD/OI/imbalance)
-  enter_threshold: 4.5  # Threshold for entry - quality signals with confirmations (was 2.0)
+  base_threshold: 3.0  # ADJUSTED: Требуется base 2.5 + минимум 1 подтверждение (imbalance) - пока OI данные не работают
+  enter_threshold: 3.0  # Threshold for entry - adjusted for current market conditions (was 4.5)
   
   volume_multiplier: 1.5
   volume_mult: 1.5  # Threshold для volume ratio (используется в коде)

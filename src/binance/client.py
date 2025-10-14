@@ -278,11 +278,20 @@ class BinanceClient:
         async def _do_request():
             if not self.session:
                 raise Exception("Session not initialized")
-            async with self.session.request('GET', oi_url, params=params) as response:
-                if response.status == 429 or response.status == 418:
-                    raise Exception(f"Rate limit error: {response.status}")
-                response.raise_for_status()
-                return await response.json()
+            try:
+                async with self.session.request('GET', oi_url, params=params) as response:
+                    if response.status == 429 or response.status == 418:
+                        logger.warning(f"⚠️ OI History rate limit {response.status} for {symbol}")
+                        raise Exception(f"Rate limit error: {response.status}")
+                    if response.status != 200:
+                        logger.error(f"❌ OI History failed {response.status} for {symbol}: {await response.text()}")
+                    response.raise_for_status()
+                    data = await response.json()
+                    logger.debug(f"✅ OI History OK for {symbol}: {len(data) if data else 0} records")
+                    return data
+            except Exception as e:
+                logger.error(f"❌ OI History request failed for {symbol}: {e}")
+                raise
         
         return await self.rate_limiter.execute_with_backoff(_do_request, weight=1)
     
