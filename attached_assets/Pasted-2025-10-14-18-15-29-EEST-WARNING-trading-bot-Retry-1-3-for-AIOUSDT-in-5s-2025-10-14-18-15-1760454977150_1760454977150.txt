@@ -1,0 +1,140 @@
+2025-10-14 18:15:29 EEST | WARNING  | trading_bot | Retry 1/3 for AIOUSDT in 5s...
+2025-10-14 18:15:30 EEST | ERROR    | Error checking AP for ARBUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:30 EEST | ERROR    | Error checking AP for TLMUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:30 EEST | ERROR    | Error checking AP for RDNTUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:31 EEST | ERROR    | Error checking AP for EDUUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:31 EEST | ERROR    | Error checking AP for SUIUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:31 EEST | ERROR    | Error checking AP for 1000PEPEUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:32 EEST | ERROR    | Error checking AP for 1000FLOKIUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:32 EEST | ERROR    | Error checking AP for UMAUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:32 EEST | ERROR    | Error checking AP for NMRUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:33 EEST | ERROR    | Error checking AP for XVGUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:33 EEST | ERROR    | Error checking AP for WLDUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:33 EEST | ERROR    | Error checking AP for PENDLEUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:33 EEST | ERROR    | Error checking AP for ARKMUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:34 EEST | ERROR    | Error checking AP for YGGUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:34 EEST | ERROR    | Error checking AP for SEIUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:34 EEST | ERROR    | Error checking AP for TIAUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:34 EEST | INFO     | trading_bot |   [1/4] 🔄 AIOUSDT 15m - gap detected, updating from 2025-10-14 15:01
+2025-10-14 18:15:34 EEST | INFO     | trading_bot | Downloading historical klines for AIOUSDT 15m from 2025-10-14 15:01:00+00:00 to 2025-10-14 15:15:34.828988+00:00 (1 days)
+2025-10-14 18:15:35 EEST | ERROR    | Error checking AP for CAKEUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:35 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AIOUSDT 15m
+2025-10-14 18:15:35 EEST | INFO     | trading_bot | Saved 1 klines for AIOUSDT 15m
+2025-10-14 18:15:35 EEST | INFO     | trading_bot |   [2/4] 🔄 AIOUSDT 1h - gap detected, updating from 2025-10-14 15:01
+2025-10-14 18:15:35 EEST | INFO     | trading_bot | Downloading historical klines for AIOUSDT 1h from 2025-10-14 15:01:00+00:00 to 2025-10-14 15:15:34.828988+00:00 (1 days)
+2025-10-14 18:15:35 EEST | ERROR    | Error checking AP for MEMEUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:35 EEST | ERROR    | Error checking AP for TWTUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:35 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AIOUSDT 1h
+2025-10-14 18:15:35 EEST | INFO     | trading_bot | Saved 0 klines for AIOUSDT 1h
+2025-10-14 18:15:35 EEST | INFO     | trading_bot |   [3/4] 🔄 AIOUSDT 4h - gap detected, updating from 2025-10-14 12:01
+2025-10-14 18:15:35 EEST | INFO     | trading_bot | Downloading historical klines for AIOUSDT 4h from 2025-10-14 12:01:00+00:00 to 2025-10-14 15:15:34.828988+00:00 (1 days)
+2025-10-14 18:15:36 EEST | ERROR    | Error checking AP for ORDIUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+2025-10-14 18:15:36 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AIOUSDT 4h
+2025-10-14 18:15:36 EEST | INFO     | trading_bot | Saved 0 klines for AIOUSDT 4h
+2025-10-14 18:15:36 EEST | INFO     | trading_bot |   [4/4] 🔄 AIOUSDT 1d - gap detected, updating from 2025-10-14 00:01
+2025-10-14 18:15:36 EEST | INFO     | trading_bot | Downloading historical klines for AIOUSDT 1d from 2025-10-14 00:01:00+00:00 to 2025-10-14 15:15:34.828988+00:00 (1 days)
+2025-10-14 18:15:36 EEST | ERROR    | Error checking AP for KASUSDT: 'ActionPriceEngine' object has no attribute 'analyze_symbol'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 877, in _check_action_price_signals
+    ap_signals = await self.action_price_engine.analyze_symbol(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -873,19 +873,17 @@ class TradingBot:
                 if len(timeframe_data) < 4:
                     continue
                 
-                # Анализ паттернов - передаём DataFrame отдельно
-                ap_signals = await self.action_price_engine.analyze_symbol(
-                    symbol,
-                    timeframe_data.get('1d'),
-                    timeframe_data.get('4h'),
-                    timeframe_data.get('1h'),
-                    timeframe_data.get('15m'),
-                    current_tf,
-                    current_time
+                # Анализ паттернов - новый EMA200 Body Cross engine
+                # Использует 15m данные (или 1h если timeframe='1h')
+                tf_data = timeframe_data.get(self.action_price_engine.timeframe, timeframe_data.get('15m'))
+                ap_signal = self.action_price_engine.analyze(
+                    symbol=symbol,
+                    df=tf_data,
+                    df_1h=timeframe_data.get('1h')
                 )
                 
-                # Обработать каждый сигнал (может быть несколько)
-                for ap_signal in ap_signals:
+                # Обработать сигнал (новый engine возвращает один Dict или None)
+                if ap_signal:
                     # Сохранить в БД - ТОЛЬКО если успешно, блокируем символ
                     save_success = self._save_action_price_signal(ap_signal)
                     
@@ -897,14 +895,14 @@ class TradingBot:
                         
                         # Отправить в Telegram
                         await self._send_action_price_telegram(ap_signal)
+                        
+                        ap_logger.info(
+                            f"🎯 AP Signal: {ap_signal['symbol']} {ap_signal['direction']} "
+                            f"{ap_signal['pattern_type']} @ {ap_signal.get('entry_price', 0):.4f} "
+                            f"(Score: {ap_signal.get('confidence_score', 0):.1f})"
+                        )
                     else:
                         ap_logger.warning(f"⚠️ Skipping {symbol} - failed to save signal to DB")
-                    
-                    ap_logger.info(
-                        f"🎯 AP Signal: {ap_signal['symbol']} {ap_signal['direction']} "
-                        f"{ap_signal['pattern_type']} @ {ap_signal['entry_price']:.4f} "
-                        f"(Zone: {ap_signal['zone_type']}, Confidence: {ap_signal.get('confidence_score', 0):.1f})"
-                    )
             
             except Exception as e:
                 ap_logger.error(f"Error checking AP for {symbol}: {e}", exc_info=True)
