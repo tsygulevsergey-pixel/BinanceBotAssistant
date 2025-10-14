@@ -36,6 +36,10 @@ Key features include local orderbook, historical data, multi-TF analysis (4H/1H/
 - ✅ **OPEN_TIME FIX (Oct 14 21:30)**: Удалён set_index('open_time') из DataLoader - теперь open_time остаётся как колонка для Action Price validation
 - ✅ **CALLBACK FIX (Oct 14 21:40)**: Исправлен вызов on_signal_closed_callback в signal_tracker.py - добавлен недостающий аргумент strategy_name
 - ✅ **DF.INDEX FIX (Oct 14 21:48)**: Заменены все df.index[-1] на df['open_time'].iloc[-1] в стратегиях (ma_vwap_pullback, donchian, atr_momentum, liquidity_sweep, orb, time_of_day) - исправлена ошибка после удаления set_index()
+- ✅ **ACTION PRICE TP2 TRACKING FIX (Oct 14 22:00)**: КРИТИЧНО - partial_exit_2_at/price теперь правильно устанавливаются при достижении TP2 (раньше всегда были NULL, TP2 count был 0)
+- ✅ **ACTION PRICE BREAKEVEN LOGIC (Oct 14 22:00)**: После TP1 SL автоматически переносится в breakeven (entry price) для защиты прибыли. Если цена возвращается к entry, закрывается с сохранённым TP1 PnL (не 0%)
+- ✅ **ACTION PRICE PNL CALCULATION FIX (Oct 14 22:00)**: Правильный расчёт partial exits - 30% @ TP1 + 70% остаток (40% TP2 + 30% trailing runner). Breakeven exit сохраняет TP1 прибыль
+- ✅ **ACTION PRICE STATISTICS FIX (Oct 14 22:00)**: /ap_stats теперь корректно показывает TP1/TP2/breakeven counts (раньше TP2 и breakeven всегда были 0)
 - 📋 SQL migration available: migrations/add_professional_fields.sql, apply_migration.py script for Windows
 
 # User Preferences
@@ -105,7 +109,13 @@ Preferred communication style: Simple, everyday language.
 
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals, calculates exit conditions using precise SL/TP levels, and updates entry prices for accurate PnL. Provides detailed metrics: Average PnL, Average Win, Average Loss.
-- **Breakeven PnL Logic**: When TP1 is hit, the system saves the actual TP1 PnL. If price returns to breakeven, the signal closes with the saved TP1 PnL instead of 0%, accurately reflecting the partial profit taken.
+- **ActionPricePerformanceTracker**: Dedicated tracker for Action Price signals with advanced features:
+  - ✅ **Partial Exits**: 30% @ TP1 (1R), 70% remainder (40% @ TP2 + 30% trailing runner)
+  - ✅ **Breakeven Logic**: After TP1, SL automatically moves to entry price for profit protection
+  - ✅ **Breakeven Exit**: If price returns to entry after TP1, closes with saved TP1 PnL (not 0%)
+  - ✅ **TP1/TP2 Tracking**: Properly records partial_exit_1/2_at and prices for statistics
+  - ✅ **MFE/MAE Tracking**: Real-time Maximum Favorable/Adverse Excursion in R
+  - ✅ **JSONL Logging**: Detailed signal data (50+ fields) for ML analysis
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and specific configurations for the Action Price system.
