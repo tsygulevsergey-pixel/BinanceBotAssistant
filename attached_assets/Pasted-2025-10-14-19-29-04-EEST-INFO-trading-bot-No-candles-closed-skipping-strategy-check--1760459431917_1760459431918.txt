@@ -1,0 +1,100 @@
+2025-10-14 19:29:04 EEST | INFO     | trading_bot | ⏭️  No candles closed - skipping strategy check
+2025-10-14 19:30:00 EEST | INFO     | 🎯 Checking Action Price signals on 15m close (force_recalc=False)
+2025-10-14 19:30:03 EEST | INFO     | 💾 Saved AP signal to DB: BTCDOMUSDT short
+2025-10-14 19:30:03 EEST | INFO     | trading_bot | 🔒 AP: BTCDOMUSDT blocked (active signal)
+2025-10-14 19:30:03 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:03 EEST | INFO     | 🎯 AP Signal: BTCDOMUSDT short body_cross @ 4154.2000 (Score: 7.0)
+2025-10-14 19:30:04 EEST | INFO     | 💾 Saved AP signal to DB: LPTUSDT long
+2025-10-14 19:30:04 EEST | INFO     | trading_bot | 🔒 AP: LPTUSDT blocked (active signal)
+2025-10-14 19:30:04 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:04 EEST | INFO     | 🎯 AP Signal: LPTUSDT long body_cross @ 5.3220 (Score: 8.0)
+2025-10-14 19:30:04 EEST | INFO     | 💾 Saved AP signal to DB: PEOPLEUSDT long
+2025-10-14 19:30:04 EEST | INFO     | trading_bot | 🔒 AP: PEOPLEUSDT blocked (active signal)
+2025-10-14 19:30:04 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:04 EEST | INFO     | 🎯 AP Signal: PEOPLEUSDT long body_cross @ 0.0133 (Score: 7.0)
+2025-10-14 19:30:05 EEST | INFO     | 💾 Saved AP signal to DB: LDOUSDT long
+2025-10-14 19:30:05 EEST | INFO     | trading_bot | 🔒 AP: LDOUSDT blocked (active signal)
+2025-10-14 19:30:05 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:05 EEST | INFO     | 🎯 AP Signal: LDOUSDT long body_cross @ 0.9578 (Score: 8.0)
+2025-10-14 19:30:09 EEST | INFO     | 💾 Saved AP signal to DB: CAKEUSDT long
+2025-10-14 19:30:14 EEST | INFO     | trading_bot | 🔒 AP: CAKEUSDT blocked (active signal)
+2025-10-14 19:30:14 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:14 EEST | INFO     | 🎯 AP Signal: CAKEUSDT long body_cross @ 3.5128 (Score: 6.0)
+2025-10-14 19:30:14 EEST | INFO     | 💾 Saved AP signal to DB: MEMEUSDT long
+2025-10-14 19:30:14 EEST | INFO     | trading_bot | 🔒 AP: MEMEUSDT blocked (active signal)
+2025-10-14 19:30:14 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:14 EEST | INFO     | 🎯 AP Signal: MEMEUSDT long body_cross @ 0.0018 (Score: 8.0)
+2025-10-14 19:30:15 EEST | INFO     | 💾 Saved AP signal to DB: 1000BONKUSDT long
+2025-10-14 19:30:15 EEST | INFO     | trading_bot | 🔒 AP: 1000BONKUSDT blocked (active signal)
+2025-10-14 19:30:15 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:15 EEST | INFO     | 🎯 AP Signal: 1000BONKUSDT long body_cross @ 0.0160 (Score: 7.0)
+2025-10-14 19:30:15 EEST | INFO     | 💾 Saved AP signal to DB: AUCTIONUSDT long
+2025-10-14 19:30:15 EEST | INFO     | trading_bot | 🔒 AP: AUCTIONUSDT blocked (active signal)
+2025-10-14 19:30:15 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:15 EEST | INFO     | 🎯 AP Signal: AUCTIONUSDT long body_cross @ 6.5110 (Score: 7.0)
+2025-10-14 19:30:17 EEST | INFO     | 💾 Saved AP signal to DB: TONUSDT long
+2025-10-14 19:30:17 EEST | INFO     | trading_bot | 🔒 AP: TONUSDT blocked (active signal)
+2025-10-14 19:30:17 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:17 EEST | INFO     | 🎯 AP Signal: TONUSDT long body_cross @ 2.2912 (Score: 8.0)
+2025-10-14 19:30:17 EEST | INFO     | 💾 Saved AP signal to DB: ETHFIUSDT long
+2025-10-14 19:30:17 EEST | INFO     | trading_bot | 🔒 AP: ETHFIUSDT blocked (active signal)
+2025-10-14 19:30:17 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'
+2025-10-14 19:30:17 EEST | INFO     | 🎯 AP Signal: ETHFIUSDT long body_cross @ 1.2425 (Score: 6.0)
+2025-10-14 19:30:17 EEST | INFO     | 💾 Saved AP signal to DB: WUSDT long
+2025-10-14 19:30:17 EEST | INFO     | trading_bot | 🔒 AP: WUSDT blocked (active signal)
+2025-10-14 19:30:17 EEST | ERROR    | Failed to send AP signal to Telegram: 'zone_type'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1361, in _send_action_price_telegram
+    f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                   ~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'zone_type'

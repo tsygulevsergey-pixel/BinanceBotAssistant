@@ -1323,8 +1323,9 @@ class TradingBot:
     async def _send_action_price_telegram(self, ap_signal: Dict):
         """Отправить Action Price сигнал в Telegram"""
         try:
-            # Формат уникален для Action Price
+            # Формат для EMA200 Body Cross
             pattern_emoji = {
+                'body_cross': '🎯',
                 'pin_bar': '📌',
                 'engulfing': '🔥',
                 'inside_bar': '📦',
@@ -1332,14 +1333,12 @@ class TradingBot:
                 'ppr': '🔄'
             }
             
-            emoji = pattern_emoji.get(ap_signal['pattern_type'], '🎯')
+            pattern_type = ap_signal.get('pattern_type', 'body_cross')
+            emoji = pattern_emoji.get(pattern_type, '🎯')
             direction_emoji = '🟢' if ap_signal['direction'] == 'LONG' else '🔴'
             
             # Получить meta_data
             meta_data = ap_signal.get('meta_data', {})
-            zone_touches = meta_data.get('zone_touches', 0)
-            rr1 = meta_data.get('rr1', 1.0)
-            rr2 = meta_data.get('rr2', 2.0)
             
             # Получить confluence flags
             confluence_flags = ap_signal.get('confluence_flags', {})
@@ -1353,39 +1352,35 @@ class TradingBot:
             if confluence_flags.get('zone_sr'):
                 confluences.append('S/R Zone')
             
+            # Рассчитать R:R
+            entry = ap_signal['entry_price']
+            sl = ap_signal['stop_loss']
+            tp2 = ap_signal.get('take_profit_2')
+            risk = abs(entry - sl)
+            rr_ratio = abs(tp2 - entry) / risk if tp2 and risk > 0 else 2.0
+            
             message = (
                 f"🎯 <b>ACTION PRICE SIGNAL</b>\n\n"
                 f"{direction_emoji} <b>{ap_signal['symbol']} {ap_signal['direction']}</b>\n"
-                f"{emoji} Паттерн: <b>{ap_signal['pattern_type'].upper()}</b>\n"
+                f"{emoji} Стратегия: <b>EMA200 Body Cross</b>\n"
                 f"📊 Таймфрейм: <b>{ap_signal['timeframe']}</b>\n"
-                f"🎯 Зона: <b>{ap_signal['zone_type']}</b> (касания: {zone_touches})\n\n"
+                f"⭐ Score: <b>{ap_signal.get('confidence_score', 0):.1f}</b>\n\n"
                 f"💰 Вход: <b>{ap_signal['entry_price']:.4f}</b>\n"
                 f"🛑 Стоп: <b>{ap_signal['stop_loss']:.4f}</b>\n"
             )
             
             if ap_signal.get('take_profit_1'):
-                message += f"🎯 TP1 (50%): <b>{ap_signal['take_profit_1']:.4f}</b>\n"
-            if ap_signal.get('take_profit_2'):
-                message += f"🎯 TP2 (50%): <b>{ap_signal['take_profit_2']:.4f}</b>\n"
+                message += f"🎯 TP1 (30%): <b>{ap_signal['take_profit_1']:.4f}</b>\n"
+            if tp2:
+                message += f"🎯 TP2 (40%): <b>{tp2:.4f}</b>\n"
             
-            # Показать R:R (TP2 если есть, иначе TP1)
-            if rr2 and rr2 > 0:
-                message += f"📈 R:R: <b>1:{rr2:.1f}</b>\n\n"
-            elif rr1 and rr1 > 0:
-                message += f"📈 R:R: <b>1:{rr1:.1f}</b>\n\n"
-            else:
-                message += f"📈 R:R: <b>1:1.5</b>\n\n"
+            message += f"📈 R:R: <b>1:{rr_ratio:.1f}</b>\n\n"
             
             # Конфлюэнсы
             if confluences:
                 message += "✅ <b>Конфлюэнсы:</b>\n"
                 for conf in confluences:
                     message += f"  • {conf}\n"
-            
-            # Confidence score
-            confidence = ap_signal.get('confidence_score', 0)
-            if confidence:
-                message += f"\n⭐ Уверенность: <b>{confidence:.1f}</b>\n"
             
             # Проверка что Telegram инициализирован
             if not self.telegram_bot or not self.telegram_bot.bot or not self.telegram_bot.chat_id:
