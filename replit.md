@@ -4,6 +4,35 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 The bot focuses on quality strategies, market regime detection, structure-based stop-loss/take-profit, signal confluence, and multi-timeframe analysis. Key features include a local orderbook, historical data, advanced scoring, and comprehensive performance tracking. The "Action Price" system independently operates with S/R zones, Anchored VWAP, and price action patterns, aiming for an 80%+ Win Rate and a Profit Factor of 1.8-2.5.
 
+# Recent Changes
+
+## October 15, 2025: Break & Retest 3-Phase TREND Improvement System
+
+Implemented comprehensive TREND regime improvements based on 19-signal analysis (17% WR → target 40-55% industry standard):
+
+**PHASE 1 - Critical Filters (TREND only):**
+- ADX threshold raised to 25 (from 20) for TREND mode, kept 15 for SQUEEZE
+- ADX momentum check: requires ADX rising (current > 2 bars ago)
+- Volume threshold: 1.8x for TREND, 1.2x for SQUEEZE (regime-specific)
+- Bearish bias block: LONG signals blocked in TREND+Bearish (historically 12.5% WR)
+- Higher Timeframe Confirmation: 1H EMA50 + 4H EMA50 alignment required when data available
+
+**PHASE 2 - Important Improvements:**
+- Bollinger Bands position filter: price must be near outer band (2% tolerance)
+- Retest quality scoring: evaluates penetration depth and rejection strength (0-1 score)
+- Improved score system: regime-specific bonuses (ADX 30+ = +1.0, volume 2x+ = +1.0, HTF confirmed = +1.0)
+
+**PHASE 3 - Optimization:**
+- RSI momentum confirmation: >45 for LONG, <55 for SHORT
+- Market structure validation: Higher Highs/Lower Lows pattern check
+- Confluence scoring: combines all filters into final signal score
+
+**Key Design Principles:**
+- All TREND-specific filters apply ONLY in TREND regime
+- SQUEEZE regime (57% WR, +20% PnL) fully preserved with softer thresholds
+- HTF confirmation: strict block if data available and disagrees, score penalty if data unavailable
+- Config updated with regime-specific parameters (ADX 25/15, volume 1.8/1.2)
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
