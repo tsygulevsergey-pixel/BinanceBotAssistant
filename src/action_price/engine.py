@@ -671,6 +671,12 @@ class ActionPriceEngine:
             tp1 = entry - risk_r * self.tp1_rr
             tp2 = entry - risk_r * self.tp2_rr if mode == 'STANDARD' else None
         
+        # КРИТИЧНО: Проверка стоп-лосса - должен быть < 5% от цены входа
+        sl_percent = abs(entry - sl) / entry * 100
+        if sl_percent >= 5.0:
+            logger.debug(f"Action Price: SL слишком широкий ({sl_percent:.2f}% >= 5%) - сигнал отклонен")
+            return None
+        
         return {
             'entry': float(entry),
             'sl': float(sl),

@@ -6,6 +6,15 @@ The bot focuses on quality strategies, market regime detection, structure-based 
 
 # Recent Changes
 
+## October 15, 2025: Action Price Stop Loss Filter
+
+**Stop Loss Risk Control:**
+- Added mandatory 5% maximum stop loss filter for Action Price signals
+- Calculates SL distance as percentage of entry price: `abs(entry - sl) / entry * 100`
+- Signals with SL >= 5% are automatically rejected
+- Prevents excessive risk exposure on volatile setups
+- File: `src/action_price/engine.py` (line 677-681)
+
 ## October 15, 2025: Performance Optimization & Enhanced Scoring
 
 **4-Point Optimization System:**
