@@ -87,19 +87,6 @@ class ActionPriceEngine:
         # 3. Сортировать по open_time (ASC - от старых к новым)
         df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
         
-        # 4. ДИАГНОСТИКА: Логировать последние 3 свечи для проверки
-        if len(df) >= 3:
-            for i in [-3, -2, -1]:
-                candle_time = df['open_time'].iloc[i]
-                candle_open = df['open'].iloc[i]
-                candle_close = df['close'].iloc[i]
-                candle_low = df['low'].iloc[i]
-                candle_high = df['high'].iloc[i]
-                logger.info(
-                    f"🕐 {symbol} Candle[{i}]: {candle_time} | "
-                    f"O:{candle_open:.5f} H:{candle_high:.5f} L:{candle_low:.5f} C:{candle_close:.5f}"
-                )
-        
         # Рассчитать индикаторы
         indicators = self._calculate_indicators(df)
         if indicators is None:

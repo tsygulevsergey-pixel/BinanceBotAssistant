@@ -2,6 +2,27 @@
 
 This project is a professional-grade Binance USDT-M Futures Trading Bot designed for institutional trading principles. It employs 5 core strategies, operating in both Signals-Only Mode for signal generation and Live Trading Mode for full trading capabilities. The bot focuses on quality strategies, market regime detection, structure-based stop-loss/take-profit, signal confluence, and multi-timeframe analysis. It aims for an 80%+ Win Rate and a Profit Factor of 1.8-2.5, leveraging an "Action Price" system with S/R zones, Anchored VWAP, and price action patterns.
 
+# Recent Changes
+
+## October 15, 2025: Action Price Fix - Timeframe Requirements
+
+**CRITICAL FIX: Action Price не генерировал сигналы**
+
+**Проблема:**
+- Action Price молча пропускал ВСЕ символы из-за жёсткого требования 4 таймфреймов (15m, 1h, 4h, 1d)
+- Если хотя бы 1 таймфрейм отсутствовал - символ пропускался БЕЗ логов
+- Избыточное логирование свечей засоряло логи
+
+**Исправление:**
+- Требуются только **15m и 1h** (обязательно)
+- **4h и 1d опциональны** (не блокируют анализ)
+- Добавлено debug логирование при отсутствии обязательных таймфреймов
+- Убрано логирование каждых 3 свечей для всех символов
+
+**Файлы:**
+- `main.py` (строки 840-848): смягчены требования таймфреймов
+- `src/action_price/engine.py` (строка 91): убрано избыточное логирование
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

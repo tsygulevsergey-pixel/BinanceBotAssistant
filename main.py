@@ -834,8 +834,14 @@ class TradingBot:
                     if df is not None and len(df) > 0:
                         timeframe_data[tf] = df
                 
-                # Пропустить если нет данных
-                if len(timeframe_data) < 4:
+                # Требуем минимум 15m и 1h данные (4h и 1d опциональны)
+                if '15m' not in timeframe_data or '1h' not in timeframe_data:
+                    missing = []
+                    if '15m' not in timeframe_data:
+                        missing.append('15m')
+                    if '1h' not in timeframe_data:
+                        missing.append('1h')
+                    ap_logger.debug(f"{symbol} - Missing required timeframes: {', '.join(missing)}")
                     continue
                 
                 # Анализ паттернов - новый EMA200 Body Cross engine
