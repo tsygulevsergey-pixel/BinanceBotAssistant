@@ -196,11 +196,15 @@ class ActionPricePerformanceTracker:
         Returns:
             Dict с данными выхода или None
         """
-        direction = signal.direction
+        direction = signal.direction.upper() if signal.direction else 'LONG'
         entry = float(signal.entry_price)
         sl = float(signal.stop_loss)
         tp1 = float(signal.take_profit_1) if signal.take_profit_1 else None
         tp2 = float(signal.take_profit_2) if signal.take_profit_2 else None
+        
+        # DEBUG: Логируем для первых 3 сигналов чтобы понять почему не срабатывает
+        if len(self.signal_mfe_mae) <= 3:
+            logger.debug(f"  [{signal.symbol}] Price: {current_price} | Dir: {direction} | Entry: {entry} | SL: {sl} | TP1: {tp1} | TP2: {tp2} | TP1_hit: {signal.partial_exit_1_at is not None}")
         
         # Проверка SL
         if direction == 'LONG' and current_price <= sl:

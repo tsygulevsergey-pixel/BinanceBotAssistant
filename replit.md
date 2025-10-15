@@ -10,20 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-## Action Price Performance Tracker Fix (October 15, 2025)
-- **Problem**: /ap_stats showed 0 closed signals - tracker wasn't monitoring or closing signals
+## Action Price Performance Tracker Fix v2 (October 15, 2025)
+- **Problem**: Tracker runs but doesn't close signals - /ap_stats still shows 0 closed
 - **Root Causes**: 
-  1. Signals reaching TP1 but not TP2/SL would remain in PENDING forever
-  2. Tracker used wrong logger (missing from action_price logs)
-  3. Timezone errors when comparing datetime objects
-  4. VWAP RuntimeWarning from pandas Timestamp/int comparison
-- **Solution**: 
-  - **Time Stops**: 48h after TP1, 7 days maximum (WIN/LOSS by PnL)
-  - **Logger Fix**: Tracker now uses ap_logger for visibility in action_price logs
+  1. Tracker used wrong logger (invisible in action_price logs) ✅ FIXED
+  2. Timezone errors in time stop logic ✅ FIXED
+  3. VWAP RuntimeWarning from pandas Timestamp/int ✅ FIXED
+  4. **Direction case mismatch**: DB stores 'long'/'short' but code checks 'LONG'/'SHORT' → conditions never match
+  5. **Silent condition failures**: No debug logs to see what's being compared
+- **Solution v2**: 
+  - **Logger Fix**: Tracker uses ap_logger (visible in action_price logs)
   - **Timezone Fix**: Auto-localize naive datetime before comparison
-  - **VWAP Fix**: Use numpy arrays instead of pandas Series in cumsum operations
-  - **Logging**: Added detailed tracking messages ("🔍 Checking X active AP signals")
-- **Result**: Tracker runs visibly, closes signals properly, stats appear in /ap_stats
+  - **VWAP Fix**: Use numpy arrays instead of pandas Series
+  - **Direction Fix**: Convert to uppercase with `.upper()` before comparison
+  - **Debug Logs**: Added detailed condition checks for first 3 signals (Price, Entry, SL, TP1, TP2, TP1_hit status)
+- **Next Step**: Debug logs will show WHY conditions don't trigger (check logs after restart)
 - **Files**: `src/action_price/performance_tracker.py`, `src/indicators/vwap.py`
 
 ## Action Price Candle Selection Fix (October 15, 2025)
