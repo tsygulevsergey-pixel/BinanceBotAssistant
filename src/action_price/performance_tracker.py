@@ -305,7 +305,12 @@ class ActionPricePerformanceTracker:
         
         # КРИТИЧНО: Time stop после TP1 (закрываем если висит > 48 часов после TP1)
         if signal.partial_exit_1_at:
-            hours_since_tp1 = (datetime.now(pytz.UTC) - signal.partial_exit_1_at).total_seconds() / 3600
+            # Убедимся что partial_exit_1_at имеет timezone
+            tp1_time = signal.partial_exit_1_at
+            if tp1_time.tzinfo is None:
+                tp1_time = pytz.UTC.localize(tp1_time)
+            
+            hours_since_tp1 = (datetime.now(pytz.UTC) - tp1_time).total_seconds() / 3600
             if hours_since_tp1 > 48:
                 # Закрываем по текущей цене (trailing stop logic)
                 total_pnl = self._calculate_total_pnl(signal, current_price, entry)
@@ -318,7 +323,12 @@ class ActionPricePerformanceTracker:
                 }
         
         # Обычный time stop (7 дней максимум без TP1)
-        hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+        # Убедимся что created_at имеет timezone
+        created_time = signal.created_at
+        if created_time.tzinfo is None:
+            created_time = pytz.UTC.localize(created_time)
+        
+        hours_since_created = (datetime.now(pytz.UTC) - created_time).total_seconds() / 3600
         if hours_since_created > 168:  # 7 дней
             # Закрываем по текущей цене
             if direction == 'LONG':

@@ -1,0 +1,211 @@
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:05 EEST | INFO     | trading_bot | [104/285] Checking CAKEUSDT... (36.5%)
+2025-10-15 03:43:05 EEST | INFO     | trading_bot |   [1/4] 🔄 CAKEUSDT 15m - gap detected, updating from 2025-10-15 00:31
+2025-10-15 03:43:05 EEST | INFO     | trading_bot | Downloading historical klines for CAKEUSDT 15m from 2025-10-15 00:31:00+00:00 to 2025-10-15 00:43:05.667893+00:00 (1 days)
+2025-10-15 03:43:05 EEST | INFO     | trading_bot | 📊 Loading: 103/285 (36.1%) | Queue: 0 ready | Ready: 103 symbols | Failed: 0 | 6 strategies | 0 signals | Rate: 4.2%
+Error checking AP signal 10: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:05 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CAKEUSDT 15m
+2025-10-15 03:43:05 EEST | INFO     | trading_bot | Saved 0 klines for CAKEUSDT 15m
+2025-10-15 03:43:06 EEST | INFO     | trading_bot |   [2/4] 🔄 CAKEUSDT 1h - gap detected, updating from 2025-10-15 00:01
+2025-10-15 03:43:06 EEST | INFO     | trading_bot | Downloading historical klines for CAKEUSDT 1h from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:05.667893+00:00 (1 days)
+Error checking AP signal 6: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:06 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CAKEUSDT 1h
+2025-10-15 03:43:06 EEST | INFO     | trading_bot | Saved 0 klines for CAKEUSDT 1h
+2025-10-15 03:43:06 EEST | INFO     | trading_bot |   [3/4] 🔄 CAKEUSDT 4h - gap detected, updating from 2025-10-15 00:01
+2025-10-15 03:43:06 EEST | INFO     | trading_bot | Downloading historical klines for CAKEUSDT 4h from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:05.667893+00:00 (1 days)
+Error checking AP signal 5: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:07 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CAKEUSDT 4h
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | Saved 0 klines for CAKEUSDT 4h
+2025-10-15 03:43:07 EEST | INFO     | trading_bot |   [4/4] 🔄 CAKEUSDT 1d - gap detected, updating from 2025-10-15 00:01
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | Downloading historical klines for CAKEUSDT 1d from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:05.667893+00:00 (1 days)
+Error checking AP signal 15: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:07 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CAKEUSDT 1d
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | Saved 0 klines for CAKEUSDT 1d
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | ✓ CAKEUSDT loaded and ready for analysis
+Error checking AP signal 7: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | [105/285] Checking MEMEUSDT... (36.8%)
+2025-10-15 03:43:07 EEST | INFO     | trading_bot |   [1/4] 🔄 MEMEUSDT 15m - gap detected, updating from 2025-10-15 00:31
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | Downloading historical klines for MEMEUSDT 15m from 2025-10-15 00:31:00+00:00 to 2025-10-15 00:43:07.634757+00:00 (1 days)
+Error checking AP signal 17: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:07 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - MEMEUSDT 15m
+2025-10-15 03:43:07 EEST | INFO     | trading_bot | Saved 0 klines for MEMEUSDT 15m
+2025-10-15 03:43:08 EEST | INFO     | trading_bot |   [2/4] 🔄 MEMEUSDT 1h - gap detected, updating from 2025-10-15 00:01
+2025-10-15 03:43:08 EEST | INFO     | trading_bot | Downloading historical klines for MEMEUSDT 1h from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:07.634757+00:00 (1 days)
+2025-10-15 03:43:08 EEST | INFO     | trading_bot | ✅ CAKEUSDT ready for analysis (104 symbols analyzing)
+Error checking AP signal 4: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:08 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - MEMEUSDT 1h
+2025-10-15 03:43:08 EEST | INFO     | trading_bot | Saved 0 klines for MEMEUSDT 1h
+2025-10-15 03:43:09 EEST | INFO     | trading_bot |   [3/4] 🔄 MEMEUSDT 4h - gap detected, updating from 2025-10-15 00:01
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | Downloading historical klines for MEMEUSDT 4h from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:07.634757+00:00 (1 days)
+Error checking AP signal 16: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - MEMEUSDT 4h
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | Saved 0 klines for MEMEUSDT 4h
+2025-10-15 03:43:09 EEST | INFO     | trading_bot |   [4/4] 🔄 MEMEUSDT 1d - gap detected, updating from 2025-10-15 00:01
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | Downloading historical klines for MEMEUSDT 1d from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:07.634757+00:00 (1 days)
+Error checking AP signal 3: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - MEMEUSDT 1d
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | Saved 0 klines for MEMEUSDT 1d
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | ✓ MEMEUSDT loaded and ready for analysis
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | ✅ MEMEUSDT ready for analysis (105 symbols analyzing)
+Error checking AP signal 12: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | [106/285] Checking TWTUSDT... (37.2%)
+2025-10-15 03:43:09 EEST | INFO     | trading_bot |   [1/4] 🔄 TWTUSDT 15m - gap detected, updating from 2025-10-15 00:31
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | Downloading historical klines for TWTUSDT 15m from 2025-10-15 00:31:00+00:00 to 2025-10-15 00:43:09.675981+00:00 (1 days)
+Error checking AP signal 11: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:09 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TWTUSDT 15m
+2025-10-15 03:43:09 EEST | INFO     | trading_bot | Saved 0 klines for TWTUSDT 15m
+2025-10-15 03:43:10 EEST | INFO     | trading_bot |   [2/4] 🔄 TWTUSDT 1h - gap detected, updating from 2025-10-15 00:012025-10-15 03:43:10 EEST | INFO     | trading_bot | Downloading historical klines for TWTUSDT 1h from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:09.675981+00:00 (1 days)
+Error checking AP signal 9: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:10 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TWTUSDT 1h
+2025-10-15 03:43:10 EEST | INFO     | trading_bot | Saved 0 klines for TWTUSDT 1h
+2025-10-15 03:43:10 EEST | INFO     | trading_bot |   [3/4] 🔄 TWTUSDT 4h - gap detected, updating from 2025-10-15 00:012025-10-15 03:43:10 EEST | INFO     | trading_bot | Downloading historical klines for TWTUSDT 4h from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:09.675981+00:00 (1 days)
+Error checking AP signal 8: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TWTUSDT 4h
+2025-10-15 03:43:11 EEST | INFO     | trading_bot | Saved 0 klines for TWTUSDT 4h
+2025-10-15 03:43:11 EEST | INFO     | trading_bot |   [4/4] 🔄 TWTUSDT 1d - gap detected, updating from 2025-10-15 00:012025-10-15 03:43:11 EEST | INFO     | trading_bot | Downloading historical klines for TWTUSDT 1d from 2025-10-15 00:01:00+00:00 to 2025-10-15 00:43:09.675981+00:00 (1 days)
+Error checking AP signal 14: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TWTUSDT 1d
+2025-10-15 03:43:11 EEST | INFO     | trading_bot | Saved 0 klines for TWTUSDT 1d
+2025-10-15 03:43:11 EEST | INFO     | trading_bot | ✓ TWTUSDT loaded and ready for analysis
+Error checking AP signal 13: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:11 EEST | INFO     | trading_bot | [107/285] Checking ORDIUSDT... (37.5%)
+2025-10-15 03:43:11 EEST | INFO     | trading_bot |   [1/4] 🔄 ORDIUSDT 15m - gap detected, updating from 2025-10-15 00:31
+2025-10-15 03:43:11 EEST | INFO     | trading_bot | Downloading historical klines for ORDIUSDT 15m from 2025-10-15 00:31:00+00:00 to 2025-10-15 00:43:11.637253+00:00 (1 days)
+Error checking AP signal 2: can't subtract offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    exit_result = await self._check_exit_conditions(signal, current_price)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 321, in _check_exit_conditions
+    hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+                           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+TypeError: can't subtract offset-naive and offset-aware datetimes
+2025-10-15 03:43:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ORDIUSDT 15m
+2025-10-15 03:43:11 EEST | INFO     | trading_bot | Saved 0 klines for ORDIUSDT 15m
+2025-10-15 03:43:12 EEST | INFO     | trading_bot |   [2/4] 🔄 ORDIUSDT 1h - gap detected, updating from 2025-10-15 00:01
