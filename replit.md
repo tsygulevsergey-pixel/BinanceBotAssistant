@@ -10,6 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Action Price Candle Selection Fix (October 15, 2025)
+- **Problem**: Bot analyzed wrong candles (-3, -2) instead of last 2 closed (-2, -1), causing EMA200 mismatch with Binance
+- **Root Cause**: Hardcoded indices used -3/-2 instead of -2/-1 for initiator/confirmation
+- **Additional Issues**: 
+  - Timestamp in JSONL always showed "1970-01-01" (used DataFrame index instead of open_time column)
+  - EMA200 values didn't match Binance because wrong candles were analyzed
+- **Solution**: 
+  - Changed to analyze last 2 closed candles: initiator=-2, confirmation=-1
+  - Fixed timestamp to use `open_time` column instead of DataFrame index
+- **Result**: Now analyzes correct candles with proper timestamps in logs
+- **Files**: `src/action_price/engine.py` (lines 260-275, 700-709)
+
 ## Price Precision Fix for Action Price (October 15, 2025)
 - **Problem**: Action Price signals showed rounded prices (0.0075 vs actual 0.0075281) - not matching Binance precision
 - **Root Cause**: Telegram message formatting used fixed `.4f` format instead of Binance symbol precision
