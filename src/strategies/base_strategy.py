@@ -182,50 +182,10 @@ class BaseStrategy(ABC):
     
     def determine_entry_type(self, entry_price: float, df: pd.DataFrame, direction: str = None) -> tuple:
         """
-        Определить тип входа на основе категории стратегии (ГИБРИДНЫЙ подход)
+        Определить тип входа - всегда MARKET для немедленного исполнения
         
         Returns:
             (entry_type, target_entry_price, entry_timeout)
         """
-        category = self.get_category()
-        
-        # BREAKOUT → MARKET entry для скорости
-        if category == "breakout":
-            return ("MARKET", None, 6)
-        
-        # PULLBACK → LIMIT entry на уровень отката
-        elif category == "pullback":
-            # Для pullback стратегий entry_price уже содержит целевой уровень
-            return ("LIMIT", entry_price, 6)
-        
-        # MEAN REVERSION → LIMIT entry с небольшим pullback offset
-        elif category == "mean_reversion":
-            # Используем ATR для расчета offset (небольшой pullback для лучшей цены)
-            # Проверяем наличие колонки 'atr' или рассчитываем
-            if 'atr' in df.columns:
-                atr = df['atr'].iloc[-1]
-            else:
-                # Рассчитываем ATR если его нет в DataFrame
-                from src.indicators.technical import calculate_atr
-                atr_series = calculate_atr(df['high'], df['low'], df['close'], period=14)
-                atr = atr_series.iloc[-1]
-            
-            pullback_offset = 0.15 * atr  # 15% ATR для mean reversion entry
-            
-            # Определяем direction если не указан
-            if direction is None:
-                current_close = df['close'].iloc[-1]
-                direction = "LONG" if entry_price > current_close else "SHORT"
-            
-            if direction == "LONG":
-                # Для LONG ждем pullback вниз - target ниже entry
-                target_entry_price = entry_price - pullback_offset
-            else:
-                # Для SHORT ждем pullback вверх - target выше entry
-                target_entry_price = entry_price + pullback_offset
-            
-            return ("LIMIT", target_entry_price, 4)  # Меньший timeout для MR
-        
-        # ORDER FLOW, CVD и другие → MARKET (агрессивный вход)
-        else:
-            return ("MARKET", None, 6)
+        # Всегда используем MARKET вход по текущей цене
+        return ("MARKET", None, 6)

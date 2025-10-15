@@ -80,15 +80,11 @@ class StrategyManager:
                     # ВАЖНО: Сначала рассчитать offset'ы от начальной entry_price
                     signal = strategy.calculate_risk_offsets(signal)
                     
-                    # Применить гибридную логику входа на основе категории стратегии
-                    entry_type, target_price, timeout = strategy.determine_entry_type(
-                        signal.entry_price, df, signal.direction
-                    )
-                    signal.entry_type = entry_type
-                    signal.entry_timeout = timeout
+                    # Установить entry_type как MARKET
+                    signal.entry_type = "MARKET"
                     
-                    # Для MARKET ордеров: получить актуальную рыночную цену
-                    if entry_type == "MARKET" and self.binance_client:
+                    # Получить актуальную рыночную цену
+                    if self.binance_client:
                         try:
                             mark_data = await self.binance_client.get_mark_price(symbol)
                             current_mark_price = float(mark_data.get('markPrice', signal.entry_price))
@@ -114,38 +110,12 @@ class StrategyManager:
                         except Exception as e:
                             strategy_logger.warning(f"    ⚠️  Could not get mark price: {e}, using close price")
                     
-                    # Для LIMIT orders: сохранить целевую цену и пересчитать SL/TP
-                    if entry_type == "LIMIT":
-                        signal.target_entry_price = target_price  # Целевая цена с offset
-                        current_price = float(df['close'].iloc[-1])
-                        
-                        # Пересчитать SL/TP от target_entry_price используя offset'ы
-                        # Это сохраняет R:R при изменении entry
-                        if signal.direction == "LONG":
-                            signal.stop_loss = signal.target_entry_price - (signal.stop_offset or 0)
-                            signal.take_profit_1 = signal.target_entry_price + (signal.tp1_offset or 0)
-                            if signal.tp2_offset:
-                                signal.take_profit_2 = signal.target_entry_price + signal.tp2_offset
-                        else:  # SHORT
-                            signal.stop_loss = signal.target_entry_price + (signal.stop_offset or 0)
-                            signal.take_profit_1 = signal.target_entry_price - (signal.tp1_offset or 0)
-                            if signal.tp2_offset:
-                                signal.take_profit_2 = signal.target_entry_price - signal.tp2_offset
-                        
-                        signal.entry_price = current_price  # Текущая цена для отображения
-                        
-                        strategy_logger.info(
-                            f"  📍 LIMIT entry: target={signal.target_entry_price:.4f}, "
-                            f"current={signal.entry_price:.4f}, SL={signal.stop_loss:.4f}, "
-                            f"TP1={signal.take_profit_1:.4f}, timeout={timeout} bars"
-                        )
-                    
                     strategy.increment_signal_count()
                     signals.append(signal)
                     logger.info(
                         f"Signal generated: {signal.strategy_name} | "
                         f"{signal.symbol} {signal.direction} | Score: {signal.base_score} | "
-                        f"Entry: {entry_type}"
+                        f"Entry: MARKET"
                     )
                     strategy_logger.info(
                         f"  ✅ {strategy.name} → СИГНАЛ! {signal.direction} | "
