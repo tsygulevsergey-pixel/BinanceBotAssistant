@@ -10,6 +10,8 @@ import pytz
 
 
 class TelegramBot:
+    TELEGRAM_MAX_LENGTH = 4000  # Лимит Telegram 4096, оставляем запас
+    
     def __init__(self, binance_client=None):
         self.token = config.get_secret('telegram_bot_token')
         self.chat_id = config.get_secret('telegram_chat_id')
@@ -335,6 +337,7 @@ class TelegramBot:
                     return
                 
                 text = f"📊 <b>Закрытые сигналы ({hours}ч)</b>\n\n"
+                count = 0
                 
                 for sig in closed_signals:
                     direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
@@ -358,13 +361,28 @@ class TelegramBot:
                     
                     strategy_short = sig.strategy_name[:15]
                     
-                    text += (
+                    signal_text = (
                         f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
                         f"   {status_emoji} {exit_label} | {pnl_str} | {strategy_short}\n\n"
                     )
+                    
+                    # Проверка лимита Telegram (4096 символов)
+                    footer = f"\n📈 Показано: {count} из {len(closed_signals)}"
+                    if len(text + signal_text + footer) > self.TELEGRAM_MAX_LENGTH:
+                        # Отправить текущее сообщение с footer
+                        await update.message.reply_text(text + footer, parse_mode='HTML')
+                        text = f"📊 <b>Закрытые сигналы ({hours}ч) - продолжение</b>\n\n"
+                    
+                    text += signal_text
+                    count += 1
                 
-                text += f"\n📈 Всего показано: {len(closed_signals)}"
-                await update.message.reply_text(text, parse_mode='HTML')
+                # Финальное сообщение
+                final_footer = f"\n📈 Всего показано: {len(closed_signals)}"
+                if len(text + final_footer) > self.TELEGRAM_MAX_LENGTH:
+                    await update.message.reply_text(text, parse_mode='HTML')
+                    await update.message.reply_text(final_footer, parse_mode='HTML')
+                else:
+                    await update.message.reply_text(text + final_footer, parse_mode='HTML')
                 
             finally:
                 session.close()
@@ -397,6 +415,7 @@ class TelegramBot:
                     return
                 
                 text = f"📊 <b>Action Price закрытые ({hours}ч)</b>\n\n"
+                count = 0
                 
                 for sig in closed_signals:
                     direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
@@ -428,13 +447,28 @@ class TelegramBot:
                     
                     pattern = sig.pattern_type[:12]
                     
-                    text += (
+                    signal_text = (
                         f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
                         f"   {status_emoji} {exit_label} | {pnl_str} | {pattern}\n\n"
                     )
+                    
+                    # Проверка лимита Telegram (4096 символов)
+                    footer = f"\n📈 Показано: {count} из {len(closed_signals)}"
+                    if len(text + signal_text + footer) > self.TELEGRAM_MAX_LENGTH:
+                        # Отправить текущее сообщение с footer
+                        await update.message.reply_text(text + footer, parse_mode='HTML')
+                        text = f"📊 <b>Action Price закрытые ({hours}ч) - продолжение</b>\n\n"
+                    
+                    text += signal_text
+                    count += 1
                 
-                text += f"\n📈 Всего показано: {len(closed_signals)}"
-                await update.message.reply_text(text, parse_mode='HTML')
+                # Финальное сообщение
+                final_footer = f"\n📈 Всего показано: {len(closed_signals)}"
+                if len(text + final_footer) > self.TELEGRAM_MAX_LENGTH:
+                    await update.message.reply_text(text, parse_mode='HTML')
+                    await update.message.reply_text(final_footer, parse_mode='HTML')
+                else:
+                    await update.message.reply_text(text + final_footer, parse_mode='HTML')
                 
             finally:
                 session.close()

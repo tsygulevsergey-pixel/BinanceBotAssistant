@@ -57,7 +57,8 @@ Preferred communication style: Simple, everyday language.
 - Provides commands for status, strategy details, performance, validation, and latency.
 - Delivers Russian language signal alerts with entry/exit levels, regime context, and score breakdown.
 - Unified `/performance` and `/ap_stats` commands for statistics.
-- **Telegram Keyboard & Menu UI**: Persistent button keyboard for quick access to main functions, including performance and closed signals. Commands: `/menu`, `/closed`, `/closed_ap`.
+- **Telegram Keyboard & Menu UI**: Persistent button keyboard for quick access to main functions (4 buttons: Performance, Action Price, Closed Signals, Closed AP). Commands: `/menu` (show/hide), `/closed` (closed signals), `/closed_ap` (AP closed).
+- **Message Length Protection**: Auto-splits long messages into multiple parts (Telegram 4096 char limit).
 
 ### Logging System
 - Separate log files for Main Bot and Action Price in `logs/` directory, using Europe/Kyiv timezone.
