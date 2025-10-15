@@ -1,0 +1,78 @@
+============================================================
+  Trading Bot - Auto Start
+============================================================
+
+[OK] Python is installed
+
+[INFO] Activating virtual environment...
+[INFO] Checking dependencies...
+[OK] Dependencies already installed
+
+============================================================
+  Starting bot...
+============================================================
+
+2025-10-15 23:02:54 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-15 23:02:55 EEST | INFO     | 🎯 Action Price Logger initialized - log file: logs/action_price_2025-10-15_23-02-55.log
+2025-10-15 23:02:55 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-15 23:03:18 EEST | WARNING  | trading_bot | Redis unavailable (Timeout connecting to server), using SQLite fallback for signal locks
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Donchian Breakout
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Squeeze Breakout
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: ORB/IRB
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: MA/VWAP Pullback
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Break & Retest
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: ATR Momentum
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: VWAP Mean Reversion
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Range Fade
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Volume Profile
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: RSI/Stoch MR
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Liquidity Sweep
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Order Flow
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: CVD Divergence
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Time-of-Day
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Cash-and-Carry
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered strategy: Market Making
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Registered 16 strategies
+2025-10-15 23:03:18 EEST | INFO     | trading_bot |
+📊 Всего стратегий: 16
+✅ Включено: 6
+❌ Выключено: 10
+
+🟢 Активные стратегии:
+  - MA/VWAP Pullback
+  - Break & Retest
+  - Volume Profile
+  - Liquidity Sweep
+  - Order Flow
+  - Cash-and-Carry
+
+🔴 Выключенные стратегии:
+  - Donchian Breakout
+  - Squeeze Breakout
+  - ORB/IRB
+  - ATR Momentum
+  - VWAP Mean Reversion
+  - Range Fade
+  - RSI/Stoch MR
+  - CVD Divergence
+  - Time-of-Day
+  - Market Making
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | ============================================================
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Trading Bot Starting...
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | ============================================================
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | 📦 Loaded precision info from cache for 619 symbols (age: 48.2 min)
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Initializing bot...
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Rate limit status: 0/1320 (90% threshold) | Hard limit: 2400 | Usage: 0.0%
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | 🔒 Break & Retest: AIUSDT blocked (active signal)
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | 🔒 Loaded 11 active signals (Main: 1, AP: 10)
+2025-10-15 23:03:18 EEST | INFO     | trading_bot |    • Main strategies: 1 symbols blocked across 1 strategies
+2025-10-15 23:03:18 EEST | INFO     | trading_bot |    • Action Price: 10 symbols blocked
+2025-10-15 23:03:18 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-15 23:03:20 EEST | INFO     | trading_bot | Found 518 USDT-M perpetual futures pairs
+2025-10-15 23:03:20 EEST | INFO     | trading_bot | Filtered to 251 pairs with volume >= $10,000,000
+2025-10-15 23:03:20 EEST | INFO     | trading_bot | Excluded 1 stablecoins: USDCUSDT
+2025-10-15 23:03:20 EEST | INFO     | trading_bot | Starting parallel data loading for 250 symbols...
+2025-10-15 23:03:20 EEST | INFO     | trading_bot | Analyzer task started - ready to consume symbols from queue
+2025-10-15 23:03:20 EEST | INFO     | trading_bot | 📊 Analyzing restart state...
+2025-10-15 23:03:21 EEST | INFO     | trading_bot | 📊 Restart analysis:
+  ✅ Existing symbols with gaps: 132 (391 total requests)
