@@ -6,7 +6,7 @@ The bot focuses on quality strategies, market regime detection, structure-based 
 
 # Recent Changes
 
-## October 15, 2025: Action Price Telegram Commands Enhancement
+## October 15, 2025: Action Price Telegram Commands & Break & Retest Fix
 
 **New Telegram Commands:**
 - `/closed_ap` - Shows ALL closed Action Price signals (removed 20 limit, auto-splits long messages)
@@ -15,6 +15,12 @@ The bot focuses on quality strategies, market regime detection, structure-based 
 - All commands support custom time period (default 24h): `/closed_ap_sl 48`
 - Updated `/help` command with new commands documentation
 - File: `src/telegram/bot.py`
+
+**Break & Retest CVD Fix:**
+- Fixed "Series is ambiguous" error in CVD direction calculation
+- Added safe conversion: checks if cvd_val is Series, extracts last value with `.iloc[-1]`
+- Fixes both LONG and SHORT signal generation
+- File: `src/strategies/break_retest.py` (lines 572-575, 707-710)
 
 ## October 15, 2025: Action Price Stop Loss Filter
 

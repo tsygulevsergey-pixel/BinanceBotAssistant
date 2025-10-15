@@ -566,6 +566,9 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     # Получить CVD и OI из indicators
                     cvd_val = indicators.get(self.timeframe, {}).get('cvd', 0)
+                    # Если cvd_val - это Series, взять последнее значение
+                    if hasattr(cvd_val, 'iloc'):
+                        cvd_val = float(cvd_val.iloc[-1]) if len(cvd_val) > 0 else 0
                     cvd_direction = 'Bullish' if cvd_val > 0 else ('Bearish' if cvd_val < 0 else 'Neutral')
                     oi_delta_pct = indicators.get('doi_pct', 0.0)
                     
@@ -701,6 +704,9 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     # Получить CVD и OI из indicators
                     cvd_val = indicators.get(self.timeframe, {}).get('cvd', 0)
+                    # Если cvd_val - это Series, взять последнее значение
+                    if hasattr(cvd_val, 'iloc'):
+                        cvd_val = float(cvd_val.iloc[-1]) if len(cvd_val) > 0 else 0
                     cvd_direction = 'Bullish' if cvd_val > 0 else ('Bearish' if cvd_val < 0 else 'Neutral')
                     oi_delta_pct = indicators.get('doi_pct', 0.0)
                     
