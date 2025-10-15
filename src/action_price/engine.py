@@ -694,8 +694,12 @@ class ActionPriceEngine:
         """
         Собрать все данные для JSONL лога согласно спецификации
         """
-        # Signal ID
-        timestamp_val = indicators.index[confirm_idx]
+        # Signal ID - берем timestamp из колонки open_time, а не из индекса
+        if 'open_time' in indicators.columns:
+            timestamp_val = indicators['open_time'].iloc[confirm_idx]
+        else:
+            timestamp_val = indicators.index[confirm_idx]
+        
         if isinstance(timestamp_val, pd.Timestamp):
             timestamp = timestamp_val
         else:
