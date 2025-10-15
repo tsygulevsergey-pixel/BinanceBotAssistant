@@ -56,15 +56,16 @@ class VWAPCalculator:
         typical_price = (df['high'] + df['low'] + df['close']) / 3
         
         # Убедимся что все данные numeric и обработаем NaN
-        typical_price = pd.to_numeric(typical_price, errors='coerce')
-        vwap = pd.to_numeric(vwap, errors='coerce')
+        typical_price = pd.to_numeric(typical_price, errors='coerce').astype(float)
+        vwap = pd.to_numeric(vwap, errors='coerce').astype(float)
+        volume = pd.to_numeric(df['volume'], errors='coerce').astype(float)
         
-        variance = ((typical_price - vwap) ** 2 * df['volume']).cumsum() / df['volume'].cumsum()
-        std = np.sqrt(variance)
+        variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+        std = np.sqrt(variance).astype(float)
         
         # Явно конвертируем в float для избежания warning'ов
-        upper_band = vwap.astype(float) + (std.astype(float) * std_mult)
-        lower_band = vwap.astype(float) - (std.astype(float) * std_mult)
+        upper_band = vwap + (std * std_mult)
+        lower_band = vwap - (std * std_mult)
         
         return upper_band, lower_band
 
