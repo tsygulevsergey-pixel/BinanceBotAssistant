@@ -1,8 +1,12 @@
 import asyncio
+from datetime import datetime, timedelta
 from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, ContextTypes
 from src.utils.config import config
 from src.utils.logger import logger
+from src.database.models import Signal, ActionPriceSignal
+from src.database.db import Database
+import pytz
 
 
 class TelegramBot:
@@ -16,6 +20,7 @@ class TelegramBot:
         self.ap_performance_tracker = None  # Action Price tracker
         self.strategy_validator = None
         self.binance_client = binance_client
+        self.db = Database()
     
     async def start(self):
         if not self.token:
@@ -34,6 +39,8 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("performance", self.cmd_performance))
         self.app.add_handler(CommandHandler("stats", self.cmd_stats))
         self.app.add_handler(CommandHandler("ap_stats", self.cmd_ap_stats))
+        self.app.add_handler(CommandHandler("closed", self.cmd_closed))
+        self.app.add_handler(CommandHandler("closed_ap", self.cmd_closed_ap))
         self.app.add_handler(CommandHandler("validate", self.cmd_validate))
         # Новые профессиональные команды
         self.app.add_handler(CommandHandler("regime_stats", self.cmd_regime_stats))
@@ -71,7 +78,9 @@ class TelegramBot:
             "/strategies - Список стратегий\n"
             "/performance - Производительность (7 дней)\n"
             "/stats - Статистика по стратегиям\n"
-            "/ap_stats - Action Price статистика\n\n"
+            "/ap_stats - Action Price статистика\n"
+            "/closed - Закрытые сигналы (24ч)\n"
+            "/closed_ap - Закрытые Action Price (24ч)\n\n"
             "📈 <b>Профессиональная аналитика:</b>\n"
             "/regime_stats - Статистика по режимам рынка\n"
             "/confluence_stats - Эффективность confluence\n\n"
@@ -92,7 +101,12 @@ class TelegramBot:
             "/strategies - Активные стратегии\n"
             "/performance - Win rate, PnL за 7 дней\n"
             "/stats - Детали по стратегиям\n"
+            "/ap_stats - Action Price статистика\n"
+            "/closed [часы] - Закрытые сигналы (по умолчанию 24ч)\n"
+            "/closed_ap [часы] - Закрытые Action Price (по умолчанию 24ч)\n"
             "/validate - Проверка корректности стратегий\n"
+            "/regime_stats - Статистика по режимам рынка\n"
+            "/confluence_stats - Эффективность confluence\n"
             "/latency - Задержки WebSocket\n"
             "/report - Статистика за период\n"
         )
@@ -244,6 +258,138 @@ class TelegramBot:
             await update.message.reply_text(text, parse_mode='HTML')
         except Exception as e:
             logger.error(f"Error getting AP stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_closed(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать закрытые сигналы основных стратегий за 24 часа"""
+        if not update.message:
+            return
+        
+        try:
+            hours = 24
+            if context.args and context.args[0].isdigit():
+                hours = int(context.args[0])
+            
+            start_time = datetime.now(pytz.UTC) - timedelta(hours=hours)
+            
+            session = self.db.get_session()
+            try:
+                closed_signals = session.query(Signal).filter(
+                    Signal.closed_at >= start_time,
+                    Signal.status.in_(['WIN', 'LOSS', 'TIME_STOP', 'BREAKEVEN'])
+                ).order_by(Signal.closed_at.desc()).limit(20).all()
+                
+                if not closed_signals:
+                    await update.message.reply_text(f"📊 Нет закрытых сигналов за последние {hours}ч")
+                    return
+                
+                text = f"📊 <b>Закрытые сигналы ({hours}ч)</b>\n\n"
+                
+                for sig in closed_signals:
+                    direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
+                    
+                    exit_type = getattr(sig, 'exit_type', 'N/A')
+                    if sig.status == 'WIN':
+                        status_emoji = "✅"
+                        exit_label = exit_type if exit_type else "WIN"
+                    elif sig.status == 'LOSS':
+                        status_emoji = "❌"
+                        exit_label = exit_type if exit_type else "LOSS"
+                    elif sig.status == 'BREAKEVEN':
+                        status_emoji = "⚖️"
+                        exit_label = "BE"
+                    else:
+                        status_emoji = "⏱️"
+                        exit_label = "TIME_STOP"
+                    
+                    pnl = sig.pnl_percent if sig.pnl_percent is not None else 0.0
+                    pnl_str = f"{pnl:+.2f}%" if pnl != 0 else "0.00%"
+                    
+                    strategy_short = sig.strategy_name[:15]
+                    
+                    text += (
+                        f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
+                        f"   {status_emoji} {exit_label} | {pnl_str} | {strategy_short}\n\n"
+                    )
+                
+                text += f"\n📈 Всего показано: {len(closed_signals)}"
+                await update.message.reply_text(text, parse_mode='HTML')
+                
+            finally:
+                session.close()
+                
+        except Exception as e:
+            logger.error(f"Error getting closed signals: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_closed_ap(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать закрытые сигналы Action Price за 24 часа"""
+        if not update.message:
+            return
+        
+        try:
+            hours = 24
+            if context.args and context.args[0].isdigit():
+                hours = int(context.args[0])
+            
+            start_time = datetime.now(pytz.UTC) - timedelta(hours=hours)
+            
+            session = self.db.get_session()
+            try:
+                closed_signals = session.query(ActionPriceSignal).filter(
+                    ActionPriceSignal.closed_at >= start_time,
+                    ActionPriceSignal.status.in_(['WIN', 'LOSS', 'TIME_STOP', 'BREAKEVEN'])
+                ).order_by(ActionPriceSignal.closed_at.desc()).limit(20).all()
+                
+                if not closed_signals:
+                    await update.message.reply_text(f"📊 Нет закрытых Action Price сигналов за последние {hours}ч")
+                    return
+                
+                text = f"📊 <b>Action Price закрытые ({hours}ч)</b>\n\n"
+                
+                for sig in closed_signals:
+                    direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
+                    
+                    exit_reason = sig.exit_reason if sig.exit_reason else 'N/A'
+                    
+                    if sig.status == 'WIN':
+                        status_emoji = "✅"
+                        if 'TAKE_PROFIT_2' in exit_reason:
+                            exit_label = "TP2"
+                        elif 'TAKE_PROFIT_1' in exit_reason:
+                            exit_label = "TP1"
+                        elif 'BREAKEVEN' in exit_reason:
+                            exit_label = "BE"
+                        else:
+                            exit_label = "WIN"
+                    elif sig.status == 'LOSS':
+                        status_emoji = "❌"
+                        exit_label = "SL"
+                    elif sig.status == 'BREAKEVEN':
+                        status_emoji = "⚖️"
+                        exit_label = "BE"
+                    else:
+                        status_emoji = "⏱️"
+                        exit_label = "TIME_STOP"
+                    
+                    pnl = sig.pnl_percent if sig.pnl_percent is not None else 0.0
+                    pnl_str = f"{pnl:+.2f}%" if pnl != 0 else "0.00%"
+                    
+                    pattern = sig.pattern_type[:12]
+                    
+                    text += (
+                        f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
+                        f"   {status_emoji} {exit_label} | {pnl_str} | {pattern}\n\n"
+                    )
+                
+                text += f"\n📈 Всего показано: {len(closed_signals)}"
+                await update.message.reply_text(text, parse_mode='HTML')
+                
+            finally:
+                session.close()
+                
+        except Exception as e:
+            logger.error(f"Error getting closed AP signals: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
     
     async def cmd_validate(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

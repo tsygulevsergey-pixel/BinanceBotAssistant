@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Telegram Closed Signals Commands (October 15, 2025)
+- **New Commands**: Added `/closed` and `/closed_ap` to show detailed list of closed signals
+- **Features**:
+  - `/closed [hours]` - Shows closed signals from main strategies (default 24h, max 20 signals)
+  - `/closed_ap [hours]` - Shows closed Action Price signals (default 24h, max 20 signals)
+  - Displays: Symbol, Direction (🟢/🔴), Exit Type (TP1/TP2/SL/BE/TIME_STOP), PnL%, Strategy/Pattern
+  - Sorted by closed_at DESC (newest first)
+  - Custom time range: `/closed 48` shows last 48 hours
+- **Implementation**: Direct database queries to `signals` and `action_price_signals` tables
+- **Files**: `src/telegram/bot.py` (lines 259-383, 40-41, 85-86, 108-109)
+
 ## Action Price Performance Tracker Statistics Fix (October 15, 2025)
 - **Problem**: Statistics showed both TP1 and TP2 for same signal (e.g., signal hits TP2 → both counters +1)
 - **Root Cause**: Used `partial_exit_1_at/partial_exit_2_at` flags instead of `exit_reason` for counting
