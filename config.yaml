@@ -11,8 +11,8 @@ database:
 
 # Binance API
 binance:
-  use_testnet: true  # true = использовать Binance Testnet (для теста на Replit)
-  signals_only_mode: true  # true = только сигналы без торговли (не нужны API ключи)
+  use_testnet: true  # true = Binance Testnet (для работы на Replit)
+  signals_only_mode: true  # true = только сигналы без торговли
   rest_weight_limit: 2400  # FUTURES API limit = 2400/min (было 1100 для SPOT), safety 90% = 2160
   startup_delay_seconds: 30  # Задержка при первом запуске если нет кеша (защита от rate limit)
   ws_reconnect_delay: 5
