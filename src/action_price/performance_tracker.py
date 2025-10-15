@@ -303,6 +303,37 @@ class ActionPricePerformanceTracker:
                 'status': 'WIN'
             }
         
+        # КРИТИЧНО: Time stop после TP1 (закрываем если висит > 48 часов после TP1)
+        if signal.partial_exit_1_at:
+            hours_since_tp1 = (datetime.now(pytz.UTC) - signal.partial_exit_1_at).total_seconds() / 3600
+            if hours_since_tp1 > 48:
+                # Закрываем по текущей цене (trailing stop logic)
+                total_pnl = self._calculate_total_pnl(signal, current_price, entry)
+                return {
+                    'exit_price': current_price,
+                    'reason': 'TIME_STOP_AFTER_TP1',
+                    'pnl_percent': total_pnl,
+                    'pnl': total_pnl,
+                    'status': 'WIN' if total_pnl > 0 else 'LOSS'
+                }
+        
+        # Обычный time stop (7 дней максимум без TP1)
+        hours_since_created = (datetime.now(pytz.UTC) - signal.created_at).total_seconds() / 3600
+        if hours_since_created > 168:  # 7 дней
+            # Закрываем по текущей цене
+            if direction == 'LONG':
+                pnl_pct = ((current_price - entry) / entry) * 100
+            else:
+                pnl_pct = ((entry - current_price) / entry) * 100
+            
+            return {
+                'exit_price': current_price,
+                'reason': 'TIME_STOP',
+                'pnl_percent': pnl_pct,
+                'pnl': pnl_pct,
+                'status': 'WIN' if pnl_pct > 0 else 'LOSS'
+            }
+        
         return None
     
     def _calculate_total_pnl(self, signal: ActionPriceSignal, 

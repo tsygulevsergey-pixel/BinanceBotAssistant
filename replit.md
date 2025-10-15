@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Action Price Performance Tracker Fix (October 15, 2025)
+- **Problem**: /ap_stats showed 0 closed signals despite having active trades because tracker didn't close signals after TP1
+- **Root Cause**: Signals reaching TP1 but not TP2/SL would remain in PENDING status forever - tracker never closed them
+- **Solution**: 
+  - Added Time Stop after TP1: Auto-closes signals after 48 hours if TP2 not reached (trailing stop logic)
+  - Added Regular Time Stop: Auto-closes all signals after 7 days maximum
+  - Both close with proper WIN/LOSS status based on PnL
+- **Result**: Signals now properly close and appear in /ap_stats statistics
+- **Files**: `src/action_price/performance_tracker.py` (lines 309-340)
+
 ## Action Price Candle Selection Fix (October 15, 2025)
 - **Problem**: Bot analyzed wrong candles (-3, -2) instead of last 2 closed (-2, -1), causing EMA200 mismatch with Binance
 - **Root Cause**: Hardcoded indices used -3/-2 instead of -2/-1 for initiator/confirmation
