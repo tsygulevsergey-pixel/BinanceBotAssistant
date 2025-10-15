@@ -1,0 +1,238 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+//@version=5
+indicator("Pump Scanner (Lite)", overlay=true, max_labels_count=50)
+
+// ════════════════════════════════════════════════════════════════════════════
+// НАСТРОЙКИ
+// ════════════════════════════════════════════════════════════════════════════
+
+// Основные параметры
+emaLen200 = input.int(200, "EMA200 Length", minval=1, group="EMA & Ribbons")
+atrLen = input.int(14, "ATR Length", minval=1, group="ATR Channels")
+atrMult = input.float(2.0, "ATR Multiplier", minval=0.1, group="ATR Channels")
+
+bbLen = input.int(20, "BB Length", minval=1, group="Bollinger & Keltner")
+bbMult = input.float(2.0, "BB Multiplier", minval=0.1, group="Bollinger & Keltner")
+kcLen = input.int(20, "KC Length", minval=1, group="Bollinger & Keltner")
+kcMult = input.float(1.5, "KC Multiplier", minval=0.1, group="Bollinger & Keltner")
+
+volLen = input.int(50, "Volume SMA Length", minval=1, group="Volume & CVD")
+volZThreshold = input.float(2.0, "Volume Z-Score Threshold", minval=0.5, group="Volume & CVD")
+lrLen = input.int(50, "CVD Linear Regression Length", minval=1, group="Volume & CVD")
+
+swingLen = input.int(20, "Swing Length", minval=1, group="Swing High/Low")
+
+// Пороговые значения
+watchMinScore = input.int(4, "Watch Min Score", minval=1, maxval=10, group="Thresholds")
+confirmDepthMin = input.float(0.35, "Trigger Depth (ATR)", minval=0.1, step=0.05, group="Thresholds")
+airMin = input.float(0.35, "Trigger Air to Band (ATR)", minval=0.1, step=0.05, group="Thresholds")
+ribbonTightThr = input.float(0.25, "Ribbon Tight (ATR)", minval=0.05, step=0.05, group="Thresholds")
+distTo200Thr = input.float(0.2, "Distance to EMA200 (ATR)", minval=0.05, step=0.05, group="Thresholds")
+slopeUpThr = input.float(0.02, "EMA200 Slope Up Threshold", minval=0.0, step=0.01, group="Thresholds")
+lookbackBW = input.int(50, "BBWidth Lookback", minval=10, group="Thresholds")
+bwCoef = input.float(0.8, "BBWidth Coefficient", minval=0.1, step=0.1, group="Thresholds")
+
+// Опции
+enableShorts = input.bool(false, "Enable Short Triggers", group="Options")
+enablePreTouchFilter = input.bool(true, "Enable Pre-Touch Filter", group="Options")
+showPanel = input.bool(true, "Show Info Panel", group="Options")
+showWatchBg = input.bool(true, "Show Watch Background", group="Options")
+showTriggerBg = input.bool(true, "Show Trigger Background", group="Options")
+
+// ════════════════════════════════════════════════════════════════════════════
+// РАСЧЁТЫ
+// ════════════════════════════════════════════════════════════════════════════
+
+// EMA200 и наклон
+ema200 = ta.ema(close, emaLen200)
+atr14 = ta.atr(atrLen)
+slope200 = nz((ema200 - ema200[1]) / atr14, 0)
+
+// EMA Ribbon
+ema5 = ta.ema(close, 5)
+ema9 = ta.ema(close, 9)
+ema13 = ta.ema(close, 13)
+ema21 = ta.ema(close, 21)
+
+// ATR каналы
+atrMid = ta.ema(close, atrLen)
+atrUpper = close + atrMult * atr14
+atrLower = close - atrMult * atr14
+
+// Bollinger Bands
+bbBasis = ta.sma(close, bbLen)
+bbDev = ta.stdev(close, bbLen)
+bbUpper = bbBasis + bbMult * bbDev
+bbLower = bbBasis - bbMult * bbDev
+bbWidth = nz((bbUpper - bbLower) / bbBasis, 0)
+
+// Keltner Channel
+kcMid = ta.ema(close, kcLen)
+kcRange = ta.atr(kcLen)
+kcUpper = kcMid + kcMult * kcRange
+kcLower = kcMid - kcMult * kcRange
+
+// TTM Squeeze
+squeezeOn = (bbLower > kcLower) and (bbUpper < kcUpper)
+bbWidthSMA = ta.sma(bbWidth, lookbackBW)
+squeezeAlt = bbWidth < bbWidthSMA * bwCoef
+
+// Swing High/Low
+swingHigh = ta.highest(high, swingLen)
+swingLow = ta.lowest(low, swingLen)
+
+// Volume Spike
+volSMA = ta.sma(volume, volLen)
+volStd = ta.stdev(volume, volLen)
+volZ = nz((volume - volSMA) / volStd, 0)
+volSpike = volZ >= volZThreshold
+
+// Псевдо-CVD
+signedVol = volume * math.sign(close - close[1])
+var float cvd = 0
+cvd := nz(cvd[1], 0) + signedVol
+cvdSlope = ta.linreg(cvd, lrLen, 0)
+
+// Ribbon Compression
+ribbonMax = math.max(ema5, ema9, ema13, ema21)
+ribbonMin = math.min(ema5, ema9, ema13, ema21)
+ribbonSpan = ribbonMax - ribbonMin
+ribbonTight = nz(ribbonSpan / atr14, 0) <= ribbonTightThr
+
+// ════════════════════════════════════════════════════════════════════════════
+// ЛОГИКА СКОРИНГА
+// ════════════════════════════════════════════════════════════════════════════
+
+// Компоненты Watch Score
+score_squeeze = squeezeOn or squeezeAlt ? 2 : 0
+score_bbWidth = bbWidth < bbWidthSMA * bwCoef ? 1 : 0
+score_ribbon = ribbonTight ? 1 : 0
+score_dist200 = math.abs(close - ema200) <= atr14 * distTo200Thr ? 1 : 0
+score_slope200 = slope200 >= slopeUpThr ? 1 : 0
+score_volSpike = volSpike ? 1 : 0
+score_cvdSlope = cvdSlope > 0 ? 1 : 0
+
+watchScore = score_squeeze + score_bbWidth + score_ribbon + score_dist200 + score_slope200 + score_volSpike + score_cvdSlope
+
+// Watch состояние
+isWatch = watchScore >= watchMinScore
+
+// ════════════════════════════════════════════════════════════════════════════
+// ТРИГГЕРЫ
+// ════════════════════════════════════════════════════════════════════════════
+
+// Расстояния для триггера
+distTo200ATR = nz((close - ema200) / atr14, 0)
+distToUpperBand = nz((bbUpper - close) / atr14, 0)
+distToLowerBand = nz((close - bbLower) / atr14, 0)
+
+// Pre-touch фильтр
+preTouchLong = enablePreTouchFilter and (low[1] <= ema200) and (distTo200ATR < 0.3)
+preTouchShort = enablePreTouchFilter and (high[1] >= ema200) and (distTo200ATR > -0.3)
+
+// Trigger Long
+breakoutLong = close > swingHigh
+depthLong = close - ema200 >= atr14 * confirmDepthMin
+airLong = distToUpperBand >= airMin
+volumeConfirm = volSpike or cvdSlope > 0
+
+isTriggerLong = breakoutLong and depthLong and airLong and volumeConfirm and not preTouchLong
+
+// Trigger Short
+breakoutShort = close < swingLow
+depthShort = ema200 - close >= atr14 * confirmDepthMin
+airShort = distToLowerBand >= airMin
+
+isTriggerShort = enableShorts and breakoutShort and depthShort and airShort and volumeConfirm and not preTouchShort
+
+// ════════════════════════════════════════════════════════════════════════════
+// ВИЗУАЛИЗАЦИЯ
+// ════════════════════════════════════════════════════════════════════════════
+
+// EMA Lines
+plot(ema200, "EMA200", color=color.white, linewidth=2)
+plot(ema5, "EMA5", color=color.red, linewidth=1)
+plot(ema9, "EMA9", color=color.orange, linewidth=1)
+plot(ema13, "EMA13", color=color.yellow, linewidth=1)
+plot(ema21, "EMA21", color=color.green, linewidth=1)
+
+// ATR Channels
+plot(atrUpper, "ATR Upper", color=color.new(color.gray, 70), linewidth=1, style=plot.style_line)
+plot(atrLower, "ATR Lower", color=color.new(color.gray, 70), linewidth=1, style=plot.style_line)
+
+// Bollinger Bands
+plot(bbUpper, "BB Upper", color=color.new(color.blue, 80), linewidth=1)
+plot(bbLower, "BB Lower", color=color.new(color.blue, 80), linewidth=1)
+
+// Фоны
+bgWatch = showWatchBg and isWatch and not isTriggerLong and not isTriggerShort ? color.new(color.yellow, 90) : na
+bgTriggerLong = showTriggerBg and isTriggerLong ? color.new(color.green, 85) : na
+bgTriggerShort = showTriggerBg and isTriggerShort ? color.new(color.red, 85) : na
+
+bgcolor(bgWatch, title="Watch Background")
+bgcolor(bgTriggerLong, title="Trigger Long Background")
+bgcolor(bgTriggerShort, title="Trigger Short Background")
+
+// Метки
+if isWatch and barstate.islast and not isTriggerLong and not isTriggerShort
+    label.new(bar_index, high, "Watch S:" + str.tostring(watchScore), 
+              style=label.style_label_down, color=color.yellow, textcolor=color.black, size=size.small)
+
+if isTriggerLong and barstate.islast
+    label.new(bar_index, low, "TRIGGER L\nS:" + str.tostring(watchScore), 
+              style=label.style_label_up, color=color.green, textcolor=color.white, size=size.normal)
+
+if isTriggerShort and barstate.islast
+    label.new(bar_index, high, "TRIGGER S\nS:" + str.tostring(watchScore), 
+              style=label.style_label_down, color=color.red, textcolor=color.white, size=size.normal)
+
+// Панель информации
+if showPanel and barstate.islast
+    var table infoTable = table.new(position.top_right, 2, 10, border_width=1, bgcolor=color.new(color.black, 80), border_color=color.gray)
+    
+    table.cell(infoTable, 0, 0, "Score:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 0, str.tostring(watchScore), text_color=color.yellow, text_size=size.small)
+    
+    table.cell(infoTable, 0, 1, "Squeeze:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 1, squeezeOn ? "✓" : "✗", text_color=squeezeOn ? color.lime : color.red, text_size=size.small)
+    
+    table.cell(infoTable, 0, 2, "BBWidth:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 2, str.tostring(bbWidth, "#.####"), text_color=color.white, text_size=size.small)
+    
+    table.cell(infoTable, 0, 3, "Dist200:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 3, str.tostring(distTo200ATR, "#.##") + " ATR", text_color=color.white, text_size=size.small)
+    
+    table.cell(infoTable, 0, 4, "Air:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 4, str.tostring(math.min(distToUpperBand, distToLowerBand), "#.##") + " ATR", text_color=color.white, text_size=size.small)
+    
+    table.cell(infoTable, 0, 5, "VolZ:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 5, str.tostring(volZ, "#.##"), text_color=volSpike ? color.lime : color.white, text_size=size.small)
+    
+    table.cell(infoTable, 0, 6, "CVD:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 6, cvdSlope > 0 ? "↑" : "↓", text_color=cvdSlope > 0 ? color.lime : color.red, text_size=size.small)
+    
+    table.cell(infoTable, 0, 7, "Ribbon:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 7, ribbonTight ? "✓" : "✗", text_color=ribbonTight ? color.lime : color.red, text_size=size.small)
+
+// ════════════════════════════════════════════════════════════════════════════
+// АЛЕРТЫ
+// ════════════════════════════════════════════════════════════════════════════
+
+alertcondition(isWatch, "Pump Watch", "WATCH: {{ticker}} TF={{interval}} Score={{plot_0}} | BW=" + str.tostring(bbWidth, "#.####") + " | Squeeze=" + str.tostring(squeezeOn) + " | Dist200=" + str.tostring(distTo200ATR, "#.##") + " ATR")
+
+alertcondition(isTriggerLong, "Pump Trigger Long", "TRIGGER LONG: {{ticker}} TF={{interval}} Score={{plot_0}} | Close>EMA200 by " + str.tostring(distTo200ATR, "#.##") + " ATR | VolZ=" + str.tostring(volZ, "#.##"))
+
+alertcondition(isTriggerShort, "Pump Trigger Short", "TRIGGER SHORT: {{ticker}} TF={{interval}} Score={{plot_0}} | Close<EMA200 by " + str.tostring(distTo200ATR, "#.##") + " ATR | VolZ=" + str.tostring(volZ, "#.##"))
+
+// ════════════════════════════════════════════════════════════════════════════
+// ВЫХОДНЫЕ СЕРИИ (для экспорта/бэктеста)
+// ════════════════════════════════════════════════════════════════════════════
+
+plot(watchScore, "Score Series", display=display.data_window)
+plot(isWatch ? 1 : 0, "Is Watch", display=display.data_window)
+plot(isTriggerLong ? 1 : 0, "Is Trigger Long", display=display.data_window)
+plot(isTriggerShort ? 1 : 0, "Is Trigger Short", display=display.data_window)
+plot(bbWidth, "BBWidth", display=display.data_window)
+plot(distTo200ATR, "Dist to EMA200 (ATR)", display=display.data_window)
+plot(volZ, "Volume Z-Score", display=display.data_window)
+plot(cvdSlope, "CVD Slope", display=display.data_window)
