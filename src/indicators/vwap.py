@@ -57,15 +57,21 @@ class VWAPCalculator:
         
         # Убедимся что все данные numeric и обработаем NaN
         typical_price = pd.to_numeric(typical_price, errors='coerce').astype(float)
-        vwap = pd.to_numeric(vwap, errors='coerce').astype(float)
+        vwap_clean = pd.to_numeric(vwap, errors='coerce').astype(float)
         volume = pd.to_numeric(df['volume'], errors='coerce').astype(float)
         
-        variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
-        std = np.sqrt(variance).astype(float)
+        # Используем .values для избежания проблем с индексом (Timestamp)
+        tp_vals = typical_price.values
+        vwap_vals = vwap_clean.values
+        vol_vals = volume.values
         
-        # Явно конвертируем в float для избежания warning'ов
-        upper_band = vwap + (std * std_mult)
-        lower_band = vwap - (std * std_mult)
+        # Расчет variance на чистых numpy массивах
+        variance_vals = np.nancumsum((tp_vals - vwap_vals) ** 2 * vol_vals) / np.nancumsum(vol_vals)
+        std_vals = np.sqrt(variance_vals)
+        
+        # Возвращаем как Series с оригинальным индексом
+        upper_band = pd.Series(vwap_vals + (std_vals * std_mult), index=df.index)
+        lower_band = pd.Series(vwap_vals - (std_vals * std_mult), index=df.index)
         
         return upper_band, lower_band
 

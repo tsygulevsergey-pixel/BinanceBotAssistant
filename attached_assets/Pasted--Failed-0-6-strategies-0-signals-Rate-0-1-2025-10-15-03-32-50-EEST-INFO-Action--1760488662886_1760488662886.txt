@@ -1,0 +1,66 @@
+ Failed: 0 | 6 strategies | 0 signals | Rate: 0.1%
+2025-10-15 03:32:50 EEST | INFO     | 🎯 Action Price analysis complete: 1 signals found
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:63: RuntimeWarning: '<' not supported between instances of 'Timestamp' and 'int', sort order is undefined for incomparable objects.
+  variance = ((typical_price - vwap) ** 2 * volume).cumsum() / volume.cumsum()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:67: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  upper_band = vwap + (std * std_mult)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\indicators\vwap.py:68: RuntimeWarning: '<' not supported between instances of 'int' and 'Timestamp', sort order is undefined for incomparable objects.
+  lower_band = vwap - (std * std_mult)
