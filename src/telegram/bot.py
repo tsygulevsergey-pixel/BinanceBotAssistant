@@ -43,6 +43,8 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("ap_stats", self.cmd_ap_stats))
         self.app.add_handler(CommandHandler("closed", self.cmd_closed))
         self.app.add_handler(CommandHandler("closed_ap", self.cmd_closed_ap))
+        self.app.add_handler(CommandHandler("closed_ap_sl", self.cmd_closed_ap_sl))
+        self.app.add_handler(CommandHandler("closed_ap_tp", self.cmd_closed_ap_tp))
         self.app.add_handler(CommandHandler("menu", self.cmd_menu))
         self.app.add_handler(CommandHandler("validate", self.cmd_validate))
         # Новые профессиональные команды
@@ -156,7 +158,9 @@ class TelegramBot:
             "/stats - Детали по стратегиям\n"
             "/ap_stats - Action Price статистика\n"
             "/closed [часы] - Закрытые сигналы (по умолчанию 24ч)\n"
-            "/closed_ap [часы] - Закрытые Action Price (по умолчанию 24ч)\n"
+            "/closed_ap [часы] - Все закрытые Action Price (по умолчанию 24ч)\n"
+            "/closed_ap_sl [часы] - Только Stop Loss Action Price\n"
+            "/closed_ap_tp [часы] - Только TP/BE Action Price\n"
             "/validate - Проверка корректности стратегий\n"
             "/regime_stats - Статистика по режимам рынка\n"
             "/confluence_stats - Эффективность confluence\n"
@@ -408,7 +412,7 @@ class TelegramBot:
                 closed_signals = session.query(ActionPriceSignal).filter(
                     ActionPriceSignal.closed_at >= start_time,
                     ActionPriceSignal.status.in_(['WIN', 'LOSS', 'TIME_STOP', 'BREAKEVEN'])
-                ).order_by(ActionPriceSignal.closed_at.desc()).limit(20).all()
+                ).order_by(ActionPriceSignal.closed_at.desc()).all()
                 
                 if not closed_signals:
                     await update.message.reply_text(f"📊 Нет закрытых Action Price сигналов за последние {hours}ч")
@@ -475,6 +479,141 @@ class TelegramBot:
                 
         except Exception as e:
             logger.error(f"Error getting closed AP signals: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_closed_ap_sl(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать закрытые по Stop Loss сигналы Action Price за 24 часа"""
+        if not update.message:
+            return
+        
+        try:
+            hours = 24
+            if context.args and context.args[0].isdigit():
+                hours = int(context.args[0])
+            
+            start_time = datetime.now(pytz.UTC) - timedelta(hours=hours)
+            
+            session = self.db.get_session()
+            try:
+                closed_signals = session.query(ActionPriceSignal).filter(
+                    ActionPriceSignal.closed_at >= start_time,
+                    ActionPriceSignal.status == 'LOSS'
+                ).order_by(ActionPriceSignal.closed_at.desc()).all()
+                
+                if not closed_signals:
+                    await update.message.reply_text(f"📊 Нет закрытых по SL Action Price сигналов за последние {hours}ч")
+                    return
+                
+                text = f"🔴 <b>Action Price Stop Loss ({hours}ч)</b>\n\n"
+                count = 0
+                
+                for sig in closed_signals:
+                    direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
+                    pnl = sig.pnl_percent if sig.pnl_percent is not None else 0.0
+                    pnl_str = f"{pnl:+.2f}%" if pnl != 0 else "0.00%"
+                    pattern = sig.pattern_type[:12]
+                    
+                    signal_text = (
+                        f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
+                        f"   ❌ SL | {pnl_str} | {pattern}\n\n"
+                    )
+                    
+                    footer = f"\n📈 Показано: {count} из {len(closed_signals)}"
+                    if len(text + signal_text + footer) > self.TELEGRAM_MAX_LENGTH:
+                        await update.message.reply_text(text + footer, parse_mode='HTML')
+                        text = f"🔴 <b>Action Price Stop Loss ({hours}ч) - продолжение</b>\n\n"
+                    
+                    text += signal_text
+                    count += 1
+                
+                final_footer = f"\n📈 Всего показано: {len(closed_signals)}"
+                if len(text + final_footer) > self.TELEGRAM_MAX_LENGTH:
+                    await update.message.reply_text(text, parse_mode='HTML')
+                    await update.message.reply_text(final_footer, parse_mode='HTML')
+                else:
+                    await update.message.reply_text(text + final_footer, parse_mode='HTML')
+                
+            finally:
+                session.close()
+                
+        except Exception as e:
+            logger.error(f"Error getting closed AP SL signals: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_closed_ap_tp(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать закрытые по TP/BE сигналы Action Price за 24 часа"""
+        if not update.message:
+            return
+        
+        try:
+            hours = 24
+            if context.args and context.args[0].isdigit():
+                hours = int(context.args[0])
+            
+            start_time = datetime.now(pytz.UTC) - timedelta(hours=hours)
+            
+            session = self.db.get_session()
+            try:
+                closed_signals = session.query(ActionPriceSignal).filter(
+                    ActionPriceSignal.closed_at >= start_time,
+                    ActionPriceSignal.status.in_(['WIN', 'BREAKEVEN'])
+                ).order_by(ActionPriceSignal.closed_at.desc()).all()
+                
+                if not closed_signals:
+                    await update.message.reply_text(f"📊 Нет закрытых по TP/BE Action Price сигналов за последние {hours}ч")
+                    return
+                
+                text = f"🟢 <b>Action Price TP/BE ({hours}ч)</b>\n\n"
+                count = 0
+                
+                for sig in closed_signals:
+                    direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
+                    
+                    exit_reason = sig.exit_reason if sig.exit_reason else 'N/A'
+                    
+                    if sig.status == 'WIN':
+                        status_emoji = "✅"
+                        if 'TAKE_PROFIT_2' in exit_reason:
+                            exit_label = "TP2"
+                        elif 'TAKE_PROFIT_1' in exit_reason:
+                            exit_label = "TP1"
+                        elif 'BREAKEVEN' in exit_reason:
+                            exit_label = "BE"
+                        else:
+                            exit_label = "WIN"
+                    else:
+                        status_emoji = "✅"
+                        exit_label = "BE"
+                    
+                    pnl = sig.pnl_percent if sig.pnl_percent is not None else 0.0
+                    pnl_str = f"{pnl:+.2f}%" if pnl != 0 else "0.00%"
+                    pattern = sig.pattern_type[:12]
+                    
+                    signal_text = (
+                        f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
+                        f"   {status_emoji} {exit_label} | {pnl_str} | {pattern}\n\n"
+                    )
+                    
+                    footer = f"\n📈 Показано: {count} из {len(closed_signals)}"
+                    if len(text + signal_text + footer) > self.TELEGRAM_MAX_LENGTH:
+                        await update.message.reply_text(text + footer, parse_mode='HTML')
+                        text = f"🟢 <b>Action Price TP/BE ({hours}ч) - продолжение</b>\n\n"
+                    
+                    text += signal_text
+                    count += 1
+                
+                final_footer = f"\n📈 Всего показано: {len(closed_signals)}"
+                if len(text + final_footer) > self.TELEGRAM_MAX_LENGTH:
+                    await update.message.reply_text(text, parse_mode='HTML')
+                    await update.message.reply_text(final_footer, parse_mode='HTML')
+                else:
+                    await update.message.reply_text(text + final_footer, parse_mode='HTML')
+                
+            finally:
+                session.close()
+                
+        except Exception as e:
+            logger.error(f"Error getting closed AP TP signals: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
     
     async def cmd_validate(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

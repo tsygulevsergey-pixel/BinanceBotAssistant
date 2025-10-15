@@ -6,6 +6,16 @@ The bot focuses on quality strategies, market regime detection, structure-based 
 
 # Recent Changes
 
+## October 15, 2025: Action Price Telegram Commands Enhancement
+
+**New Telegram Commands:**
+- `/closed_ap` - Shows ALL closed Action Price signals (removed 20 limit, auto-splits long messages)
+- `/closed_ap_sl [hours]` - Shows only Stop Loss signals for detailed loss analysis
+- `/closed_ap_tp [hours]` - Shows only TP1/TP2/Breakeven signals for win analysis
+- All commands support custom time period (default 24h): `/closed_ap_sl 48`
+- Updated `/help` command with new commands documentation
+- File: `src/telegram/bot.py`
+
 ## October 15, 2025: Action Price Stop Loss Filter
 
 **Stop Loss Risk Control:**
@@ -130,6 +140,7 @@ Preferred communication style: Simple, everyday language.
 - Unified `/performance` and `/ap_stats` commands for statistics.
 - **Telegram Keyboard & Menu UI**: Persistent button keyboard for quick access to main functions (4 buttons: Performance, Action Price, Closed Signals, Closed AP). Commands: `/menu` (show/hide), `/closed` (closed signals), `/closed_ap` (AP closed).
 - **Message Length Protection**: Auto-splits long messages into multiple parts (Telegram 4096 char limit).
+- **Action Price Filtered Commands**: `/closed_ap_sl` (only Stop Loss), `/closed_ap_tp` (only TP1/TP2/BE) for detailed signal analysis.
 
 ### Logging System
 - Separate log files for Main Bot and Action Price in `logs/` directory, using Europe/Kyiv timezone.
