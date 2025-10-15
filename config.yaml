@@ -53,7 +53,9 @@ market_detector:
     execution: ["1m"]
   
   trend:
-    adx_threshold: 20
+    adx_threshold: 20  # Базовый порог (не используется больше)
+    adx_threshold_trend: 25  # ФАЗА 1: Строже для TREND режима
+    adx_threshold_squeeze: 15  # ФАЗА 1: Мягче для SQUEEZE режима
     ema_periods: [20, 50, 200]
     late_trend_atr_multiplier: 1.8
   
@@ -169,7 +171,9 @@ strategies:
     enabled: true
     breakout_atr: 0.25
     zone_atr: [0.2, 0.3]
-    volume_threshold: 1.5
+    volume_threshold: 1.5  # Базовый (не используется больше)
+    volume_threshold_trend: 1.8  # ФАЗА 1: Строже для TREND
+    volume_threshold_squeeze: 1.2  # ФАЗА 1: Мягче для SQUEEZE
     split_ratio: 0.5  # 50% limit, 50% confirm
   
   # #9 Volume Profile ⭐ CORE - Институциональные уровни

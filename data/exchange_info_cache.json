@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-14T22:34:02.564224+00:00",
+  "timestamp": "2025-10-15T19:15:07.760784+00:00",
   "symbols_info": {
     "BTCUSDT": {
       "pricePrecision": 2,
@@ -3707,6 +3707,12 @@
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "RECALLUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "status": "PENDING_TRADING",
       "contractType": "PERPETUAL"
     }
   }

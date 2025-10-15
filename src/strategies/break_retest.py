@@ -30,7 +30,15 @@ class BreakRetestStrategy(BaseStrategy):
         self.split_ratio = strategy_config.get('split_ratio', 0.5)  # 50/50
         self.timeframe = '15m'
         self.breakout_lookback = 20  # Ищем пробои за последние 20 баров
-        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
+        
+        # ФАЗА 1: Разные ADX пороги для разных режимов
+        self.adx_threshold_trend = config.get('market_detector.trend.adx_threshold_trend', 25)  # Строже для TREND
+        self.adx_threshold_squeeze = config.get('market_detector.trend.adx_threshold_squeeze', 15)  # Мягче для SQUEEZE
+        self.adx_threshold_default = config.get('market_detector.trend.adx_threshold', 20)  # По умолчанию
+        
+        # ФАЗА 1: Разные volume требования для режимов
+        self.volume_threshold_trend = config.get('strategies.retest.volume_threshold_trend', 1.8)  # Строже для TREND
+        self.volume_threshold_squeeze = config.get('strategies.retest.volume_threshold_squeeze', 1.2)  # Мягче для SQUEEZE
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -94,7 +102,216 @@ class BreakRetestStrategy(BaseStrategy):
             'swing_low_idx': swing_low_idx
         }
     
-    def _find_recent_breakout(self, df: pd.DataFrame, atr: pd.Series, vwap: pd.Series, adx: pd.Series) -> Optional[Dict]:
+    def _check_higher_timeframe_trend(self, df_1h: Optional[pd.DataFrame], df_4h: Optional[pd.DataFrame], 
+                                      direction: str) -> tuple[bool, bool]:
+        """
+        ФАЗА 1: Higher Timeframe Confirmation
+        Проверяет тренд на 1H и 4H таймфреймах
+        Возвращает: (подтверждено, есть_данные)
+        """
+        from src.indicators.technical import calculate_ema
+        
+        # Проверка доступности данных - используем мягкие требования
+        if df_1h is None or len(df_1h) < 50:
+            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 1H (недостаточно для EMA50)")
+            return (False, False)  # Нет подтверждения, нет данных
+        
+        # Для 4H используем EMA50 вместо EMA200 (более реалистичные требования)
+        if df_4h is None or len(df_4h) < 50:
+            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 4H (недостаточно для EMA50)")
+            return (False, False)  # Нет подтверждения, нет данных
+        
+        # Проверка EMA50 на 1H
+        ema50_1h = calculate_ema(df_1h['close'], period=50)
+        price_1h = df_1h['close'].iloc[-1]
+        
+        # Проверка EMA50 на 4H (вместо EMA200)
+        ema50_4h = calculate_ema(df_4h['close'], period=50)
+        price_4h = df_4h['close'].iloc[-1]
+        
+        if direction == 'LONG':
+            trend_1h = price_1h > ema50_1h.iloc[-1]
+            trend_4h = price_4h > ema50_4h.iloc[-1]
+            confirmed = trend_1h and trend_4h
+            return (confirmed, True)
+        else:  # SHORT
+            trend_1h = price_1h < ema50_1h.iloc[-1]
+            trend_4h = price_4h < ema50_4h.iloc[-1]
+            confirmed = trend_1h and trend_4h
+            return (confirmed, True)
+    
+    def _check_bollinger_position(self, df: pd.DataFrame, direction: str) -> bool:
+        """
+        ФАЗА 2: Bollinger Bands фильтр
+        Проверяет, что цена у внешней полосы (сильный импульс)
+        """
+        from src.indicators.technical import calculate_bollinger_bands
+        
+        bb_upper, bb_middle, bb_lower = calculate_bollinger_bands(df['close'], period=20, std=2.0)
+        current_close = df['close'].iloc[-1]
+        
+        if direction == 'LONG':
+            # Для LONG: цена должна быть близко к верхней полосе
+            distance_to_upper = (bb_upper.iloc[-1] - current_close) / bb_upper.iloc[-1]
+            return distance_to_upper <= 0.02  # В пределах 2% от верхней полосы
+        else:  # SHORT
+            # Для SHORT: цена должна быть близко к нижней полосе
+            distance_to_lower = (current_close - bb_lower.iloc[-1]) / current_close
+            return distance_to_lower <= 0.02  # В пределах 2% от нижней полосы
+    
+    def _check_retest_quality(self, breakout: Dict, retest_bars: list, breakout_level: float) -> float:
+        """
+        ФАЗА 2: Проверка качества ретеста
+        Возвращает качество 0-1 (0=плохо, 1=отлично)
+        """
+        if not retest_bars or len(retest_bars) == 0:
+            return 0.0
+        
+        quality_score = 1.0
+        
+        # 1. Проверка глубины проникновения
+        max_penetration = 0
+        for bar in retest_bars:
+            if breakout['direction'] == 'LONG':
+                # Для LONG: насколько низко ушли ниже уровня
+                penetration = (breakout_level - bar['low']) / breakout['atr']
+                if penetration > max_penetration:
+                    max_penetration = penetration
+            else:  # SHORT
+                penetration = (bar['high'] - breakout_level) / breakout['atr']
+                if penetration > max_penetration:
+                    max_penetration = penetration
+        
+        # Штраф за глубокое проникновение (>0.3 ATR плохо)
+        if max_penetration > 0.3:
+            quality_score -= 0.3
+        
+        # 2. Проверка rejection (есть ли отклонение)
+        has_rejection = False
+        for bar in retest_bars:
+            if breakout['direction'] == 'LONG':
+                wick_size = bar['low'] - min(bar['open'], bar['close'])
+                body_size = abs(bar['close'] - bar['open'])
+                if wick_size > body_size * 0.5:
+                    has_rejection = True
+                    break
+            else:
+                wick_size = max(bar['open'], bar['close']) - bar['high']
+                body_size = abs(bar['close'] - bar['open'])
+                if wick_size > body_size * 0.5:
+                    has_rejection = True
+                    break
+        
+        if not has_rejection:
+            quality_score -= 0.2  # Штраф за отсутствие rejection
+        
+        return max(0.0, quality_score)
+    
+    def _calculate_improved_score(self, base_score: float, breakout: Dict, regime: str, 
+                                   bias: str, retest_quality: float, 
+                                   bb_good: bool, htf_confirmed: bool, htf_has_data: bool,
+                                   rsi_confirmed: bool = True,
+                                   market_structure_good: bool = True) -> float:
+        """
+        ФАЗА 2+3: Улучшенная score система
+        """
+        score = base_score
+        
+        # ФАЗА 2: Бонусы в зависимости от режима
+        if regime == 'TREND':
+            # ADX бонусы (для TREND)
+            adx = breakout.get('adx', 0)
+            if adx > 30:
+                score += 1.0  # Очень сильный тренд
+            elif adx > 25:
+                score += 0.5  # Сильный тренд
+            
+            # ADX rising бонус (уже проверено в _find_recent_breakout)
+            score += 0.5
+            
+            # Volume бонусы
+            vol_ratio = breakout.get('volume_ratio', 1.0)
+            if vol_ratio > 2.0:
+                score += 1.0  # Мощный объем
+            elif vol_ratio > 1.5:
+                score += 0.5
+            
+            # Higher TF confirmation
+            if htf_has_data:
+                if htf_confirmed:
+                    score += 1.0  # Большой бонус если подтверждено
+                # Если есть данные но не подтверждено - уже заблокировано в check_signal
+            else:
+                score -= 0.5  # Небольшой штраф если нет данных для проверки
+            
+            # Bollinger position
+            if bb_good:
+                score += 0.5
+            
+            # Retest quality
+            score += retest_quality * 0.5
+            
+        elif regime == 'SQUEEZE':
+            # SQUEEZE бонусы (мягче)
+            if breakout.get('volume_ratio', 1.0) > 1.5:
+                score += 0.5
+            
+            score += retest_quality * 0.3
+        
+        # ФАЗА 3: RSI и Market Structure бонусы
+        if rsi_confirmed:
+            score += 0.5
+        
+        if market_structure_good:
+            score += 0.5
+        
+        # Bias бонусы/штрафы
+        if bias.lower() == 'neutral':
+            score += 0.5  # Нейтральный bias лучше
+        elif bias.lower() == 'bearish':
+            score -= 0.5  # Небольшой штраф (основной уже в check_signal для TREND)
+        
+        return score
+    
+    def _check_rsi_confirmation(self, df: pd.DataFrame, direction: str) -> bool:
+        """
+        ФАЗА 3: RSI фильтр
+        Проверяет импульс через RSI
+        """
+        from src.indicators.technical import calculate_rsi
+        
+        rsi = calculate_rsi(df['close'], period=14)
+        current_rsi = rsi.iloc[-1]
+        
+        if direction == 'LONG':
+            return current_rsi > 45  # Слабый импульс вверх
+        else:  # SHORT
+            return current_rsi < 55  # Слабый импульс вниз
+    
+    def _check_market_structure(self, df: pd.DataFrame, direction: str) -> bool:
+        """
+        ФАЗА 3: Market Structure проверка
+        Проверяет формирование Higher Highs / Lower Lows
+        """
+        if len(df) < 10:
+            return True  # Недостаточно данных - не блокируем
+        
+        highs = df['high'].tail(6).values
+        lows = df['low'].tail(6).values
+        
+        if direction == 'LONG':
+            # Для LONG: Higher Highs и Higher Lows
+            hh = highs[-1] >= highs[-3] >= highs[-5]
+            hl = lows[-1] >= lows[-3] >= lows[-5]
+            return hh or hl  # Хотя бы одно условие
+        else:  # SHORT
+            # Для SHORT: Lower Lows и Lower Highs
+            ll = lows[-1] <= lows[-3] <= lows[-5]
+            lh = highs[-1] <= highs[-3] <= highs[-5]
+            return ll or lh
+    
+    def _find_recent_breakout(self, df: pd.DataFrame, atr: pd.Series, vwap: pd.Series, adx: pd.Series, 
+                              regime: str, adx_threshold: float, volume_threshold: float) -> Optional[Dict]:
         """Найти недавний пробой с использованием swing levels и ADX фильтром"""
         df_len = len(df)
         
@@ -125,39 +342,50 @@ class BreakRetestStrategy(BaseStrategy):
             avg_vol = df['volume'].iloc[i-20:i].mean()
             vol_ratio = bar_volume / avg_vol if avg_vol > 0 else 0
             
-            # ADX фильтр: ADX > threshold для валидного breakout
-            if bar_adx < self.adx_threshold:
-                strategy_logger.debug(f"    ⚠️ Пропуск пробоя на баре {i}: ADX слишком слабый ({bar_adx:.1f} < {self.adx_threshold})")
+            # ADX фильтр: ADX > threshold для валидного breakout (зависит от режима)
+            if bar_adx < adx_threshold:
+                strategy_logger.debug(f"    ⚠️ Пропуск пробоя на баре {i}: ADX слишком слабый ({bar_adx:.1f} < {adx_threshold})")
                 continue
             
-            # Пробой вверх (через swing high)
+            # ФАЗА 1: Проверка что ADX растет (только для TREND режима)
+            # Требование: ADX[-1] > ADX[-3] (текущий ADX выше чем 2 бара назад)
+            if regime == 'TREND' and abs(i) >= 3:
+                adx_prev_2 = adx.iloc[i - 2]  # 2 бара назад
+                adx_rising = bar_adx > adx_prev_2
+                if not adx_rising:
+                    strategy_logger.debug(f"    ⚠️ Пропуск пробоя на баре {i}: ADX падает ({bar_adx:.1f} <= {adx_prev_2:.1f}) в TREND")
+                    continue
+            
+            # Пробой вверх (через swing high) - используем адаптивный volume_threshold
             if (swings['swing_high'] is not None and 
                 bar_close > swings['swing_high'] and 
                 (bar_close - swings['swing_high']) >= self.breakout_atr * bar_atr and
-                vol_ratio >= self.volume_threshold):
-                strategy_logger.debug(f"    ✅ Пробой LONG найден на баре {i}: ADX={bar_adx:.1f}, volume {vol_ratio:.1f}x")
+                vol_ratio >= volume_threshold):
+                strategy_logger.debug(f"    ✅ Пробой LONG найден на баре {i}: ADX={bar_adx:.1f}, volume {vol_ratio:.1f}x (порог {volume_threshold}x для {regime})")
                 return {
                     'direction': 'LONG',
                     'level': swings['swing_high'],
                     'bar_index': i,
                     'atr': bar_atr,
                     'vwap': bar_vwap,
-                    'adx': bar_adx
+                    'adx': bar_adx,
+                    'volume_ratio': vol_ratio  # ФАЗА 2: сохраняем для score
                 }
             
-            # Пробой вниз (через swing low)
+            # Пробой вниз (через swing low) - используем адаптивный volume_threshold
             elif (swings['swing_low'] is not None and 
                   bar_close < swings['swing_low'] and 
                   (swings['swing_low'] - bar_close) >= self.breakout_atr * bar_atr and
-                  vol_ratio >= self.volume_threshold):
-                strategy_logger.debug(f"    ✅ Пробой SHORT найден на баре {i}: ADX={bar_adx:.1f}, volume {vol_ratio:.1f}x")
+                  vol_ratio >= volume_threshold):
+                strategy_logger.debug(f"    ✅ Пробой SHORT найден на баре {i}: ADX={bar_adx:.1f}, volume {vol_ratio:.1f}x (порог {volume_threshold}x для {regime})")
                 return {
                     'direction': 'SHORT',
                     'level': swings['swing_low'],
                     'bar_index': i,
                     'atr': bar_atr,
                     'vwap': bar_vwap,
-                    'adx': bar_adx
+                    'adx': bar_adx,
+                    'volume_ratio': vol_ratio  # ФАЗА 2: сохраняем для score
                 }
         
         return None
@@ -170,6 +398,11 @@ class BreakRetestStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 50")
             return None
         
+        # ФАЗА 1: Блокировка bearish bias в TREND режиме
+        if regime == 'TREND' and bias.lower() == 'bearish':
+            strategy_logger.debug(f"    ❌ TREND + bearish bias = исторически убыточно (WR 12.5%)")
+            return None
+        
         # Рассчитать ATR, ADX и VWAP
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
@@ -180,10 +413,26 @@ class BreakRetestStrategy(BaseStrategy):
         # Получить VWAP из indicators или рассчитать
         vwap = indicators.get('vwap', None)
         
-        # Найти недавний пробой с ADX фильтром
-        breakout = self._find_recent_breakout(df, atr, vwap, adx)
+        # Выбрать правильный ADX порог в зависимости от режима
+        if regime == 'TREND':
+            adx_threshold = self.adx_threshold_trend  # 25 для TREND
+        elif regime == 'SQUEEZE':
+            adx_threshold = self.adx_threshold_squeeze  # 15 для SQUEEZE
+        else:
+            adx_threshold = self.adx_threshold_default  # 20 по умолчанию
+        
+        # Выбрать правильный volume порог в зависимости от режима
+        if regime == 'TREND':
+            volume_threshold = self.volume_threshold_trend  # 1.8 для TREND
+        elif regime == 'SQUEEZE':
+            volume_threshold = self.volume_threshold_squeeze  # 1.2 для SQUEEZE
+        else:
+            volume_threshold = self.volume_threshold  # 1.5 по умолчанию
+        
+        # Найти недавний пробой с ADX фильтром (передаем режим и пороги)
+        breakout = self._find_recent_breakout(df, atr, vwap, adx, regime, adx_threshold, volume_threshold)
         if breakout is None:
-            strategy_logger.debug(f"    ❌ Нет недавнего пробоя swing level с объемом >{self.volume_threshold}x, расстоянием ≥{self.breakout_atr} ATR и ADX > 20")
+            strategy_logger.debug(f"    ❌ Нет недавнего пробоя swing level (ADX>{adx_threshold}, vol>{volume_threshold}x для режима {regime})")
             return None
         
         # Логирование найденного пробоя
@@ -241,6 +490,59 @@ class BreakRetestStrategy(BaseStrategy):
                         strategy_logger.debug(f"    ❌ LONG ретест есть, но H4 bias {bias}")
                         return None
                     
+                    # ФАЗА 1: Higher Timeframe Confirmation (только для TREND)
+                    htf_confirmed = True
+                    htf_has_data = False
+                    if regime == 'TREND':
+                        df_1h = indicators.get('1h')
+                        df_4h = indicators.get('4h')
+                        htf_confirmed, htf_has_data = self._check_higher_timeframe_trend(df_1h, df_4h, 'LONG')
+                        
+                        # Если есть данные но не подтверждается - блокируем
+                        if htf_has_data and not htf_confirmed:
+                            strategy_logger.debug(f"    ❌ LONG ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA50)")
+                            return None  # Строгая блокировка для TREND режима
+                        
+                        if htf_confirmed:
+                            strategy_logger.debug(f"    ✅ Higher TF подтверждает LONG тренд (1H+4H > EMA50)")
+                        else:
+                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки (штраф к score)")
+                    
+                    # ФАЗА 2: Bollinger Bands фильтр (только для TREND)
+                    bb_good = True
+                    if regime == 'TREND':
+                        bb_good = self._check_bollinger_position(df, 'LONG')
+                        if not bb_good:
+                            strategy_logger.debug(f"    ⚠️ Цена не у верхней полосы Bollinger (слабый импульс)")
+                            # Не блокируем, просто понижаем score
+                    
+                    # ФАЗА 2: Проверка качества ретеста
+                    retest_bars_data = []
+                    for i in range(-lookback_retest, 0):
+                        if abs(i) < len(df):
+                            retest_bars_data.append({
+                                'low': df['low'].iloc[i],
+                                'high': df['high'].iloc[i],
+                                'open': df['open'].iloc[i],
+                                'close': df['close'].iloc[i]
+                            })
+                    retest_quality = self._check_retest_quality(breakout, retest_bars_data, breakout_level)
+                    strategy_logger.debug(f"    📊 Качество ретеста: {retest_quality:.2f}/1.0")
+                    
+                    # ФАЗА 3: RSI Confirmation
+                    rsi_confirmed = True
+                    if regime == 'TREND':
+                        rsi_confirmed = self._check_rsi_confirmation(df, 'LONG')
+                        if not rsi_confirmed:
+                            strategy_logger.debug(f"    ⚠️ RSI не подтверждает импульс вверх")
+                    
+                    # ФАЗА 3: Market Structure
+                    market_structure_good = True
+                    if regime == 'TREND':
+                        market_structure_good = self._check_market_structure(df, 'LONG')
+                        if not market_structure_good:
+                            strategy_logger.debug(f"    ⚠️ Market structure не показывает Higher Highs/Lows")
+                    
                     entry = current_close
                     
                     # Расчет зон S/R на 15m для точного стопа
@@ -252,6 +554,15 @@ class BreakRetestStrategy(BaseStrategy):
                     atr_distance = abs(entry - stop_loss)
                     tp1 = entry + atr_distance * 1.0  # 1R
                     tp2 = entry + atr_distance * 2.0  # 2R
+                    
+                    # ФАЗА 2+3: Улучшенная score система
+                    base_score = 2.5
+                    improved_score = self._calculate_improved_score(
+                        base_score, breakout, regime, bias, retest_quality,
+                        bb_good, htf_confirmed, htf_has_data, rsi_confirmed, market_structure_good
+                    )
+                    
+                    strategy_logger.debug(f"    💯 Score: {base_score:.1f} → {improved_score:.1f} (режим {regime})")
                     
                     signal = Signal(
                         strategy_name=self.name,
@@ -265,12 +576,19 @@ class BreakRetestStrategy(BaseStrategy):
                         take_profit_2=float(tp2),
                         regime=regime,
                         bias=bias,
-                        base_score=2.5,  # Increased from 1.0 - professional quality breakout
+                        base_score=improved_score,  # Используем улучшенный score
                         metadata={
                             'breakout_level': float(breakout_level),
                             'retest_zone_upper': float(retest_zone_upper),
                             'retest_zone_lower': float(retest_zone_lower),
-                            'breakout_bar_index': int(breakout['bar_index'])
+                            'breakout_bar_index': int(breakout['bar_index']),
+                            'adx': float(breakout.get('adx', 0)),
+                            'volume_ratio': float(breakout.get('volume_ratio', 1.0)),
+                            'retest_quality': float(retest_quality),
+                            'htf_confirmed': htf_confirmed,
+                            'bb_good': bb_good,
+                            'rsi_confirmed': rsi_confirmed,
+                            'market_structure_good': market_structure_good
                         }
                     )
                     return signal
@@ -299,6 +617,59 @@ class BreakRetestStrategy(BaseStrategy):
                         strategy_logger.debug(f"    ❌ SHORT ретест есть, но H4 bias {bias}")
                         return None
                     
+                    # ФАЗА 1: Higher Timeframe Confirmation (только для TREND)
+                    htf_confirmed = True
+                    htf_has_data = False
+                    if regime == 'TREND':
+                        df_1h = indicators.get('1h')
+                        df_4h = indicators.get('4h')
+                        htf_confirmed, htf_has_data = self._check_higher_timeframe_trend(df_1h, df_4h, 'SHORT')
+                        
+                        # Если есть данные но не подтверждается - блокируем
+                        if htf_has_data and not htf_confirmed:
+                            strategy_logger.debug(f"    ❌ SHORT ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA50)")
+                            return None  # Строгая блокировка для TREND режима
+                        
+                        if htf_confirmed:
+                            strategy_logger.debug(f"    ✅ Higher TF подтверждает SHORT тренд (1H+4H < EMA50)")
+                        else:
+                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки (штраф к score)")
+                    
+                    # ФАЗА 2: Bollinger Bands фильтр (только для TREND)
+                    bb_good = True
+                    if regime == 'TREND':
+                        bb_good = self._check_bollinger_position(df, 'SHORT')
+                        if not bb_good:
+                            strategy_logger.debug(f"    ⚠️ Цена не у нижней полосы Bollinger (слабый импульс)")
+                            # Не блокируем, просто понижаем score
+                    
+                    # ФАЗА 2: Проверка качества ретеста
+                    retest_bars_data = []
+                    for i in range(-lookback_retest, 0):
+                        if abs(i) < len(df):
+                            retest_bars_data.append({
+                                'low': df['low'].iloc[i],
+                                'high': df['high'].iloc[i],
+                                'open': df['open'].iloc[i],
+                                'close': df['close'].iloc[i]
+                            })
+                    retest_quality = self._check_retest_quality(breakout, retest_bars_data, breakout_level)
+                    strategy_logger.debug(f"    📊 Качество ретеста: {retest_quality:.2f}/1.0")
+                    
+                    # ФАЗА 3: RSI Confirmation
+                    rsi_confirmed = True
+                    if regime == 'TREND':
+                        rsi_confirmed = self._check_rsi_confirmation(df, 'SHORT')
+                        if not rsi_confirmed:
+                            strategy_logger.debug(f"    ⚠️ RSI не подтверждает импульс вниз")
+                    
+                    # ФАЗА 3: Market Structure
+                    market_structure_good = True
+                    if regime == 'TREND':
+                        market_structure_good = self._check_market_structure(df, 'SHORT')
+                        if not market_structure_good:
+                            strategy_logger.debug(f"    ⚠️ Market structure не показывает Lower Lows/Highs")
+                    
                     entry = current_close
                     
                     # Расчет зон S/R на 15m для точного стопа
@@ -310,6 +681,15 @@ class BreakRetestStrategy(BaseStrategy):
                     atr_distance = abs(stop_loss - entry)
                     tp1 = entry - atr_distance * 1.0  # 1R
                     tp2 = entry - atr_distance * 2.0  # 2R
+                    
+                    # ФАЗА 2+3: Улучшенная score система
+                    base_score = 2.5
+                    improved_score = self._calculate_improved_score(
+                        base_score, breakout, regime, bias, retest_quality,
+                        bb_good, htf_confirmed, htf_has_data, rsi_confirmed, market_structure_good
+                    )
+                    
+                    strategy_logger.debug(f"    💯 Score: {base_score:.1f} → {improved_score:.1f} (режим {regime})")
                     
                     signal = Signal(
                         strategy_name=self.name,
@@ -323,12 +703,19 @@ class BreakRetestStrategy(BaseStrategy):
                         take_profit_2=float(tp2),
                         regime=regime,
                         bias=bias,
-                        base_score=2.5,  # Increased from 1.0 - professional quality breakout
+                        base_score=improved_score,  # Используем улучшенный score
                         metadata={
                             'breakout_level': float(breakout_level),
                             'retest_zone_upper': float(retest_zone_upper),
                             'retest_zone_lower': float(retest_zone_lower),
-                            'breakout_bar_index': int(breakout['bar_index'])
+                            'breakout_bar_index': int(breakout['bar_index']),
+                            'adx': float(breakout.get('adx', 0)),
+                            'volume_ratio': float(breakout.get('volume_ratio', 1.0)),
+                            'retest_quality': float(retest_quality),
+                            'htf_confirmed': htf_confirmed,
+                            'bb_good': bb_good,
+                            'rsi_confirmed': rsi_confirmed,
+                            'market_structure_good': market_structure_good
                         }
                     )
                     return signal
