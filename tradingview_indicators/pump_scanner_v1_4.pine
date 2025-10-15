@@ -1,0 +1,547 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+//@version=5
+indicator("Pump Scanner v1.4 (Advanced: HC/LC + Anti-Noise + HTF)", overlay=true, max_labels_count=50)
+
+// ════════════════════════════════════════════════════════════════════════════
+// НАСТРОЙКИ
+// ════════════════════════════════════════════════════════════════════════════
+
+// Профиль порогов
+thresholdProfile = input.string("Base", "Threshold Profile", options=["Strict", "Base", "Aggressive"], group="Profile")
+
+// Основные параметры
+emaLen200 = input.int(200, "EMA200 Length", minval=1, group="Core Indicators")
+atrLen = input.int(14, "ATR Length", minval=1, group="Core Indicators")
+bbLen = input.int(20, "BB Length", minval=1, group="Core Indicators")
+bbMult = input.float(2.0, "BB Multiplier", minval=0.1, group="Core Indicators")
+kcLen = input.int(20, "KC Length", minval=1, group="Core Indicators")
+kcMult = input.float(1.5, "KC Multiplier", minval=0.1, group="Core Indicators")
+hcLen = input.int(20, "HC/LC Length (Close-based)", minval=5, group="Core Indicators")
+
+// Path A/B Enable
+enablePathA = input.bool(true, "Enable Path A (Compression)", group="Paths")
+enablePathB = input.bool(true, "Enable Path B (FIT)", group="Paths")
+enableShorts = input.bool(false, "Enable Short Signals", group="Paths")
+
+// Cooldowns
+cooldownA = input.int(25, "Path A Cooldown (bars)", minval=10, maxval=60, group="Cooldowns")
+cooldownB = input.int(40, "Path B Cooldown (bars)", minval=20, maxval=80, group="Cooldowns")
+fitClusterBlock = input.int(8, "FIT Cluster Block (bars)", minval=5, maxval=20, group="Cooldowns")
+
+// Anti-Noise
+noiseWindow = input.int(30, "Noise Window (bars)", minval=20, maxval=50, group="Anti-Noise")
+noiseMaxCount = input.int(3, "Max Noisy Bars in Window", minval=1, maxval=10, group="Anti-Noise")
+noiseTRmult = input.float(1.0, "Noise TR/ATR Threshold", minval=0.5, step=0.1, group="Anti-Noise")
+noiseVolZ = input.float(1.3, "Noise VolZ Threshold", minval=0.5, step=0.1, group="Anti-Noise")
+
+// HTF Filter
+enableHTF = input.bool(false, "Enable HTF Filter (Soft)", group="HTF Filter")
+htfTimeframe = input.timeframe("60", "HTF Timeframe", group="HTF Filter")
+htfEma200len = input.int(200, "HTF EMA200 Length", minval=50, group="HTF Filter")
+htfEma100len = input.int(100, "HTF EMA100 Length", minval=50, group="HTF Filter")
+
+// FIT Special
+fitMinAir_atrZ = input.float(-0.7, "FIT Min Air if ATR% Z ≤", maxval=0.0, step=0.1, group="FIT Special")
+fitMinAirValue = input.float(0.18, "FIT Min Air Value (ATR)", minval=0.1, step=0.02, group="FIT Special")
+fitDynamicTR = input.float(1.5, "FIT Dynamic TR if BBExp≥2.0 & VolZ≥3.0", minval=1.0, step=0.1, group="FIT Special")
+
+// Display
+showPanel = input.bool(true, "Show Info Panel", group="Display")
+showWatchBg = input.bool(true, "Show Watch Background", group="Display")
+showTriggerBg = input.bool(true, "Show Trigger Background", group="Display")
+lookbackBW = input.int(200, "Z-Score Lookback", minval=50, group="Display")
+
+// ════════════════════════════════════════════════════════════════════════════
+// ПОРОГИ ПО ПРОФИЛЯМ
+// ════════════════════════════════════════════════════════════════════════════
+
+// Compression
+Tz_bb = thresholdProfile == "Strict" ? -0.8 : (thresholdProfile == "Base" ? -0.6 : -0.4)
+Tz_atr = thresholdProfile == "Strict" ? -0.5 : (thresholdProfile == "Base" ? -0.3 : -0.2)
+Tr_ribbon = thresholdProfile == "Strict" ? 0.22 : (thresholdProfile == "Base" ? 0.25 : 0.28)
+Tr_dist = 0.25  // одинаково для всех
+
+// Trigger Path A
+Td_depth = thresholdProfile == "Strict" ? 0.35 : (thresholdProfile == "Base" ? 0.30 : 0.25)
+Td_air = thresholdProfile == "Strict" ? 0.35 : (thresholdProfile == "Base" ? 0.30 : 0.25)
+Td_volz = thresholdProfile == "Strict" ? 2.2 : (thresholdProfile == "Base" ? 2.0 : 1.8)
+
+// FIT Path B
+F_tr = thresholdProfile == "Strict" ? 1.7 : (thresholdProfile == "Base" ? 1.6 : 1.5)
+F_body = thresholdProfile == "Strict" ? 1.1 : (thresholdProfile == "Base" ? 1.0 : 0.9)
+F_closePos = thresholdProfile == "Strict" ? 0.25 : (thresholdProfile == "Base" ? 0.30 : 0.40)  // top X%
+F_volz = thresholdProfile == "Strict" ? 3.0 : (thresholdProfile == "Base" ? 2.5 : 2.2)
+F_depth = thresholdProfile == "Strict" ? 0.25 : (thresholdProfile == "Base" ? 0.20 : 0.15)
+F_bbexp = thresholdProfile == "Strict" ? 1.8 : (thresholdProfile == "Base" ? 1.6 : 1.5)
+F_air = thresholdProfile == "Strict" ? 0.25 : (thresholdProfile == "Base" ? 0.20 : 0.18)
+
+// ════════════════════════════════════════════════════════════════════════════
+// РАСЧЁТЫ
+// ════════════════════════════════════════════════════════════════════════════
+
+// EMA200 и наклон
+ema200 = ta.ema(close, emaLen200)
+atr14 = ta.atr(atrLen)
+slope200 = nz((ema200 - ema200[1]) / atr14, 0)
+
+// EMA Ribbon
+ema5 = ta.ema(close, 5)
+ema9 = ta.ema(close, 9)
+ema13 = ta.ema(close, 13)
+ema21 = ta.ema(close, 21)
+ribbonMax = math.max(ema5, ema9, ema13, ema21)
+ribbonMin = math.min(ema5, ema9, ema13, ema21)
+ribbonSpan = ribbonMax - ribbonMin
+ribbonTight = nz(ribbonSpan / atr14, 0)
+
+// Bollinger Bands
+bbBasis = ta.sma(close, bbLen)
+bbDev = ta.stdev(close, bbLen)
+bbUpper = bbBasis + bbMult * bbDev
+bbLower = bbBasis - bbMult * bbDev
+bbWidth = nz((bbUpper - bbLower) / bbBasis, 0)
+
+// Keltner Channel
+kcMid = ta.ema(close, kcLen)
+kcRange = ta.atr(kcLen)
+kcUpper = kcMid + kcMult * kcRange
+kcLower = kcMid - kcMult * kcRange
+squeezeOn = (bbLower > kcLower) and (bbUpper < kcUpper)
+
+// Z-Scores
+bbWidthSMA = ta.sma(bbWidth, lookbackBW)
+bbWidthStd = ta.stdev(bbWidth, lookbackBW)
+bbWidthZ = nz((bbWidth - bbWidthSMA) / bbWidthStd, 0)
+
+atrPct = nz(atr14 / close * 100, 0)
+atrPctSMA = ta.sma(atrPct, lookbackBW)
+atrPctStd = ta.stdev(atrPct, lookbackBW)
+atrPctZ = nz((atrPct - atrPctSMA) / atrPctStd, 0)
+
+// Компрессия (2 из 3)
+compressionSign1 = squeezeOn
+compressionSign2 = bbWidthZ <= Tz_bb
+compressionSign3 = atrPctZ <= Tz_atr
+compressionSignsCount = (compressionSign1 ? 1 : 0) + (compressionSign2 ? 1 : 0) + (compressionSign3 ? 1 : 0)
+trueCompression = compressionSignsCount >= 2
+
+// Персистентность компрессии (≥3 из 6)
+compressionCount = 0
+for i = 0 to 5
+    if trueCompression[i]
+        compressionCount += 1
+persistentCompression = compressionCount >= 3
+
+// HC/LC по закрытиям (не High/Low!)
+hc20 = ta.highest(close, hcLen)
+lc20 = ta.lowest(close, hcLen)
+
+// Volume
+volSMA = ta.sma(volume, 50)
+volStd = ta.stdev(volume, 50)
+volZ = nz((volume - volSMA) / volStd, 0)
+volDry = nz(volume / volSMA, 1.0) < 0.8
+vol95 = ta.percentile_nearest_rank(volume, 90, 95)
+
+// Позиция относительно EMA200
+aboveEMA200 = close > ema200
+belowEMA200 = close < ema200
+distTo200ATR = nz((close - ema200) / atr14, 0)
+nearEMA200 = math.abs(distTo200ATR) <= Tr_dist
+
+// Air (воздух до полос)
+airLong = nz((bbUpper - close) / atr14, 0)
+airShort = nz((close - bbLower) / atr14, 0)
+
+// BBWidth Expansion
+bbWidthAvg5 = ta.sma(bbWidth, 5)
+bbWidthExpansion = nz(bbWidth / bbWidthAvg5, 1.0)
+
+// TrueRange и Body
+trueRange = high - low
+trRange_ATR = nz(trueRange / atr14, 0)
+body = math.abs(close - open)
+body_ATR = nz(body / atr14, 0)
+bodyRatio = nz(body / trueRange, 0)
+
+// Позиция Close в баре (для anti-needle)
+posInBar = trueRange > 0 ? nz((close - low) / trueRange, 0.5) : 0.5
+
+// Pre-touch EMA200
+preTouchLong = (low[1] <= ema200[1]) and (close[1] > ema200[1])
+preTouchShort = (high[1] >= ema200[1]) and (close[1] < ema200[1])
+
+// HTF Data
+ema200_htf = request.security(syminfo.tickerid, htfTimeframe, ta.ema(close, htfEma200len))
+ema100_htf = request.security(syminfo.tickerid, htfTimeframe, ta.ema(close, htfEma100len))
+close_htf = request.security(syminfo.tickerid, htfTimeframe, close)
+atr_htf = request.security(syminfo.tickerid, htfTimeframe, ta.atr(14))
+ema200_htf_prev = request.security(syminfo.tickerid, htfTimeframe, ta.ema(close[1], htfEma200len))
+
+htfBullish = close_htf >= ema200_htf
+htfBearish = close_htf <= ema200_htf
+htfCrossUp = ta.crossover(close_htf, ema200_htf) and nz((close_htf - ema200_htf) / atr_htf, 0) >= 0.30
+htfCrossDown = ta.crossunder(close_htf, ema200_htf) and nz((ema200_htf - close_htf) / atr_htf, 0) >= 0.30
+htfSlope = nz((ema200_htf - ema200_htf_prev) / atr_htf, 0)
+
+// HTF Soft Filter
+htfOkLong = not enableHTF or htfBullish or (htfSlope >= -0.01 and close_htf >= ema100_htf) or htfCrossUp
+htfOkShort = not enableHTF or htfBearish or (htfSlope <= 0.01 and close_htf <= ema100_htf) or htfCrossDown
+
+// Anti-Noise: подсчёт "шумных" баров за 30 баров
+noiseCount = 0
+for i = 0 to noiseWindow - 1
+    if (trRange_ATR[i] > noiseTRmult) and (volZ[i] > noiseVolZ)
+        noiseCount += 1
+noisyBackground = noiseCount > noiseMaxCount
+
+// ════════════════════════════════════════════════════════════════════════════
+// PATH A: КОМПРЕССИЯ → ВЫХОД
+// ════════════════════════════════════════════════════════════════════════════
+
+// Watch Score
+score_compression = persistentCompression ? 3 : 0
+score_ribbon = ribbonTight <= Tr_ribbon ? 2 : 0
+score_near200 = nearEMA200 ? 1 : 0
+score_volDry = volDry ? 1 : 0
+
+slopeUpGood = slope200 >= -0.01
+slopeDownGood = slope200 <= 0.01
+
+score_slopeLong = (aboveEMA200 and slopeUpGood) ? 2 : 0
+score_slopeShort = (belowEMA200 and slopeDownGood) ? 2 : 0
+
+watchScoreLong = score_compression + score_ribbon + score_near200 + score_volDry + score_slopeLong
+watchScoreShort = score_compression + score_ribbon + score_near200 + score_volDry + score_slopeShort
+
+// Watch
+isWatchLongRaw = enablePathA and aboveEMA200 and watchScoreLong >= 5
+isWatchShortRaw = enablePathA and belowEMA200 and watchScoreShort >= 5 and enableShorts
+
+// Дебаунс
+var int watchDebounceCounter = 0
+if (isWatchLongRaw or isWatchShortRaw)
+    watchDebounceCounter += 1
+else
+    watchDebounceCounter := 0
+
+watchConfirmed = watchDebounceCounter >= 2
+isWatchLong = watchConfirmed and isWatchLongRaw
+isWatchShort = watchConfirmed and isWatchShortRaw
+
+// Trigger Path A (BOS по Close, не High!)
+bosLong = close > hc20
+bosShort = close < lc20
+
+depthLongA = distTo200ATR >= Td_depth
+depthShortA = -distTo200ATR >= Td_depth
+airLongA = airLong >= Td_air
+airShortA = airShort >= Td_air
+volumeConfirmA = volZ >= Td_volz
+
+// Pre-touch фильтр
+preTouchBlockLong = preTouchLong and (distTo200ATR < 0.25)
+preTouchBlockShort = preTouchShort and (-distTo200ATR < 0.25)
+
+isTriggerLongA = enablePathA and bosLong and depthLongA and airLongA and volumeConfirmA and not preTouchBlockLong
+isTriggerShortA = enablePathA and enableShorts and bosShort and depthShortA and airShortA and volumeConfirmA and not preTouchBlockShort
+
+// ════════════════════════════════════════════════════════════════════════════
+// PATH B: FIT (First-Impulse Trigger)
+// ════════════════════════════════════════════════════════════════════════════
+
+// 1. Аномальная свеча (с динамическим ослаблением)
+dynamicTRrelaxed = (bbWidthExpansion >= 2.0) and (volZ >= 3.0)
+effectiveTRthreshold = dynamicTRrelaxed ? fitDynamicTR : F_tr
+
+fitAnomalyRange = math.max(trRange_ATR, body_ATR) >= effectiveTRthreshold
+
+// Anti-needle: Close в верхних/нижних X% бара
+fitClosePosLong = posInBar >= (1.0 - F_closePos)  // верхние 30%
+fitClosePosShort = posInBar <= F_closePos  // нижние 30%
+
+// 2. Аномальный объём
+fitAnomalyVol = (volZ >= F_volz) or (volume >= vol95)
+
+// 3. Структурный сдвиг
+ema200CrossUp = ta.crossover(close, ema200) and (distTo200ATR >= F_depth)
+ema200CrossDown = ta.crossunder(close, ema200) and (-distTo200ATR >= F_depth)
+hcBreakLong = (close > hc20) and ((close - hc20) >= 0.10 * atr14)
+lcBreakShort = (close < lc20) and ((lc20 - close) >= 0.10 * atr14)
+
+fitStructuralLong = ema200CrossUp or hcBreakLong
+fitStructuralShort = ema200CrossDown or lcBreakShort
+
+// 4. BBWidth Expansion
+fitBBexpanded = bbWidthExpansion >= F_bbexp
+
+// 5. Воздух (с мягким порогом при низкой волатильности)
+fitAirThreshold = (atrPctZ <= fitMinAir_atrZ) ? fitMinAirValue : F_air
+fitAirLong = airLong >= fitAirThreshold
+fitAirShort = airShort >= fitAirThreshold
+
+// 6. Мягкий pre-touch
+fitPreTouchBlockLong = preTouchLong and (distTo200ATR < 0.30)
+fitPreTouchBlockShort = preTouchShort and (-distTo200ATR < 0.30)
+
+// FIT сигналы (raw)
+isFITlongRaw = enablePathB and fitAnomalyRange and fitClosePosLong and fitAnomalyVol and fitStructuralLong and fitBBexpanded and fitAirLong and not fitPreTouchBlockLong and htfOkLong and not noisyBackground
+
+isFITshortRaw = enablePathB and enableShorts and fitAnomalyRange and fitClosePosShort and fitAnomalyVol and fitStructuralShort and fitBBexpanded and fitAirShort and not fitPreTouchBlockShort and htfOkShort and not noisyBackground
+
+// ════════════════════════════════════════════════════════════════════════════
+// COOLDOWNS & CLUSTERING
+// ════════════════════════════════════════════════════════════════════════════
+
+// Cooldown Path A
+var int cooldownCounterA = 0
+if (isTriggerLongA or isTriggerShortA)
+    cooldownCounterA := cooldownA
+if cooldownCounterA > 0
+    cooldownCounterA -= 1
+
+// Cooldown Path B
+var int cooldownCounterB = 0
+if (isFITlongRaw or isFITshortRaw)
+    cooldownCounterB := cooldownB
+if cooldownCounterB > 0
+    cooldownCounterB -= 1
+
+// FIT Clustering (блокировка повторных FIT в одном направлении)
+var int fitLongClusterBlock = 0
+var int fitShortClusterBlock = 0
+
+// Условия сброса блокировки
+fitLongClusterReset = (close > hc20) and (volZ >= 2.2)
+fitShortClusterReset = (close < lc20) and (volZ >= 2.2)
+
+if isFITlongRaw
+    fitLongClusterBlock := fitClusterBlock
+if fitLongClusterBlock > 0
+    fitLongClusterBlock -= 1
+if fitLongClusterReset
+    fitLongClusterBlock := 0
+
+if isFITshortRaw
+    fitShortClusterBlock := fitClusterBlock
+if fitShortClusterBlock > 0
+    fitShortClusterBlock -= 1
+if fitShortClusterReset
+    fitShortClusterBlock := 0
+
+// Финальные FIT с кластеризацией
+canFITlong = (cooldownCounterB == 0) and (fitLongClusterBlock == 0)
+canFITshort = (cooldownCounterB == 0) and (fitShortClusterBlock == 0)
+
+isFITlong = isFITlongRaw and canFITlong
+isFITshort = isFITshortRaw and canFITshort
+
+// Финальные триггеры Path A
+canTriggerA = (cooldownCounterA == 0) and (cooldownCounterB == 0)
+isTriggerLong = isTriggerLongA and canTriggerA
+isTriggerShort = isTriggerShortA and canTriggerA
+
+// ════════════════════════════════════════════════════════════════════════════
+// ОБЩИЕ ФИЛЬТРЫ ОТМЕНЫ
+// ════════════════════════════════════════════════════════════════════════════
+
+// Distance от EMA200
+tooFarFromEMA = math.abs(distTo200ATR) > 1.10
+
+// Body/TR < 0.5 = игла
+isNeedle = bodyRatio < 0.5
+
+// Air слишком мал
+airTooSmallA = (airLong < 0.20) or (airShort < 0.20)
+
+// Блокировка сигналов
+blockLongSignals = tooFarFromEMA or isNeedle or (not htfOkLong and enableHTF)
+blockShortSignals = tooFarFromEMA or isNeedle or (not htfOkShort and enableHTF)
+
+// Финальные сигналы
+isTriggerLongFinal = isTriggerLong and not blockLongSignals and not airTooSmallA
+isTriggerShortFinal = isTriggerShort and not blockShortSignals and not airTooSmallA
+isFITlongFinal = isFITlong and not blockLongSignals
+isFITshortFinal = isFITshort and not blockShortSignals
+
+// Watch с учётом cooldown
+isWatchLongFinal = isWatchLong and (cooldownCounterA == 0) and (cooldownCounterB == 0) and not blockLongSignals
+isWatchShortFinal = isWatchShort and (cooldownCounterA == 0) and (cooldownCounterB == 0) and not blockShortSignals
+
+// ════════════════════════════════════════════════════════════════════════════
+// ВИЗУАЛИЗАЦИЯ
+// ════════════════════════════════════════════════════════════════════════════
+
+// EMA200 и BB
+plot(ema200, "EMA200", color=color.new(color.orange, 30), linewidth=2)
+plot(bbUpper, "BB Upper", color=color.new(color.blue, 80), linewidth=1)
+plot(bbLower, "BB Lower", color=color.new(color.blue, 80), linewidth=1)
+
+// Фоны
+bgWatchLong = showWatchBg and isWatchLongFinal ? color.new(color.green, 92) : na
+bgWatchShort = showWatchBg and isWatchShortFinal ? color.new(color.red, 92) : na
+bgTriggerLong = showTriggerBg and (isTriggerLongFinal or isFITlongFinal) ? color.new(color.green, 85) : na
+bgTriggerShort = showTriggerBg and (isTriggerShortFinal or isFITshortFinal) ? color.new(color.red, 85) : na
+
+bgcolor(bgWatchLong, title="Watch Long")
+bgcolor(bgWatchShort, title="Watch Short")
+bgcolor(bgTriggerLong, title="Trigger Long")
+bgcolor(bgTriggerShort, title="Trigger Short")
+
+// Метки
+if isWatchLongFinal and barstate.islast
+    label.new(bar_index, low, "⚡WATCH", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+
+if isWatchShortFinal and barstate.islast
+    label.new(bar_index, high, "⚡WATCH", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+
+if isTriggerLongFinal and barstate.islast
+    label.new(bar_index, low, "🚀TRIG\nHC:" + str.tostring(hc20, "#.##"), style=label.style_label_up, color=color.lime, textcolor=color.black, size=size.normal)
+
+if isTriggerShortFinal and barstate.islast
+    label.new(bar_index, high, "🚀TRIG\nLC:" + str.tostring(lc20, "#.##"), style=label.style_label_down, color=color.fuchsia, textcolor=color.white, size=size.normal)
+
+if isFITlongFinal and barstate.islast
+    label.new(bar_index, low, "⚡FIT\nTR:" + str.tostring(trRange_ATR, "#.#"), style=label.style_label_up, color=color.yellow, textcolor=color.black, size=size.normal)
+
+if isFITshortFinal and barstate.islast
+    label.new(bar_index, high, "⚡FIT\nTR:" + str.tostring(trRange_ATR, "#.#"), style=label.style_label_down, color=color.orange, textcolor=color.white, size=size.normal)
+
+// Панель
+if showPanel and barstate.islast
+    var table infoTable = table.new(position.top_right, 2, 18, border_width=1, bgcolor=color.new(color.black, 80), border_color=color.gray)
+    
+    // Profile
+    table.cell(infoTable, 0, 0, "Profile:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 0, thresholdProfile, text_color=color.aqua, text_size=size.small)
+    
+    // Path
+    pathActive = (isTriggerLongFinal or isTriggerShortFinal) ? "A-TRIG" : ((isFITlongFinal or isFITshortFinal) ? "B-FIT" : "---")
+    table.cell(infoTable, 0, 1, "Path:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 1, pathActive, text_color=color.yellow, text_size=size.small)
+    
+    // TR/ATR
+    table.cell(infoTable, 0, 2, "TR/ATR:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 2, str.tostring(trRange_ATR, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // Body/ATR
+    table.cell(infoTable, 0, 3, "Body/ATR:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 3, str.tostring(body_ATR, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // Body/TR
+    table.cell(infoTable, 0, 4, "Body/TR:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 4, str.tostring(bodyRatio, "#.##"), text_color=isNeedle ? color.red : color.lime, text_size=size.small)
+    
+    // VolZ
+    table.cell(infoTable, 0, 5, "VolZ:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 5, str.tostring(volZ, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // BBExp
+    table.cell(infoTable, 0, 6, "BBExp:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 6, str.tostring(bbWidthExpansion, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // BW Z
+    table.cell(infoTable, 0, 7, "BW Z:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 7, str.tostring(bbWidthZ, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // ATR% Z
+    table.cell(infoTable, 0, 8, "ATR% Z:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 8, str.tostring(atrPctZ, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // Ribbon
+    table.cell(infoTable, 0, 9, "Ribbon:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 9, str.tostring(ribbonTight, "#.##"), text_color=ribbonTight <= Tr_ribbon ? color.lime : color.white, text_size=size.small)
+    
+    // Dist200
+    table.cell(infoTable, 0, 10, "Dist200:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 10, str.tostring(distTo200ATR, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // Air
+    airDisplay = airLong > airShort ? airLong : airShort
+    table.cell(infoTable, 0, 11, "Air:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 11, str.tostring(airDisplay, "#.##"), text_color=color.white, text_size=size.small)
+    
+    // Slope200
+    table.cell(infoTable, 0, 12, "Slope:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 12, str.tostring(slope200, "#.###"), text_color=slope200 > 0 ? color.lime : color.red, text_size=size.small)
+    
+    // PosInBar
+    table.cell(infoTable, 0, 13, "PosBar%:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 13, str.tostring(posInBar * 100, "#") + "%", text_color=color.white, text_size=size.small)
+    
+    // Flags
+    sqFlag = squeezeOn ? "SQ" : ""
+    cross200Flag = (ema200CrossUp or ema200CrossDown) ? "X200" : ""
+    bosFlag = (bosLong or bosShort) ? "BOS" : ""
+    ptFlag = (preTouchLong or preTouchShort) ? "PT" : ""
+    flagsDisplay = sqFlag + " " + cross200Flag + " " + bosFlag + " " + ptFlag
+    table.cell(infoTable, 0, 14, "Flags:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 14, flagsDisplay, text_color=color.gray, text_size=size.small)
+    
+    // HTF
+    htfDisplay = enableHTF ? (htfOkLong ? "✓L" : (htfOkShort ? "✓S" : "✗")) : "OFF"
+    table.cell(infoTable, 0, 15, "HTF:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 15, htfDisplay, text_color=(htfOkLong or htfOkShort) ? color.lime : color.red, text_size=size.small)
+    
+    // Noise Count
+    table.cell(infoTable, 0, 16, "Noise30:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 16, str.tostring(noiseCount) + "/" + str.tostring(noiseMaxCount), text_color=noisyBackground ? color.red : color.lime, text_size=size.small)
+    
+    // Cooldown
+    cooldownDisplay = cooldownCounterA > 0 ? "A:" + str.tostring(cooldownCounterA) : (cooldownCounterB > 0 ? "B:" + str.tostring(cooldownCounterB) : "Ready")
+    table.cell(infoTable, 0, 17, "Cooldown:", text_color=color.white, text_size=size.small)
+    table.cell(infoTable, 1, 17, cooldownDisplay, text_color=(cooldownCounterA > 0 or cooldownCounterB > 0) ? color.orange : color.lime, text_size=size.small)
+
+// ════════════════════════════════════════════════════════════════════════════
+// АЛЕРТЫ
+// ════════════════════════════════════════════════════════════════════════════
+
+if isWatchLongFinal and barstate.isconfirmed
+    alert("WATCH_LONG: " + syminfo.ticker + " | Score=" + str.tostring(watchScoreLong) + " | BW_Z=" + str.tostring(bbWidthZ, "#.##"), alert.freq_once_per_bar)
+
+if isWatchShortFinal and barstate.isconfirmed
+    alert("WATCH_SHORT: " + syminfo.ticker + " | Score=" + str.tostring(watchScoreShort) + " | BW_Z=" + str.tostring(bbWidthZ, "#.##"), alert.freq_once_per_bar)
+
+if isTriggerLongFinal and barstate.isconfirmed
+    alertMsg = '{"symbol":"' + syminfo.ticker + '","tf":"' + timeframe.period + '","type":"TRIGGER","dir":"LONG","close":' + str.tostring(close) + ',"atr":' + str.tostring(atr14) + ',"ema200":' + str.tostring(ema200) + ',"trAtr":' + str.tostring(trRange_ATR) + ',"bodyAtr":' + str.tostring(body_ATR) + ',"volZ":' + str.tostring(volZ) + ',"bbExp":' + str.tostring(bbWidthExpansion) + ',"dist200Atr":' + str.tostring(distTo200ATR) + ',"air":' + str.tostring(airLong) + ',"slope200":' + str.tostring(slope200) + ',"posInBar":' + str.tostring(posInBar) + ',"htfOk":' + str.tostring(htfOkLong) + '}'
+    alert(alertMsg, alert.freq_once_per_bar)
+
+if isTriggerShortFinal and barstate.isconfirmed
+    alertMsg = '{"symbol":"' + syminfo.ticker + '","tf":"' + timeframe.period + '","type":"TRIGGER","dir":"SHORT","close":' + str.tostring(close) + ',"atr":' + str.tostring(atr14) + ',"ema200":' + str.tostring(ema200) + ',"trAtr":' + str.tostring(trRange_ATR) + ',"bodyAtr":' + str.tostring(body_ATR) + ',"volZ":' + str.tostring(volZ) + ',"bbExp":' + str.tostring(bbWidthExpansion) + ',"dist200Atr":' + str.tostring(distTo200ATR) + ',"air":' + str.tostring(airShort) + ',"slope200":' + str.tostring(slope200) + ',"posInBar":' + str.tostring(posInBar) + ',"htfOk":' + str.tostring(htfOkShort) + '}'
+    alert(alertMsg, alert.freq_once_per_bar)
+
+if isFITlongFinal and barstate.isconfirmed
+    alertMsg = '{"symbol":"' + syminfo.ticker + '","tf":"' + timeframe.period + '","type":"FIT","dir":"LONG","close":' + str.tostring(close) + ',"atr":' + str.tostring(atr14) + ',"ema200":' + str.tostring(ema200) + ',"trAtr":' + str.tostring(trRange_ATR) + ',"bodyAtr":' + str.tostring(body_ATR) + ',"volZ":' + str.tostring(volZ) + ',"bbExp":' + str.tostring(bbWidthExpansion) + ',"dist200Atr":' + str.tostring(distTo200ATR) + ',"air":' + str.tostring(airLong) + ',"slope200":' + str.tostring(slope200) + ',"posInBar":' + str.tostring(posInBar) + ',"htfOk":' + str.tostring(htfOkLong) + '}'
+    alert(alertMsg, alert.freq_once_per_bar)
+
+if isFITshortFinal and barstate.isconfirmed
+    alertMsg = '{"symbol":"' + syminfo.ticker + '","tf":"' + timeframe.period + '","type":"FIT","dir":"SHORT","close":' + str.tostring(close) + ',"atr":' + str.tostring(atr14) + ',"ema200":' + str.tostring(ema200) + ',"trAtr":' + str.tostring(trRange_ATR) + ',"bodyAtr":' + str.tostring(body_ATR) + ',"volZ":' + str.tostring(volZ) + ',"bbExp":' + str.tostring(bbWidthExpansion) + ',"dist200Atr":' + str.tostring(distTo200ATR) + ',"air":' + str.tostring(airShort) + ',"slope200":' + str.tostring(slope200) + ',"posInBar":' + str.tostring(posInBar) + ',"htfOk":' + str.tostring(htfOkShort) + '}'
+    alert(alertMsg, alert.freq_once_per_bar)
+
+// Simple alertconditions
+alertcondition(isWatchLongFinal, "Watch Long", "⚡WATCH LONG: {{ticker}}")
+alertcondition(isWatchShortFinal, "Watch Short", "⚡WATCH SHORT: {{ticker}}")
+alertcondition(isTriggerLongFinal, "Trigger Long", "🚀TRIGGER LONG: {{ticker}}")
+alertcondition(isTriggerShortFinal, "Trigger Short", "🚀TRIGGER SHORT: {{ticker}}")
+alertcondition(isFITlongFinal, "FIT Long", "⚡FIT LONG: {{ticker}}")
+alertcondition(isFITshortFinal, "FIT Short", "⚡FIT SHORT: {{ticker}}")
+
+// ════════════════════════════════════════════════════════════════════════════
+// ВЫХОДНЫЕ СЕРИИ
+// ════════════════════════════════════════════════════════════════════════════
+
+plot(isWatchLongFinal ? 1 : 0, "Watch Long", display=display.data_window)
+plot(isWatchShortFinal ? 1 : 0, "Watch Short", display=display.data_window)
+plot(isTriggerLongFinal ? 1 : 0, "Trigger Long", display=display.data_window)
+plot(isTriggerShortFinal ? 1 : 0, "Trigger Short", display=display.data_window)
+plot(isFITlongFinal ? 1 : 0, "FIT Long", display=display.data_window)
+plot(isFITshortFinal ? 1 : 0, "FIT Short", display=display.data_window)
+plot(trRange_ATR, "TR/ATR", display=display.data_window)
+plot(body_ATR, "Body/ATR", display=display.data_window)
+plot(bodyRatio, "Body/TR", display=display.data_window)
+plot(volZ, "VolZ", display=display.data_window)
+plot(bbWidthExpansion, "BBExp", display=display.data_window)
+plot(bbWidthZ, "BBWidth Z", display=display.data_window)
+plot(atrPctZ, "ATR% Z", display=display.data_window)
+plot(posInBar, "Pos In Bar", display=display.data_window)
+plot(noiseCount, "Noise Count", display=display.data_window)

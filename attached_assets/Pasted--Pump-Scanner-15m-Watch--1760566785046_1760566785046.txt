@@ -1,0 +1,210 @@
+ТЗ: Pump Scanner (15m) — детектор пампов/дампов
+
+Цель: вовремя подсвечивать участки «заряда» (Watch) и давать точный «пуск» (Trigger) перед резким импульсом вверх/вниз. Работает двумя независимыми путями:
+A) Компрессия → Выход, B) FIT (First-Impulse Trigger) — «взрыв без Watch».
+
+0) Общие требования
+
+Тайм-фрейм по умолчанию: 15m (параметром).
+
+Подсчёт — строго на закрытии бара.
+
+Стороны: лонг/шорт зеркальны; подсветка и алерты — по направлению.
+
+Кулдауны: после Trigger из компрессии — 25 баров, после FIT — 40 баров.
+
+Дальше 200-й не сигналить: если |Close−EMA200|/ATR > 1.10 на баре сигнала.
+
+1) Базовые ряды и обозначения
+
+ATR = ATR(14), ATR% = ATR/Close.
+
+EMA200 = EMA(Close,200), slope200 = (EMA200 − EMA200[1]) / ATR (в ATR/бар).
+
+Лента EMA: EMA5/9/13/21.
+
+RibbonSpan = max(EMA5..21) − min(EMA5..21)
+
+RibbonTight = RibbonSpan / ATR
+
+BB (20, 2σ): BBupper, BBbasis, BBlower, BBWidth = (BBupper − BBlower)/BBbasis.
+
+KC (20, 1.5 ATR); SqueezeON = (BBupper < KCupper) and (BBlower > KClower).
+
+Z-scores (окно 200 баров): Z(X) = (X − SMA200(X))/StDev200(X).
+
+Dist200ATR = |Close − EMA200| / ATR.
+
+Air (воздух до полос BB):
+
+Long: Air = (BBupper − Close)/ATR
+
+Short: Air = (Close − BBlower)/ATR
+
+Широтный взрыв BB: BBExp = BBWidth_now / SMA(BBWidth,5).
+
+Диапазон и «тело»: TR = TrueRange, TR/ATR, Body/ATR = |Close−Open|/ATR.
+
+Хай/лоу по закрытиям: HC20 = наивысшее Close за 20 баров, LC20 = наинизшее Close за 20 баров.
+
+Объём: VolZ = Z(volume по окну 50), VolDry = volume/SMA(50) < 0.8.
+
+Pre-touch EMA200: предыдущая свеча прокалывала/касалась EMA200 и закрылась по другую сторону.
+
+2) Профили порогов (одно из трёх на выбор)
+Порог	Strict	Base (реком.)	Aggressive
+Tz_bb (BBWidth Z)	≤ −0.8	≤ −0.6	≤ −0.4
+Tz_atr (ATR% Z)	≤ −0.5	≤ −0.3	≤ −0.2
+Tr_ribbon (Ribbon/ATR)	≤ 0.22	≤ 0.25	≤ 0.28
+Tr_dist (	C−EMA200	/ATR)	≤ 0.25
+Td_depth (Trigger-глубина)	≥ 0.35	≥ 0.30	≥ 0.25
+Td_air (Trigger-воздух)	≥ 0.35	≥ 0.30	≥ 0.25
+Td_volz	≥ 2.2	≥ 2.0	≥ 1.8
+F_tr (FIT: TR/ATR или Body/ATR)	≥ 1.7/1.1	≥ 1.6/1.0	≥ 1.5/0.9
+F_close (позиция Close в баре)	top-25%	top-30%	top-40%
+F_volz (FIT)	≥ 3.0	≥ 2.5	≥ 2.2
+F_depth (над/под EMA200 в FIT)	≥ 0.25	≥ 0.20	≥ 0.15
+F_bbexp (BBExp)	≥ 1.8	≥ 1.6	≥ 1.5
+F_air (воздух в FIT)	≥ 0.25	≥ 0.20	≥ 0.18
+
+Динамическое ослабление для FIT: если одновременно BBExp ≥ 2.0 и VolZ ≥ 3.0, то разрешить F_tr = 1.5 (даже в Base).
+
+3) Путь A — «Компрессия → Выход»
+A1. Watch Long (заряд) — выполнить всё:
+
+Компрессия «2 из 3»:
+SqueezeON, Z(BBWidth) ≤ Tz_bb, Z(ATR%) ≤ Tz_atr и персистентность ≥ 3 из 6 последних баров.
+
+Катушка у средней: RibbonTight ≤ Tr_ribbon и Dist200ATR ≤ Tr_dist.
+
+Направление: Close ≥ EMA200 и slope200 ≥ −0.01.
+
+Сухой объём: VolDry = true.
+
+Дебаунс: условия A1 держатся минимум 2 подряд бара.
+
+Watch Short — зеркально (Close ≤ EMA200; slope200 ≤ +0.01 допускается как «почти плоско»).
+
+A2. Trigger Long (выход из компрессии) — выполнить всё:
+
+BOS по закрытию: Close > HC20 (а не просто High20).
+
+Глубина: (Close − EMA200) / ATR ≥ Td_depth.
+
+Воздух: Air ≥ Td_air.
+
+Объём: VolZ ≥ Td_volz.
+
+Pre-touch фильтр: если был pre-touch и п.2 < 0.25 ATR — сигнал не давать.
+
+Trigger Short — зеркально (Close < LC20, (EMA200−Close)/ATR ≥ Td_depth, и т. д.).
+
+4) Путь B — FIT (First-Impulse Trigger)
+
+Срабатывает даже без Watch. FIT Long — выполнить всё:
+
+Аномальная свеча:
+max(TR/ATR, Body/ATR) ≥ F_tr и Close ≥ High − 0.30*TR (закрытие в верхних 30% бара — анти-«игла»).
+
+Аномальный объём: VolZ ≥ F_volz ИЛИ объём ≥ 95-перцентиля за 90 дней.
+
+Структурный сдвиг (любое из):
+
+пересечение EMA200 снизу вверх и (Close−EMA200)/ATR ≥ F_depth,
+
+или Close > HC20 и (Close−HC20) ≥ 0.10*ATR.
+
+Взрыв полос: BBExp ≥ F_bbexp.
+
+Воздух: Air ≥ F_air (если Z(ATR%) ≤ −0.7, разрешить 0.18).
+
+Мягкий pre-touch: если был pre-touch и глубина п.3 < 0.30 ATR — не триггерим.
+
+Анти-noise фон: за последние 30 баров количество «шумных» баров (TR/ATR>1.0 и VolZ>1.3) ≤ 3.
+
+HTF-фильтр (мягкий): разрешать Long-FIT, если хоть одно:
+Close(1H) ≥ EMA200(1H) или (slope200 ≥ −0.01 и Close(1H) ≥ EMA100(1H)) или CrossUp EMA200(1H) с глубиной ≥ **0.30 ATR(1H)`.
+
+FIT Short — зеркально (закрытие в нижних 30%, пересечение сверху вниз, Close < LC20 и т. д.).
+
+Кластеризация FIT: после FIT-Long подавлять новые FIT-Long 8 баров, пока нет нового Close > HC20 и VolZ ≥ 2.2.
+
+5) Условия отмены/блокировки (оба пути)
+
+Air < 0.20 ATR (для A2 — < Td_air).
+
+|Close − EMA200| / ATR > 1.10.
+
+Body/TR < 0.5 (игла) — игнор.
+
+Любой повторный сигнал раньше своего кулдауна — игнор.
+
+6) Входные параметры индикатора
+
+Профиль порогов: Strict / Base / Aggressive.
+
+Вкл./выкл.: Compression path, FIT path, Short-сигналы, HTF-фильтр.
+
+Тайм-фрейм HTF (по умолчанию 1H).
+
+Порог «шумных баров» за 30 баров (по умолчанию 3).
+
+Кулдауны (по умолчанию 25/40/8 баров).
+
+Мини-воздух (FIT) при Z(ATR%) ≤ −0.7 (по умолчанию 0.18 ATR).
+
+7) Вывод на график и алерты
+
+Подсветка:
+
+Watch Long/Short — фон (зелёный/красный полупрозрачный) только по направлению.
+
+Trigger Long/Short — маркеры (стрелка/метка) с подписью типа.
+
+Панель (data-window) на текущем баре:
+TR/ATR, Body/ATR, VolZ, BBExp, Z(BBWidth), Z(ATR%), RibbonTight, Dist200ATR, Air, slope200, posInBar%, флаги SqueezeON, cross200?, breakHC20/LC20?, preTouch?, HTF ok?, счётчик «noise30».
+
+Алерты (Once per bar close):
+
+WATCH_LONG / WATCH_SHORT
+
+TRIGGER_LONG / TRIGGER_SHORT
+
+FIT_LONG / FIT_SHORT
+Текст алерта — JSON с полями: symbol, tf, type, dir, close, atr, ema200, trAtr, bodyAtr, volZ, bbExp, dist200Atr, air, slope200, posInBar, htfOk.
+
+8) (Опция) Режим оценки качества
+
+Правда (лонг-памп):
+
+P1: +15% ≤ 8 баров, MAE ≤ 0.35×ATR или ≤ 6%;
+
+P2: +30% ≤ 16 баров; P3: +50% ≤ 32 баров.
+(Шорт — зеркально: −10%/8 и −20%/16.)
+
+Считать Precision/Recall по P1 и P2, Lead-time (медиана, p75), False/day.
+
+Кластеризовать события в пределах 8 баров как один памп/дамп.
+
+Вывести сводную таблицу по тикеру/периоду.
+
+Критерии Pass (рекомендация):
+Recall@P1 ≥ 65% (≥80% на «ракетных»), Precision@P1 ≥ 50% (≥60% на «ракетных»), Lead-time медиана 0–1 бар (p75 ≤ 2), False/day ≤ 0.35.
+
+9) Цвета/UX (рекомендация)
+
+Watch Long — тёплый зелёный фон; Watch Short — тёплый красный.
+
+Trigger Long — зелёная стрелка вверх; FIT Long — зелёная ромб-метка.
+
+Зеркально для Short. Подписи: WATCH, TRIG, FIT.
+
+Итого
+
+Два пути (A/B) обеспечивают как раннюю подсветку (компрессия), так и моментальный старт (FIT).
+
+Фильтры Air/Distance/HTF/anti-needle/anti-noise глушат ложняки.
+
+Профили порогов позволяют быстро подстроить чувствительность без перекомпиляции.
+
+Этого хватает разработчику, чтобы реализовать индикатор и алерты один в один с твоими требованиями.
