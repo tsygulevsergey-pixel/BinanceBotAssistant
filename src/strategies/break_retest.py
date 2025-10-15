@@ -564,6 +564,11 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     strategy_logger.debug(f"    💯 Score: {base_score:.1f} → {improved_score:.1f} (режим {regime})")
                     
+                    # Получить CVD и OI из indicators
+                    cvd_val = indicators.get(self.timeframe, {}).get('cvd', 0)
+                    cvd_direction = 'Bullish' if cvd_val > 0 else ('Bearish' if cvd_val < 0 else 'Neutral')
+                    oi_delta_pct = indicators.get('doi_pct', 0.0)
+                    
                     signal = Signal(
                         strategy_name=self.name,
                         symbol=symbol,
@@ -577,6 +582,9 @@ class BreakRetestStrategy(BaseStrategy):
                         regime=regime,
                         bias=bias,
                         base_score=improved_score,  # Используем улучшенный score
+                        volume_ratio=float(breakout.get('volume_ratio', 1.0)),  # ИЗ BREAKOUT
+                        cvd_direction=cvd_direction,  # ИЗ INDICATORS
+                        oi_delta_percent=float(oi_delta_pct),  # ИЗ INDICATORS
                         metadata={
                             'breakout_level': float(breakout_level),
                             'retest_zone_upper': float(retest_zone_upper),
@@ -691,6 +699,11 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     strategy_logger.debug(f"    💯 Score: {base_score:.1f} → {improved_score:.1f} (режим {regime})")
                     
+                    # Получить CVD и OI из indicators
+                    cvd_val = indicators.get(self.timeframe, {}).get('cvd', 0)
+                    cvd_direction = 'Bullish' if cvd_val > 0 else ('Bearish' if cvd_val < 0 else 'Neutral')
+                    oi_delta_pct = indicators.get('doi_pct', 0.0)
+                    
                     signal = Signal(
                         strategy_name=self.name,
                         symbol=symbol,
@@ -704,6 +717,9 @@ class BreakRetestStrategy(BaseStrategy):
                         regime=regime,
                         bias=bias,
                         base_score=improved_score,  # Используем улучшенный score
+                        volume_ratio=float(breakout.get('volume_ratio', 1.0)),  # ИЗ BREAKOUT
+                        cvd_direction=cvd_direction,  # ИЗ INDICATORS
+                        oi_delta_percent=float(oi_delta_pct),  # ИЗ INDICATORS
                         metadata={
                             'breakout_level': float(breakout_level),
                             'retest_zone_upper': float(retest_zone_upper),
