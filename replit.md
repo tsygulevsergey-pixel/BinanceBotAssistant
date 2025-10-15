@@ -6,6 +6,48 @@ The bot focuses on quality strategies, market regime detection, structure-based 
 
 # Recent Changes
 
+## October 15, 2025: TradingView Pump Scanner v1.3 (Dual Path)
+
+**New Separate File: `tradingview_indicators/pump_scanner_v1_3.pine`**
+
+Implemented dual-path detection system for pump/dump identification:
+
+**PATH A - Compression → Breakout:**
+- Flexible compression: 2 of 3 signs required (was 3 of 3 in v1.1)
+  - TTM Squeeze ON
+  - BBWidth Z-Score ≤ -0.8
+  - ATR% Z-Score ≤ -0.5
+- Persistence: ≥3 of last 6 bars (was ≥4 of 6)
+- Relaxed EMA200 slope: Long ≥ -0.01, Short ≤ +0.01 (was ±0.02)
+- Distance to EMA200: 0.25 ATR (was 0.2)
+- Trigger thresholds: 0.30 ATR depth/air (was 0.35)
+- Volume Z-Score: 2.0 for trigger
+- Cooldown: 25 bars after trigger
+
+**PATH B - FIT (First-Impulse Trigger):**
+- Catches explosive moves without prior Watch state
+- Anomaly detection:
+  - TrueRange/ATR ≥ 1.8 OR Body/ATR ≥ 1.2
+  - Volume Z ≥ 3.0 OR Volume ≥ 95th percentile
+- Structural shift: EMA200 cross OR SwingHigh/Low break
+- BBWidth expansion: ≥1.8x of last 5 bars average
+- Air requirement: 0.20 ATR (softer than Path A)
+- Cooldown: 40 bars after FIT
+
+**Advanced Filters (Optional):**
+- HTF Bias: Requires 1H EMA200 alignment
+- Regime Filter: Blocks if ATR% Z > 1.0 (market too wide)
+- Max Distance: Blocks if >1.1 ATR from EMA200
+
+**Visual Differentiation:**
+- Path A Triggers: 🚀 (Lime/Fuchsia)
+- Path B FIT: ⚡ (Yellow/Orange)
+- Panel shows active path, compression metrics, FIT diagnostics
+
+**Files:**
+- `tradingview_indicators/pump_scanner_v1_3.pine` - New dual-path version
+- `tradingview_indicators/pump_scanner_lite.pine` - v1.1 preserved for comparison
+
 ## October 15, 2025: Action Price Telegram Commands & Break & Retest Fix
 
 **New Telegram Commands:**
