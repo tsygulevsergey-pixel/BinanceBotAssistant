@@ -54,6 +54,7 @@ class ActionPriceEngine:
         self.tp1_rr = config.get('tp1_rr', 1.0)
         self.tp2_rr = config.get('tp2_rr', 2.0)
         self.sl_buffer_atr = config.get('sl_buffer_atr', 0.1)
+        self.max_sl_percent = config.get('max_sl_percent', 10.0)  # Максимальный SL в %
         
         logger.info(f"✅ Action Price Engine initialized (EMA200 Body Cross, TF={self.timeframe})")
     
@@ -658,10 +659,13 @@ class ActionPriceEngine:
             tp1 = entry - risk_r * self.tp1_rr
             tp2 = entry - risk_r * self.tp2_rr if mode == 'STANDARD' else None
         
-        # КРИТИЧНО: Проверка стоп-лосса - должен быть < 5% от цены входа
+        # КРИТИЧНО: Проверка стоп-лосса - должен быть < max_sl_percent от цены входа
         sl_percent = abs(entry - sl) / entry * 100
-        if sl_percent >= 5.0:
-            logger.debug(f"Action Price: SL слишком широкий ({sl_percent:.2f}% >= 5%) - сигнал отклонен")
+        if sl_percent >= self.max_sl_percent:
+            logger.warning(
+                f"⚠️ {symbol} Action Price: SL слишком широкий ({sl_percent:.2f}% >= {self.max_sl_percent}%) - сигнал отклонен | "
+                f"Entry: {entry:.6f}, SL: {sl:.6f}, Risk: {abs(entry-sl):.6f}"
+            )
             return None
         
         return {

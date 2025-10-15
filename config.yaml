@@ -379,6 +379,7 @@ action_price:
   tp1_rr: 1.0  # TP1 = 1R (Risk)
   tp2_rr: 2.0  # TP2 = 2R (только для STANDARD)
   sl_buffer_atr: 0.1  # Буфер SL = 0.1×ATR от экстремума инициатора
+  max_sl_percent: 10.0  # Максимальный SL в % от entry (5.0 = 5%, 10.0 = 10%)
   
   # Зоны S/R
   zones:
