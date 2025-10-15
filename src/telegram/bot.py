@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
-from telegram import Update, Bot
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram import Update, Bot, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from src.utils.config import config
 from src.utils.logger import logger
 from src.database.models import Signal, ActionPriceSignal
@@ -41,10 +41,13 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("ap_stats", self.cmd_ap_stats))
         self.app.add_handler(CommandHandler("closed", self.cmd_closed))
         self.app.add_handler(CommandHandler("closed_ap", self.cmd_closed_ap))
+        self.app.add_handler(CommandHandler("menu", self.cmd_menu))
         self.app.add_handler(CommandHandler("validate", self.cmd_validate))
         # Новые профессиональные команды
         self.app.add_handler(CommandHandler("regime_stats", self.cmd_regime_stats))
         self.app.add_handler(CommandHandler("confluence_stats", self.cmd_confluence_stats))
+        # Обработчик нажатий на кнопки клавиатуры
+        self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_keyboard_buttons))
         
         await self.app.initialize()
         await self.app.start()
@@ -67,6 +70,47 @@ class TelegramBot:
                 logger.error(f"Error stopping Telegram bot: {e}")
         logger.info("Telegram bot stopped")
     
+    def get_main_keyboard(self):
+        """Создать главную клавиатуру с кнопками"""
+        keyboard = [
+            [KeyboardButton("📊 Производительность"), KeyboardButton("🎯 Action Price")],
+            [KeyboardButton("📋 Закрытые сигналы"), KeyboardButton("📈 Закрытые AP")]
+        ]
+        return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    
+    async def handle_keyboard_buttons(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Обработчик нажатий на кнопки клавиатуры"""
+        if not update.message or not update.message.text:
+            return
+        
+        text = update.message.text
+        
+        if text == "📊 Производительность":
+            await self.cmd_performance(update, context)
+        elif text == "🎯 Action Price":
+            await self.cmd_ap_stats(update, context)
+        elif text == "📋 Закрытые сигналы":
+            await self.cmd_closed(update, context)
+        elif text == "📈 Закрытые AP":
+            await self.cmd_closed_ap(update, context)
+    
+    async def cmd_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать/скрыть главную клавиатуру"""
+        if not update.message:
+            return
+        
+        # Проверяем аргумент: hide для скрытия, иначе показываем
+        if context.args and context.args[0].lower() == 'hide':
+            await update.message.reply_text(
+                "🔹 Клавиатура скрыта\n\nИспользуй /menu чтобы показать снова",
+                reply_markup=ReplyKeyboardRemove()
+            )
+        else:
+            await update.message.reply_text(
+                "🔹 Клавиатура активирована\n\nИспользуй /menu hide чтобы скрыть",
+                reply_markup=self.get_main_keyboard()
+            )
+    
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
             return
@@ -74,6 +118,7 @@ class TelegramBot:
             "🤖 <b>Торговый бот запущен</b>\n\n"
             "📊 <b>Основные команды:</b>\n"
             "/help - Справка\n"
+            "/menu - Показать/скрыть клавиатуру\n"
             "/status - Статус бота\n"
             "/strategies - Список стратегий\n"
             "/performance - Производительность (7 дней)\n"
@@ -87,9 +132,14 @@ class TelegramBot:
             "⚙️ <b>Диагностика:</b>\n"
             "/validate - Проверка стратегий\n"
             "/latency - Задержки системы\n"
-            "/report - Статистика сигналов\n"
+            "/report - Статистика сигналов\n\n"
+            "Используй кнопки внизу для быстрого доступа! 👇"
         )
-        await update.message.reply_text(welcome_text, parse_mode='HTML')
+        await update.message.reply_text(
+            welcome_text, 
+            parse_mode='HTML',
+            reply_markup=self.get_main_keyboard()
+        )
     
     async def cmd_help(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
@@ -97,6 +147,7 @@ class TelegramBot:
         help_text = (
             "<b>Справка по командам:</b>\n\n"
             "/start - Начало работы\n"
+            "/menu - Показать/скрыть клавиатуру\n"
             "/status - Состояние бота и рынков\n"
             "/strategies - Активные стратегии\n"
             "/performance - Win rate, PnL за 7 дней\n"

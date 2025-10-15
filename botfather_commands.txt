@@ -1,0 +1,15 @@
+start - Начало работы
+menu - Показать/скрыть клавиатуру
+help - Справка по командам
+status - Состояние бота и рынков
+strategies - Активные стратегии
+performance - Win rate, PnL за 7 дней
+stats - Детали по стратегиям
+ap_stats - Action Price статистика
+closed - Закрытые сигналы (по умолчанию 24ч)
+closed_ap - Закрытые Action Price (по умолчанию 24ч)
+validate - Проверка корректности стратегий
+regime_stats - Статистика по режимам рынка
+confluence_stats - Эффективность confluence
+latency - Задержки WebSocket
+report - Статистика за период
