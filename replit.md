@@ -11,14 +11,20 @@ Preferred communication style: Simple, everyday language.
 # Recent Changes
 
 ## Action Price Performance Tracker Fix (October 15, 2025)
-- **Problem**: /ap_stats showed 0 closed signals despite having active trades because tracker didn't close signals after TP1
-- **Root Cause**: Signals reaching TP1 but not TP2/SL would remain in PENDING status forever - tracker never closed them
+- **Problem**: /ap_stats showed 0 closed signals - tracker wasn't monitoring or closing signals
+- **Root Causes**: 
+  1. Signals reaching TP1 but not TP2/SL would remain in PENDING forever
+  2. Tracker used wrong logger (missing from action_price logs)
+  3. Timezone errors when comparing datetime objects
+  4. VWAP RuntimeWarning from pandas Timestamp/int comparison
 - **Solution**: 
-  - Added Time Stop after TP1: Auto-closes signals after 48 hours if TP2 not reached (trailing stop logic)
-  - Added Regular Time Stop: Auto-closes all signals after 7 days maximum
-  - Both close with proper WIN/LOSS status based on PnL
-- **Result**: Signals now properly close and appear in /ap_stats statistics
-- **Files**: `src/action_price/performance_tracker.py` (lines 309-340)
+  - **Time Stops**: 48h after TP1, 7 days maximum (WIN/LOSS by PnL)
+  - **Logger Fix**: Tracker now uses ap_logger for visibility in action_price logs
+  - **Timezone Fix**: Auto-localize naive datetime before comparison
+  - **VWAP Fix**: Use numpy arrays instead of pandas Series in cumsum operations
+  - **Logging**: Added detailed tracking messages ("🔍 Checking X active AP signals")
+- **Result**: Tracker runs visibly, closes signals properly, stats appear in /ap_stats
+- **Files**: `src/action_price/performance_tracker.py`, `src/indicators/vwap.py`
 
 ## Action Price Candle Selection Fix (October 15, 2025)
 - **Problem**: Bot analyzed wrong candles (-3, -2) instead of last 2 closed (-2, -1), causing EMA200 mismatch with Binance

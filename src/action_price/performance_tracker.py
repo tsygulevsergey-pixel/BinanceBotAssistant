@@ -10,8 +10,9 @@ import logging
 from src.database.models import ActionPriceSignal
 from src.database.db import db
 from src.binance.client import BinanceClient
+from src.action_price.logger import ap_logger
 
-logger = logging.getLogger(__name__)
+logger = ap_logger  # Используем Action Price logger для консистентности
 
 
 class ActionPricePerformanceTracker:
@@ -62,9 +63,10 @@ class ActionPricePerformanceTracker:
             ).all()
             
             if not active_signals:
+                logger.debug("No active AP signals to check")
                 return
             
-            logger.debug(f"Checking {len(active_signals)} active AP signals")
+            logger.info(f"🔍 Checking {len(active_signals)} active AP signals for exit conditions")
             
             for signal in active_signals:
                 try:
