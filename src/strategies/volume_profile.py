@@ -66,12 +66,12 @@ class VolumeProfileStrategy(BaseStrategy):
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         
-        # Проверка близости к краям value area
-        near_vah = abs(current_close - vah) <= 0.3 * current_atr
-        near_val = abs(current_close - val) <= 0.3 * current_atr
+        # Проверка близости к краям value area (расширено до 0.5 ATR для большего охвата)
+        near_vah = abs(current_close - vah) <= 0.5 * current_atr
+        near_val = abs(current_close - val) <= 0.5 * current_atr
         
         if not (near_vah or near_val):
-            strategy_logger.debug(f"    ❌ Цена не около VAH/VAL (расстояние > 0.3 ATR)")
+            strategy_logger.debug(f"    ❌ Цена не около VAH/VAL (расстояние > 0.5 ATR)")
             return None
         
         # Определяем: rejection или acceptance

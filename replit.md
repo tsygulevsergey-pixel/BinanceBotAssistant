@@ -6,6 +6,33 @@ The bot focuses on quality strategies, market regime detection, structure-based 
 
 # Recent Changes
 
+## October 15, 2025: Performance Optimization & Enhanced Scoring
+
+**4-Point Optimization System:**
+
+1. **Volume Profile Zone Expansion** (src/strategies/volume_profile.py):
+   - Expanded VAH/VAL detection zone from 0.3 ATR to 0.5 ATR
+   - Captures more opportunities near Value Area boundaries
+   - Maintains quality with acceptance/rejection logic intact
+
+2. **TIME_STOP Patience Increase** (config.yaml):
+   - Extended timeout from 6-8 bars to 12-16 bars (3-4 hours on 15m)
+   - Allows quality setups more time to develop
+   - TIME_STOP still disabled after TP1 hit (position protected)
+
+3. **Aggressive Trailing Stop** (src/utils/signal_tracker.py):
+   - After TP1: SL moved to +0.5R instead of breakeven
+   - LONG: SL = Entry + 0.5*R_distance
+   - SHORT: SL = Entry - 0.5*R_distance
+   - Captures additional profit while maintaining protection
+
+4. **Enhanced Score Differentiation** (src/scoring/signal_scorer.py):
+   - **+1.0** Strong ADX (>30) in TREND regime
+   - **+0.5** RSI extreme reversal (RSI<30 for LONG, RSI>70 for SHORT in MR strategies)
+   - **+1.0** Regime alignment (Breakout in TREND, MR in RANGE/SQUEEZE)
+   - **-0.5** Extreme ATR volatility (ATR > 2x average)
+   - Total: 10 scoring components (6 original + 4 new)
+
 ## October 15, 2025: Break & Retest 3-Phase TREND Improvement System
 
 Implemented comprehensive TREND regime improvements based on 19-signal analysis (17% WR → target 40-55% industry standard):

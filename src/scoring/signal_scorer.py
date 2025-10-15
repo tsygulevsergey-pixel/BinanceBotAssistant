@@ -111,6 +111,35 @@ class SignalScorer:
             else:
                 components.append("BTC: 0 (no data)")
         
+        # ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ для дифференциации:
+        
+        # +1: Strong ADX (>30) в TREND режиме
+        adx_bonus = self._score_adx(signal, indicators)
+        score += adx_bonus
+        if adx_bonus > 0:
+            adx_val = indicators.get('adx', 0)
+            components.append(f"ADX: +{adx_bonus:.1f} (strong trend {adx_val:.1f})")
+        
+        # +0.5: RSI extreme reversal setup
+        rsi_bonus = self._score_rsi_extreme(signal, indicators)
+        score += rsi_bonus
+        if rsi_bonus > 0:
+            rsi_val = indicators.get('rsi', 50)
+            components.append(f"RSI: +{rsi_bonus:.1f} (extreme {rsi_val:.1f})")
+        
+        # +1: Market regime alignment (TREND стратегия в TREND режиме)
+        regime_bonus = self._score_regime_alignment(signal, indicators)
+        score += regime_bonus
+        if regime_bonus > 0:
+            regime = indicators.get('regime', 'UNKNOWN')
+            components.append(f"Regime: +{regime_bonus:.1f} ({regime} aligned)")
+        
+        # -0.5: High ATR volatility penalty (риск слишком высокий)
+        atr_penalty = self._score_atr_volatility(signal, indicators)
+        score += atr_penalty
+        if atr_penalty < 0:
+            components.append(f"ATR: {atr_penalty:.1f} (extreme volatility)")
+        
         # Логируем детальный breakdown
         logger.info(
             f"{signal.symbol} {signal.direction} scoring breakdown:\n"
@@ -238,6 +267,75 @@ class SignalScorer:
             logger.debug(f"{signal.symbol} {penalty:.1f} BTC against (signal {signal.direction})")
         
         return penalty, btc_change_pct
+    
+    def _score_adx(self, signal: Signal, indicators: Dict) -> float:
+        """
+        Бонус за сильный тренд (ADX > 30) в TREND режиме
+        +1 если ADX > 30 и режим TREND
+        """
+        adx = indicators.get('adx', 0)
+        regime = indicators.get('regime', 'UNKNOWN')
+        
+        # Бонус только для TREND режима с сильным ADX
+        if regime == 'TREND' and adx > 30:
+            logger.debug(f"{signal.symbol} +1 strong ADX={adx:.1f} in TREND")
+            return 1.0
+        
+        return 0.0
+    
+    def _score_rsi_extreme(self, signal: Signal, indicators: Dict) -> float:
+        """
+        Бонус за RSI extreme reversal setup для mean reversion
+        +0.5 если RSI < 30 для LONG или RSI > 70 для SHORT
+        """
+        rsi = indicators.get('rsi', 50)
+        
+        # Только для mean reversion стратегий
+        if signal.strategy_name in ['VWAP Mean Reversion', 'Range Fade', 'RSI/Stoch MR']:
+            if signal.direction == 'LONG' and rsi < 30:
+                logger.debug(f"{signal.symbol} +0.5 RSI oversold {rsi:.1f}")
+                return 0.5
+            elif signal.direction == 'SHORT' and rsi > 70:
+                logger.debug(f"{signal.symbol} +0.5 RSI overbought {rsi:.1f}")
+                return 0.5
+        
+        return 0.0
+    
+    def _score_regime_alignment(self, signal: Signal, indicators: Dict) -> float:
+        """
+        Бонус за alignment стратегии с market regime
+        +1 если breakout стратегия в TREND или MR стратегия в RANGE
+        """
+        regime = indicators.get('regime', 'UNKNOWN')
+        
+        # Breakout стратегии любят TREND
+        breakout_strategies = ['Liquidity Sweep', 'Break & Retest', 'Order Flow', 'Momentum Breakout']
+        if signal.strategy_name in breakout_strategies and regime == 'TREND':
+            logger.debug(f"{signal.symbol} +1 breakout strategy in TREND")
+            return 1.0
+        
+        # MR стратегии любят RANGE/SQUEEZE
+        mr_strategies = ['VWAP Mean Reversion', 'Range Fade', 'RSI/Stoch MR', 'Volume Profile']
+        if signal.strategy_name in mr_strategies and regime in ['RANGE', 'SQUEEZE']:
+            logger.debug(f"{signal.symbol} +1 MR strategy in {regime}")
+            return 1.0
+        
+        return 0.0
+    
+    def _score_atr_volatility(self, signal: Signal, indicators: Dict) -> float:
+        """
+        Пенальти за экстремальную волатильность
+        -0.5 если ATR > 2x средней (высокий риск)
+        """
+        atr = indicators.get('atr', 0)
+        atr_avg = indicators.get('atr_avg', atr)  # Средняя ATR за период
+        
+        # Если ATR более чем в 2 раза выше средней - пенальти
+        if atr_avg > 0 and atr > atr_avg * 2.0:
+            logger.debug(f"{signal.symbol} -0.5 extreme ATR={atr:.4f} (avg={atr_avg:.4f})")
+            return -0.5
+        
+        return 0.0
     
     def should_enter(self, score: float) -> bool:
         """Проверить, достаточен ли score для входа"""

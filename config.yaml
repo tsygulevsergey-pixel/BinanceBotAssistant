@@ -107,7 +107,7 @@ risk:
   max_concurrent_positions: 10
   
   stop_loss_atr_multiplier: [0.2, 0.3]
-  time_stop_bars: [6, 8]  # on 1m timeframe
+  time_stop_bars: [12, 16]  # на 15m таймфрейме = 3-4 часа (увеличено для большего терпения)
   
   # Maximum stop-loss distance protection
   max_stop_distance_atr: 3.0  # Reject signals with stop > 3 ATR away
