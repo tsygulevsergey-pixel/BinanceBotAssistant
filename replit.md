@@ -49,7 +49,7 @@ Preferred communication style: Simple, everyday language.
 ### Filtering & Risk Management
 - **S/R Zone-Based Stop-Loss System**: Advanced stop placement with intelligent fallback and smart distance guard.
 - **Trailing Stop-Loss with Partial TP**: For advanced profit management (30% @ TP1, 40% @ TP2, 30% trailing).
-- **Hybrid Entry System**: Adaptive MARKET/LIMIT execution.
+- **Market Entry System**: All strategies execute MARKET orders at current price for immediate entry.
 - **Time Stops**: Exits trades if no progress.
 - **Symbol Blocking System (Per-Strategy)**: Independent blocking per strategy allows multiple strategies on the same symbol.
 
