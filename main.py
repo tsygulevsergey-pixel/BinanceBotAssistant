@@ -650,7 +650,10 @@ class TradingBot:
             'funding_extreme': False,  # TODO: Рассчитать из API Funding Rate
             'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
             'h4_swing_high': h4_swing_high,
-            'h4_swing_low': h4_swing_low
+            'h4_swing_low': h4_swing_low,
+            # ДОБАВЛЕНО: DataFrame'ы для Higher Timeframe Confirmation в Break & Retest
+            '1h': timeframe_data.get('1h'),  # DataFrame 1H для HTF проверки
+            '4h': timeframe_data.get('4h')   # DataFrame 4H для HTF проверки
         }
         
         # Валидация индикаторов (только для первого символа или периодически)

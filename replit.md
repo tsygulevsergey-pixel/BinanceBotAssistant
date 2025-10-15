@@ -33,6 +33,12 @@ Implemented comprehensive TREND regime improvements based on 19-signal analysis 
 - HTF confirmation: strict block if data available and disagrees, score penalty if data unavailable
 - Config updated with regime-specific parameters (ADX 25/15, volume 1.8/1.2)
 
+**Technical Implementation:**
+- HTF uses EMA50 on both 1H and 4H (reduced from EMA200 for realistic data requirements)
+- 1H/4H DataFrames added to indicators dict in main.py (lines 658-659)
+- With 90-day history: 2160 bars on 1H, 540 bars on 4H - more than sufficient
+- HTF confirmation returns tuple (confirmed: bool, has_data: bool) for smart blocking
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
