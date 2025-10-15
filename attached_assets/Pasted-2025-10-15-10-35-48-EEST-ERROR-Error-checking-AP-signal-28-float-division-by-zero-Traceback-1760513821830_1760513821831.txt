@@ -1,0 +1,32 @@
+2025-10-15 10:35:48 EEST | ERROR    | Error checking AP signal 28: float division by zero
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    self._update_mfe_mae(signal, current_price)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 147, in _update_mfe_mae
+    current_pnl_r = (entry - current_price) / risk_r
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+ZeroDivisionError: float division by zero
+2025-10-15 10:35:49 EEST | ERROR    | Error checking AP signal 27: float division by zero
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    self._update_mfe_mae(signal, current_price)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 147, in _update_mfe_mae
+    current_pnl_r = (entry - current_price) / risk_r
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+ZeroDivisionError: float division by zero
+2025-10-15 10:35:50 EEST | ERROR    | Error checking AP signal 24: float division by zero
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    self._update_mfe_mae(signal, current_price)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 147, in _update_mfe_mae
+    current_pnl_r = (entry - current_price) / risk_r
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+ZeroDivisionError: float division by zero
+2025-10-15 10:35:54 EEST | ERROR    | Error checking AP signal 26: float division by zero
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 93, in _check_signal
+    self._update_mfe_mae(signal, current_price)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 147, in _update_mfe_mae
+    current_pnl_r = (entry - current_price) / risk_r
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+ZeroDivisionError: float division by zero
