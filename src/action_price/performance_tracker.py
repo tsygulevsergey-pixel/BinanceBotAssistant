@@ -371,7 +371,7 @@ class ActionPricePerformanceTracker:
         Returns:
             Общий PnL в процентах
         """
-        direction = signal.direction
+        direction = signal.direction.upper() if signal.direction else 'LONG'
         
         # Если есть частичный выход на TP1
         if signal.partial_exit_1_at and signal.partial_exit_1_price:
@@ -397,7 +397,9 @@ class ActionPricePerformanceTracker:
                 else:
                     pnl_remainder = ((entry - final_exit_price) / entry) * 100 * tp2_pct
             
-            return pnl_tp1 + pnl_remainder
+            total_pnl = pnl_tp1 + pnl_remainder
+            logger.debug(f"PnL calc: {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + Remainder: {pnl_remainder:.2f}% (70%) = Total: {total_pnl:.2f}%")
+            return total_pnl
         else:
             # Полный выход без частичных фиксаций
             if direction == 'LONG':

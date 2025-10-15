@@ -10,23 +10,24 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-## Action Price Performance Tracker Fix v3 (October 15, 2025)
-- **Problem**: Tracker runs but doesn't close signals - /ap_stats still shows 0 closed
+## Action Price Performance Tracker Fix v4 (October 15, 2025)
+- **Problem**: Tracker works but shows wrong PnL for TP2 exits (e.g., -0.82% instead of profit)
 - **Root Causes**: 
   1. Tracker used wrong logger (invisible in action_price logs) ✅ FIXED
   2. Timezone errors in time stop logic ✅ FIXED
   3. VWAP RuntimeWarning from pandas Timestamp/int ✅ FIXED
-  4. Direction case mismatch: DB stores 'long'/'short' but code checks 'LONG'/'SHORT' ✅ FIXED
+  4. Direction case mismatch in exit conditions: DB stores 'long'/'short' but code checks 'LONG'/'SHORT' ✅ FIXED
   5. Silent condition failures: No debug logs ✅ FIXED
-  6. **ZeroDivisionError after TP1**: When SL moves to breakeven (SL=Entry), risk_r=0 → crash in MFE/MAE calc ✅ FIXED
-- **Solution v3**: 
+  6. ZeroDivisionError after TP1: When SL moves to breakeven (SL=Entry), risk_r=0 → crash in MFE/MAE calc ✅ FIXED
+  7. **PnL calculation bug**: Forgot `.upper()` in `_calculate_total_pnl()` → used wrong formula ✅ FIXED
+- **Solution v4**: 
   - **Logger Fix**: Tracker uses ap_logger (visible in action_price logs)
   - **Timezone Fix**: Auto-localize naive datetime before comparison
   - **VWAP Fix**: Use numpy arrays instead of pandas Series
-  - **Direction Fix**: Convert to uppercase with `.upper()` before comparison
-  - **Debug Logs**: Added detailed condition checks for first 3 signals
+  - **Direction Fix**: Convert to uppercase with `.upper()` in ALL functions (_check_exit_conditions, _update_mfe_mae, _calculate_total_pnl)
+  - **Debug Logs**: Added PnL calculation breakdown (TP1 30% + Remainder 70% = Total)
   - **Breakeven Protection**: Skip MFE/MAE update when risk_r < 0.0001 (prevents division by zero)
-- **Result**: ✅ WORKING - Tracker closes signals, fixes TP1, moves SL to breakeven, no crashes
+- **Result**: ✅ WORKING - Tracker closes signals correctly with accurate PnL calculations
 - **Files**: `src/action_price/performance_tracker.py`, `src/indicators/vwap.py`
 
 ## Action Price Candle Selection Fix (October 15, 2025)
