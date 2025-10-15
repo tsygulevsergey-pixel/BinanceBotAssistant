@@ -1371,7 +1371,7 @@ class TradingBot:
             
             pattern_type = ap_signal.get('pattern_type', 'body_cross')
             emoji = pattern_emoji.get(pattern_type, '🎯')
-            direction_emoji = '🟢' if ap_signal['direction'] == 'LONG' else '🔴'
+            direction_emoji = '🟢' if ap_signal['direction'].lower() == 'long' else '🔴'
             
             # Получить meta_data
             meta_data = ap_signal.get('meta_data', {})
