@@ -137,8 +137,12 @@ class ActionPricePerformanceTracker:
         """
         entry = float(signal.entry_price)
         sl = float(signal.stop_loss)
-        direction = signal.direction
+        direction = signal.direction.upper() if signal.direction else 'LONG'
         risk_r = abs(entry - sl)
+        
+        # КРИТИЧНО: Если SL в breakeven (risk_r = 0), пропускаем MFE/MAE update
+        if risk_r < 0.0001:
+            return
         
         # Рассчитать текущий P&L в R
         if direction == 'LONG':

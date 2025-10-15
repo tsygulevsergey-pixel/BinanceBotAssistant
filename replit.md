@@ -10,21 +10,23 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-## Action Price Performance Tracker Fix v2 (October 15, 2025)
+## Action Price Performance Tracker Fix v3 (October 15, 2025)
 - **Problem**: Tracker runs but doesn't close signals - /ap_stats still shows 0 closed
 - **Root Causes**: 
   1. Tracker used wrong logger (invisible in action_price logs) ✅ FIXED
   2. Timezone errors in time stop logic ✅ FIXED
   3. VWAP RuntimeWarning from pandas Timestamp/int ✅ FIXED
-  4. **Direction case mismatch**: DB stores 'long'/'short' but code checks 'LONG'/'SHORT' → conditions never match
-  5. **Silent condition failures**: No debug logs to see what's being compared
-- **Solution v2**: 
+  4. Direction case mismatch: DB stores 'long'/'short' but code checks 'LONG'/'SHORT' ✅ FIXED
+  5. Silent condition failures: No debug logs ✅ FIXED
+  6. **ZeroDivisionError after TP1**: When SL moves to breakeven (SL=Entry), risk_r=0 → crash in MFE/MAE calc ✅ FIXED
+- **Solution v3**: 
   - **Logger Fix**: Tracker uses ap_logger (visible in action_price logs)
   - **Timezone Fix**: Auto-localize naive datetime before comparison
   - **VWAP Fix**: Use numpy arrays instead of pandas Series
   - **Direction Fix**: Convert to uppercase with `.upper()` before comparison
-  - **Debug Logs**: Added detailed condition checks for first 3 signals (Price, Entry, SL, TP1, TP2, TP1_hit status)
-- **Next Step**: Debug logs will show WHY conditions don't trigger (check logs after restart)
+  - **Debug Logs**: Added detailed condition checks for first 3 signals
+  - **Breakeven Protection**: Skip MFE/MAE update when risk_r < 0.0001 (prevents division by zero)
+- **Result**: ✅ WORKING - Tracker closes signals, fixes TP1, moves SL to breakeven, no crashes
 - **Files**: `src/action_price/performance_tracker.py`, `src/indicators/vwap.py`
 
 ## Action Price Candle Selection Fix (October 15, 2025)
