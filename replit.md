@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Action Price Performance Tracker Statistics Fix (October 15, 2025)
+- **Problem**: Statistics showed both TP1 and TP2 for same signal (e.g., signal hits TP2 → both counters +1)
+- **Root Cause**: Used `partial_exit_1_at/partial_exit_2_at` flags instead of `exit_reason` for counting
+- **Solution**: Changed to count by `exit_reason` - mutually exclusive categories:
+  - `exit_reason = 'TAKE_PROFIT_1'` → TP1 counter
+  - `exit_reason = 'TAKE_PROFIT_2'` → TP2 counter
+  - `exit_reason = 'BREAKEVEN'` → Breakeven counter
+- **Result**: Correct statistics - if TP2 hit, shows only TP2 (not both TP1+TP2)
+- **Files**: `src/action_price/performance_tracker.py` (lines 465-467)
+
 ## Action Price Performance Tracker Fix v4 (October 15, 2025)
 - **Problem**: Tracker works but shows wrong PnL for TP2 exits (e.g., -0.82% instead of profit)
 - **Root Causes**: 

@@ -457,9 +457,10 @@ class ActionPricePerformanceTracker:
             wins = [s for s in closed if s.status == 'WIN']
             losses = [s for s in closed if s.status == 'LOSS']
             
-            # Подсчет TP1/TP2/Breakeven (как в основных стратегиях)
-            tp1_count = len([s for s in closed if s.partial_exit_1_at is not None])
-            tp2_count = len([s for s in closed if s.partial_exit_2_at is not None])
+            # Подсчет TP1/TP2/Breakeven по exit_reason (взаимоисключающие)
+            # Логика: если TP2 - считаем только TP2, если Breakeven - считаем только Breakeven
+            tp1_count = len([s for s in closed if s.exit_reason == 'TAKE_PROFIT_1'])
+            tp2_count = len([s for s in closed if s.exit_reason == 'TAKE_PROFIT_2'])
             breakeven_count = len([s for s in closed if s.exit_reason == 'BREAKEVEN'])
             
             win_rate = (len(wins) / len(closed) * 100) if closed else 0.0
