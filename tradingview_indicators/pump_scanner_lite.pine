@@ -218,11 +218,20 @@ if showPanel and barstate.islast
 // АЛЕРТЫ
 // ════════════════════════════════════════════════════════════════════════════
 
-alertcondition(isWatch, "Pump Watch", "WATCH: {{ticker}} TF={{interval}} Score={{plot_0}} | BW=" + str.tostring(bbWidth, "#.####") + " | Squeeze=" + str.tostring(squeezeOn) + " | Dist200=" + str.tostring(distTo200ATR, "#.##") + " ATR")
+// Используем alert() вместо alertcondition для динамических сообщений
+if isWatch and barstate.isconfirmed
+    alert("WATCH: " + syminfo.ticker + " TF=" + timeframe.period + " Score=" + str.tostring(watchScore) + " | BW=" + str.tostring(bbWidth, "#.####") + " | Squeeze=" + str.tostring(squeezeOn) + " | Dist200=" + str.tostring(distTo200ATR, "#.##") + " ATR", alert.freq_once_per_bar)
 
-alertcondition(isTriggerLong, "Pump Trigger Long", "TRIGGER LONG: {{ticker}} TF={{interval}} Score={{plot_0}} | Close>EMA200 by " + str.tostring(distTo200ATR, "#.##") + " ATR | VolZ=" + str.tostring(volZ, "#.##"))
+if isTriggerLong and barstate.isconfirmed
+    alert("TRIGGER LONG: " + syminfo.ticker + " TF=" + timeframe.period + " Score=" + str.tostring(watchScore) + " | Close>EMA200 by " + str.tostring(distTo200ATR, "#.##") + " ATR | VolZ=" + str.tostring(volZ, "#.##"), alert.freq_once_per_bar)
 
-alertcondition(isTriggerShort, "Pump Trigger Short", "TRIGGER SHORT: {{ticker}} TF={{interval}} Score={{plot_0}} | Close<EMA200 by " + str.tostring(distTo200ATR, "#.##") + " ATR | VolZ=" + str.tostring(volZ, "#.##"))
+if isTriggerShort and barstate.isconfirmed
+    alert("TRIGGER SHORT: " + syminfo.ticker + " TF=" + timeframe.period + " Score=" + str.tostring(watchScore) + " | Close<EMA200 by " + str.tostring(distTo200ATR, "#.##") + " ATR | VolZ=" + str.tostring(volZ, "#.##"), alert.freq_once_per_bar)
+
+// Простые alertcondition для быстрой настройки (статические сообщения)
+alertcondition(isWatch, "Pump Watch (Simple)", "WATCH: {{ticker}} on {{interval}}")
+alertcondition(isTriggerLong, "Pump Trigger Long (Simple)", "TRIGGER LONG: {{ticker}} on {{interval}}")
+alertcondition(isTriggerShort, "Pump Trigger Short (Simple)", "TRIGGER SHORT: {{ticker}} on {{interval}}")
 
 // ════════════════════════════════════════════════════════════════════════════
 // ВЫХОДНЫЕ СЕРИИ (для экспорта/бэктеста)
