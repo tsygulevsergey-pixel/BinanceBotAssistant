@@ -44,7 +44,12 @@ Preferred communication style: Simple, everyday language.
 - **Time Stops**: Exits trades if no progress.
 - **Symbol Blocking System (Per-Strategy)**: Independent blocking.
 - **Pump Scanner v1.4**: Advanced TradingView indicator with multiple threshold profiles, anti-needle/noise filters, HTF soft filter, FIT Clustering, Dynamic TR Relaxation, and Adaptive Air Threshold. Outputs JSON alerts.
-- **Break & Retest Enhancements**: Implemented a 3-Phase TREND Improvement System with critical filters (ADX threshold, momentum, volume thresholds, bearish bias block, HTF confirmation), Bollinger Bands position, retest quality scoring, RSI momentum, and market structure validation.
+- **Break & Retest Enhancements (Phase 1 COMPLETED - Oct 16, 2025)**: 
+  - ✅ **HTF Trend Alignment with EMA200**: Strict 1H/4H EMA200 check (upgraded from EMA50) for trend confirmation in TREND regime
+  - ✅ **Pin Bar & Engulfing Patterns**: Added candlestick pattern detection with quality score bonuses (+0.3 each) for stronger retest confirmation
+  - ✅ **ATR-based Dynamic TP/SL**: Configurable option (`use_atr_based_tp_sl`) with multipliers (TP1=1.5×ATR, TP2=2.5×ATR, SL=1.0×ATR) adapts to volatility and solves TIME_STOP problem
+  - ✅ **Volume Confirmation**: Adaptive volume thresholds per regime (TREND: 1.8×, SQUEEZE: 1.2×) filters weak breakouts
+  - **Previous**: 3-Phase TREND Improvement System with ADX threshold, momentum, volume thresholds, bearish bias block, Bollinger Bands position, retest quality scoring, RSI momentum, and market structure validation
 - **Action Price SL Filter**: Logs warnings for signals rejected due to excessively wide stop-loss, with a configurable `max_sl_percent` threshold (defaulted to 10.0%).
 
 ### Telegram Integration

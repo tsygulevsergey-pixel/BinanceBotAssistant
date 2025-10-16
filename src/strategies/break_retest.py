@@ -115,43 +115,51 @@ class BreakRetestStrategy(BaseStrategy):
     def _check_higher_timeframe_trend(self, df_1h: Optional[pd.DataFrame], df_4h: Optional[pd.DataFrame], 
                                       direction: str) -> tuple[bool, bool]:
         """
-        ФАЗА 1: Higher Timeframe Confirmation (УЛУЧШЕНО)
-        Проверяет тренд на 1H и 4H таймфреймах используя EMA200 для сильной фильтрации
+        ФАЗА 1: Higher Timeframe Confirmation (ИСПРАВЛЕНО - graceful degradation)
+        Проверяет тренд на 1H и 4H таймфреймах используя EMA200 (или меньший период если данных недостаточно)
         Возвращает: (подтверждено, есть_данные)
         """
         from src.indicators.technical import calculate_ema
         
-        # Проверка доступности данных для EMA200
-        if df_1h is None or len(df_1h) < 200:
-            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 1H (недостаточно для EMA200, есть {len(df_1h) if df_1h is not None else 0} баров)")
+        # ИСПРАВЛЕНИЕ: Graceful degradation - используем максимальный доступный период
+        # Проверка 1H: предпочитаем EMA200, но используем EMA50 если данных мало
+        if df_1h is None or len(df_1h) < 50:
+            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 1H (минимум 50 баров, есть {len(df_1h) if df_1h is not None else 0})")
             return (False, False)  # Нет подтверждения, нет данных
         
-        # Для 4H используем EMA200 для строгой фильтрации тренда
-        if df_4h is None or len(df_4h) < 200:
-            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 4H (недостаточно для EMA200, есть {len(df_4h) if df_4h is not None else 0} баров)")
+        ema_period_1h = 200 if len(df_1h) >= 200 else 50
+        if ema_period_1h == 50:
+            strategy_logger.debug(f"    📊 HTF 1H: используем EMA50 (недостаточно данных для EMA200, есть {len(df_1h)} баров)")
+        
+        # ИСПРАВЛЕНИЕ: Для 4H также graceful degradation
+        if df_4h is None or len(df_4h) < 50:
+            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 4H (минимум 50 баров, есть {len(df_4h) if df_4h is not None else 0})")
             return (False, False)  # Нет подтверждения, нет данных
         
-        # Проверка EMA200 на 1H (строгий тренд-фильтр)
-        ema200_1h = calculate_ema(df_1h['close'], period=200)
+        ema_period_4h = 200 if len(df_4h) >= 200 else 50
+        if ema_period_4h == 50:
+            strategy_logger.debug(f"    📊 HTF 4H: используем EMA50 (недостаточно данных для EMA200, есть {len(df_4h)} баров)")
+        
+        # Расчёт EMA с адаптивным периодом
+        ema_1h = calculate_ema(df_1h['close'], period=ema_period_1h)
         price_1h = df_1h['close'].iloc[-1]
         
-        # Проверка EMA200 на 4H (главный тренд-фильтр)
-        ema200_4h = calculate_ema(df_4h['close'], period=200)
+        ema_4h = calculate_ema(df_4h['close'], period=ema_period_4h)
         price_4h = df_4h['close'].iloc[-1]
         
         if direction == 'LONG':
-            trend_1h = price_1h > ema200_1h.iloc[-1]
-            trend_4h = price_4h > ema200_4h.iloc[-1]
+            trend_1h = price_1h > ema_1h.iloc[-1]
+            trend_4h = price_4h > ema_4h.iloc[-1]
             confirmed = trend_1h and trend_4h
-            strategy_logger.debug(f"    📊 HTF Check: 1H={'✅' if trend_1h else '❌'} (price={price_1h:.2f} vs EMA200={ema200_1h.iloc[-1]:.2f}), "
-                                f"4H={'✅' if trend_4h else '❌'} (price={price_4h:.2f} vs EMA200={ema200_4h.iloc[-1]:.2f})")
+            strategy_logger.debug(f"    📊 HTF Check: 1H={'✅' if trend_1h else '❌'} (price={price_1h:.2f} vs EMA{ema_period_1h}={ema_1h.iloc[-1]:.2f}), "
+                                f"4H={'✅' if trend_4h else '❌'} (price={price_4h:.2f} vs EMA{ema_period_4h}={ema_4h.iloc[-1]:.2f})")
             return (confirmed, True)
         else:  # SHORT
-            trend_1h = price_1h < ema200_1h.iloc[-1]
-            trend_4h = price_4h < ema200_4h.iloc[-1]
+            trend_1h = price_1h < ema_1h.iloc[-1]
+            trend_4h = price_4h < ema_4h.iloc[-1]
             confirmed = trend_1h and trend_4h
-            strategy_logger.debug(f"    📊 HTF Check: 1H={'✅' if trend_1h else '❌'} (price={price_1h:.2f} vs EMA200={ema200_1h.iloc[-1]:.2f}), "
-                                f"4H={'✅' if trend_4h else '❌'} (price={price_4h:.2f} vs EMA200={ema200_4h.iloc[-1]:.2f})")
+            strategy_logger.debug(f"    📊 HTF Check: 1H={'✅' if trend_1h else '❌'} (price={price_1h:.2f} vs EMA{ema_period_1h}={ema_1h.iloc[-1]:.2f}), "
+                                f"4H={'✅' if trend_4h else '❌'} (price={price_4h:.2f} vs EMA{ema_period_4h}={ema_4h.iloc[-1]:.2f})")
             return (confirmed, True)
     
     def _check_bollinger_position(self, df: pd.DataFrame, direction: str) -> bool:
