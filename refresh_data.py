@@ -52,12 +52,33 @@ async def refresh_data(symbol: str = None, days: int = 10):
     total = len(symbols)
     for idx, sym in enumerate(symbols, 1):
         try:
-            print(f"[{idx}/{total}] 🔄 {sym}...")
+            # Проверить rate limit перед обновлением
+            rate_status = binance_client.get_rate_limit_status()
+            usage_percent = (rate_status['current'] / rate_status['limit']) * 100
+            
+            print(f"[{idx}/{total}] 🔄 {sym}... (Rate: {rate_status['current']}/{rate_status['limit']} = {usage_percent:.1f}%)")
+            
+            # Если использование > 80%, подождать
+            if usage_percent > 80:
+                wait_time = 5
+                print(f"   ⚠️  Rate limit {usage_percent:.1f}% - пауза {wait_time}s...")
+                await asyncio.sleep(wait_time)
+            
             await data_loader.refresh_recent_candles(sym, days=days)
             print(f"[{idx}/{total}] ✅ {sym} - ГОТОВО\n")
+            
+            # Небольшая задержка между символами (0.5s)
+            if idx < total:
+                await asyncio.sleep(0.5)
+            
         except Exception as e:
             print(f"[{idx}/{total}] ❌ {sym} - ОШИБКА: {e}\n")
             logger.error(f"Error refreshing {sym}: {e}")
+            
+            # Если ошибка rate limit - увеличить задержку
+            if "rate limit" in str(e).lower() or "429" in str(e):
+                print(f"   ⚠️  Rate limit error - пауза 10s...")
+                await asyncio.sleep(10)
     
     print(f"\n{'='*80}")
     print(f"✅ ОБНОВЛЕНИЕ ЗАВЕРШЕНО")
