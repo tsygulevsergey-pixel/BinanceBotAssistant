@@ -39,6 +39,9 @@ class LiquiditySweepStrategy(BaseStrategy):
         self.acceptance_atr_distance = 0.25
         self.max_bars_after_sweep = 3  # Максимум 3 бара после sweep для проверки
         
+        # ФАЗА 2: HTF Trend Alignment
+        self.use_htf_filter = strategy_config.get('use_htf_filter', True)
+        
         # Хранилище активных sweep контекстов {symbol: {...}}
         self.active_sweeps: Dict[str, Dict] = {}
         
@@ -47,6 +50,36 @@ class LiquiditySweepStrategy(BaseStrategy):
     
     def get_category(self) -> str:
         return "mean_reversion"  # Fade базово MR, continuation - breakout
+    
+    def _check_htf_trend(self, df_1h: Optional[pd.DataFrame], direction: str) -> tuple[bool, bool]:
+        """
+        ФАЗА 2: Higher Timeframe Trend Alignment для Liquidity Sweep
+        
+        Fade signals: HTF против движения (sweep up → HTF down)
+        Continuation: HTF по движению (sweep up → HTF up)
+        
+        Возвращает: (подтверждено, есть_данные)
+        """
+        from src.indicators.technical import calculate_ema
+        
+        if df_1h is None or len(df_1h) < 50:
+            strategy_logger.debug(f"    ⚠️ HTF Filter: нет данных 1H (минимум 50 баров)")
+            return (False, False)
+        
+        # Используем EMA50 на 1H для HTF тренда
+        ema50_1h = calculate_ema(df_1h['close'], period=50)
+        price_1h = df_1h['close'].iloc[-1]
+        
+        if direction == 'up':
+            # Sweep вверх: continuation нужен HTF uptrend, fade нужен HTF downtrend
+            htf_uptrend = price_1h > ema50_1h.iloc[-1]
+            strategy_logger.debug(f"    📊 HTF 1H: price={price_1h:.2f} vs EMA50={ema50_1h.iloc[-1]:.2f} → {'UPTREND' if htf_uptrend else 'DOWNTREND'}")
+            return (htf_uptrend, True)
+        else:  # down
+            # Sweep вниз: continuation нужен HTF downtrend, fade нужен HTF uptrend
+            htf_downtrend = price_1h < ema50_1h.iloc[-1]
+            strategy_logger.debug(f"    📊 HTF 1H: price={price_1h:.2f} vs EMA50={ema50_1h.iloc[-1]:.2f} → {'DOWNTREND' if htf_downtrend else 'UPTREND'}")
+            return (htf_downtrend, True)
     
     def _cleanup_old_sweeps(self, current_timestamp: pd.Timestamp, max_age_minutes: int = 60):
         """
@@ -118,9 +151,12 @@ class LiquiditySweepStrategy(BaseStrategy):
                 # Проверяем fade/continuation на текущем баре
                 strategy_logger.debug(f"    🔍 Проверка активного sweep (бар {bars_since_sweep+1} после прокола)")
                 
+                # ФАЗА 2: Получаем HTF данные для trend alignment
+                df_1h = indicators.get('1h')
+                
                 signal_type = self._check_fade_or_continuation(
                     df, sweep_ctx['direction'], sweep_ctx['level'], 
-                    sweep_ctx['atr'], indicators
+                    sweep_ctx['atr'], indicators, df_1h
                 )
                 
                 if signal_type == 'fade':
@@ -205,9 +241,10 @@ class LiquiditySweepStrategy(BaseStrategy):
     
     def _check_fade_or_continuation(self, df: pd.DataFrame, sweep_direction: str,
                                     sweep_level: float, atr: float, 
-                                    indicators: Dict) -> Optional[str]:
+                                    indicators: Dict, df_1h: Optional[pd.DataFrame] = None) -> Optional[str]:
         """
         Определяет fade или continuation после sweep
+        ФАЗА 2: с HTF Trend Alignment проверкой
         """
         current_close = df['close'].iloc[-1]
         prev_close = df['close'].iloc[-2]
@@ -233,6 +270,16 @@ class LiquiditySweepStrategy(BaseStrategy):
                     # Imbalance flip (давление продаж)
                     if depth_imbalance > 1.1:
                         strategy_logger.debug(f"      ✓ Imbalance flip (продажи): {depth_imbalance:.2f} > 1.1")
+                        
+                        # ФАЗА 2: HTF Filter для FADE (sweep up → нужен HTF downtrend)
+                        if self.use_htf_filter and df_1h is not None:
+                            htf_trend, has_data = self._check_htf_trend(df_1h, 'up')
+                            if has_data and htf_trend:  # htf_trend=True означает uptrend для sweep='up'
+                                strategy_logger.debug(f"      ❌ FADE отклонён: HTF UPTREND (нужен downtrend для fade)")
+                                return None
+                            elif has_data:
+                                strategy_logger.debug(f"      ✅ HTF подтверждение FADE: HTF DOWNTREND")
+                        
                         strategy_logger.debug(f"      ✅ FADE подтверждён!")
                         return 'fade'
                     else:
@@ -251,6 +298,16 @@ class LiquiditySweepStrategy(BaseStrategy):
                 # CVD/OI по выходу (покупки продолжаются)
                 if cvd > 0 or doi_pct > 1.0:
                     strategy_logger.debug(f"      ✓ CVD/OI подтверждение: CVD={cvd:.2f}, doi_pct={doi_pct:.2f}")
+                    
+                    # ФАЗА 2: HTF Filter для CONTINUATION (sweep up → нужен HTF uptrend)
+                    if self.use_htf_filter and df_1h is not None:
+                        htf_trend, has_data = self._check_htf_trend(df_1h, 'up')
+                        if has_data and not htf_trend:  # не uptrend
+                            strategy_logger.debug(f"      ❌ CONTINUATION отклонён: HTF DOWNTREND (нужен uptrend)")
+                            return None
+                        elif has_data:
+                            strategy_logger.debug(f"      ✅ HTF подтверждение CONTINUATION: HTF UPTREND")
+                    
                     strategy_logger.debug(f"      ✅ CONTINUATION подтверждён!")
                     return 'continuation'
                 else:
@@ -271,6 +328,16 @@ class LiquiditySweepStrategy(BaseStrategy):
                     # Imbalance flip (давление покупок)
                     if depth_imbalance < 0.9:
                         strategy_logger.debug(f"      ✓ Imbalance flip (покупки): {depth_imbalance:.2f} < 0.9")
+                        
+                        # ФАЗА 2: HTF Filter для FADE (sweep down → нужен HTF uptrend)
+                        if self.use_htf_filter and df_1h is not None:
+                            htf_trend, has_data = self._check_htf_trend(df_1h, 'down')
+                            if has_data and htf_trend:  # htf_trend=True означает downtrend для sweep='down'
+                                strategy_logger.debug(f"      ❌ FADE отклонён: HTF DOWNTREND (нужен uptrend для fade)")
+                                return None
+                            elif has_data:
+                                strategy_logger.debug(f"      ✅ HTF подтверждение FADE: HTF UPTREND")
+                        
                         strategy_logger.debug(f"      ✅ FADE подтверждён!")
                         return 'fade'
                     else:
@@ -289,6 +356,16 @@ class LiquiditySweepStrategy(BaseStrategy):
                 # CVD/OI вниз
                 if cvd < 0 or doi_pct < -1.0:
                     strategy_logger.debug(f"      ✓ CVD/OI подтверждение: CVD={cvd:.2f}, doi_pct={doi_pct:.2f}")
+                    
+                    # ФАЗА 2: HTF Filter для CONTINUATION (sweep down → нужен HTF downtrend)
+                    if self.use_htf_filter and df_1h is not None:
+                        htf_trend, has_data = self._check_htf_trend(df_1h, 'down')
+                        if has_data and not htf_trend:  # не downtrend
+                            strategy_logger.debug(f"      ❌ CONTINUATION отклонён: HTF UPTREND (нужен downtrend)")
+                            return None
+                        elif has_data:
+                            strategy_logger.debug(f"      ✅ HTF подтверждение CONTINUATION: HTF DOWNTREND")
+                    
                     strategy_logger.debug(f"      ✅ CONTINUATION подтверждён!")
                     return 'continuation'
                 else:

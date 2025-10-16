@@ -206,6 +206,8 @@ strategies:
     sweep_min_atr: 0.1
     sweep_max_atr: 0.3
     volume_threshold: 1.5
+    # ФАЗА 2: HTF Trend Alignment
+    use_htf_filter: true  # Проверка HTF тренда (1H EMA50) для fade/continuation
   
   # #12 Order Flow ⭐ CORE - Smart money tracking
   order_flow:
