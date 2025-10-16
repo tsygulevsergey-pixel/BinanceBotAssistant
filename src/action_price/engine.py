@@ -20,18 +20,19 @@ from .cooldown import ActionPriceCooldown
 class ActionPriceEngine:
     """EMA200 Body Cross Strategy с профессиональной системой скоринга"""
     
-    def __init__(self, config: dict, binance_client=None):
+    def __init__(self, config: dict, binance_client=None, signal_logger=None):
         """
         Args:
             config: Конфигурация из config.yaml['action_price']
             binance_client: BinanceClient для получения актуальной цены
+            signal_logger: Внешний JSONL логгер (если None, создаётся новый)
         """
         self.config = config
         self.enabled = config.get('enabled', True)
         self.client = binance_client
         
-        # JSONL логгер для детальных метрик
-        self.signal_logger = ActionPriceSignalLogger()
+        # JSONL логгер для детальных метрик (используем переданный или создаём новый)
+        self.signal_logger = signal_logger if signal_logger else ActionPriceSignalLogger()
         
         # Cooldown система
         self.cooldown = ActionPriceCooldown(config.get('cooldown', {}))

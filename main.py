@@ -54,6 +54,7 @@ import pytz
 from src.action_price.engine import ActionPriceEngine
 from src.action_price.performance_tracker import ActionPricePerformanceTracker
 from src.action_price.logger import ap_logger
+from src.action_price.signal_logger import ActionPriceSignalLogger
 from src.database.models import ActionPriceSignal
 
 
@@ -78,6 +79,7 @@ class TradingBot:
         # Action Price components (only enabled when use_testnet=false)
         self.action_price_engine: Optional[ActionPriceEngine] = None
         self.ap_performance_tracker: Optional[ActionPricePerformanceTracker] = None
+        self.ap_signal_logger: Optional[ActionPriceSignalLogger] = None
         self.action_price_enabled = False
         
         # Компоненты бота
@@ -258,14 +260,20 @@ class TradingBot:
         if not use_testnet and ap_enabled:
             self.action_price_enabled = True
             ap_config = config.get('action_price', {})
-            self.action_price_engine = ActionPriceEngine(ap_config, self.client)
+            
+            # Создать JSONL logger для детального логирования
+            self.ap_signal_logger = ActionPriceSignalLogger()
+            
+            # Создать engine с переданным logger
+            self.action_price_engine = ActionPriceEngine(ap_config, self.client, self.ap_signal_logger)
             
             # Запуск Action Price Performance Tracker
             self.ap_performance_tracker = ActionPricePerformanceTracker(
                 self.client,
                 db,
                 check_interval,
-                self._unblock_symbol_action_price  # Разблокировка для ACTION PRICE
+                self._unblock_symbol_action_price,  # Разблокировка для ACTION PRICE
+                self.ap_signal_logger  # JSONL logger
             )
             asyncio.create_task(self.ap_performance_tracker.start())
             ap_logger.info("🎯 Action Price Engine initialized (Production mode)")

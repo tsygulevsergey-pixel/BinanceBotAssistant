@@ -19,19 +19,21 @@ class ActionPricePerformanceTracker:
     """Отслеживание производительности Action Price сигналов с частичными выходами"""
     
     def __init__(self, binance_client: BinanceClient, db,
-                 check_interval: int = 60, on_signal_closed_callback=None):
+                 check_interval: int = 60, on_signal_closed_callback=None, signal_logger=None):
         """
         Args:
             binance_client: Binance клиент
             db: Database экземпляр
             check_interval: Интервал проверки в секундах
             on_signal_closed_callback: Callback для разблокировки символа
+            signal_logger: ActionPriceSignalLogger для JSONL логирования
         """
         self.binance_client = binance_client
         self.db = db
         self.check_interval = check_interval
         self.running = False
         self.on_signal_closed_callback = on_signal_closed_callback
+        self.signal_logger = signal_logger  # JSONL logger
         
         # MFE/MAE tracking (в памяти)
         self.signal_mfe_mae = {}  # {signal_id: {'mfe_r': float, 'mae_r': float}}
@@ -174,16 +176,19 @@ class ActionPricePerformanceTracker:
             mfe_mae: Dict с mfe_r и mae_r
         """
         try:
-            # Импортируем signal_logger
-            from .signal_logger import ActionPriceSignalLogger
-            
-            # Создать или получить экземпляр logger (упрощённо, можно использовать singleton)
-            # Для простоты пропустим логирование exit update если нет доступа к logger
-            # В реальности нужно передавать logger через конструктор или singleton
-            
-            # TODO: Полная интеграция с signal_logger для update_signal_exit
-            # Пока просто логируем в обычный лог
-            logger.debug(f"Signal {signal.id} exit logged - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
+            if self.signal_logger:
+                # Обновить сигнал выходом в JSONL
+                self.signal_logger.update_signal_exit(
+                    signal_id=signal.id,
+                    exit_reason=signal.close_reason if signal.close_reason else 'UNKNOWN',
+                    timestamp_exit=signal.closed_at if signal.closed_at else datetime.now(pytz.UTC),
+                    exit_price=float(signal.exit_price) if signal.exit_price else 0.0,
+                    mfe_r=mfe_mae['mfe_r'],
+                    mae_r=mfe_mae['mae_r']
+                )
+                logger.debug(f"✅ JSONL logged exit: {signal.id} - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
+            else:
+                logger.debug(f"Signal {signal.id} exit logged - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R (JSONL disabled)")
             
         except Exception as e:
             logger.error(f"Error logging signal exit: {e}", exc_info=True)
