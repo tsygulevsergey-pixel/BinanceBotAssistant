@@ -420,44 +420,86 @@ class TradingBot:
         logger.info(f"📅 Next 4h update: {TimeframeSync.get_next_update_time('4h', now).strftime('%H:%M UTC')}")
         
         iteration = 0
-        check_interval = config.get('scanning.check_interval_seconds', 60)
-        last_check_time = datetime.now()
         
         while self.running:
             iteration += 1
-            current_time = datetime.now()
+            current_time = datetime.now(pytz.UTC)
             
-            # Каждые check_interval секунд проверяем сигналы (неблокирующий запуск)
-            if (current_time - last_check_time).total_seconds() >= check_interval and len(self.ready_symbols) > 0:
+            # Вычислить следующее время закрытия свечи для каждого таймфрейма
+            next_15m = TimeframeSync.get_next_update_time('15m', current_time)
+            next_1h = TimeframeSync.get_next_update_time('1h', current_time)
+            next_4h = TimeframeSync.get_next_update_time('4h', current_time)
+            next_1d = TimeframeSync.get_next_update_time('1d', current_time)
+            
+            # Найти самое раннее закрытие
+            next_candle_close = min(next_15m, next_1h, next_4h, next_1d)
+            
+            # Добавить 31 секунду задержки для стабилизации данных Binance
+            target_time = next_candle_close + timedelta(seconds=31)
+            
+            # Вычислить время ожидания
+            wait_seconds = (target_time - current_time).total_seconds()
+            
+            # Определить какие таймфреймы закроются
+            closing_tfs = []
+            if next_candle_close == next_15m:
+                closing_tfs.append('15m')
+            if next_candle_close == next_1h:
+                closing_tfs.append('1h')
+            if next_candle_close == next_4h:
+                closing_tfs.append('4h')
+            if next_candle_close == next_1d:
+                closing_tfs.append('1d')
+            
+            if wait_seconds > 0:
+                logger.info(
+                    f"⏰ Next candle close: {', '.join(closing_tfs)} at {next_candle_close.strftime('%H:%M UTC')} "
+                    f"(+31s = {target_time.strftime('%H:%M:%S')}) | Waiting {wait_seconds:.0f}s"
+                )
+                
+                # Ждать до target_time, но показывать статус каждые 60 секунд
+                while self.running:
+                    current_time = datetime.now(pytz.UTC)
+                    remaining = (target_time - current_time).total_seconds()
+                    
+                    if remaining <= 0:
+                        break
+                    
+                    # Статус каждую минуту или каждые 10 сек если загрузка идёт
+                    status_interval = 10 if self.coordinator and not self.coordinator.is_loading_complete() else 60
+                    if iteration % status_interval == 0 and self.client:
+                        rate_status = self.client.get_rate_limit_status()
+                        total_signals = self.strategy_manager.get_total_signals_count()
+                        
+                        if self.coordinator:
+                            coord_status = self.coordinator.get_status_summary()
+                            logger.info(
+                                f"📊 {coord_status} | "
+                                f"{self.strategy_manager.get_enabled_count()} strategies | "
+                                f"{total_signals} signals | "
+                                f"Rate: {rate_status['percent_used']:.1f}% | "
+                                f"Next check in {remaining:.0f}s"
+                            )
+                        else:
+                            logger.info(
+                                f"Status: {len(self.symbols)} symbols | "
+                                f"{self.strategy_manager.get_enabled_count()} strategies active | "
+                                f"{total_signals} total signals | "
+                                f"Rate limit: {rate_status['percent_used']:.1f}% | "
+                                f"Next check in {remaining:.0f}s"
+                            )
+                    
+                    iteration += 1
+                    await asyncio.sleep(1)
+            
+            # Время пришло - запустить проверку сигналов (если есть готовые символы)
+            if len(self.ready_symbols) > 0:
                 # Запускаем только если предыдущая проверка завершена
                 if not self._check_signals_lock.locked():
+                    logger.info(f"🚀 Candles closed: {', '.join(closing_tfs)} - starting signal check...")
                     self._check_signals_task = asyncio.create_task(self._check_signals_wrapper())
-                    last_check_time = current_time
                 else:
-                    logger.debug("⏳ Previous signal check still running, skipping this cycle")
-            
-            # Action Price теперь вызывается в _check_signals() ПОСЛЕ загрузки свечей
-            # Статус каждую минуту или каждые 10 сек если загрузка идёт
-            status_interval = 10 if self.coordinator and not self.coordinator.is_loading_complete() else 60
-            if iteration % status_interval == 0 and self.client:
-                rate_status = self.client.get_rate_limit_status()
-                total_signals = self.strategy_manager.get_total_signals_count()
-                
-                if self.coordinator:
-                    coord_status = self.coordinator.get_status_summary()
-                    logger.info(
-                        f"📊 {coord_status} | "
-                        f"{self.strategy_manager.get_enabled_count()} strategies | "
-                        f"{total_signals} signals | "
-                        f"Rate: {rate_status['percent_used']:.1f}%"
-                    )
-                else:
-                    logger.info(
-                        f"Status: {len(self.symbols)} symbols | "
-                        f"{self.strategy_manager.get_enabled_count()} strategies active | "
-                        f"{total_signals} total signals | "
-                        f"Rate limit: {rate_status['percent_used']:.1f}%"
-                    )
+                    logger.warning("⏳ Previous signal check still running, skipping this cycle")
             
             await asyncio.sleep(1)
     
