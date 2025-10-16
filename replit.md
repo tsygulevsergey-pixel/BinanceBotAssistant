@@ -45,7 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Symbol Blocking System (Per-Strategy)**: Independent blocking.
 - **Pump Scanner v1.4**: Advanced TradingView indicator with multiple threshold profiles, anti-needle/noise filters, HTF soft filter, FIT Clustering, Dynamic TR Relaxation, and Adaptive Air Threshold. Outputs JSON alerts.
 - **Break & Retest Enhancements (Phase 1 COMPLETED - Oct 16, 2025)**: 
-  - ✅ **HTF Trend Alignment with EMA200**: Strict 1H/4H EMA200 check (upgraded from EMA50) for trend confirmation in TREND regime
+  - ✅ **HTF Trend Alignment with EMA200**: Strict 1H/4H EMA200 check (upgraded from EMA50) for trend confirmation in TREND regime. **CRITICAL BUG FIXED**: Initial implementation required ≥200 bars (blocked all trades), fixed with graceful degradation to EMA50 when <200 bars available (10 days = ~60 bars on 4H)
   - ✅ **Pin Bar & Engulfing Patterns**: Added candlestick pattern detection with quality score bonuses (+0.3 each) for stronger retest confirmation
   - ✅ **ATR-based Dynamic TP/SL**: Configurable option (`use_atr_based_tp_sl`) with multipliers (TP1=1.5×ATR, TP2=2.5×ATR, SL=1.0×ATR) adapts to volatility and solves TIME_STOP problem
   - ✅ **Volume Confirmation**: Adaptive volume thresholds per regime (TREND: 1.8×, SQUEEZE: 1.2×) filters weak breakouts
