@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime
 
 # Путь к БД
-DB_PATH = 'trading_bot.db'
+DB_PATH = 'data/trading_bot.db'
 
 def check_candles_data(symbol='NMRUSDT', timeframe='15m'):
     """Проверка данных свечей в БД"""
