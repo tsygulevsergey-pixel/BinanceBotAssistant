@@ -64,6 +64,7 @@ Preferred communication style: Simple, everyday language.
 - Provides commands for status, strategy details, performance, validation, latency, and Russian language signal alerts.
 - Features a persistent button keyboard UI and message length protection.
 - Includes commands for detailed Action Price signal analysis (`/closed_ap_sl`, `/closed_ap_tp`).
+- **Action Price Signal Format (Oct 16, 2025)**: Enhanced with candle details table showing Initiator candle (timestamp, Open→Close, EMA200) and Confirming candle (timestamp, High-Low, EMA200) in structured table format below R:R. Timestamps converted to EEST timezone for readability.
 
 ### Logging System
 - Separate log files for Main Bot and Action Price in `logs/` directory, using Europe/Kyiv timezone. Action Price signals are logged centrally to a single JSONL file.
