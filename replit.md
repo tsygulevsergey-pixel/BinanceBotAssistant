@@ -4,6 +4,26 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Changes
 
+## October 16, 2025: Action Price Fix - JSONL Logging Integration
+
+**FIX: Централизованное логирование сигналов в JSONL**
+
+**Проблема:**
+- ActionPriceEngine создавал СВОЙ экземпляр ActionPriceSignalLogger
+- main.py передавал logger в tracker, но НЕ в engine
+- Результат: создавалось 2 JSONL файла (engine + tracker)
+
+**Исправление:**
+1. **Engine принимает logger извне**: Добавлен параметр `signal_logger` в `ActionPriceEngine.__init__()`
+2. **main.py передаёт общий logger**: Создаёт один `ActionPriceSignalLogger` и передаёт в engine + tracker
+3. **Один JSONL файл**: Теперь все записи (entry + exit) идут в один файл `logs/action_price_signals_YYYYMMDD.jsonl`
+
+**Файлы:**
+- `src/action_price/engine.py` (строка 26): принимает `signal_logger` параметр
+- `main.py` (строки 268-271): создаёт logger и передаёт в engine
+
+---
+
 ## October 16, 2025: Action Price Fix - Unclosed Candle Filter
 
 **CRITICAL FIX: Action Price использовал незакрытые свечи**
