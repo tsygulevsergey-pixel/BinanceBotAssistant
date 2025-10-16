@@ -192,6 +192,16 @@ class ActionPriceEngine:
             'confidence_score': float(score_total),
             'regime': '',
             
+            # Данные свечей для Telegram таблицы
+            'initiator_timestamp': signal_data.get('initiator_timestamp'),
+            'timestamp_open': signal_data.get('timestamp_open'),
+            'initiator_open': signal_data.get('initiator_open'),
+            'initiator_close': signal_data.get('initiator_close'),
+            'initiator_ema200': signal_data.get('initiator_ema200'),
+            'confirm_high': signal_data.get('confirm_high'),
+            'confirm_low': signal_data.get('confirm_low'),
+            'confirm_ema200': signal_data.get('confirm_ema200'),
+            
             # Мета данные
             'meta_data': {
                 'score_components': score_components,
@@ -710,11 +720,11 @@ class ActionPriceEngine:
         entry = confirm_close  # Fallback если API недоступен
         if self.client:
             try:
-                ticker = await self.client.get_symbol_ticker(symbol)
-                entry = float(ticker['price'])
-                logger.debug(f"{symbol} Entry Price: REST API={entry:.6f}, Confirm Close={confirm_close:.6f}")
+                mark_data = await self.client.get_mark_price(symbol)
+                entry = float(mark_data['markPrice'])
+                logger.debug(f"{symbol} Entry Price: Mark Price={entry:.6f}, Confirm Close={confirm_close:.6f}")
             except Exception as e:
-                logger.warning(f"{symbol} Action Price: Failed to get current price via REST API, using confirm_close: {e}")
+                logger.warning(f"{symbol} Action Price: Failed to get mark price via REST API, using confirm_close: {e}")
         
         # КРИТИЧНО: Проверка стоп-лосса - должен быть < max_sl_percent от цены confirm_close
         sl_percent = abs(confirm_close - sl) / confirm_close * 100
