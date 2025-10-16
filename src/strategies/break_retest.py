@@ -39,6 +39,16 @@ class BreakRetestStrategy(BaseStrategy):
         # ФАЗА 1: Разные volume требования для режимов
         self.volume_threshold_trend = config.get('strategies.retest.volume_threshold_trend', 1.8)  # Строже для TREND
         self.volume_threshold_squeeze = config.get('strategies.retest.volume_threshold_squeeze', 1.2)  # Мягче для SQUEEZE
+        
+        # ФАЗА 1: ATR-based TP/SL опция
+        self.use_atr_based_tp_sl = strategy_config.get('use_atr_based_tp_sl', True)
+        self.atr_tp1_multiplier = strategy_config.get('atr_tp1_multiplier', 1.5)
+        self.atr_tp2_multiplier = strategy_config.get('atr_tp2_multiplier', 2.5)
+        self.atr_sl_multiplier = strategy_config.get('atr_sl_multiplier', 1.0)
+        
+        # ФАЗА 1: Фильтры подтверждения
+        self.require_pin_bar_or_engulfing = strategy_config.get('require_pin_bar_or_engulfing', False)
+        self.htf_ema200_check = strategy_config.get('htf_ema200_check', True)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -105,39 +115,43 @@ class BreakRetestStrategy(BaseStrategy):
     def _check_higher_timeframe_trend(self, df_1h: Optional[pd.DataFrame], df_4h: Optional[pd.DataFrame], 
                                       direction: str) -> tuple[bool, bool]:
         """
-        ФАЗА 1: Higher Timeframe Confirmation
-        Проверяет тренд на 1H и 4H таймфреймах
+        ФАЗА 1: Higher Timeframe Confirmation (УЛУЧШЕНО)
+        Проверяет тренд на 1H и 4H таймфреймах используя EMA200 для сильной фильтрации
         Возвращает: (подтверждено, есть_данные)
         """
         from src.indicators.technical import calculate_ema
         
-        # Проверка доступности данных - используем мягкие требования
-        if df_1h is None or len(df_1h) < 50:
-            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 1H (недостаточно для EMA50)")
+        # Проверка доступности данных для EMA200
+        if df_1h is None or len(df_1h) < 200:
+            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 1H (недостаточно для EMA200, есть {len(df_1h) if df_1h is not None else 0} баров)")
             return (False, False)  # Нет подтверждения, нет данных
         
-        # Для 4H используем EMA50 вместо EMA200 (более реалистичные требования)
-        if df_4h is None or len(df_4h) < 50:
-            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 4H (недостаточно для EMA50)")
+        # Для 4H используем EMA200 для строгой фильтрации тренда
+        if df_4h is None or len(df_4h) < 200:
+            strategy_logger.debug(f"    ⚠️ Higher TF: нет данных 4H (недостаточно для EMA200, есть {len(df_4h) if df_4h is not None else 0} баров)")
             return (False, False)  # Нет подтверждения, нет данных
         
-        # Проверка EMA50 на 1H
-        ema50_1h = calculate_ema(df_1h['close'], period=50)
+        # Проверка EMA200 на 1H (строгий тренд-фильтр)
+        ema200_1h = calculate_ema(df_1h['close'], period=200)
         price_1h = df_1h['close'].iloc[-1]
         
-        # Проверка EMA50 на 4H (вместо EMA200)
-        ema50_4h = calculate_ema(df_4h['close'], period=50)
+        # Проверка EMA200 на 4H (главный тренд-фильтр)
+        ema200_4h = calculate_ema(df_4h['close'], period=200)
         price_4h = df_4h['close'].iloc[-1]
         
         if direction == 'LONG':
-            trend_1h = price_1h > ema50_1h.iloc[-1]
-            trend_4h = price_4h > ema50_4h.iloc[-1]
+            trend_1h = price_1h > ema200_1h.iloc[-1]
+            trend_4h = price_4h > ema200_4h.iloc[-1]
             confirmed = trend_1h and trend_4h
+            strategy_logger.debug(f"    📊 HTF Check: 1H={'✅' if trend_1h else '❌'} (price={price_1h:.2f} vs EMA200={ema200_1h.iloc[-1]:.2f}), "
+                                f"4H={'✅' if trend_4h else '❌'} (price={price_4h:.2f} vs EMA200={ema200_4h.iloc[-1]:.2f})")
             return (confirmed, True)
         else:  # SHORT
-            trend_1h = price_1h < ema50_1h.iloc[-1]
-            trend_4h = price_4h < ema50_4h.iloc[-1]
+            trend_1h = price_1h < ema200_1h.iloc[-1]
+            trend_4h = price_4h < ema200_4h.iloc[-1]
             confirmed = trend_1h and trend_4h
+            strategy_logger.debug(f"    📊 HTF Check: 1H={'✅' if trend_1h else '❌'} (price={price_1h:.2f} vs EMA200={ema200_1h.iloc[-1]:.2f}), "
+                                f"4H={'✅' if trend_4h else '❌'} (price={price_4h:.2f} vs EMA200={ema200_4h.iloc[-1]:.2f})")
             return (confirmed, True)
     
     def _check_bollinger_position(self, df: pd.DataFrame, direction: str) -> bool:
@@ -159,20 +173,76 @@ class BreakRetestStrategy(BaseStrategy):
             distance_to_lower = (current_close - bb_lower.iloc[-1]) / current_close
             return distance_to_lower <= 0.02  # В пределах 2% от нижней полосы
     
+    def _check_pin_bar(self, bar: Dict, direction: str) -> bool:
+        """
+        ФАЗА 1: Проверка Pin Bar паттерна
+        Pin Bar = длинный хвост (тень) + маленькое тело
+        """
+        body_size = abs(bar['close'] - bar['open'])
+        
+        if direction == 'LONG':
+            # Bullish Pin Bar: длинный нижний хвост
+            lower_wick = min(bar['open'], bar['close']) - bar['low']
+            upper_wick = bar['high'] - max(bar['open'], bar['close'])
+            
+            # Условия: нижний хвост > 2× тела И > верхнего хвоста
+            if body_size > 0 and lower_wick > body_size * 2.0 and lower_wick > upper_wick * 1.5:
+                return True
+                
+        else:  # SHORT
+            # Bearish Pin Bar: длинный верхний хвост
+            upper_wick = bar['high'] - max(bar['open'], bar['close'])
+            lower_wick = min(bar['open'], bar['close']) - bar['low']
+            
+            # Условия: верхний хвост > 2× тела И > нижнего хвоста
+            if body_size > 0 and upper_wick > body_size * 2.0 and upper_wick > lower_wick * 1.5:
+                return True
+        
+        return False
+    
+    def _check_engulfing(self, prev_bar: Dict, current_bar: Dict, direction: str) -> bool:
+        """
+        ФАЗА 1: Проверка Engulfing (поглощающей) свечи
+        Текущая свеча полностью поглощает предыдущую
+        """
+        if direction == 'LONG':
+            # Bullish Engulfing: текущая свеча поглощает предыдущую медвежью
+            prev_bearish = prev_bar['close'] < prev_bar['open']
+            current_bullish = current_bar['close'] > current_bar['open']
+            
+            engulfs = (current_bar['close'] > prev_bar['open'] and 
+                      current_bar['open'] < prev_bar['close'])
+            
+            return prev_bearish and current_bullish and engulfs
+            
+        else:  # SHORT
+            # Bearish Engulfing: текущая свеча поглощает предыдущую бычью
+            prev_bullish = prev_bar['close'] > prev_bar['open']
+            current_bearish = current_bar['close'] < current_bar['open']
+            
+            engulfs = (current_bar['close'] < prev_bar['open'] and 
+                      current_bar['open'] > prev_bar['close'])
+            
+            return prev_bullish and current_bearish and engulfs
+        
+        return False
+    
     def _check_retest_quality(self, breakout: Dict, retest_bars: list, breakout_level: float) -> float:
         """
-        ФАЗА 2: Проверка качества ретеста
+        ФАЗА 1+2: Проверка качества ретеста (УЛУЧШЕНО)
+        Добавлены проверки Pin Bar и Engulfing patterns
         Возвращает качество 0-1 (0=плохо, 1=отлично)
         """
         if not retest_bars or len(retest_bars) == 0:
             return 0.0
         
         quality_score = 1.0
+        direction = breakout['direction']
         
         # 1. Проверка глубины проникновения
         max_penetration = 0
         for bar in retest_bars:
-            if breakout['direction'] == 'LONG':
+            if direction == 'LONG':
                 # Для LONG: насколько низко ушли ниже уровня
                 penetration = (breakout_level - bar['low']) / breakout['atr']
                 if penetration > max_penetration:
@@ -186,26 +256,46 @@ class BreakRetestStrategy(BaseStrategy):
         if max_penetration > 0.3:
             quality_score -= 0.3
         
-        # 2. Проверка rejection (есть ли отклонение)
-        has_rejection = False
+        # 2. НОВОЕ: Проверка Pin Bar pattern (СИЛЬНЫЙ сигнал подтверждения)
+        has_pin_bar = False
         for bar in retest_bars:
-            if breakout['direction'] == 'LONG':
-                wick_size = bar['low'] - min(bar['open'], bar['close'])
-                body_size = abs(bar['close'] - bar['open'])
-                if wick_size > body_size * 0.5:
-                    has_rejection = True
-                    break
-            else:
-                wick_size = max(bar['open'], bar['close']) - bar['high']
-                body_size = abs(bar['close'] - bar['open'])
-                if wick_size > body_size * 0.5:
-                    has_rejection = True
+            if self._check_pin_bar(bar, direction):
+                has_pin_bar = True
+                quality_score += 0.3  # БОНУС за Pin Bar!
+                strategy_logger.debug(f"    ✅ Pin Bar обнаружен на ретесте!")
+                break
+        
+        # 3. НОВОЕ: Проверка Engulfing pattern (если есть минимум 2 свечи)
+        has_engulfing = False
+        if len(retest_bars) >= 2:
+            for i in range(1, len(retest_bars)):
+                if self._check_engulfing(retest_bars[i-1], retest_bars[i], direction):
+                    has_engulfing = True
+                    quality_score += 0.3  # БОНУС за Engulfing!
+                    strategy_logger.debug(f"    ✅ Engulfing pattern обнаружен на ретесте!")
                     break
         
-        if not has_rejection:
-            quality_score -= 0.2  # Штраф за отсутствие rejection
+        # 4. Проверка базового rejection (если нет Pin Bar / Engulfing)
+        if not has_pin_bar and not has_engulfing:
+            has_rejection = False
+            for bar in retest_bars:
+                if direction == 'LONG':
+                    wick_size = min(bar['open'], bar['close']) - bar['low']
+                    body_size = abs(bar['close'] - bar['open'])
+                    if wick_size > body_size * 0.5:
+                        has_rejection = True
+                        break
+                else:
+                    wick_size = bar['high'] - max(bar['open'], bar['close'])
+                    body_size = abs(bar['close'] - bar['open'])
+                    if wick_size > body_size * 0.5:
+                        has_rejection = True
+                        break
+            
+            if not has_rejection:
+                quality_score -= 0.3  # ШТРАФ если нет НИКАКИХ признаков rejection
         
-        return max(0.0, quality_score)
+        return max(0.0, min(1.5, quality_score))  # Макс 1.5 если есть Pin Bar + Engulfing
     
     def _calculate_improved_score(self, base_score: float, breakout: Dict, regime: str, 
                                    bias: str, retest_quality: float, 
@@ -500,13 +590,13 @@ class BreakRetestStrategy(BaseStrategy):
                         
                         # Если есть данные но не подтверждается - блокируем
                         if htf_has_data and not htf_confirmed:
-                            strategy_logger.debug(f"    ❌ LONG ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA50)")
+                            strategy_logger.debug(f"    ❌ LONG ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA200)")
                             return None  # Строгая блокировка для TREND режима
                         
                         if htf_confirmed:
-                            strategy_logger.debug(f"    ✅ Higher TF подтверждает LONG тренд (1H+4H > EMA50)")
+                            strategy_logger.debug(f"    ✅ Higher TF подтверждает LONG тренд (1H+4H > EMA200)")
                         else:
-                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки (штраф к score)")
+                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки EMA200 (штраф к score)")
                     
                     # ФАЗА 2: Bollinger Bands фильтр (только для TREND)
                     bb_good = True
@@ -545,15 +635,24 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     entry = current_close
                     
-                    # Расчет зон S/R на 15m для точного стопа
-                    sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
-                    nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
-                    stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0)
-                    
-                    # Расчет дистанции и тейков 1R и 2R
-                    atr_distance = abs(entry - stop_loss)
-                    tp1 = entry + atr_distance * 1.0  # 1R
-                    tp2 = entry + atr_distance * 2.0  # 2R
+                    # ФАЗА 1: Выбор метода расчёта TP/SL
+                    if self.use_atr_based_tp_sl:
+                        # ATR-based TP/SL (динамическая адаптация под волатильность)
+                        stop_loss = entry - (current_atr * self.atr_sl_multiplier)
+                        tp1 = entry + (current_atr * self.atr_tp1_multiplier)
+                        tp2 = entry + (current_atr * self.atr_tp2_multiplier)
+                        strategy_logger.debug(f"    📊 ATR-based TP/SL: SL={self.atr_sl_multiplier}×ATR, TP1={self.atr_tp1_multiplier}×ATR, TP2={self.atr_tp2_multiplier}×ATR")
+                    else:
+                        # SR-based TP/SL (старый метод - точные зоны S/R)
+                        sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                        nearest_zone = find_nearest_zone(entry, sr_zones, 'LONG')
+                        stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'LONG', fallback_mult=2.0)
+                        
+                        # Расчет дистанции и тейков 1R и 2R
+                        atr_distance = abs(entry - stop_loss)
+                        tp1 = entry + atr_distance * 1.0  # 1R
+                        tp2 = entry + atr_distance * 2.0  # 2R
+                        strategy_logger.debug(f"    📊 SR-based TP/SL: SL из S/R зоны, TP1=1R, TP2=2R")
                     
                     # ФАЗА 2+3: Улучшенная score система
                     base_score = 2.5
@@ -638,13 +737,13 @@ class BreakRetestStrategy(BaseStrategy):
                         
                         # Если есть данные но не подтверждается - блокируем
                         if htf_has_data and not htf_confirmed:
-                            strategy_logger.debug(f"    ❌ SHORT ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA50)")
+                            strategy_logger.debug(f"    ❌ SHORT ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA200)")
                             return None  # Строгая блокировка для TREND режима
                         
                         if htf_confirmed:
-                            strategy_logger.debug(f"    ✅ Higher TF подтверждает SHORT тренд (1H+4H < EMA50)")
+                            strategy_logger.debug(f"    ✅ Higher TF подтверждает SHORT тренд (1H+4H < EMA200)")
                         else:
-                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки (штраф к score)")
+                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки EMA200 (штраф к score)")
                     
                     # ФАЗА 2: Bollinger Bands фильтр (только для TREND)
                     bb_good = True
@@ -683,15 +782,24 @@ class BreakRetestStrategy(BaseStrategy):
                     
                     entry = current_close
                     
-                    # Расчет зон S/R на 15m для точного стопа
-                    sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
-                    nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
-                    stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0)
-                    
-                    # Расчет дистанции и тейков 1R и 2R
-                    atr_distance = abs(stop_loss - entry)
-                    tp1 = entry - atr_distance * 1.0  # 1R
-                    tp2 = entry - atr_distance * 2.0  # 2R
+                    # ФАЗА 1: Выбор метода расчёта TP/SL
+                    if self.use_atr_based_tp_sl:
+                        # ATR-based TP/SL (динамическая адаптация под волатильность)
+                        stop_loss = entry + (current_atr * self.atr_sl_multiplier)
+                        tp1 = entry - (current_atr * self.atr_tp1_multiplier)
+                        tp2 = entry - (current_atr * self.atr_tp2_multiplier)
+                        strategy_logger.debug(f"    📊 ATR-based TP/SL: SL={self.atr_sl_multiplier}×ATR, TP1={self.atr_tp1_multiplier}×ATR, TP2={self.atr_tp2_multiplier}×ATR")
+                    else:
+                        # SR-based TP/SL (старый метод - точные зоны S/R)
+                        sr_zones = create_sr_zones(df, current_atr, buffer_mult=0.25)
+                        nearest_zone = find_nearest_zone(entry, sr_zones, 'SHORT')
+                        stop_loss = calculate_stop_loss_from_zone(entry, nearest_zone, current_atr, 'SHORT', fallback_mult=2.0)
+                        
+                        # Расчет дистанции и тейков 1R и 2R
+                        atr_distance = abs(stop_loss - entry)
+                        tp1 = entry - atr_distance * 1.0  # 1R
+                        tp2 = entry - atr_distance * 2.0  # 2R
+                        strategy_logger.debug(f"    📊 SR-based TP/SL: SL из S/R зоны, TP1=1R, TP2=2R")
                     
                     # ФАЗА 2+3: Улучшенная score система
                     base_score = 2.5
