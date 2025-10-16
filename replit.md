@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **StrategyManager**: Orchestrates strategies with regime-based selection.
 - **Signal Dataclass**: Standardized signal output with confluence tracking.
 - **5 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile.
-- **Action Price System**: Based on EMA200 Body Cross logic, featuring an 11-component scoring system for different market regimes (STANDARD, SCALP, SKIP). Includes JSONL logging for ML analysis and real-time MFE/MAE tracking. It processes only fully closed 15m candles (filtering out the last unclosed candle) and calculates TP based on R-distance from SL. Detailed logging of pattern conditions is included for debugging.
+- **Action Price System**: Based on EMA200 Body Cross logic, featuring an 11-component scoring system for different market regimes (STANDARD, SCALP, SKIP). Includes JSONL logging for ML analysis and real-time MFE/MAE tracking. It processes only fully closed 15m candles (filtering out the last unclosed candle). **UPDATED Entry/TP/SL Logic (Oct 16, 2025)**: Risk (R) calculated from SL to Close of confirming candle (fixed), TP levels calculated from Close of confirming candle (TP1=Close±1R, TP2=Close±2R), Entry price fetched via REST API ticker (real market price at signal generation time) for accurate Signals-Only tracking. Detailed logging of pattern conditions is included for debugging.
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market states.

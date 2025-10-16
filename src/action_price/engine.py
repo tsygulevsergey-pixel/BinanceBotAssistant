@@ -59,7 +59,7 @@ class ActionPriceEngine:
         
         logger.info(f"✅ Action Price Engine initialized (EMA200 Body Cross, TF={self.timeframe})")
     
-    def analyze(self, symbol: str, df: pd.DataFrame, df_1h: pd.DataFrame = None) -> Optional[Dict]:
+    async def analyze(self, symbol: str, df: pd.DataFrame, df_1h: pd.DataFrame = None) -> Optional[Dict]:
         """
         Анализ рынка и генерация сигнала
         
@@ -125,9 +125,9 @@ class ActionPriceEngine:
             logger.debug(f"{symbol} - Score {score_total:.1f} → SKIP")
             return None
         
-        # Рассчитать SL/TP уровни
-        levels = self._calculate_sl_tp_levels(
-            df, indicators, direction, initiator_idx, confirm_idx, mode
+        # Рассчитать SL/TP уровни (НОВАЯ ЛОГИКА: Entry через REST API)
+        levels = await self._calculate_sl_tp_levels(
+            symbol, df, indicators, direction, initiator_idx, confirm_idx, mode
         )
         
         if levels is None:
@@ -652,8 +652,9 @@ class ActionPriceEngine:
         else:
             return 'SKIP'
     
-    def _calculate_sl_tp_levels(
+    async def _calculate_sl_tp_levels(
         self,
+        symbol: str,
         df: pd.DataFrame,
         indicators: pd.DataFrame,
         direction: str,
@@ -664,11 +665,16 @@ class ActionPriceEngine:
         """
         Рассчитать Stop Loss и Take Profit уровни
         
+        НОВАЯ ЛОГИКА:
+        - R рассчитывается от SL до Close подтверждающей (фиксированный)
+        - TP рассчитываются от Close подтверждающей
+        - Entry берётся через REST API (актуальная рыночная цена)
+        
         Returns:
             Dict с entry, sl, tp1, tp2 или None
         """
-        # Entry = close подтверждающей свечи
-        entry = indicators['close'].iloc[confirm_idx]
+        # Close подтверждающей свечи (техническая точка для TP)
+        confirm_close = indicators['close'].iloc[confirm_idx]
         
         # ATR для буфера
         atr = indicators['atr'].iloc[initiator_idx]
@@ -678,34 +684,44 @@ class ActionPriceEngine:
             # SL за экстремумом инициатора (low - буфер)
             sl = indicators['low'].iloc[initiator_idx] - sl_buffer
             
-            # Risk
-            risk_r = entry - sl
+            # Risk от SL до Close подтверждающей (фиксированный)
+            risk_r = confirm_close - sl
             if risk_r <= 0:
                 return None
             
-            # TP
-            tp1 = entry + risk_r * self.tp1_rr
-            tp2 = entry + risk_r * self.tp2_rr if mode == 'STANDARD' else None
+            # TP от Close подтверждающей
+            tp1 = confirm_close + risk_r * self.tp1_rr
+            tp2 = confirm_close + risk_r * self.tp2_rr if mode == 'STANDARD' else None
             
         else:  # SHORT
             # SL за экстремумом инициатора (high + буфер)
             sl = indicators['high'].iloc[initiator_idx] + sl_buffer
             
-            # Risk
-            risk_r = sl - entry
+            # Risk от SL до Close подтверждающей (фиксированный)
+            risk_r = sl - confirm_close
             if risk_r <= 0:
                 return None
             
-            # TP
-            tp1 = entry - risk_r * self.tp1_rr
-            tp2 = entry - risk_r * self.tp2_rr if mode == 'STANDARD' else None
+            # TP от Close подтверждающей
+            tp1 = confirm_close - risk_r * self.tp1_rr
+            tp2 = confirm_close - risk_r * self.tp2_rr if mode == 'STANDARD' else None
         
-        # КРИТИЧНО: Проверка стоп-лосса - должен быть < max_sl_percent от цены входа
-        sl_percent = abs(entry - sl) / entry * 100
+        # Получить актуальную рыночную цену через REST API
+        entry = confirm_close  # Fallback если API недоступен
+        if self.client:
+            try:
+                ticker = await self.client.get_symbol_ticker(symbol)
+                entry = float(ticker['price'])
+                logger.debug(f"{symbol} Entry Price: REST API={entry:.6f}, Confirm Close={confirm_close:.6f}")
+            except Exception as e:
+                logger.warning(f"{symbol} Action Price: Failed to get current price via REST API, using confirm_close: {e}")
+        
+        # КРИТИЧНО: Проверка стоп-лосса - должен быть < max_sl_percent от цены confirm_close
+        sl_percent = abs(confirm_close - sl) / confirm_close * 100
         if sl_percent >= self.max_sl_percent:
             logger.warning(
                 f"⚠️ {symbol} Action Price: SL слишком широкий ({sl_percent:.2f}% >= {self.max_sl_percent}%) - сигнал отклонен | "
-                f"Entry: {entry:.6f}, SL: {sl:.6f}, Risk: {abs(entry-sl):.6f}"
+                f"Confirm Close: {confirm_close:.6f}, SL: {sl:.6f}, Risk: {abs(confirm_close-sl):.6f}"
             )
             return None
         

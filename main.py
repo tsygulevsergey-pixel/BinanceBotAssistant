@@ -930,7 +930,7 @@ class TradingBot:
                 # Анализ паттернов - новый EMA200 Body Cross engine
                 # Использует 15m данные (или 1h если timeframe='1h')
                 tf_data = timeframe_data.get(self.action_price_engine.timeframe, timeframe_data.get('15m'))
-                ap_signal = self.action_price_engine.analyze(
+                ap_signal = await self.action_price_engine.analyze(
                     symbol=symbol,
                     df=tf_data,
                     df_1h=timeframe_data.get('1h')
