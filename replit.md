@@ -15,6 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **DataLoader**: Fetches historical data, supports caching, fast catchup, and periodic gap refill. **CLOSED CANDLES ONLY**: Automatically filters out the last unclosed candle from Binance API (checks `close_time > now`). Automated data refresh is enabled on bot startup (10 days), configurable for specific day ranges. All candles in DB are UPDATE-able to ensure data accuracy.
 - **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates.
 - **BinanceWebSocket**: Real-time market data streaming.
+- **Smart Candle-Sync Main Loop (Oct 17, 2025)**: Main loop now calculates exact candle close times (15m: 00/15/30/45, 1h: 00, 4h: 00/04/08/12/16/20, 1d: 00:00) and waits precisely until close+31s before triggering signal check. Eliminates previous 0-60s random delay from fixed-interval timer. Ensures Action Price and strategies always analyze fresh data exactly 31s after candle close.
 
 ### Database Layer
 - **Technology**: SQLAlchemy ORM with SQLite backend (WAL mode, indexed queries). Existing candles are updated, not skipped, to ensure data accuracy.
