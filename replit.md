@@ -4,6 +4,42 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Changes
 
+## October 16, 2025: Critical Fix - DataLoader Updates Existing Candles
+
+**CRITICAL FIX: Незакрытые свечи перезаписываются правильными данными**
+
+**Проблема:**
+- DataLoader сохранял незакрытые свечи в БД (Close: 13.725)
+- При обновлении ПРОПУСКАЛ существующие свечи (`if not existing`)
+- После закрытия свечи (Close: 13.673) старые данные оставались в БД
+- EMA200 рассчитывался по НЕПРАВИЛЬНЫМ Close ценам → расхождение с Binance
+
+**Пример:**
+```
+09:59 UTC - скачал свечу 09:45-10:00 (незакрытая, Close: 13.725) → сохранил в БД
+10:00 UTC - свеча закрылась (реальный Close: 13.673)
+10:02 UTC - обновление: свеча уже есть → ПРОПУСТИЛ → Close 13.725 остался!
+```
+
+**Исправление:**
+1. **UPDATE вместо SKIP**: Теперь обновляет существующие свечи всеми полями
+2. **Метод refresh_recent_candles**: Переобновляет все свечи за N дней
+3. **Скрипт refresh_data.py**: CMD-утилита для массового обновления данных
+
+**Использование:**
+```cmd
+python refresh_data.py              # все символы за 10 дней
+python refresh_data.py NMRUSDT      # один символ за 10 дней
+python refresh_data.py NMRUSDT 7    # один символ за 7 дней
+```
+
+**Файлы:**
+- `src/binance/data_loader.py` (строки 108-139): UPDATE существующих свечей
+- `src/binance/data_loader.py` (строки 559-580): метод refresh_recent_candles
+- `refresh_data.py`: скрипт для обновления данных
+
+---
+
 ## October 16, 2025: Action Price Debug - Detailed Pattern Logging
 
 **ENHANCEMENT: Добавлено детальное логирование условий паттерна**

@@ -102,7 +102,21 @@ class DataLoader:
                     Candle.open_time == open_time
                 ).first()
                 
-                if not existing:
+                if existing:
+                    # ОБНОВИТЬ существующую свечу (особенно важно для незакрытых свечей)
+                    existing.open = float(kline[1])
+                    existing.high = float(kline[2])
+                    existing.low = float(kline[3])
+                    existing.close = float(kline[4])
+                    existing.volume = float(kline[5])
+                    existing.close_time = close_time
+                    existing.quote_volume = float(kline[7])
+                    existing.trades = int(kline[8])
+                    existing.taker_buy_base = float(kline[9])
+                    existing.taker_buy_quote = float(kline[10])
+                    saved_count += 1
+                else:
+                    # Создать новую свечу
                     candle = Candle(
                         symbol=symbol,
                         timeframe=interval,
@@ -538,6 +552,29 @@ class DataLoader:
                     await self.download_historical_klines(symbol, interval, start_date, end_date)
         finally:
             session.close()
+    
+    async def refresh_recent_candles(self, symbol: str, days: int = 10):
+        """
+        Обновить/переобновить все свечи за последние N дней
+        Используется для исправления незакрытых свечей в БД
+        
+        Args:
+            symbol: Символ для обновления
+            days: Количество дней для обновления (по умолчанию 10)
+        """
+        timeframes = ['15m', '1h', '4h', '1d']
+        end_date = datetime.now(pytz.UTC)
+        start_date = end_date - timedelta(days=days)
+        
+        logger.info(f"🔄 Refreshing {symbol} data for last {days} days ({start_date.date()} to {end_date.date()})")
+        
+        for interval in timeframes:
+            try:
+                # Скачать данные заново
+                await self.download_historical_klines(symbol, interval, start_date, end_date)
+                logger.info(f"✅ {symbol} {interval} refreshed successfully")
+            except Exception as e:
+                logger.error(f"❌ Failed to refresh {symbol} {interval}: {e}")
     
     def get_candles(self, symbol: str, interval: str, limit: int = 500) -> pd.DataFrame:
         session = db.get_session()
