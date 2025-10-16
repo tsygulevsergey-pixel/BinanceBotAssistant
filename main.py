@@ -202,6 +202,72 @@ class TradingBot:
         
         return symbols
     
+    async def _refresh_recent_data(self):
+        """Обновить последние данные свечей в БД (за 10 дней)"""
+        days = config.get('data_refresh.days', 10)
+        enabled = config.get('data_refresh.enabled', True)
+        
+        if not enabled:
+            logger.info("📊 Data refresh disabled in config - skipping")
+            return
+        
+        logger.info(f"📊 Refreshing recent candle data ({days} days)...")
+        
+        # Получить все символы из БД
+        session = db.get_session()
+        try:
+            from src.database.models import Candle
+            result = session.query(Candle.symbol).distinct().all()
+            db_symbols = [row[0] for row in result]
+        finally:
+            session.close()
+        
+        if not db_symbols:
+            logger.info("📊 No symbols in DB - skipping data refresh")
+            return
+        
+        logger.info(f"📊 Found {len(db_symbols)} symbols in DB - updating recent data...")
+        
+        success_count = 0
+        error_count = 0
+        
+        for idx, symbol in enumerate(db_symbols, 1):
+            try:
+                # Проверить rate limit
+                rate_status = self.client.get_rate_limit_status()
+                usage_percent = rate_status['percent_used']
+                
+                # Если использование > 80%, подождать
+                if usage_percent > 80:
+                    wait_time = 5
+                    logger.warning(f"⚠️ Rate limit {usage_percent:.1f}% - паузa {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+                
+                # Обновить данные для символа
+                await self.data_loader.refresh_recent_candles(symbol, days=days)
+                success_count += 1
+                
+                # Показать прогресс каждые 50 символов
+                if idx % 50 == 0:
+                    logger.info(f"📊 Progress: {idx}/{len(db_symbols)} symbols updated...")
+                
+                # Небольшая задержка между символами
+                await asyncio.sleep(0.1)
+                
+            except Exception as e:
+                error_count += 1
+                logger.error(f"Error refreshing {symbol}: {e}")
+                
+                # Если rate limit error - увеличить задержку
+                if "rate limit" in str(e).lower() or "429" in str(e):
+                    logger.warning(f"⚠️ Rate limit error - пауза 10s...")
+                    await asyncio.sleep(10)
+        
+        logger.info(
+            f"✅ Data refresh complete: {success_count} success, {error_count} errors "
+            f"({len(db_symbols)} total symbols)"
+        )
+    
     async def _initialize(self):
         logger.info("Initializing bot...")
         
@@ -220,6 +286,9 @@ class TradingBot:
         
         # Получаем начальный список символов
         self.symbols = await self._fetch_symbols_by_volume()
+        
+        # Обновить последние данные свечей в БД (за 10 дней)
+        await self._refresh_recent_data()
         
         logger.info(f"Starting parallel data loading for {len(self.symbols)} symbols...")
         
