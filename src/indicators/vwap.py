@@ -65,8 +65,15 @@ class VWAPCalculator:
         vwap_vals = vwap_clean.values
         vol_vals = volume.values
         
-        # Расчет variance на чистых numpy массивах
-        variance_vals = np.nancumsum((tp_vals - vwap_vals) ** 2 * vol_vals) / np.nancumsum(vol_vals)
+        # Расчет variance на чистых numpy массивах с защитой от деления на 0
+        cumsum_vol = np.nancumsum(vol_vals)
+        
+        # Защита от деления на ноль - заменяем 0 на nan
+        with np.errstate(divide='ignore', invalid='ignore'):
+            variance_vals = np.nancumsum((tp_vals - vwap_vals) ** 2 * vol_vals) / cumsum_vol
+            # Заменить inf и очень малые значения на nan
+            variance_vals = np.where(cumsum_vol > 0, variance_vals, np.nan)
+        
         std_vals = np.sqrt(variance_vals)
         
         # Возвращаем как Series с оригинальным индексом
