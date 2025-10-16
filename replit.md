@@ -54,6 +54,10 @@ Preferred communication style: Simple, everyday language.
   - ✅ **Volume Profile - POC Magnet Filter**: Rejects rejection signals in RANGE/SQUEEZE when price >1.5 ATR from POC (price tends to revert to POC in range-bound markets)
   - ✅ **Volume Profile - Stricter Acceptance Logic**: Changed from OR to AND - requires BOTH CVD AND Volume Delta confirmation simultaneously for acceptance signals (higher quality)
   - ✅ **Liquidity Sweep - HTF Trend Alignment (1H EMA50)**: Fade signals require HTF against sweep direction (sweep up → HTF down), Continuation signals require HTF with sweep direction (sweep up → HTF up). Configurable via `use_htf_filter` (default: true). Gracefully skips when HTF data absent.
+- **Multi-Factor Confirmation & Regime-Based Weighting (Phase 3 COMPLETED - Oct 16, 2025)**:
+  - ✅ **Multi-Factor Confirmation System**: 6 factors (Strategy Signal, HTF Alignment, Volume Confirmation, CVD/DOI, Price Action Patterns, S/R Zone Confluence). Requires ≥3 factors for signal approval (configurable). Each factor adds bonus to score.
+  - ✅ **Regime-Based Strategy Weighting**: TREND regime favors Break & Retest (1.5x) + MA/VWAP Pullback (1.3x). RANGE regime favors Volume Profile (1.5x) + Liquidity Sweep (1.3x). SQUEEZE regime favors Order Flow (1.5x). Strategies with weight <0.5 are blocked.
+  - ✅ **Integrated in StrategyManager**: Both systems active in check_all_signals() - filters weak signals, applies regime weights, adds factor bonuses to score.
 - **Action Price SL Filter**: Logs warnings for signals rejected due to excessively wide stop-loss, with a configurable `max_sl_percent` threshold (defaulted to 10.0%).
 
 ### Telegram Integration

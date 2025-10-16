@@ -5,6 +5,9 @@ from src.strategies.base_strategy import BaseStrategy, Signal
 from src.utils.logger import logger
 from src.utils.strategy_logger import strategy_logger
 from src.utils.config import config
+# ФАЗА 3: Multi-Factor Confirmation & Regime Weighting
+from src.strategies.multi_factor_confirmation import MultiFactorConfirmation
+from src.strategies.regime_strategy_weights import RegimeStrategyWeights
 
 
 class StrategyManager:
@@ -14,6 +17,10 @@ class StrategyManager:
         self.strategies: List[BaseStrategy] = []
         self.enabled_strategy_ids = config.get('strategies.enabled', [])
         self.binance_client = binance_client
+        
+        # ФАЗА 3: Инициализация систем подтверждения
+        self.multi_factor = MultiFactorConfirmation(config)
+        self.regime_weights = RegimeStrategyWeights(config)
         
     def register_strategy(self, strategy: BaseStrategy):
         """Зарегистрировать стратегию"""
@@ -27,7 +34,7 @@ class StrategyManager:
     
     async def check_all_signals(self, symbol: str, timeframe_data: Dict[str, pd.DataFrame],
                          regime: str, bias: str, indicators: Dict,
-                         blocked_symbols_by_strategy: dict = None) -> List[Signal]:
+                         blocked_symbols_by_strategy: Optional[dict] = None) -> List[Signal]:
         """
         Проверить все стратегии на сигналы
         
@@ -77,6 +84,45 @@ class StrategyManager:
                 
                 signal = strategy.check_signal(symbol, df, regime, bias, indicators)
                 if signal:
+                    # ФАЗА 3: Multi-Factor Confirmation - проверка подтверждающих факторов
+                    df_1h = timeframe_data.get('1h')
+                    df_4h = timeframe_data.get('4h')
+                    approved, factors = self.multi_factor.check_factors(
+                        symbol, signal.direction, df, df_1h, df_4h, indicators, regime
+                    )
+                    
+                    if not approved:
+                        strategy_logger.info(
+                            f"  ❌ {strategy.name} REJECTED by Multi-Factor: "
+                            f"{factors.count()}/{6} factors confirmed (need {self.multi_factor.min_factors})"
+                        )
+                        continue  # Пропустить сигнал
+                    
+                    # ФАЗА 3: Regime-Based Strategy Weighting - проверка соответствия режиму
+                    if not self.regime_weights.is_suitable(strategy.name, regime):
+                        strategy_logger.info(
+                            f"  ❌ {strategy.name} BLOCKED by Regime Weight: "
+                            f"unsuitable for {regime} regime"
+                        )
+                        continue  # Пропустить сигнал
+                    
+                    # Применить weight multiplier к score
+                    original_score = signal.base_score
+                    signal.base_score = self.regime_weights.apply_weight(
+                        strategy.name, regime, signal.base_score
+                    )
+                    
+                    # Добавить factor bonus к score
+                    factor_bonus = self.multi_factor.calculate_factor_bonus(factors)
+                    signal.base_score += factor_bonus
+                    
+                    # Логирование улучшений score
+                    strategy_logger.info(
+                        f"  📊 Score Enhancements: base={original_score:.1f} → "
+                        f"regime_weighted={signal.base_score-factor_bonus:.1f} → "
+                        f"final={signal.base_score:.1f} (factors: {factors.get_confirmed_list()})"
+                    )
+                    
                     # ВАЖНО: Сначала рассчитать offset'ы от начальной entry_price
                     signal = strategy.calculate_risk_offsets(signal)
                     
