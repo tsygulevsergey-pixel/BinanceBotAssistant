@@ -295,6 +295,26 @@ class ActionPriceEngine:
             conf_low > ema200_conf  # Нет касания низом
         )
         
+        # ДЕТАЛЬНОЕ ЛОГИРОВАНИЕ для LONG
+        if initiator_long:
+            logger.info(
+                f"✅ LONG Initiator OK | "
+                f"O:{init_open:.5f} < EMA:{ema200_init:.5f} < C:{init_close:.5f}"
+            )
+            if confirm_long:
+                logger.info(
+                    f"✅ LONG Confirm OK | "
+                    f"L:{conf_low:.5f} > EMA:{ema200_conf:.5f}, C:{conf_close:.5f} > EMA:{ema200_conf:.5f}"
+                )
+            else:
+                # КРИТИЧНО: Почему confirm НЕ прошла
+                logger.warning(
+                    f"❌ LONG Confirm FAILED | "
+                    f"L:{conf_low:.5f} {'>' if conf_low > ema200_conf else '<='} EMA:{ema200_conf:.5f} "
+                    f"(low must be ABOVE EMA200!) | "
+                    f"C:{conf_close:.5f} {'>' if conf_close > ema200_conf else '<='} EMA:{ema200_conf:.5f}"
+                )
+        
         if initiator_long and confirm_long:
             return ('long', initiator_idx, confirm_idx)
         
@@ -311,6 +331,26 @@ class ActionPriceEngine:
             conf_close < ema200_conf and
             conf_high < ema200_conf  # Нет касания верхом
         )
+        
+        # ДЕТАЛЬНОЕ ЛОГИРОВАНИЕ для SHORT
+        if initiator_short:
+            logger.info(
+                f"✅ SHORT Initiator OK | "
+                f"C:{init_close:.5f} < EMA:{ema200_init:.5f} < O:{init_open:.5f}"
+            )
+            if confirm_short:
+                logger.info(
+                    f"✅ SHORT Confirm OK | "
+                    f"H:{conf_high:.5f} < EMA:{ema200_conf:.5f}, C:{conf_close:.5f} < EMA:{ema200_conf:.5f}"
+                )
+            else:
+                # КРИТИЧНО: Почему confirm НЕ прошла
+                logger.warning(
+                    f"❌ SHORT Confirm FAILED | "
+                    f"H:{conf_high:.5f} {'<' if conf_high < ema200_conf else '>='} EMA:{ema200_conf:.5f} "
+                    f"(high must be BELOW EMA200!) | "
+                    f"C:{conf_close:.5f} {'<' if conf_close < ema200_conf else '>='} EMA:{ema200_conf:.5f}"
+                )
         
         if initiator_short and confirm_short:
             return ('short', initiator_idx, confirm_idx)

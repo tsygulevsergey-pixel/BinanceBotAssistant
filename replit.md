@@ -4,6 +4,30 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Changes
 
+## October 16, 2025: Action Price Debug - Detailed Pattern Logging
+
+**ENHANCEMENT: Добавлено детальное логирование условий паттерна**
+
+**Проблема:**
+- Пользователь видел сигнал LONG на SKLUSDT, но по графику условия не выполнялись
+- Свеча подтверждения касалась EMA200, но сигнал все равно сгенерировался
+- Невозможно было понять ПОЧЕМУ бот принял решение
+
+**Исправление:**
+1. **Логи для LONG**: Показывает проверку initiator и confirm с реальными значениями
+   ```
+   ✅ LONG Initiator OK | O:0.02050 < EMA:0.02060 < C:0.02070
+   ❌ LONG Confirm FAILED | L:0.02055 <= EMA:0.02060 (low must be ABOVE EMA200!)
+   ```
+
+2. **Логи для SHORT**: Аналогичная детализация для SHORT паттернов
+3. **Видимость проблем**: WARNING если confirm не прошла, с точными значениями
+
+**Файлы:**
+- `src/action_price/engine.py` (строки 301-356): детальное логирование условий
+
+---
+
 ## October 16, 2025: Action Price Fix - JSONL Logging Integration
 
 **FIX: Централизованное логирование сигналов в JSONL**
