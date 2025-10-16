@@ -50,6 +50,10 @@ Preferred communication style: Simple, everyday language.
   - ✅ **ATR-based Dynamic TP/SL**: Configurable option (`use_atr_based_tp_sl`) with multipliers (TP1=1.5×ATR, TP2=2.5×ATR, SL=1.0×ATR) adapts to volatility and solves TIME_STOP problem
   - ✅ **Volume Confirmation**: Adaptive volume thresholds per regime (TREND: 1.8×, SQUEEZE: 1.2×) filters weak breakouts
   - **Previous**: 3-Phase TREND Improvement System with ADX threshold, momentum, volume thresholds, bearish bias block, Bollinger Bands position, retest quality scoring, RSI momentum, and market structure validation
+- **Volume Profile & Liquidity Sweep Enhancements (Phase 2 COMPLETED - Oct 16, 2025)**:
+  - ✅ **Volume Profile - POC Magnet Filter**: Rejects rejection signals in RANGE/SQUEEZE when price >1.5 ATR from POC (price tends to revert to POC in range-bound markets)
+  - ✅ **Volume Profile - Stricter Acceptance Logic**: Changed from OR to AND - requires BOTH CVD AND Volume Delta confirmation simultaneously for acceptance signals (higher quality)
+  - ✅ **Liquidity Sweep - HTF Trend Alignment (1H EMA50)**: Fade signals require HTF against sweep direction (sweep up → HTF down), Continuation signals require HTF with sweep direction (sweep up → HTF up). Configurable via `use_htf_filter` (default: true). Gracefully skips when HTF data absent.
 - **Action Price SL Filter**: Logs warnings for signals rejected due to excessively wide stop-loss, with a configurable `max_sl_percent` threshold (defaulted to 10.0%).
 
 ### Telegram Integration
