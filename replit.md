@@ -12,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Market Data Infrastructure
 - **BinanceClient**: REST API client with rate limiting and exponential backoff.
-- **DataLoader**: Fetches historical data, supports caching, fast catchup, and periodic gap refill. Automated data refresh is enabled on bot startup, configurable for specific day ranges.
+- **DataLoader**: Fetches historical data, supports caching, fast catchup, and periodic gap refill. **CLOSED CANDLES ONLY**: Automatically filters out the last unclosed candle from Binance API (checks `close_time > now`). Automated data refresh is enabled on bot startup (10 days), configurable for specific day ranges. All candles in DB are UPDATE-able to ensure data accuracy.
 - **OrderBook**: Local engine synchronized via REST snapshots and WebSocket differential updates.
 - **BinanceWebSocket**: Real-time market data streaming.
 
@@ -30,7 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **MarketRegimeDetector**: Classifies market states.
 - **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
 - **CVDCalculator**: Cumulative Volume Delta.
-- **VWAPCalculator**: Daily, anchored, and session-based VWAP.
+- **VWAPCalculator**: Daily, anchored, and session-based VWAP. Includes divide-by-zero protection in variance calculations using `np.errstate()`.
 - **VolumeProfile**: POC, VAH/VAL calculation.
 - **IndicatorCache**: High-performance caching.
 

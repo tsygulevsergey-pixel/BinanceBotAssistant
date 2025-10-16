@@ -77,6 +77,18 @@ class DataLoader:
             
             current_date += timedelta(days=1)
         
+        # ВАЖНО: Удалить последнюю незакрытую свечу (Binance API всегда возвращает её)
+        # Проверяем что это действительно незакрытая свеча (close_time > now)
+        if all_klines:
+            last_kline = all_klines[-1]
+            last_close_time = datetime.fromtimestamp(last_kline[6] / 1000, tz=pytz.UTC)
+            now = datetime.now(pytz.UTC)
+            
+            if last_close_time > now:
+                # Это незакрытая свеча - удаляем
+                all_klines = all_klines[:-1]
+                logger.debug(f"Removed last unclosed candle from {symbol} {interval} (close_time: {last_close_time})")
+        
         saved_count = self._save_klines_to_db(symbol, interval, all_klines)
         logger.info(f"Saved {saved_count} klines for {symbol} {interval}")
         
