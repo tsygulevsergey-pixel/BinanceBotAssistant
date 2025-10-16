@@ -764,6 +764,17 @@ class ActionPriceEngine:
             f"{symbol}_{timestamp.isoformat()}_{direction}".encode()
         ).hexdigest()[:16]
         
+        # Timestamp инициатора
+        if 'open_time' in indicators.columns:
+            init_timestamp_val = indicators['open_time'].iloc[initiator_idx]
+        else:
+            init_timestamp_val = indicators.index[initiator_idx]
+        
+        if isinstance(init_timestamp_val, pd.Timestamp):
+            init_timestamp = init_timestamp_val
+        else:
+            init_timestamp = pd.to_datetime(init_timestamp_val)
+        
         # Данные инициатора ([2])
         init_open = indicators['open'].iloc[initiator_idx]
         init_high = indicators['high'].iloc[initiator_idx]
@@ -955,5 +966,11 @@ class ActionPriceEngine:
             initiator_volume=float(indicators['volume'].iloc[initiator_idx]) if 'volume' in indicators else None,
             confirm_volume=float(indicators['volume'].iloc[confirm_idx]) if 'volume' in indicators else None
         )
+        
+        # Добавить timestamp инициатора для Telegram сообщения
+        init_timestamp_dt = init_timestamp.to_pydatetime() if hasattr(init_timestamp, 'to_pydatetime') else init_timestamp
+        if init_timestamp_dt.tzinfo is None:
+            init_timestamp_dt = init_timestamp_dt.replace(tzinfo=pytz.UTC)
+        signal_data['initiator_timestamp'] = init_timestamp_dt.isoformat()
         
         return signal_data

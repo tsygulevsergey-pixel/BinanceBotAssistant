@@ -1389,6 +1389,57 @@ class TradingBot:
             
             message += f"📈 R:R: <b>1:{rr_ratio:.1f}</b>\n\n"
             
+            # Добавить таблицу с деталями свечей
+            from datetime import datetime
+            import pytz
+            
+            # Получить timestamp и данные свечей
+            init_ts_str = ap_signal.get('initiator_timestamp')
+            confirm_ts_str = ap_signal.get('timestamp_open')
+            
+            init_open = ap_signal.get('initiator_open')
+            init_close = ap_signal.get('initiator_close')
+            init_ema200 = ap_signal.get('initiator_ema200')
+            
+            confirm_high = ap_signal.get('confirm_high')
+            confirm_low = ap_signal.get('confirm_low')
+            confirm_ema200 = ap_signal.get('confirm_ema200')
+            
+            if all([init_ts_str, confirm_ts_str, init_open, init_close, init_ema200, confirm_high, confirm_low, confirm_ema200]):
+                # Конвертировать timestamp в локальное время (EEST)
+                eest_tz = pytz.timezone('Europe/Kiev')
+                
+                init_dt = datetime.fromisoformat(init_ts_str.replace('Z', '+00:00'))
+                init_dt_local = init_dt.astimezone(eest_tz)
+                init_time_fmt = init_dt_local.strftime('%d %b %H:%M')
+                
+                confirm_dt = datetime.fromisoformat(confirm_ts_str.replace('Z', '+00:00'))
+                confirm_dt_local = confirm_dt.astimezone(eest_tz)
+                confirm_time_fmt = confirm_dt_local.strftime('%d %b %H:%M')
+                
+                # Форматировать цены
+                init_open_fmt = self.client.format_price(symbol, init_open)
+                init_close_fmt = self.client.format_price(symbol, init_close)
+                init_ema200_fmt = self.client.format_price(symbol, init_ema200)
+                
+                confirm_high_fmt = self.client.format_price(symbol, confirm_high)
+                confirm_low_fmt = self.client.format_price(symbol, confirm_low)
+                confirm_ema200_fmt = self.client.format_price(symbol, confirm_ema200)
+                
+                # Добавить таблицу
+                message += (
+                    f"📊 <b>Анализ свечей:</b>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"🔶 Индикатор     | {init_time_fmt}\n"
+                    f"   O→C: {init_open_fmt} → {init_close_fmt}\n"
+                    f"   EMA200: {init_ema200_fmt}\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"✅ Подтверждение | {confirm_time_fmt}\n"
+                    f"   H-L: {confirm_high_fmt} - {confirm_low_fmt}\n"
+                    f"   EMA200: {confirm_ema200_fmt}\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                )
+            
             # Конфлюэнсы
             if confluences:
                 message += "✅ <b>Конфлюэнсы:</b>\n"
