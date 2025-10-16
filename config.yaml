@@ -381,6 +381,9 @@ action_price:
   sl_buffer_atr: 0.1  # Буфер SL = 0.1×ATR от экстремума инициатора
   max_sl_percent: 10.0  # Максимальный SL в % от entry (5.0 = 5%, 10.0 = 10%)
   
+  # Буфер для подтверждения (защита от касаний EMA200)
+  confirm_buffer_atr: 0.1  # Low/High должны быть на расстоянии 0.1×ATR от EMA200
+  
   # Зоны S/R
   zones:
     lookback_days: 90
