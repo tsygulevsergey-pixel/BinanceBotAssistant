@@ -29,17 +29,36 @@ kc_len = input.int(20, "Keltner период", minval=1, group="Волатиль
 kc_mult_atr = input.float(1.5, "Keltner множитель ATR", minval=0.1, group="Волатильность")
 sq_min_bars = input.int(3, "Минимум баров Squeeze", minval=1, group="Волатильность")
 
-// --- Риск-менеджмент ---
-atr_len = input.int(14, "ATR период", minval=1, group="Риск")
-sl_atr_mult = input.float(1.2, "SL множитель ATR", minval=0.1, group="Риск")
-entry_offset_ticks = input.int(0, "Смещение входа (тики)", minval=0, group="Риск")
-tp1_R = input.float(1.0, "TP1 (R)", minval=0.1, group="Риск")
-tp2_R = input.float(2.0, "TP2 (R)", minval=0.1, group="Риск")
-tp3_R = input.float(3.0, "TP3 (R)", minval=0.1, group="Риск")
-use_tp3 = input.bool(false, "Использовать TP3", group="Риск")
-move_to_be_after_tp1 = input.bool(true, "SL в BE после TP1", group="Риск")
-trail_atr_mult = input.float(1.0, "Трейлинг множитель ATR", minval=0, group="Риск")
-max_bars_in_trade = input.int(96, "Макс. баров в сделке", minval=1, group="Риск")
+// --- SCALP MODE ---
+scalp_mode = input.bool(true, "SCALP MODE", group="Scalp")
+fat_bar_k = input.float(1.2, "Fat Bar коэф. (range>k×ATR)", minval=0.5, group="Scalp")
+retest_enable = input.bool(true, "Вход по ретесту", group="Scalp")
+retest_basis = input.string("Donchian", "Ретест базис", options=["Donchian", "VWAP", "EMAzone", "BBmid"], group="Scalp")
+retest_tol_ticks = input.int(10, "Ретест допуск (тики)", minval=0, group="Scalp")
+retest_expire_bars = input.int(6, "Срок годности ретеста (баров)", minval=1, group="Scalp")
+
+// --- STOP LOGIC ---
+sl_mode = input.string("micro", "Режим стопа", options=["micro", "atr", "structure"], group="Stop")
+swing_lookback = input.int(3, "Swing lookback", minval=1, group="Stop")
+body_pad_ticks = input.int(2, "Body pad (тики)", minval=0, group="Stop")
+zone_pad_atr = input.float(0.4, "Zone pad (×ATR)", minval=0, group="Stop")
+atr_fast_len = input.int(7, "ATR Fast период", minval=1, group="Stop")
+atr_fast_mult = input.float(0.6, "ATR Fast множитель", minval=0.1, group="Stop")
+sl_min_pct = input.float(0.10, "SL min %", minval=0.01, group="Stop")
+sl_max_pct = input.float(0.60, "SL max %", minval=0.01, group="Stop")
+ema_gap_max_atr = input.float(1.0, "EMA gap max (×ATR)", minval=0, group="Stop")
+
+// --- TAKES/RUN ---
+tp0_R = input.float(0.5, "TP0 (R)", minval=0.1, group="Takes")
+tp1_R = input.float(1.0, "TP1 (R)", minval=0.1, group="Takes")
+tp2_R = input.float(1.5, "TP2 (R)", minval=0.1, group="Takes")
+take_tp0_pct = input.int(33, "TP0 закрытие %", minval=0, maxval=100, group="Takes")
+take_tp1_pct = input.int(33, "TP1 закрытие %", minval=0, maxval=100, group="Takes")
+take_tp2_pct = input.int(34, "TP2 закрытие %", minval=0, maxval=100, group="Takes")
+move_to_be_after_tp0 = input.bool(true, "SL→BE после TP0", group="Takes")
+trail_after_tp1_atr_mult = input.float(1.0, "Трейлинг после TP1 (×ATR)", minval=0, group="Takes")
+max_bars_in_trade = input.int(12, "Макс. баров в сделке", minval=1, group="Takes")
+early_exit_ema50_R = input.float(0.3, "Ранний выход через EMA50 до R", minval=0, group="Takes")
 
 // --- Ордер-флоу/деривативы ---
 use_cvd = input.bool(false, "Использовать CVD", group="Ордер-флоу")
@@ -137,7 +156,8 @@ else
     sq_count := 0
 
 // --- ATR ---
-atr = ta.atr(atr_len)
+atr = ta.atr(14)
+atr_fast = ta.atr(atr_fast_len)
 
 // --- CVD ---
 var float cvd_proxy = 0.0
@@ -174,10 +194,14 @@ mins_to_next = (8*60 - mins_mod) % (8*60)
 nearFunding = avoid_near_funding and (mins_to_next <= minutes_around_funding or mins_mod <= minutes_around_funding)
 
 // ============================================================================
-// 3) ЛОГИКА СИГНАЛОВ
+// 3) ЛОГИКА СИГНАЛОВ (SCALP MODE)
 // ============================================================================
 
-// --- Фильтр тренда ---
+// --- 1) Фильтр жирных свечей ---
+bar_range = high - low
+fat_bar = scalp_mode and (bar_range > fat_bar_k * atr)
+
+// --- 2) Фильтр тренда ---
 isLongTrend = close > emaTrend
 if use_vwap
     isLongTrend := isLongTrend and close >= vwapValue
@@ -190,19 +214,58 @@ if use_vwap
 if use_avwap and not na(avwapValue)
     isShortTrend := isShortTrend and close <= avwapValue
 
-// --- Триггеры ---
-// Squeeze Breakout
-squeezeWasActive = sq_count[1] >= sq_min_bars
-squeezeExitLong = squeezeWasActive and close > bbU and close > donHigh[1]
-squeezeExitShort = squeezeWasActive and close < bbL and close < donLow[1]
+// --- 3) Проверка расстояния до EMA50 ---
+ema_gap = math.abs(close - emaMid)
+too_far_from_ema = scalp_mode and (ema_gap > ema_gap_max_atr * atr)
 
-// Donchian Breakout
-donBreakLong = close > donHigh[1]
-donBreakShort = close < donLow[1]
+// --- 4) Донч пробой (триггер вооружения) ---
+donBreakLong = close > donHigh[1] and not fat_bar and not too_far_from_ema and isLongTrend
+donBreakShort = close < donLow[1] and not fat_bar and not too_far_from_ema and isShortTrend
 
-// Комбинированные триггеры
-triggerLong = (squeezeExitLong or donBreakLong) and isLongTrend
-triggerShort = (squeezeExitShort or donBreakShort) and isShortTrend
+// --- 5) Система вооружения и ретеста ---
+var bool armed_long = false
+var bool armed_short = false
+var float trigger_long_level = na
+var float trigger_short_level = na
+var int armed_long_bar = na
+var int armed_short_bar = na
+
+if donBreakLong and retest_enable
+    armed_long := true
+    armed_long_bar := bar_index
+    trigger_long_level := retest_basis == "Donchian" ? donHigh[1] : 
+                          retest_basis == "VWAP" ? vwapValue :
+                          retest_basis == "BBmid" ? bbBasis : 
+                          math.avg(emaFast, emaMid)
+
+if donBreakShort and retest_enable
+    armed_short := true
+    armed_short_bar := bar_index
+    trigger_short_level := retest_basis == "Donchian" ? donLow[1] : 
+                           retest_basis == "VWAP" ? vwapValue :
+                           retest_basis == "BBmid" ? bbBasis : 
+                           math.avg(emaFast, emaMid)
+
+retest_tol = retest_tol_ticks * syminfo.mintick
+
+retest_long_hit = armed_long and (low <= trigger_long_level + retest_tol)
+retest_short_hit = armed_short and (high >= trigger_short_level - retest_tol)
+
+if armed_long and (bar_index - armed_long_bar > retest_expire_bars)
+    armed_long := false
+
+if armed_short and (bar_index - armed_short_bar > retest_expire_bars)
+    armed_short := false
+
+if retest_long_hit
+    armed_long := false
+
+if retest_short_hit
+    armed_short := false
+
+// --- 6) Финальные триггеры ---
+triggerLong = retest_enable ? retest_long_hit : donBreakLong
+triggerShort = retest_enable ? retest_short_hit : donBreakShort
 
 // --- Подтверждение ордер-флоу ---
 cvdConfirmLong = use_cvd ? (not na(cvdDelta) and cvdDelta > 0) : true
@@ -220,7 +283,7 @@ score = 0
 if sc_trend_ema200
     score += (close > emaTrend ? 1 : 0) + (close < emaTrend ? 1 : 0)
 
-if sc_squeeze and squeezeWasActive
+if sc_squeeze and inSqueeze
     score += 1
 
 if sc_break_don
@@ -249,92 +312,131 @@ longSignalConfirmed = longSignal and barstate.isconfirmed
 shortSignalConfirmed = shortSignal and barstate.isconfirmed
 
 // ============================================================================
-// 4) ВЕДЕНИЕ СДЕЛКИ
+// 4) ВЕДЕНИЕ СДЕЛКИ (SCALP MODE)
 // ============================================================================
 
 // Структура сделки
-var string trade_dir = na  // "LONG" или "SHORT"
+var string trade_dir = na
 var float trade_entry = na
 var float trade_sl = na
+var float trade_tp0 = na
 var float trade_tp1 = na
 var float trade_tp2 = na
-var float trade_tp3 = na
 var int trade_open_bar = na
 var bool trade_active = false
+var bool tp0_hit = false
 var bool tp1_hit = false
 var bool tp2_hit = false
-var bool tp3_hit = false
 var bool sl_moved_to_be = false
 var float trade_trail = na
+var float stop_pct = na
 
 // Открытие новой сделки
 if (longSignalConfirmed or shortSignalConfirmed) and not trade_active
     trade_dir := longSignalConfirmed ? "LONG" : "SHORT"
     trade_open_bar := bar_index
-    trade_active := true
+    trade_entry := close
+    tp0_hit := false
     tp1_hit := false
     tp2_hit := false
-    tp3_hit := false
     sl_moved_to_be := false
     trade_trail := na
     
-    // Расчёт Entry
-    if entry_offset_ticks > 0
-        trade_entry := trade_dir == "LONG" ? 
-                       high + entry_offset_ticks * syminfo.mintick : 
-                       low - entry_offset_ticks * syminfo.mintick
-    else
-        trade_entry := close
-    
-    // Расчёт SL
+    // --- Микро-структурный стоп ---
     if trade_dir == "LONG"
-        sl_base = math.min(low, ta.lowest(low, 3))
-        trade_sl := sl_base - sl_atr_mult * atr
+        sl_swing = ta.lowest(low, swing_lookback) - body_pad_ticks * syminfo.mintick
+        sl_body = math.min(open, close) - body_pad_ticks * syminfo.mintick
+        sl_zone = math.min(emaFast, math.min(vwapValue, kcBasis)) - zone_pad_atr * atr
+        sl_atr = close - atr_fast_mult * atr_fast
+        
+        sl_candidate = sl_mode == "micro" ? math.max(sl_swing, math.max(sl_body, math.max(sl_zone, sl_atr))) :
+                       sl_mode == "atr" ? sl_atr : 
+                       sl_swing
+        
+        dist_pct = 100.0 * (close - sl_candidate) / close
+        
+        if dist_pct > sl_max_pct
+            trade_active := false
+        else
+            if dist_pct < sl_min_pct
+                trade_sl := close * (1.0 - sl_min_pct / 100.0)
+            else
+                trade_sl := sl_candidate
+            
+            stop_pct := 100.0 * (close - trade_sl) / close
+            trade_active := true
+    
     else
-        sl_base = math.max(high, ta.highest(high, 3))
-        trade_sl := sl_base + sl_atr_mult * atr
+        sl_swing = ta.highest(high, swing_lookback) + body_pad_ticks * syminfo.mintick
+        sl_body = math.max(open, close) + body_pad_ticks * syminfo.mintick
+        sl_zone = math.max(emaFast, math.max(vwapValue, kcBasis)) + zone_pad_atr * atr
+        sl_atr = close + atr_fast_mult * atr_fast
+        
+        sl_candidate = sl_mode == "micro" ? math.min(sl_swing, math.min(sl_body, math.min(sl_zone, sl_atr))) :
+                       sl_mode == "atr" ? sl_atr : 
+                       sl_swing
+        
+        dist_pct = 100.0 * (sl_candidate - close) / close
+        
+        if dist_pct > sl_max_pct
+            trade_active := false
+        else
+            if dist_pct < sl_min_pct
+                trade_sl := close * (1.0 + sl_min_pct / 100.0)
+            else
+                trade_sl := sl_candidate
+            
+            stop_pct := 100.0 * (trade_sl - close) / close
+            trade_active := true
     
-    // Расчёт R и TP
-    R = math.abs(trade_entry - trade_sl)
-    sign_dir = trade_dir == "LONG" ? 1 : -1
-    
-    trade_tp1 := trade_entry + sign_dir * tp1_R * R
-    trade_tp2 := trade_entry + sign_dir * tp2_R * R
-    trade_tp3 := use_tp3 ? trade_entry + sign_dir * tp3_R * R : na
+    // Расчёт скальп-тейков (0.5R/1.0R/1.5R)
+    if trade_active
+        R = math.abs(trade_entry - trade_sl)
+        sign_dir = trade_dir == "LONG" ? 1 : -1
+        
+        trade_tp0 := trade_entry + sign_dir * tp0_R * R
+        trade_tp1 := trade_entry + sign_dir * tp1_R * R
+        trade_tp2 := trade_entry + sign_dir * tp2_R * R
 
 // Управление активной сделкой
 if trade_active
     bars_in_trade = bar_index - trade_open_bar
     sign_dir = trade_dir == "LONG" ? 1 : -1
+    R_current = math.abs(trade_entry - trade_sl)
+    R_progress = trade_dir == "LONG" ? 
+                 (close - trade_entry) / R_current : 
+                 (trade_entry - close) / R_current
     
-    // Проверка достижения уровней
-    if not tp1_hit
+    // --- Проверка достижения TP0 (0.5R) ---
+    if not tp0_hit
+        tp0_reached = trade_dir == "LONG" ? high >= trade_tp0 : low <= trade_tp0
+        if tp0_reached
+            tp0_hit := true
+            
+            // SL → BE после TP0
+            if move_to_be_after_tp0
+                trade_sl := trade_entry
+                sl_moved_to_be := true
+    
+    // --- Проверка достижения TP1 (1.0R) ---
+    if not tp1_hit and tp0_hit
         tp1_reached = trade_dir == "LONG" ? high >= trade_tp1 : low <= trade_tp1
         if tp1_reached
             tp1_hit := true
             
-            // Перевод в BE
-            if move_to_be_after_tp1
-                trade_sl := trade_entry
-                sl_moved_to_be := true
-            
-            // Инициализация трейлинга
-            if trail_atr_mult > 0
-                trade_trail := trade_entry + sign_dir * trail_atr_mult * atr
+            // Инициализация трейлинга после TP1
+            if trail_after_tp1_atr_mult > 0
+                trade_trail := trade_entry + sign_dir * trail_after_tp1_atr_mult * atr_fast
     
+    // --- Проверка достижения TP2 (1.5R) ---
     if not tp2_hit and tp1_hit
         tp2_reached = trade_dir == "LONG" ? high >= trade_tp2 : low <= trade_tp2
         if tp2_reached
             tp2_hit := true
     
-    if not tp3_hit and tp2_hit and use_tp3
-        tp3_reached = trade_dir == "LONG" ? high >= trade_tp3 : low <= trade_tp3
-        if tp3_reached
-            tp3_hit := true
-    
-    // Обновление трейлинга
-    if tp1_hit and trail_atr_mult > 0
-        new_trail = close + sign_dir * trail_atr_mult * atr
+    // --- Обновление трейлинга ---
+    if tp1_hit and trail_after_tp1_atr_mult > 0
+        new_trail = close + sign_dir * trail_after_tp1_atr_mult * atr_fast
         if trade_dir == "LONG"
             trade_trail := math.max(nz(trade_trail, new_trail), new_trail)
             trade_sl := math.max(trade_sl, trade_trail)
@@ -342,35 +444,31 @@ if trade_active
             trade_trail := math.min(nz(trade_trail, new_trail), new_trail)
             trade_sl := math.min(trade_sl, trade_trail)
     
-    // Проверка SL
+    // --- Проверка SL ---
     sl_hit = trade_dir == "LONG" ? low <= trade_sl : high >= trade_sl
     
-    // Проверка инвалидации (до 0.5R)
-    R_current = math.abs(trade_entry - trade_sl)
-    R_progress = trade_dir == "LONG" ? 
-                 (close - trade_entry) / R_current : 
-                 (trade_entry - close) / R_current
-    
+    // --- Микро-инвалидация (ранний выход через EMA50 до 0.3R) ---
     invalidated = false
-    if R_progress < 0.5
+    if R_progress < early_exit_ema50_R
         if trade_dir == "LONG" and close < emaMid
             invalidated := true
         if trade_dir == "SHORT" and close > emaMid
             invalidated := true
     
-    // Проверка тайм-аута
+    // --- Тайм-аут ---
     timeout = bars_in_trade >= max_bars_in_trade
     
-    // Закрытие сделки
+    // --- Закрытие сделки ---
     if sl_hit or invalidated or timeout or tp2_hit
         trade_active := false
         trade_dir := na
         trade_entry := na
         trade_sl := na
+        trade_tp0 := na
         trade_tp1 := na
         trade_tp2 := na
-        trade_tp3 := na
         trade_trail := na
+        stop_pct := na
 
 // ============================================================================
 // 5) ВИЗУАЛИЗАЦИЯ
@@ -408,18 +506,25 @@ plotshape(show_entries and longSignalConfirmed, "Long Signal", shape.triangleup,
 plotshape(show_entries and shortSignalConfirmed, "Short Signal", shape.triangledown, 
           location.abovebar, color.new(color.red, 0), size=size.small)
 
+// --- Trigger level (вооружённый ретест) ---
+trigger_long_line = armed_long ? trigger_long_level : na
+trigger_short_line = armed_short ? trigger_short_level : na
+
+plot(show_sl_tp and retest_enable ? trigger_long_line : na, "Trigger Long", color.new(color.yellow, 0), 1, plot.style_circles)
+plot(show_sl_tp and retest_enable ? trigger_short_line : na, "Trigger Short", color.new(color.orange, 0), 1, plot.style_circles)
+
 // --- Уровни активной сделки ---
 entry_line = trade_active ? trade_entry : na
 sl_line = trade_active ? trade_sl : na
+tp0_line = trade_active ? trade_tp0 : na
 tp1_line = trade_active ? trade_tp1 : na
 tp2_line = trade_active ? trade_tp2 : na
-tp3_line = trade_active and use_tp3 ? trade_tp3 : na
 
 plot(show_sl_tp ? entry_line : na, "Entry", color.new(color.blue, 0), 2, plot.style_linebr)
 plot(show_sl_tp ? sl_line : na, "SL", color.new(color.red, 0), 2, plot.style_linebr)
-plot(show_sl_tp ? tp1_line : na, "TP1", color.new(color.green, 0), 1, plot.style_linebr)
-plot(show_sl_tp ? tp2_line : na, "TP2", color.new(color.green, 30), 1, plot.style_linebr)
-plot(show_sl_tp ? tp3_line : na, "TP3", color.new(color.green, 60), 1, plot.style_linebr)
+plot(show_sl_tp ? tp0_line : na, "TP0", color.new(color.green, 0), 1, plot.style_linebr)
+plot(show_sl_tp ? tp1_line : na, "TP1", color.new(color.green, 30), 1, plot.style_linebr)
+plot(show_sl_tp ? tp2_line : na, "TP2", color.new(color.green, 60), 1, plot.style_linebr)
 
 // --- Метки ---
 if show_labels and trade_active and barstate.islast
@@ -427,13 +532,12 @@ if show_labels and trade_active and barstate.islast
               style=label.style_circle, color=color.blue, textcolor=color.white, size=size.tiny)
     label.new(bar_index, trade_sl, sl_moved_to_be ? "BE" : "SL", 
               style=label.style_circle, color=color.red, textcolor=color.white, size=size.tiny)
+    label.new(bar_index, trade_tp0, "TP0", 
+              style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
     label.new(bar_index, trade_tp1, "TP1", 
               style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
     label.new(bar_index, trade_tp2, "TP2", 
               style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
-    if use_tp3 and not na(trade_tp3)
-        label.new(bar_index, trade_tp3, "TP3", 
-                  style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
 
 // ============================================================================
 // 6) ИНФО-ПАНЕЛЬ
@@ -452,6 +556,23 @@ if show_panel and barstate.islast
     table.cell(panel, 0, 1, "Статус:", text_color=color.white)
     table.cell(panel, 1, 1, status_text, text_color=color.white, bgcolor=color.new(status_color, 70))
     
+    // ATR Fast
+    table.cell(panel, 0, 2, "ATR(7):", text_color=color.white)
+    table.cell(panel, 1, 2, str.tostring(atr_fast, format.mintick), text_color=color.white)
+    
+    // Fat Bar флаг
+    table.cell(panel, 0, 3, "Fat Bar:", text_color=color.white)
+    fat_text = fat_bar ? "YES" : "NO"
+    fat_color = fat_bar ? color.red : color.green
+    table.cell(panel, 1, 3, fat_text, text_color=color.white, bgcolor=color.new(fat_color, 70))
+    
+    // Retest Status
+    if retest_enable
+        retest_status = armed_long ? "ARMED LONG" : (armed_short ? "ARMED SHORT" : "READY")
+        retest_color = (armed_long or armed_short) ? color.yellow : color.gray
+        table.cell(panel, 0, 4, "Retest:", text_color=color.white)
+        table.cell(panel, 1, 4, retest_status, text_color=color.white, bgcolor=color.new(retest_color, 70))
+    
     // Если есть активная сделка
     if trade_active
         R_current = math.abs(trade_entry - trade_sl)
@@ -459,33 +580,39 @@ if show_panel and barstate.islast
                      (close - trade_entry) / R_current : 
                      (trade_entry - close) / R_current
         
-        table.cell(panel, 0, 2, "Entry:", text_color=color.white)
-        table.cell(panel, 1, 2, str.tostring(trade_entry, format.mintick), text_color=color.white)
+        table.cell(panel, 0, 5, "Entry:", text_color=color.white)
+        table.cell(panel, 1, 5, str.tostring(trade_entry, format.mintick), text_color=color.white)
         
-        table.cell(panel, 0, 3, "SL:", text_color=color.white)
-        table.cell(panel, 1, 3, str.tostring(trade_sl, format.mintick), text_color=color.white)
+        table.cell(panel, 0, 6, "SL:", text_color=color.white)
+        table.cell(panel, 1, 6, str.tostring(trade_sl, format.mintick), text_color=color.white)
         
-        table.cell(panel, 0, 4, "TP1:", text_color=color.white)
-        table.cell(panel, 1, 4, str.tostring(trade_tp1, format.mintick), text_color=color.white)
+        table.cell(panel, 0, 7, "Stop %:", text_color=color.white)
+        table.cell(panel, 1, 7, str.tostring(stop_pct, "#.##") + "%", text_color=color.white)
         
-        table.cell(panel, 0, 5, "TP2:", text_color=color.white)
-        table.cell(panel, 1, 5, str.tostring(trade_tp2, format.mintick), text_color=color.white)
+        table.cell(panel, 0, 8, "TP0:", text_color=color.white)
+        table.cell(panel, 1, 8, str.tostring(trade_tp0, format.mintick), text_color=color.white)
         
-        table.cell(panel, 0, 6, "R Progress:", text_color=color.white)
+        table.cell(panel, 0, 9, "TP1:", text_color=color.white)
+        table.cell(panel, 1, 9, str.tostring(trade_tp1, format.mintick), text_color=color.white)
+        
+        table.cell(panel, 0, 10, "TP2:", text_color=color.white)
+        table.cell(panel, 1, 10, str.tostring(trade_tp2, format.mintick), text_color=color.white)
+        
+        table.cell(panel, 0, 11, "R now:", text_color=color.white)
         r_text = str.tostring(R_progress, "#.##") + "R"
         r_color = R_progress > 0 ? color.green : color.red
-        table.cell(panel, 1, 6, r_text, text_color=color.white, bgcolor=color.new(r_color, 70))
+        table.cell(panel, 1, 11, r_text, text_color=color.white, bgcolor=color.new(r_color, 70))
         
-        table.cell(panel, 0, 7, "Bars in trade:", text_color=color.white)
-        table.cell(panel, 1, 7, str.tostring(bar_index - trade_open_bar), text_color=color.white)
+        table.cell(panel, 0, 12, "Bars:", text_color=color.white)
+        table.cell(panel, 1, 12, str.tostring(bar_index - trade_open_bar), text_color=color.white)
     
     // Score информация
-    table.cell(panel, 0, 8, "Score:", text_color=color.white)
+    table.cell(panel, 0, 13, "Score:", text_color=color.white)
     score_color = score >= score_min ? color.green : color.red
-    table.cell(panel, 1, 8, str.tostring(score), text_color=color.white, bgcolor=color.new(score_color, 70))
+    table.cell(panel, 1, 13, str.tostring(score), text_color=color.white, bgcolor=color.new(score_color, 70))
     
     // Факторы
-    row = 9
+    row = 14
     if use_cvd
         cvd_text = na(cvdDelta) ? "n/a" : str.tostring(cvdDelta, "#.##")
         table.cell(panel, 0, row, "CVD Δ:", text_color=color.white)
@@ -525,7 +652,7 @@ if show_panel and barstate.islast
 
 alertcondition(longSignalConfirmed, "Long Signal", "Long Signal: {{ticker}} @ {{close}} on {{interval}}")
 alertcondition(shortSignalConfirmed, "Short Signal", "Short Signal: {{ticker}} @ {{close}} on {{interval}}")
-alertcondition(tp1_hit and not tp1_hit[1], "TP1 Hit", "TP1 Hit: {{ticker}} on {{interval}}")
-alertcondition(tp2_hit and not tp2_hit[1], "TP2 Hit", "TP2 Hit: {{ticker}} on {{interval}}")
-alertcondition(use_tp3 and tp3_hit and not tp3_hit[1], "TP3 Hit", "TP3 Hit: {{ticker}} on {{interval}}")
+alertcondition(tp0_hit and not tp0_hit[1], "TP0 Hit", "TP0 (0.5R) Hit: {{ticker}} on {{interval}}")
+alertcondition(tp1_hit and not tp1_hit[1], "TP1 Hit", "TP1 (1.0R) Hit: {{ticker}} on {{interval}}")
+alertcondition(tp2_hit and not tp2_hit[1], "TP2 Hit", "TP2 (1.5R) Hit: {{ticker}} on {{interval}}")
 alertcondition(trade_active[1] and not trade_active, "SL/Exit Hit", "Stop/Exit Hit: {{ticker}} on {{interval}}")

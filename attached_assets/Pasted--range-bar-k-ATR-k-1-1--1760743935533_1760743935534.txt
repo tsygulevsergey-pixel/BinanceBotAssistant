@@ -1,0 +1,124 @@
+Что поменять (коротко)
+
+Фильтр «жирных» свечей
+Не торгуем пробой, если range(bar) > k × ATR (k=1.1..1.3). Это сразу отсекает «свечи-раскалёжки» с большим стопом.
+
+Вход НЕ по close, а по ретесту (Break&Retest)
+После пробоя «вооружаем» сигнал и ставим лимит-вход на ретест уровня (DonchianHigh[1]/DonchianLow[1], mid-BB, VWAP или зона EMA20-50) с допуском retest_tol в тиках. Срок годности — N баров. Так вход смещается ближе к уровню ⇒ стоп резко меньше.
+
+Режим выбора стопа = “ближайшая адекватная опора” (микро-структура)
+Для лонга взять max из:
+
+SL_swing = lowest(low, swing_lookback) − pad_ticks
+
+SL_body = min(open, close) − body_pad_ticks (стоп за телом сигнального бара, не за тенью)
+
+SL_zone = min(EMA20, VWAP, KC mid) − zone_pad × ATR
+
+SL_atr = close − atr_fast_mult × ATR(7)
+И финальный SL = clamp(SL_candidate, min/max%) (см. п.4).
+Для шорта — симметрично (берём min из кандидатов выше цены).
+
+ATR-CLAMP (потолок и пол для стопа)
+Добавить параметры:
+sl_min_pct=0.10%, sl_max_pct=0.60% от цены (по умолчанию).
+Если выбранный структурный SL даёт дистанцию > sl_max_pct, сигнал не торгуем ИЛИ ждём ретеста (п.2).
+Если < sl_min_pct — поднять до минимума (против «тик-хлама»).
+
+«Скальп-тейки» и ранний кешаут
+Лестница: TP0=0.5R (закрыть 33%), TP1=1.0R (ещё 33%), TP2=1.5R (остаток).
+После TP0 — SL→BE, после TP1 — трейлинг trail = entry + sign×1.0×ATR(7).
+
+Тайм-аут/микро-инвалидации
+
+max_bars_in_trade = 24 (6 часов на 15m) или короче (например 12).
+
+Ранний выход, если цена закрылась против через EMA50 до достижения 0.3R.
+
+Не входить, если расстояние до EMA50 > ema_gap_max = 1.0×ATR(14) (вход «слишком высоко»).
+
+Что добавить в ТЗ (параметры)
+[SCALP MODE]
+scalp_mode (on/off) = on
+fat_bar_k = 1.2               // порог «жирной» свечи: range > k×ATR => нет входа
+retest_enable = true
+retest_basis  = "Donchian|VWAP|EMAzone|BBmid"
+retest_tol_ticks = 5-15
+retest_expire_bars = 6
+
+[STOP LOGIC]
+sl_mode = "micro"             // micro | atr | structure
+swing_lookback = 3
+body_pad_ticks = 2
+zone_pad_atr = 0.4
+atr_fast_len = 7
+atr_fast_mult = 0.6
+sl_min_pct = 0.10
+sl_max_pct = 0.60
+ema_gap_max_atr = 1.0
+
+[TAKES/RUN]
+tp0_R = 0.5; take_tp0_pct = 33
+tp1_R = 1.0; take_tp1_pct = 33
+tp2_R = 1.5; take_tp2_pct = 34
+move_to_be_after_tp0 = true
+trail_after_tp1_atr_mult = 1.0
+max_bars_in_trade = 12..24
+
+Логика (как это шьётся в код)
+// 1) отфильтруем «жирные» пробои
+atr14  = ta.atr(14)
+fatBar = (high - low) > input.float(1.2, 'fat_bar_k') * atr14
+if fatBar
+    longSignal  := false
+    shortSignal := false
+
+// 2) режим «вооружённого» ретеста
+var bool  armedLong  = false
+var float triggerLong = na
+if longBreakout and not fatBar
+    armedLong := true
+    triggerLong := donHigh[1]  // или BBmid/VWAP/EMAzone по настройке
+if armedLong
+    reentryZoneHit = low <= triggerLong + retestTol*syminfo.mintick
+    armedLong := not reentryZoneHit and bar_index - bar_index[1] < retestExpire
+    longSignal := reentryZoneHit  // вход на ретесте вместо close
+
+// 3) кандидаты стопов (лонг)
+sl_swing = ta.lowest(low, swingLookback) - padTicks*syminfo.mintick
+sl_body  = math.min(open, close) - bodyPad*syminfo.mintick
+sl_zone  = math.min(ema20, vwap, kcBasis) - zonePadAtr*ta.atr(14)
+sl_atr   = close - atrFastMult*ta.atr(7)
+slLongRaw = math.max(sl_swing, math.max(sl_body, math.max(sl_zone, sl_atr)))
+
+// 4) CLAMP по % от цены
+distPct  = 100.0 * (close - slLongRaw) / close
+slLong   = distPct > slMaxPct ? na : (distPct < slMinPct ? close * (1 - slMinPct/100.0) : slLongRaw)
+longSignal := longSignal and not na(slLong)
+
+// 5) тейки под скальп
+R  = close - slLong
+tp0 = close + 0.5 * R
+tp1 = close + 1.0 * R
+tp2 = close + 1.5 * R
+
+
+(Для шорта всё зеркально.)
+
+Визуализация (чтобы на графике «видно, где вход/SL/TP»)
+
+Если сигнал «вооружён» — рисуем пунктир Trigger (уровень ретеста).
+
+При реальном входе — label E на ретест-свечe, а не на свече пробоя.
+
+Линии: SL, TP0, TP1, TP2 + отметки BE/Trail по факту.
+
+В панели: Stop %, ATR(7), fatBar?, Retest OK/Expired, R now.
+
+Что это даст
+
+Стопы становятся в 2–4 раза короче за счёт входа от уровня и body/zone-стопов, а не «low−ATR».
+
+Тейки ближе (0.5R/1R/1.5R), оборот по сделкам выше — то, что нужно под «маленькие движения».
+
+Плохие импульсные бары (те, что и создавали «монструозный» SL) просто не торгуются либо торгуются только после отката.
