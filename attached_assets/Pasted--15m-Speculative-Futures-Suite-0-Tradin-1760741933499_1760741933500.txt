@@ -1,0 +1,399 @@
+ехническое задание: индикатор «15m Speculative Futures Suite»
+0) Общие требования
+
+Платформа: TradingView, Pine Script v5.
+
+Тип: indicator() с режимом overlay=true, опция переключения режима Indicator/Strategy (для встроенного теста).
+
+Таймфрейм: по умолчанию 15m (должен работать на любом ТФ, но оптимизация — под 15m).
+
+Без перерисовки: сигналы фиксируются только на закрытии бара (barstate.isconfirmed), request.security() — без lookahead=barmerge.lookahead_on.
+
+Производительность: лимитировать число внешних security() вызовов; все тяжёлые расчёты вынести на верхний ТФ минимально.
+
+Состояния: использовать var/varip для хранения активной сделки, уровней и статистики.
+
+1) Входные параметры (inputs)
+
+Общие
+
+mode: "Indicator" / "Strategy" (переключатель).
+
+tf_main: "15" (строка) — основной ТФ для всех расчётов (по умолчанию текущий).
+
+src: источник цены (hlc3 по умолчанию).
+
+show_panel: чекбокс — отображать инфо-панель (Score, R, ΔOI и т. п.).
+
+Тренд/контекст
+
+ema_fast_len = 20, ema_mid_len = 50, ema_trend_len = 200.
+
+use_vwap (on/off).
+
+Anchored VWAP:
+
+use_avwap (on/off);
+
+avwap_anchor_time (datetime) — время «привязки» якора.
+
+Диапазон/волатильность
+
+Donchian: don_len = 20.
+
+Bollinger: bb_len = 20, bb_mult = 2.0.
+
+Keltner: kc_len = 20, kc_mult_atr = 1.5.
+
+Squeeze: sq_min_bars = 3 (минимум баров сжатия).
+
+Риск-менеджмент
+
+atr_len = 14, sl_atr_mult = 1.2.
+
+risk_per_trade_pct = 1.0 (% от депо, если режим Strategy).
+
+entry_offset_ticks = 0 (смещение стоп-ордера входа от High/Low пробойной свечи).
+
+Тейки (R-уровни): tp1_R = 1.0, tp2_R = 2.0, tp3_R = 3.0 (tp3 опционально).
+
+Менеджмент: чекбоксы
+
+move_to_be_after_tp1 (перевод SL в BE после TP1),
+
+trail_atr_mult = 1.0 (трейлинг после TP1).
+
+max_bars_in_trade = 96 (макс. длительность сделки; по дефолту 24 часа на 15m).
+
+Ордер-флоу/деривативы (опциональные фильтры)
+
+use_cvd (on/off), cvd_mode: "proxy" / "external".
+
+Proxy CVD = volume * sign(close - open) с EMA-сглаживанием.
+
+External CVD: тикер в cvd_symbol (через request.security).
+
+use_oi (on/off), oi_symbol (внешний тикер OI), oi_delta_min_pct (например 3–10% медианы).
+
+use_funding (on/off), fund_symbol (внешний тикер ставки), fund_abs_max (порог перегрева, напр. 0.05%).
+
+avoid_near_funding (on/off), minutes_around_funding (напр. 15) — блок входов вокруг 00:00 / 08:00 / 16:00 UTC.
+
+Скоринг (качественный фильтр)
+
+use_score (on/off), score_min (например 3).
+
+Баллы (каждый пункт on/off и вес):
+
+sc_trend_ema200 (+1 если лонг над/шорт под EMA200).
+
+sc_squeeze (+1 если был squeeze ≥ sq_min_bars).
+
+sc_break_don (+1 на пробое Donchian).
+
+sc_cvd (+1 если CVD в сторону входа).
+
+sc_oi (+1 если ΔOI >= порог в сторону входа).
+
+sc_funding_penalty (−1 если |fund| ≥ fund_abs_max).
+
+sc_near_funding_penalty (−1 если близко ко времени фандинга).
+
+Визуализация
+
+Чекбоксы: show_ema, show_vwap, show_avwap, show_donchian, show_bb_kc, show_atr_trail, show_entries, show_sl_tp, show_labels, show_table.
+
+Параметры подписей: размер шрифта, отступы, сдвиг по X/Y.
+
+2) Источники данных и вычисления
+2.1. Базовые ряды
+
+OHLCV текущего символа/ТФ.
+
+Допустима опция request.security(syminfo.tickerid, tf_main, ...) для унификации ТФ.
+
+2.2. Индикаторы
+
+EMA: emaFast=ta.ema(close, 20), emaMid=ta.ema(close, 50), emaTrend=ta.ema(close, 200).
+
+VWAP: ta.vwap(hlc3) (считается внутри сессии).
+
+Anchored VWAP:
+
+Сброс накопления на баре time >= avwap_anchor_time.
+
+Реализация: интегрировать Σ(price*volume) и Σ(volume) с момента якоря, avwap = Σ(p*v)/Σ(v).
+
+Donchian: donHigh=ta.highest(high, don_len), donLow=ta.lowest(low, don_len).
+
+Bollinger: bbBasis=ta.sma(src, bb_len), bbDev=bb_mult*ta.stdev(src, bb_len), bbU=bbBasis+bbDev, bbL=bbBasis-bbDev.
+
+Keltner: kcBasis=ta.ema(src, kc_len), range=kc_mult_atr*ta.atr(kc_len), kcU=kcBasis+range, kcL=kcBasis-range.
+
+Squeeze: squeeze = (bbU < kcU) and (bbL > kcL). Вести счётчик подряд идущих баров sq_count.
+
+ATR: atr=ta.atr(atr_len).
+
+CVD
+
+Proxy: cvd_proxy := nz(cvd_proxy[1]) + volume * math.sign(close - open), сглаживание EMA.
+
+External: cvd = request.security(cvd_symbol, tf_main, close) (или соответствующее поле).
+
+Open Interest (опц.): oi = request.security(oi_symbol, tf_main, close), delta_oi = oi - oi[1], нормировать на медиану ta.median(abs(delta_oi), N) и сравнить с oi_delta_min_pct.
+
+Funding (опц.): fund = request.security(fund_symbol, tf_main, close); флаг перегрева abs(fund) >= fund_abs_max.
+
+Окна фандинга (UTC 00/08/16)
+
+mins_since_epoch = int(time / 60000)
+
+mins_mod = mins_since_epoch % (8*60)
+
+mins_to_next = (8*60 - mins_mod) % (8*60)
+
+near_funding = mins_to_next <= minutes_around_funding or mins_mod <= minutes_around_funding.
+
+3) Логика сигналов
+3.1. Фильтр тренда
+
+Лонг: close > emaTrend и (опц.) close >= vwap и (если use_avwap) close >= avwap.
+
+Шорт: close < emaTrend и (опц.) close <= vwap и (если use_avwap) close <= avwap.
+
+3.2. Режим волатильности (готовность)
+
+Squeeze готов: sq_count >= sq_min_bars (BB внутри KC).
+
+Выход из squeeze: текущая свеча с закрытием вне BB (выше для лонга / ниже для шорта).
+
+3.3. Триггеры входа (варианта два — можно включать оба)
+
+Squeeze-Breakout (по тренду)
+
+Условия:
+
+Фильтр тренда в сторону сделки.
+
+Был squeeze sq_count >= sq_min_bars.
+
+Триггер: close выше bbU и выше donHigh[1] (лонг) / close ниже bbL и ниже donLow[1] (шорт).
+
+Donchian-Breakout (по тренду)
+
+Фильтр тренда выполняется.
+
+Триггер: закрытие выше donHigh[1] (лонг) / ниже donLow[1] (шорт).
+
+3.4. Подтверждение ордер-флоу/деривативов (доп. фильтры, если включены)
+
+CVD: изменение CVD за текущий бар > 0 (лонг) / < 0 (шорт).
+
+ΔOI: delta_oi в сторону пробоя и по модулю ≥ oi_delta_min_pct от своей медианы.
+
+Funding: |fund| < fund_abs_max.
+
+Время фандинга: если avoid_near_funding, запрет сигнала при near_funding.
+
+3.5. Скоринг (если включён)
+
+Рассчитать суммарный score из чекбоксов/весов выше.
+
+Сигнал допустим, если score >= score_min.
+
+3.6. Фиксация входа и уровней
+
+Bar of signal = текущий бар на закрытии.
+
+EntryPrice (визуал):
+
+по умолчанию entry = close сигнального бара;
+
+если entry_offset_ticks>0:
+
+лонг: entry = high + entry_offset_ticks * syminfo.mintick
+
+шорт: entry = low - entry_offset_ticks * syminfo.mintick
+
+Стоп-лосс (SL):
+
+Лонг: sl = min(low, ta.lowest(low, 3)) - sl_atr_mult*atr (или просто low сигнальной − ATR-множитель).
+
+Шорт: sl = max(high, ta.highest(high, 3)) + sl_atr_mult*atr.
+
+Расчёт R: R = abs(entry - sl).
+
+Тейки:
+
+tp1 = entry + sign * tp1_R * R
+
+tp2 = entry + sign * tp2_R * R
+
+tp3 опционально.
+
+sign = +1 (лонг) / -1 (шорт).
+
+3.7. Ведение сделки (симуляция в индикаторе)
+
+Разрешена одна активная сделка за раз.
+
+После фиксации входа:
+
+Отслеживать события по очереди: SL/TP1/TP2/TP3 (по касанию экстремумов бара low/high).
+
+Если move_to_be_after_tp1: после достижения TP1 — sl := entry (breakeven).
+
+Если включён трейлинг: после TP1 — trail = entry + sign * trail_atr_mult*atr, обновлять sl := max/min(sl, trail) в сторону сделки.
+
+Тайм-аут: по max_bars_in_trade закрыть сделку по рынку (визуально — значок «⌛»), посчитать R-результат по close.
+
+Правила отмены (invalidations) — опционально:
+
+Лонг: закрытие ниже emaMid до достижения 0.5R ⇒ отмена.
+
+Шорт: закрытие выше emaMid до 0.5R ⇒ отмена.
+
+4) Визуализация на графике
+4.1. Линии/каналы
+
+EMA20/50/200, VWAP, Anchored VWAP (если включён).
+
+Donchian (верх/низ), Bollinger (верх/низ), Keltner (верх/низ).
+
+Активные Entry/SL/TP1/TP2/TP3 как plot() с style=plot.style_linebr и подписью цены.
+
+4.2. Маркеры сигналов
+
+plotshape() на сигнальном баре:
+
+Лонг: стрелка вверх/лейбл "LONG", цвет в тон тренду.
+
+Шорт: стрелка вниз/лейбл "SHORT".
+
+Рядом подпись: Score, ΔOI%, CVDΔ, fund.
+
+4.3. Метки уровней
+
+label.new() у Entry/SL/TP (короткие подписи: E, SL, TP1, TP2, TP3, BE).
+
+Для активной сделки — динамическая линия SL (включая трейлинг), подсказка R left / R hit.
+
+4.4. Инфо-панель (table)
+
+Наполнение (по последнему сигналу/активной сделке):
+
+Направление, время бара, Entry/SL/TP1/TP2/TP3.
+
+R-дистанция, текущее отклонение в R.
+
+Score и вклад факторов (тренд/squeeze/don/cvd/oi/fund).
+
+Флаги: near_funding, fund_abs, ΔOI ok.
+
+Мини-история N последних сделок: результат в R (TP2/SL/timeout).
+
+5) Алерты (alertcondition)
+
+Создать минимум следующие события, каждое — только на закрытии бара:
+
+Long_Signal / Short_Signal — новый сигнал входа.
+
+TP1_Hit, TP2_Hit, (TP3_Hit если включён).
+
+SL_Hit.
+
+Trade_Cancelled (инвалидация) / Trade_Timeout (по времени).
+Сообщение (JSON):
+
+{
+  "symbol":"{{ticker}}",
+  "tf":"{{interval}}",
+  "dir":"LONG|SHORT",
+  "time":"{{time}}",
+  "entry": {{plot_Entry}},
+  "sl": {{plot_SL}},
+  "tp1": {{plot_TP1}},
+  "tp2": {{plot_TP2}},
+  "score": {{Score}},
+  "cvd_delta": {{CVDd}},
+  "oi_delta_pct": {{OIdPct}},
+  "fund": {{Funding}},
+  "reason":"SqueezeBreakout|DonchianBreakout"
+}
+
+
+(Внутри Pine — подставить актуальные переменные/значения.)
+
+6) Режим Strategy (по переключателю)
+
+Использовать strategy() с:
+
+Размер позы по risk_per_trade_pct и дистанции до SL (волатильностное позиционирование).
+
+Вход strategy.entry() на следующем баре по EntryPrice (или по рынку), strategy.exit() с stop = SL, limit = TP2.
+
+После TP1 — имитировать частичное закрытие 50% и перевод SL в BE (на второй заявке).
+
+Статистика: отобразить WinRate, Expectancy в R, PF, MaxDD.
+
+Важно: никаких calc_on_every_tick/перерисовок; все решения — на закрытии бара.
+
+7) Обработка граничных случаев
+
+Если внешние ряды (OI/Funding/CVD) недоступны — автоматически отключить соответствующие фильтры (в панели указать n/a).
+
+При экстремально низкой волатильности (atr близок к 0) — блокировать сигналы.
+
+При слишком близком SL (ниже syminfo.mintick * k) — поднять к минимально допустимому.
+
+8) Нейминг ключевых переменных/функций (для читаемости кода)
+
+Флаги: isLongTrend, isShortTrend, inSqueeze, squeezeExitLong/Short, donBreakLong/Short, nearFunding.
+
+Сигналы: longSignal, shortSignal.
+
+Ордер-флоу: cvd, cvdDelta, oi, oiDelta, oiDeltaPct, fund.
+
+Уровни: entry, sl, tp1, tp2, tp3, trail.
+
+Состояние сделки (структура/запись): Trade{dir, entry, sl, tp1, tp2, tp3, openBarIndex, isActive}.
+
+Панель: функции drawTable(), plotLevels(), plotSignals().
+
+9) Тест-чек-лист для приёмки
+
+Сигнал появляется только на закрытии бара, линии Entry/SL/TP строятся верно.
+
+При достижении TP1 — SL переходит в BE (если включено), трейлинг стартует.
+
+Срабатывают корректные алерты для всех событий (Signal/TP/SL/Timeout).
+
+Фильтры ΔOI/CVD/Funding корректно включаются/выключаются (при n/a — не мешают сигналу).
+
+Режим Strategy даёт сопоставимую симуляцию (нет перерисовки).
+
+Панель показывает корректные числа (R-дистанции, Score, причины входа).
+
+Включение/выключение Donchian/Squeeze-логики влияет на частоту сигналов ожидаемо.
+
+10) Ограничения и допущения
+
+CVD без тиковых данных — только прокси-оценка; точный CVD возможен при наличии внешнего тикера/фида.
+
+Open Interest/Funding — доступны лишь для тех инструментов/бирж, где TradingView публикует эти ряды (иначе n/a).
+
+Anchored VWAP — работает от заданного времени; при смене символа/ТФ пользователь должен проверить актуальность якоря.
+
+Индикатор не исполняет ордера; режим Strategy — только для оценки логики.
+
+Итог: что будет на графике
+
+Полный контекст: EMA20/50/200, VWAP/Anchored VWAP, Donchian, BB+KC (для Squeeze), ATR-трейл.
+
+Чёткие метки LONG/SHORT на сигнальной свече.
+
+Линии Entry/SL/TP1/TP2(/TP3) с подписями цен; динамический BE/Trail после TP1 (если включено).
+
+Инфо-панель с Score, вкладом факторов (squeeze/don/cvd/oi/fund), текущим прогрессом по R и причинами входа.
+
+Алерты для автоматизации (в веб-хуки/бот).

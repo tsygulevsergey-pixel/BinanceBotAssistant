@@ -1,0 +1,548 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © YourUsername
+
+//@version=5
+indicator("15m Speculative Futures Suite", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// ============================================================================
+// 1) ВХОДНЫЕ ПАРАМЕТРЫ
+// ============================================================================
+
+// --- Общие ---
+tf_main = input.string("", "Основной таймфрейм", tooltip="Пусто = текущий ТФ")
+src = input.source(hlc3, "Источник цены")
+show_panel = input.bool(true, "Показать инфо-панель")
+
+// --- Тренд/контекст ---
+ema_fast_len = input.int(20, "EMA Fast", minval=1, group="Тренд")
+ema_mid_len = input.int(50, "EMA Mid", minval=1, group="Тренд")
+ema_trend_len = input.int(200, "EMA Trend", minval=1, group="Тренд")
+use_vwap = input.bool(true, "Использовать VWAP", group="Тренд")
+use_avwap = input.bool(false, "Использовать Anchored VWAP", group="Тренд")
+avwap_anchor_time = input.time(timestamp("2024-01-01 00:00"), "Anchored VWAP время якоря", group="Тренд")
+
+// --- Диапазон/волатильность ---
+don_len = input.int(20, "Donchian период", minval=1, group="Волатильность")
+bb_len = input.int(20, "Bollinger период", minval=1, group="Волатильность")
+bb_mult = input.float(2.0, "Bollinger множитель", minval=0.1, group="Волатильность")
+kc_len = input.int(20, "Keltner период", minval=1, group="Волатильность")
+kc_mult_atr = input.float(1.5, "Keltner множитель ATR", minval=0.1, group="Волатильность")
+sq_min_bars = input.int(3, "Минимум баров Squeeze", minval=1, group="Волатильность")
+
+// --- Риск-менеджмент ---
+atr_len = input.int(14, "ATR период", minval=1, group="Риск")
+sl_atr_mult = input.float(1.2, "SL множитель ATR", minval=0.1, group="Риск")
+entry_offset_ticks = input.int(0, "Смещение входа (тики)", minval=0, group="Риск")
+tp1_R = input.float(1.0, "TP1 (R)", minval=0.1, group="Риск")
+tp2_R = input.float(2.0, "TP2 (R)", minval=0.1, group="Риск")
+tp3_R = input.float(3.0, "TP3 (R)", minval=0.1, group="Риск")
+use_tp3 = input.bool(false, "Использовать TP3", group="Риск")
+move_to_be_after_tp1 = input.bool(true, "SL в BE после TP1", group="Риск")
+trail_atr_mult = input.float(1.0, "Трейлинг множитель ATR", minval=0, group="Риск")
+max_bars_in_trade = input.int(96, "Макс. баров в сделке", minval=1, group="Риск")
+
+// --- Ордер-флоу/деривативы ---
+use_cvd = input.bool(false, "Использовать CVD", group="Ордер-флоу")
+cvd_mode = input.string("proxy", "CVD режим", options=["proxy", "external"], group="Ордер-флоу")
+cvd_symbol = input.string("", "CVD внешний тикер", group="Ордер-флоу")
+cvd_ema_len = input.int(14, "CVD EMA сглаживание", minval=1, group="Ордер-флоу")
+
+use_oi = input.bool(false, "Использовать OI", group="Деривативы")
+oi_symbol = input.string("", "OI тикер", group="Деривативы")
+oi_delta_min_pct = input.float(5.0, "OI Delta мин % от медианы", minval=0, group="Деривативы")
+oi_median_len = input.int(20, "OI медиана период", minval=5, group="Деривативы")
+
+use_funding = input.bool(false, "Использовать Funding", group="Деривативы")
+fund_symbol = input.string("", "Funding тикер", group="Деривативы")
+fund_abs_max = input.float(0.05, "Funding макс порог %", minval=0, group="Деривативы")
+
+avoid_near_funding = input.bool(false, "Избегать окон фандинга", group="Деривативы")
+minutes_around_funding = input.int(15, "Минут вокруг фандинга", minval=0, group="Деривативы")
+
+// --- Скоринг ---
+use_score = input.bool(true, "Использовать скоринг", group="Скоринг")
+score_min = input.int(3, "Минимальный Score", minval=0, group="Скоринг")
+sc_trend_ema200 = input.bool(true, "Score: EMA200 тренд (+1)", group="Скоринг")
+sc_squeeze = input.bool(true, "Score: Squeeze (+1)", group="Скоринг")
+sc_break_don = input.bool(true, "Score: Donchian пробой (+1)", group="Скоринг")
+sc_cvd = input.bool(true, "Score: CVD (+1)", group="Скоринг")
+sc_oi = input.bool(true, "Score: OI Delta (+1)", group="Скоринг")
+sc_funding_penalty = input.bool(true, "Score: Funding штраф (−1)", group="Скоринг")
+sc_near_funding_penalty = input.bool(true, "Score: Окно фандинга штраф (−1)", group="Скоринг")
+
+// --- Визуализация ---
+show_ema = input.bool(true, "Показать EMA", group="Визуализация")
+show_vwap_line = input.bool(true, "Показать VWAP", group="Визуализация")
+show_avwap_line = input.bool(true, "Показать Anchored VWAP", group="Визуализация")
+show_donchian = input.bool(true, "Показать Donchian", group="Визуализация")
+show_bb_kc = input.bool(true, "Показать BB/KC", group="Визуализация")
+show_entries = input.bool(true, "Показать входы", group="Визуализация")
+show_sl_tp = input.bool(true, "Показать SL/TP", group="Визуализация")
+show_labels = input.bool(true, "Показать метки", group="Визуализация")
+
+// ============================================================================
+// 2) ВЫЧИСЛЕНИЕ ИНДИКАТОРОВ
+// ============================================================================
+
+// Используем текущий ТФ или заданный
+actual_tf = tf_main == "" ? timeframe.period : tf_main
+
+// --- EMA ---
+emaFast = ta.ema(close, ema_fast_len)
+emaMid = ta.ema(close, ema_mid_len)
+emaTrend = ta.ema(close, ema_trend_len)
+
+// --- VWAP ---
+vwapValue = ta.vwap(hlc3)
+
+// --- Anchored VWAP ---
+var float avwap_sum_pv = 0.0
+var float avwap_sum_v = 0.0
+var bool avwap_reset_done = false
+
+if time >= avwap_anchor_time and not avwap_reset_done
+    avwap_sum_pv := 0.0
+    avwap_sum_v := 0.0
+    avwap_reset_done := true
+
+if time >= avwap_anchor_time
+    avwap_sum_pv += hlc3 * volume
+    avwap_sum_v += volume
+
+avwapValue = avwap_sum_v > 0 ? avwap_sum_pv / avwap_sum_v : na
+
+// --- Donchian ---
+donHigh = ta.highest(high, don_len)
+donLow = ta.lowest(low, don_len)
+
+// --- Bollinger ---
+bbBasis = ta.sma(src, bb_len)
+bbDev = bb_mult * ta.stdev(src, bb_len)
+bbU = bbBasis + bbDev
+bbL = bbBasis - bbDev
+
+// --- Keltner ---
+kcBasis = ta.ema(src, kc_len)
+kcRange = kc_mult_atr * ta.atr(kc_len)
+kcU = kcBasis + kcRange
+kcL = kcBasis - kcRange
+
+// --- Squeeze ---
+inSqueeze = (bbU < kcU) and (bbL > kcL)
+var int sq_count = 0
+
+if inSqueeze
+    sq_count += 1
+else
+    sq_count := 0
+
+// --- ATR ---
+atr = ta.atr(atr_len)
+
+// --- CVD ---
+var float cvd_proxy = 0.0
+cvd_raw_delta = volume * math.sign(close - open)
+cvd_proxy += cvd_raw_delta
+cvd_proxy_smooth = ta.ema(cvd_proxy, cvd_ema_len)
+
+cvd_external = use_cvd and cvd_mode == "external" and cvd_symbol != "" ? 
+               request.security(cvd_symbol, actual_tf, close, lookahead=barmerge.lookahead_off) : na
+
+cvd = use_cvd ? (cvd_mode == "proxy" ? cvd_proxy_smooth : cvd_external) : na
+cvdDelta = use_cvd ? (cvd - cvd[1]) : na
+
+// --- Open Interest ---
+oi = use_oi and oi_symbol != "" ? 
+     request.security(oi_symbol, actual_tf, close, lookahead=barmerge.lookahead_off) : na
+
+oiDelta = use_oi and not na(oi) ? (oi - oi[1]) : na
+oiDeltaAbs = use_oi and not na(oiDelta) ? math.abs(oiDelta) : na
+oiMedian = use_oi and not na(oiDeltaAbs) ? ta.median(oiDeltaAbs, oi_median_len) : na
+oiDeltaPct = use_oi and not na(oiMedian) and oiMedian > 0 ? (oiDeltaAbs / oiMedian) * 100 : 0.0
+
+// --- Funding ---
+fund = use_funding and fund_symbol != "" ? 
+       request.security(fund_symbol, actual_tf, close, lookahead=barmerge.lookahead_off) : na
+
+fundAbs = use_funding and not na(fund) ? math.abs(fund) : 0.0
+fundOverheated = use_funding and fundAbs >= fund_abs_max
+
+// --- Окна фандинга (UTC 00/08/16) ---
+mins_since_epoch = int(time / 60000)
+mins_mod = mins_since_epoch % (8*60)
+mins_to_next = (8*60 - mins_mod) % (8*60)
+nearFunding = avoid_near_funding and (mins_to_next <= minutes_around_funding or mins_mod <= minutes_around_funding)
+
+// ============================================================================
+// 3) ЛОГИКА СИГНАЛОВ
+// ============================================================================
+
+// --- Фильтр тренда ---
+isLongTrend = close > emaTrend
+if use_vwap
+    isLongTrend := isLongTrend and close >= vwapValue
+if use_avwap and not na(avwapValue)
+    isLongTrend := isLongTrend and close >= avwapValue
+
+isShortTrend = close < emaTrend
+if use_vwap
+    isShortTrend := isShortTrend and close <= vwapValue
+if use_avwap and not na(avwapValue)
+    isShortTrend := isShortTrend and close <= avwapValue
+
+// --- Триггеры ---
+// Squeeze Breakout
+squeezeWasActive = sq_count[1] >= sq_min_bars
+squeezeExitLong = squeezeWasActive and close > bbU and close > donHigh[1]
+squeezeExitShort = squeezeWasActive and close < bbL and close < donLow[1]
+
+// Donchian Breakout
+donBreakLong = close > donHigh[1]
+donBreakShort = close < donLow[1]
+
+// Комбинированные триггеры
+triggerLong = (squeezeExitLong or donBreakLong) and isLongTrend
+triggerShort = (squeezeExitShort or donBreakShort) and isShortTrend
+
+// --- Подтверждение ордер-флоу ---
+cvdConfirmLong = use_cvd ? (not na(cvdDelta) and cvdDelta > 0) : true
+cvdConfirmShort = use_cvd ? (not na(cvdDelta) and cvdDelta < 0) : true
+
+oiConfirmLong = use_oi ? (not na(oiDelta) and oiDelta > 0 and oiDeltaPct >= oi_delta_min_pct) : true
+oiConfirmShort = use_oi ? (not na(oiDelta) and oiDelta < 0 and oiDeltaPct >= oi_delta_min_pct) : true
+
+fundingOk = use_funding ? not fundOverheated : true
+fundingTimeOk = avoid_near_funding ? not nearFunding : true
+
+// --- Скоринг ---
+score = 0
+
+if sc_trend_ema200
+    score += (close > emaTrend ? 1 : 0) + (close < emaTrend ? 1 : 0)
+
+if sc_squeeze and squeezeWasActive
+    score += 1
+
+if sc_break_don
+    score += (donBreakLong or donBreakShort) ? 1 : 0
+
+if sc_cvd and use_cvd
+    score += ((cvdConfirmLong and triggerLong) or (cvdConfirmShort and triggerShort)) ? 1 : 0
+
+if sc_oi and use_oi
+    score += ((oiConfirmLong and triggerLong) or (oiConfirmShort and triggerShort)) ? 1 : 0
+
+if sc_funding_penalty and use_funding and fundOverheated
+    score -= 1
+
+if sc_near_funding_penalty and avoid_near_funding and nearFunding
+    score -= 1
+
+scoreOk = use_score ? score >= score_min : true
+
+// --- Финальные сигналы ---
+longSignal = triggerLong and cvdConfirmLong and oiConfirmLong and fundingOk and fundingTimeOk and scoreOk
+shortSignal = triggerShort and cvdConfirmShort and oiConfirmShort and fundingOk and fundingTimeOk and scoreOk
+
+// Фиксируем сигналы только на закрытии бара
+longSignalConfirmed = longSignal and barstate.isconfirmed
+shortSignalConfirmed = shortSignal and barstate.isconfirmed
+
+// ============================================================================
+// 4) ВЕДЕНИЕ СДЕЛКИ
+// ============================================================================
+
+// Структура сделки
+var string trade_dir = na  // "LONG" или "SHORT"
+var float trade_entry = na
+var float trade_sl = na
+var float trade_tp1 = na
+var float trade_tp2 = na
+var float trade_tp3 = na
+var int trade_open_bar = na
+var bool trade_active = false
+var bool tp1_hit = false
+var bool tp2_hit = false
+var bool tp3_hit = false
+var bool sl_moved_to_be = false
+var float trade_trail = na
+
+// Открытие новой сделки
+if (longSignalConfirmed or shortSignalConfirmed) and not trade_active
+    trade_dir := longSignalConfirmed ? "LONG" : "SHORT"
+    trade_open_bar := bar_index
+    trade_active := true
+    tp1_hit := false
+    tp2_hit := false
+    tp3_hit := false
+    sl_moved_to_be := false
+    trade_trail := na
+    
+    // Расчёт Entry
+    if entry_offset_ticks > 0
+        trade_entry := trade_dir == "LONG" ? 
+                       high + entry_offset_ticks * syminfo.mintick : 
+                       low - entry_offset_ticks * syminfo.mintick
+    else
+        trade_entry := close
+    
+    // Расчёт SL
+    if trade_dir == "LONG"
+        sl_base = math.min(low, ta.lowest(low, 3))
+        trade_sl := sl_base - sl_atr_mult * atr
+    else
+        sl_base = math.max(high, ta.highest(high, 3))
+        trade_sl := sl_base + sl_atr_mult * atr
+    
+    // Расчёт R и TP
+    R = math.abs(trade_entry - trade_sl)
+    sign_dir = trade_dir == "LONG" ? 1 : -1
+    
+    trade_tp1 := trade_entry + sign_dir * tp1_R * R
+    trade_tp2 := trade_entry + sign_dir * tp2_R * R
+    trade_tp3 := use_tp3 ? trade_entry + sign_dir * tp3_R * R : na
+
+// Управление активной сделкой
+if trade_active
+    bars_in_trade = bar_index - trade_open_bar
+    sign_dir = trade_dir == "LONG" ? 1 : -1
+    
+    // Проверка достижения уровней
+    if not tp1_hit
+        tp1_reached = trade_dir == "LONG" ? high >= trade_tp1 : low <= trade_tp1
+        if tp1_reached
+            tp1_hit := true
+            
+            // Перевод в BE
+            if move_to_be_after_tp1
+                trade_sl := trade_entry
+                sl_moved_to_be := true
+            
+            // Инициализация трейлинга
+            if trail_atr_mult > 0
+                trade_trail := trade_entry + sign_dir * trail_atr_mult * atr
+    
+    if not tp2_hit and tp1_hit
+        tp2_reached = trade_dir == "LONG" ? high >= trade_tp2 : low <= trade_tp2
+        if tp2_reached
+            tp2_hit := true
+    
+    if not tp3_hit and tp2_hit and use_tp3
+        tp3_reached = trade_dir == "LONG" ? high >= trade_tp3 : low <= trade_tp3
+        if tp3_reached
+            tp3_hit := true
+    
+    // Обновление трейлинга
+    if tp1_hit and trail_atr_mult > 0
+        new_trail = close + sign_dir * trail_atr_mult * atr
+        if trade_dir == "LONG"
+            trade_trail := math.max(nz(trade_trail, new_trail), new_trail)
+            trade_sl := math.max(trade_sl, trade_trail)
+        else
+            trade_trail := math.min(nz(trade_trail, new_trail), new_trail)
+            trade_sl := math.min(trade_sl, trade_trail)
+    
+    // Проверка SL
+    sl_hit = trade_dir == "LONG" ? low <= trade_sl : high >= trade_sl
+    
+    // Проверка инвалидации (до 0.5R)
+    R_current = math.abs(trade_entry - trade_sl)
+    R_progress = trade_dir == "LONG" ? 
+                 (close - trade_entry) / R_current : 
+                 (trade_entry - close) / R_current
+    
+    invalidated = false
+    if R_progress < 0.5
+        if trade_dir == "LONG" and close < emaMid
+            invalidated := true
+        if trade_dir == "SHORT" and close > emaMid
+            invalidated := true
+    
+    // Проверка тайм-аута
+    timeout = bars_in_trade >= max_bars_in_trade
+    
+    // Закрытие сделки
+    if sl_hit or invalidated or timeout or tp2_hit
+        trade_active := false
+        trade_dir := na
+        trade_entry := na
+        trade_sl := na
+        trade_tp1 := na
+        trade_tp2 := na
+        trade_tp3 := na
+        trade_trail := na
+
+// ============================================================================
+// 5) ВИЗУАЛИЗАЦИЯ
+// ============================================================================
+
+// --- EMA ---
+plot(show_ema ? emaFast : na, "EMA20", color.new(color.yellow, 0), 1)
+plot(show_ema ? emaMid : na, "EMA50", color.new(color.orange, 0), 2)
+plot(show_ema ? emaTrend : na, "EMA200", color.new(color.red, 0), 3)
+
+// --- VWAP ---
+plot(show_vwap_line and use_vwap ? vwapValue : na, "VWAP", color.new(color.blue, 0), 2)
+
+// --- Anchored VWAP ---
+plot(show_avwap_line and use_avwap ? avwapValue : na, "Anchored VWAP", color.new(color.purple, 0), 2)
+
+// --- Donchian ---
+plot(show_donchian ? donHigh : na, "Don High", color.new(color.green, 70), 1)
+plot(show_donchian ? donLow : na, "Don Low", color.new(color.red, 70), 1)
+
+// --- Bollinger ---
+plot(show_bb_kc ? bbU : na, "BB Upper", color.new(color.gray, 50), 1)
+plot(show_bb_kc ? bbL : na, "BB Lower", color.new(color.gray, 50), 1)
+
+// --- Keltner ---
+plot(show_bb_kc ? kcU : na, "KC Upper", color.new(color.aqua, 70), 1, plot.style_circles)
+plot(show_bb_kc ? kcL : na, "KC Lower", color.new(color.aqua, 70), 1, plot.style_circles)
+
+// --- Squeeze визуализация ---
+bgcolor(inSqueeze ? color.new(color.yellow, 90) : na, title="Squeeze BG")
+
+// --- Маркеры сигналов ---
+plotshape(show_entries and longSignalConfirmed, "Long Signal", shape.triangleup, 
+          location.belowbar, color.new(color.green, 0), size=size.small)
+plotshape(show_entries and shortSignalConfirmed, "Short Signal", shape.triangledown, 
+          location.abovebar, color.new(color.red, 0), size=size.small)
+
+// --- Уровни активной сделки ---
+entry_line = trade_active ? trade_entry : na
+sl_line = trade_active ? trade_sl : na
+tp1_line = trade_active ? trade_tp1 : na
+tp2_line = trade_active ? trade_tp2 : na
+tp3_line = trade_active and use_tp3 ? trade_tp3 : na
+
+plot(show_sl_tp ? entry_line : na, "Entry", color.new(color.blue, 0), 2, plot.style_linebr)
+plot(show_sl_tp ? sl_line : na, "SL", color.new(color.red, 0), 2, plot.style_linebr)
+plot(show_sl_tp ? tp1_line : na, "TP1", color.new(color.green, 0), 1, plot.style_linebr)
+plot(show_sl_tp ? tp2_line : na, "TP2", color.new(color.green, 30), 1, plot.style_linebr)
+plot(show_sl_tp ? tp3_line : na, "TP3", color.new(color.green, 60), 1, plot.style_linebr)
+
+// --- Метки ---
+if show_labels and trade_active and barstate.islast
+    label.new(bar_index, trade_entry, "E", 
+              style=label.style_circle, color=color.blue, textcolor=color.white, size=size.tiny)
+    label.new(bar_index, trade_sl, sl_moved_to_be ? "BE" : "SL", 
+              style=label.style_circle, color=color.red, textcolor=color.white, size=size.tiny)
+    label.new(bar_index, trade_tp1, "TP1", 
+              style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
+    label.new(bar_index, trade_tp2, "TP2", 
+              style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
+    if use_tp3 and not na(trade_tp3)
+        label.new(bar_index, trade_tp3, "TP3", 
+                  style=label.style_circle, color=color.green, textcolor=color.white, size=size.tiny)
+
+// ============================================================================
+// 6) ИНФО-ПАНЕЛЬ
+// ============================================================================
+
+if show_panel and barstate.islast
+    var table panel = table.new(position.top_right, 2, 15, border_width=1)
+    
+    // Заголовок
+    table.cell(panel, 0, 0, "15m Speculative Futures", text_color=color.white, bgcolor=color.new(color.blue, 30))
+    table.merge_cells(panel, 0, 0, 1, 0)
+    
+    // Статус сделки
+    status_text = trade_active ? trade_dir : "NO TRADE"
+    status_color = trade_active ? (trade_dir == "LONG" ? color.green : color.red) : color.gray
+    table.cell(panel, 0, 1, "Статус:", text_color=color.white)
+    table.cell(panel, 1, 1, status_text, text_color=color.white, bgcolor=color.new(status_color, 70))
+    
+    // Если есть активная сделка
+    if trade_active
+        R_current = math.abs(trade_entry - trade_sl)
+        R_progress = trade_dir == "LONG" ? 
+                     (close - trade_entry) / R_current : 
+                     (trade_entry - close) / R_current
+        
+        table.cell(panel, 0, 2, "Entry:", text_color=color.white)
+        table.cell(panel, 1, 2, str.tostring(trade_entry, format.mintick), text_color=color.white)
+        
+        table.cell(panel, 0, 3, "SL:", text_color=color.white)
+        table.cell(panel, 1, 3, str.tostring(trade_sl, format.mintick), text_color=color.white)
+        
+        table.cell(panel, 0, 4, "TP1:", text_color=color.white)
+        table.cell(panel, 1, 4, str.tostring(trade_tp1, format.mintick), text_color=color.white)
+        
+        table.cell(panel, 0, 5, "TP2:", text_color=color.white)
+        table.cell(panel, 1, 5, str.tostring(trade_tp2, format.mintick), text_color=color.white)
+        
+        table.cell(panel, 0, 6, "R Progress:", text_color=color.white)
+        r_text = str.tostring(R_progress, "#.##") + "R"
+        r_color = R_progress > 0 ? color.green : color.red
+        table.cell(panel, 1, 6, r_text, text_color=color.white, bgcolor=color.new(r_color, 70))
+        
+        table.cell(panel, 0, 7, "Bars in trade:", text_color=color.white)
+        table.cell(panel, 1, 7, str.tostring(bar_index - trade_open_bar), text_color=color.white)
+    
+    // Score информация
+    table.cell(panel, 0, 8, "Score:", text_color=color.white)
+    score_color = score >= score_min ? color.green : color.red
+    table.cell(panel, 1, 8, str.tostring(score), text_color=color.white, bgcolor=color.new(score_color, 70))
+    
+    // Факторы
+    row = 9
+    if use_cvd
+        cvd_text = na(cvdDelta) ? "n/a" : str.tostring(cvdDelta, "#.##")
+        table.cell(panel, 0, row, "CVD Δ:", text_color=color.white)
+        table.cell(panel, 1, row, cvd_text, text_color=color.white)
+        row += 1
+    
+    if use_oi
+        oi_text = na(oiDeltaPct) ? "n/a" : str.tostring(oiDeltaPct, "#.#") + "%"
+        table.cell(panel, 0, row, "OI Δ%:", text_color=color.white)
+        table.cell(panel, 1, row, oi_text, text_color=color.white)
+        row += 1
+    
+    if use_funding
+        fund_text = na(fund) ? "n/a" : str.tostring(fund * 100, "#.###") + "%"
+        fund_bg = fundOverheated ? color.new(color.red, 70) : color.new(color.gray, 90)
+        table.cell(panel, 0, row, "Funding:", text_color=color.white)
+        table.cell(panel, 1, row, fund_text, text_color=color.white, bgcolor=fund_bg)
+        row += 1
+    
+    // Флаги
+    if avoid_near_funding
+        near_text = nearFunding ? "YES" : "NO"
+        near_color = nearFunding ? color.red : color.green
+        table.cell(panel, 0, row, "Near Funding:", text_color=color.white)
+        table.cell(panel, 1, row, near_text, text_color=color.white, bgcolor=color.new(near_color, 70))
+        row += 1
+    
+    // Squeeze
+    sq_text = inSqueeze ? "ACTIVE (" + str.tostring(sq_count) + ")" : "NO"
+    sq_color = inSqueeze ? color.yellow : color.gray
+    table.cell(panel, 0, row, "Squeeze:", text_color=color.white)
+    table.cell(panel, 1, row, sq_text, text_color=color.white, bgcolor=color.new(sq_color, 70))
+
+// ============================================================================
+// 7) АЛЕРТЫ
+// ============================================================================
+
+// Long Signal
+alertcondition(longSignalConfirmed, "Long Signal", 
+    'Long Signal: {{ticker}} @ {{close}}, Score: ' + str.tostring(score))
+
+// Short Signal
+alertcondition(shortSignalConfirmed, "Short Signal", 
+    'Short Signal: {{ticker}} @ {{close}}, Score: ' + str.tostring(score))
+
+// TP1 Hit
+alertcondition(tp1_hit and tp1_hit[1] == false, "TP1 Hit", 
+    'TP1 Hit: {{ticker}} @ ' + str.tostring(trade_tp1))
+
+// TP2 Hit
+alertcondition(tp2_hit and tp2_hit[1] == false, "TP2 Hit", 
+    'TP2 Hit: {{ticker}} @ ' + str.tostring(trade_tp2))
+
+// TP3 Hit
+alertcondition(use_tp3 and tp3_hit and tp3_hit[1] == false, "TP3 Hit", 
+    'TP3 Hit: {{ticker}} @ ' + str.tostring(trade_tp3))
+
+// SL Hit
+alertcondition(trade_active[1] and not trade_active and (longSignalConfirmed[1] or shortSignalConfirmed[1]), 
+    "SL/Exit Hit", 'Stop/Exit Hit: {{ticker}}')
