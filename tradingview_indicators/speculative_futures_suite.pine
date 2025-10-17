@@ -34,31 +34,23 @@ sq_min_bars = input.int(3, "Минимум баров Squeeze", minval=1, group=
 
 // --- SCALP MODE ---
 scalp_mode = input.bool(true, "SCALP MODE", group="Scalp")
-
-default_fat_bar = profile == "Starter" ? 1.35 : (profile == "Balanced" ? 1.25 : 1.15)
-default_retest_tol = profile == "Starter" ? 12 : (profile == "Balanced" ? 10 : 8)
-default_retest_expire = profile == "Starter" ? 8 : 6
-
-fat_bar_k = input.float(default_fat_bar, "Fat Bar коэф. (range>k×ATR)", minval=0.5, group="Scalp")
+fat_bar_k = input.float(1.35, "Fat Bar коэф. (range>k×ATR)", minval=0.5, group="Scalp", tooltip="Starter:1.35, Balanced:1.25, Strict:1.15")
 retest_enable = input.bool(true, "Вход по ретесту", group="Scalp")
 retest_basis = input.string("Donchian", "Ретест базис", options=["Donchian", "VWAP", "EMAzone", "BBmid"], group="Scalp")
 retest_tol_mode = input.string("ticks", "Режим допуска", options=["ticks", "atr_pct"], group="Scalp")
-retest_tol_ticks = input.int(default_retest_tol, "Ретест допуск (тики)", minval=0, group="Scalp")
+retest_tol_ticks = input.int(12, "Ретест допуск (тики)", minval=0, group="Scalp", tooltip="Starter:12, Balanced:10, Strict:8")
 retest_tol_atr_pct = input.float(12.0, "Ретест допуск (% ATR)", minval=0, group="Scalp")
-retest_expire_bars = input.int(default_retest_expire, "Срок годности ретеста (баров)", minval=1, group="Scalp")
+retest_expire_bars = input.int(8, "Срок годности ретеста (баров)", minval=1, group="Scalp", tooltip="Starter:8, Balanced:6, Strict:6")
 
 // --- STOP LOGIC ---
-default_sl_min = profile == "Starter" ? 0.08 : (profile == "Balanced" ? 0.10 : 0.12)
-default_sl_max = profile == "Starter" ? 0.45 : (profile == "Balanced" ? 0.50 : 0.60)
-
 sl_mode = input.string("micro", "Режим стопа", options=["micro", "atr", "structure"], group="Stop")
 swing_lookback = input.int(3, "Swing lookback", minval=1, group="Stop")
 body_pad_ticks = input.int(2, "Body pad (тики)", minval=0, group="Stop")
 zone_pad_atr = input.float(0.4, "Zone pad (×ATR)", minval=0, group="Stop")
 atr_fast_len = input.int(7, "ATR Fast период", minval=1, group="Stop")
 atr_fast_mult = input.float(0.6, "ATR Fast множитель", minval=0.1, group="Stop")
-sl_min_pct = input.float(default_sl_min, "SL min %", minval=0.01, group="Stop")
-sl_max_pct = input.float(default_sl_max, "SL max %", minval=0.01, group="Stop")
+sl_min_pct = input.float(0.08, "SL min %", minval=0.01, group="Stop", tooltip="Starter:0.08, Balanced:0.10, Strict:0.12")
+sl_max_pct = input.float(0.45, "SL max %", minval=0.01, group="Stop", tooltip="Starter:0.45, Balanced:0.50, Strict:0.60")
 ema_gap_max_atr = input.float(1.0, "EMA gap max (×ATR)", minval=0, group="Stop")
 
 // --- TAKES/RUN ---
@@ -92,12 +84,8 @@ avoid_near_funding = input.bool(false, "Избегать окон фандинг
 minutes_around_funding = input.int(15, "Минут вокруг фандинга", minval=0, group="Деривативы")
 
 // --- Скоринг ---
-default_score_min = profile == "Starter" ? 1 : (profile == "Balanced" ? 2 : 3)
-default_funding_avoid = profile == "Starter" ? false : (profile == "Balanced" ? true : true)
-default_funding_window = profile == "Balanced" ? 10 : 15
-
 use_score = input.bool(true, "Использовать скоринг", group="Скоринг")
-score_min = input.int(default_score_min, "Минимальный Score", minval=0, group="Скоринг")
+score_min = input.int(1, "Минимальный Score", minval=0, group="Скоринг", tooltip="Starter:1, Balanced:2, Strict:3")
 sc_trend_ema200 = input.bool(true, "Score: EMA200 тренд (+1)", group="Скоринг")
 sc_squeeze = input.bool(true, "Score: Squeeze (+1)", group="Скоринг")
 sc_break_don = input.bool(true, "Score: Donchian пробой (+1)", group="Скоринг")
@@ -194,7 +182,8 @@ oi = use_oi and oi_symbol != "" ?
 
 oiDelta = use_oi and not na(oi) ? (oi - oi[1]) : na
 oiDeltaAbs = use_oi and not na(oiDelta) ? math.abs(oiDelta) : na
-oiMedian = use_oi and not na(oiDeltaAbs) ? ta.median(oiDeltaAbs, oi_median_len) : na
+oiMedianRaw = ta.median(oiDeltaAbs, oi_median_len)
+oiMedian = use_oi and not na(oiDeltaAbs) ? oiMedianRaw : na
 oiDeltaPct = use_oi and not na(oiMedian) and oiMedian > 0 ? (oiDeltaAbs / oiMedian) * 100 : 0.0
 
 // --- Funding ---
@@ -331,32 +320,36 @@ longSignalConfirmed = longSignal and barstate.isconfirmed
 shortSignalConfirmed = shortSignal and barstate.isconfirmed
 
 // --- Диагностика статусов (почему нет входа) ---
-var string long_status = "NO SETUP"
-var string short_status = "NO SETUP"
-
-if fat_bar
-    long_status := donBreakLong ? "FAT BAR" : long_status
-    short_status := donBreakShort ? "FAT BAR" : short_status
-else if too_far_from_ema
-    long_status := donBreakLong ? "FAR FROM EMA" : long_status
-    short_status := donBreakShort ? "FAR FROM EMA" : short_status
-else if armed_long
-    bars_left = retest_expire_bars - (bar_index - armed_long_bar)
-    long_status := "ARMED (" + str.tostring(bars_left) + ")"
-else if armed_short
-    bars_left_s = retest_expire_bars - (bar_index - armed_short_bar)
-    short_status := "ARMED (" + str.tostring(bars_left_s) + ")"
+long_status = "NO SETUP"
+short_status = "NO SETUP"
 
 if longSignalConfirmed or retest_long_hit
     long_status := "HIT"
+else if not scoreOk and triggerLong
+    long_status := "SCORE LOW (" + str.tostring(score) + "/" + str.tostring(score_min) + ")"
+else if armed_long
+    bars_left = retest_expire_bars - (bar_index - armed_long_bar)
+    long_status := "ARMED (" + str.tostring(bars_left) + ")"
+else if fat_bar and donBreakLong
+    long_status := "FAT BAR"
+else if too_far_from_ema and donBreakLong
+    long_status := "FAR FROM EMA"
+else if donBreakLong
+    long_status := "READY"
+
 if shortSignalConfirmed or retest_short_hit
     short_status := "HIT"
-
-if not scoreOk and (triggerLong or triggerShort)
-    if triggerLong
-        long_status := "SCORE LOW (" + str.tostring(score) + "/" + str.tostring(score_min) + ")"
-    if triggerShort
-        short_status := "SCORE LOW (" + str.tostring(score) + "/" + str.tostring(score_min) + ")"
+else if not scoreOk and triggerShort
+    short_status := "SCORE LOW (" + str.tostring(score) + "/" + str.tostring(score_min) + ")"
+else if armed_short
+    bars_left_s = retest_expire_bars - (bar_index - armed_short_bar)
+    short_status := "ARMED (" + str.tostring(bars_left_s) + ")"
+else if fat_bar and donBreakShort
+    short_status := "FAT BAR"
+else if too_far_from_ema and donBreakShort
+    short_status := "FAR FROM EMA"
+else if donBreakShort
+    short_status := "READY"
 
 // ============================================================================
 // 4) ВЕДЕНИЕ СДЕЛКИ (SCALP MODE)
