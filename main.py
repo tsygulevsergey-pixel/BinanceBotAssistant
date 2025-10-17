@@ -939,10 +939,17 @@ class TradingBot:
         )
         
         signals_found = 0
+        symbols_analyzed = 0
+        symbols_blocked = 0
+        
         for symbol in symbols_to_check:
             # Пропускаем символы с активными сигналами ACTION PRICE
             if symbol in self.symbols_blocked_action_price:
+                symbols_blocked += 1
+                ap_logger.debug(f"{symbol} - Blocked (active AP signal)")
                 continue
+            
+            symbols_analyzed += 1
             
             try:
                 # Загрузить данные для всех необходимых таймфреймов
@@ -951,12 +958,8 @@ class TradingBot:
                     limits = {'15m': 500, '1h': 500, '4h': 500, '1d': 200}
                     df = self.data_loader.get_candles(symbol, tf, limit=limits.get(tf, 200))
                     if df is not None and len(df) > 0:
-                        # КРИТИЧНО: Исключить последнюю свечу (может быть незакрытой)
-                        # Бот анализирует индексы -2 (инициатор) и -1 (подтверждение)
-                        # Если в БД попала текущая незакрытая свеча, она будет на индексе -1
-                        # Исключаем её, чтобы анализировать только закрытые свечи
-                        if len(df) > 2:
-                            df = df.iloc[:-1].copy()  # Убрать последнюю свечу
+                        # DataLoader уже фильтрует незакрытые свечи (close_time > now)
+                        # Поэтому все свечи в df - ЗАКРЫТЫЕ, дополнительная фильтрация НЕ нужна
                         timeframe_data[tf] = df
                 
                 # Требуем минимум 15m и 1h данные (4h и 1d опциональны)
@@ -1005,8 +1008,14 @@ class TradingBot:
             
             await asyncio.sleep(0.05)
         
-        if signals_found > 0:
-            ap_logger.info(f"🎯 Action Price analysis complete: {signals_found} signals found")
+        # Всегда логировать итоги анализа
+        ap_logger.info(
+            f"🎯 Action Price analysis complete:\n"
+            f"  📊 Total symbols: {len(symbols_to_check)}\n"
+            f"  🔍 Analyzed: {symbols_analyzed}\n"
+            f"  🚫 Blocked: {symbols_blocked}\n"
+            f"  ✅ Signals found: {signals_found}"
+        )
     
     async def _fast_catchup_phase(self):
         """FAST CATCHUP: Быстрая параллельная догрузка gaps для existing symbols"""

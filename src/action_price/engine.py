@@ -75,6 +75,7 @@ class ActionPriceEngine:
             return None
         
         if len(df) < 250:  # Нужно минимум для EMA200
+            logger.debug(f"{symbol} - Insufficient data: {len(df)} bars < 250")
             return None
         
         # КРИТИЧНО: Валидация и подготовка датафрейма
@@ -92,11 +93,13 @@ class ActionPriceEngine:
         # Рассчитать индикаторы
         indicators = self._calculate_indicators(df)
         if indicators is None:
+            logger.debug(f"{symbol} - Failed to calculate indicators")
             return None
         
         # Определить инициатор и подтверждение
         pattern_result = self._detect_body_cross_pattern(df, indicators)
         if pattern_result is None:
+            logger.debug(f"{symbol} - No EMA200 Body Cross pattern detected")
             return None
         
         direction, initiator_idx, confirm_idx = pattern_result
@@ -122,7 +125,7 @@ class ActionPriceEngine:
         # Определить режим (STANDARD/SCALP/SKIP)
         mode = self._determine_mode(score_total)
         if mode == 'SKIP':
-            logger.debug(f"{symbol} - Score {score_total:.1f} → SKIP")
+            logger.debug(f"{symbol} - Score {score_total:.1f} → SKIP (below threshold)")
             return None
         
         # Рассчитать SL/TP уровни (НОВАЯ ЛОГИКА: Entry через REST API)
@@ -131,7 +134,10 @@ class ActionPriceEngine:
         )
         
         if levels is None:
+            logger.debug(f"{symbol} - Failed to calculate SL/TP levels")
             return None
+        
+        logger.debug(f"{symbol} - ✅ Signal generated: {direction} {mode} (score: {score_total:.1f})")
         
         # Собрать все метрики для JSONL лога
         signal_data = self._build_signal_data(
