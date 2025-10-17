@@ -1,0 +1,224 @@
+EvreyBotAI, [17.10.2025 10:27]
+⚠️ Data Integrity Alert
+
+📊 Symbol: DUSKUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:27]
+⚠️ Data Integrity Alert
+
+📊 Symbol: DOGSUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:28]
+⚠️ Data Integrity Alert
+
+📊 Symbol: AUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:29]
+⚠️ Data Integrity Alert
+
+📊 Symbol: QTUMUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:30]
+⚠️ Data Integrity Alert
+
+📊 Symbol: SKATEUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:30]
+⚠️ Data Integrity Alert
+
+📊 Symbol: BANANAS31USDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:31]
+⚠️ Data Integrity Alert
+
+📊 Symbol: SUNUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:31]
+⚠️ Data Integrity Alert
+
+📊 Symbol: SAGAUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:32]
+⚠️ Data Integrity Alert
+
+📊 Symbol: ZILUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:32]
+⚠️ Data Integrity Alert
+
+📊 Symbol: MASKUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:33]
+⚠️ Data Integrity Alert
+
+📊 Symbol: ROSEUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:33]
+⚠️ Data Integrity Alert
+
+📊 Symbol: SOLVUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:34]
+⚠️ Data Integrity Alert
+
+📊 Symbol: NILUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:34]
+⚠️ Data Integrity Alert
+
+📊 Symbol: NXPCUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 10:34]
+⚠️ Data Integrity Alert
+
+📊 Symbol: BDXNUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: LAYERUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: XVGUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: BABYUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: BIGTIMEUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: USUALUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: SOPHUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:35]
+⚠️ Data Integrity Alert
+
+📊 Symbol: HFTUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:36]
+⚠️ Data Integrity Alert
+
+📊 Symbol: 1INCHUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:37]
+⚠️ Data Integrity Alert
+
+📊 Symbol: RESOLVUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
+
+EvreyBotAI, [17.10.2025 11:37]
+⚠️ Data Integrity Alert
+
+📊 Symbol: QNTUSDT
+🔍 Issue: incomplete
+📝 Details: Data completeness below 99% (auto-refill failed)
+
+⚠️ Trading on this symbol may be affected
