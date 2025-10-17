@@ -525,24 +525,24 @@ if show_panel and barstate.islast
 
 // Long Signal
 alertcondition(longSignalConfirmed, "Long Signal", 
-    'Long Signal: {{ticker}} @ {{close}}, Score: ' + str.tostring(score))
+    "Long Signal: {{ticker}} @ {{close}} on {{interval}}")
 
 // Short Signal
 alertcondition(shortSignalConfirmed, "Short Signal", 
-    'Short Signal: {{ticker}} @ {{close}}, Score: ' + str.tostring(score))
+    "Short Signal: {{ticker}} @ {{close}} on {{interval}}")
 
 // TP1 Hit
-alertcondition(tp1_hit and tp1_hit[1] == false, "TP1 Hit", 
-    'TP1 Hit: {{ticker}} @ ' + str.tostring(trade_tp1))
+alertcondition(tp1_hit and not tp1_hit[1], "TP1 Hit", 
+    "TP1 Hit: {{ticker}} on {{interval}}")
 
 // TP2 Hit
-alertcondition(tp2_hit and tp2_hit[1] == false, "TP2 Hit", 
-    'TP2 Hit: {{ticker}} @ ' + str.tostring(trade_tp2))
+alertcondition(tp2_hit and not tp2_hit[1], "TP2 Hit", 
+    "TP2 Hit: {{ticker}} on {{interval}}")
 
 // TP3 Hit
-alertcondition(use_tp3 and tp3_hit and tp3_hit[1] == false, "TP3 Hit", 
-    'TP3 Hit: {{ticker}} @ ' + str.tostring(trade_tp3))
+alertcondition(use_tp3 and tp3_hit and not tp3_hit[1], "TP3 Hit", 
+    "TP3 Hit: {{ticker}} on {{interval}}")
 
 // SL Hit
-alertcondition(trade_active[1] and not trade_active and (longSignalConfirmed[1] or shortSignalConfirmed[1]), 
-    "SL/Exit Hit", 'Stop/Exit Hit: {{ticker}}')
+alertcondition(trade_active[1] and not trade_active, "SL/Exit Hit", 
+    "Stop/Exit Hit: {{ticker}} on {{interval}}")
