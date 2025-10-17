@@ -13,6 +13,9 @@ tf_main = input.string("", "Основной таймфрейм", tooltip="Пу�
 src = input.source(hlc3, "Источник цены")
 show_panel = input.bool(true, "Показать инфо-панель")
 
+// --- ПРОФИЛЬ ЧУВСТВИТЕЛЬНОСТИ ---
+profile = input.string("Starter", "Профиль", options=["Starter", "Balanced", "Strict"], group="Профиль", tooltip="Starter: больше сигналов, Strict: строже фильтры")
+
 // --- Тренд/контекст ---
 ema_fast_len = input.int(20, "EMA Fast", minval=1, group="Тренд")
 ema_mid_len = input.int(50, "EMA Mid", minval=1, group="Тренд")
@@ -31,21 +34,31 @@ sq_min_bars = input.int(3, "Минимум баров Squeeze", minval=1, group=
 
 // --- SCALP MODE ---
 scalp_mode = input.bool(true, "SCALP MODE", group="Scalp")
-fat_bar_k = input.float(1.2, "Fat Bar коэф. (range>k×ATR)", minval=0.5, group="Scalp")
+
+default_fat_bar = profile == "Starter" ? 1.35 : (profile == "Balanced" ? 1.25 : 1.15)
+default_retest_tol = profile == "Starter" ? 12 : (profile == "Balanced" ? 10 : 8)
+default_retest_expire = profile == "Starter" ? 8 : 6
+
+fat_bar_k = input.float(default_fat_bar, "Fat Bar коэф. (range>k×ATR)", minval=0.5, group="Scalp")
 retest_enable = input.bool(true, "Вход по ретесту", group="Scalp")
 retest_basis = input.string("Donchian", "Ретест базис", options=["Donchian", "VWAP", "EMAzone", "BBmid"], group="Scalp")
-retest_tol_ticks = input.int(10, "Ретест допуск (тики)", minval=0, group="Scalp")
-retest_expire_bars = input.int(6, "Срок годности ретеста (баров)", minval=1, group="Scalp")
+retest_tol_mode = input.string("ticks", "Режим допуска", options=["ticks", "atr_pct"], group="Scalp")
+retest_tol_ticks = input.int(default_retest_tol, "Ретест допуск (тики)", minval=0, group="Scalp")
+retest_tol_atr_pct = input.float(12.0, "Ретест допуск (% ATR)", minval=0, group="Scalp")
+retest_expire_bars = input.int(default_retest_expire, "Срок годности ретеста (баров)", minval=1, group="Scalp")
 
 // --- STOP LOGIC ---
+default_sl_min = profile == "Starter" ? 0.08 : (profile == "Balanced" ? 0.10 : 0.12)
+default_sl_max = profile == "Starter" ? 0.45 : (profile == "Balanced" ? 0.50 : 0.60)
+
 sl_mode = input.string("micro", "Режим стопа", options=["micro", "atr", "structure"], group="Stop")
 swing_lookback = input.int(3, "Swing lookback", minval=1, group="Stop")
 body_pad_ticks = input.int(2, "Body pad (тики)", minval=0, group="Stop")
 zone_pad_atr = input.float(0.4, "Zone pad (×ATR)", minval=0, group="Stop")
 atr_fast_len = input.int(7, "ATR Fast период", minval=1, group="Stop")
 atr_fast_mult = input.float(0.6, "ATR Fast множитель", minval=0.1, group="Stop")
-sl_min_pct = input.float(0.10, "SL min %", minval=0.01, group="Stop")
-sl_max_pct = input.float(0.60, "SL max %", minval=0.01, group="Stop")
+sl_min_pct = input.float(default_sl_min, "SL min %", minval=0.01, group="Stop")
+sl_max_pct = input.float(default_sl_max, "SL max %", minval=0.01, group="Stop")
 ema_gap_max_atr = input.float(1.0, "EMA gap max (×ATR)", minval=0, group="Stop")
 
 // --- TAKES/RUN ---
@@ -79,8 +92,12 @@ avoid_near_funding = input.bool(false, "Избегать окон фандинг
 minutes_around_funding = input.int(15, "Минут вокруг фандинга", minval=0, group="Деривативы")
 
 // --- Скоринг ---
+default_score_min = profile == "Starter" ? 1 : (profile == "Balanced" ? 2 : 3)
+default_funding_avoid = profile == "Starter" ? false : (profile == "Balanced" ? true : true)
+default_funding_window = profile == "Balanced" ? 10 : 15
+
 use_score = input.bool(true, "Использовать скоринг", group="Скоринг")
-score_min = input.int(3, "Минимальный Score", minval=0, group="Скоринг")
+score_min = input.int(default_score_min, "Минимальный Score", minval=0, group="Скоринг")
 sc_trend_ema200 = input.bool(true, "Score: EMA200 тренд (+1)", group="Скоринг")
 sc_squeeze = input.bool(true, "Score: Squeeze (+1)", group="Скоринг")
 sc_break_don = input.bool(true, "Score: Donchian пробой (+1)", group="Скоринг")
@@ -246,7 +263,9 @@ if donBreakShort and retest_enable
                            retest_basis == "BBmid" ? bbBasis : 
                            math.avg(emaFast, emaMid)
 
-retest_tol = retest_tol_ticks * syminfo.mintick
+retest_tol = retest_tol_mode == "ticks" ? 
+             retest_tol_ticks * syminfo.mintick : 
+             (retest_tol_atr_pct / 100.0) * atr
 
 retest_long_hit = armed_long and (low <= trigger_long_level + retest_tol)
 retest_short_hit = armed_short and (high >= trigger_short_level - retest_tol)
@@ -267,17 +286,17 @@ if retest_short_hit
 triggerLong = retest_enable ? retest_long_hit : donBreakLong
 triggerShort = retest_enable ? retest_short_hit : donBreakShort
 
-// --- Подтверждение ордер-флоу ---
-cvdConfirmLong = use_cvd ? (not na(cvdDelta) and cvdDelta > 0) : true
-cvdConfirmShort = use_cvd ? (not na(cvdDelta) and cvdDelta < 0) : true
+// --- Мягкие деривативные фильтры (не блокируют, дают бонус к score) ---
+cvdBonusLong = use_cvd and not na(cvdDelta) and cvdDelta > 0
+cvdBonusShort = use_cvd and not na(cvdDelta) and cvdDelta < 0
 
-oiConfirmLong = use_oi ? (not na(oiDelta) and oiDelta > 0 and oiDeltaPct >= oi_delta_min_pct) : true
-oiConfirmShort = use_oi ? (not na(oiDelta) and oiDelta < 0 and oiDeltaPct >= oi_delta_min_pct) : true
+oiBonusLong = use_oi and not na(oiDelta) and oiDelta > 0 and oiDeltaPct >= oi_delta_min_pct
+oiBonusShort = use_oi and not na(oiDelta) and oiDelta < 0 and oiDeltaPct >= oi_delta_min_pct
 
-fundingOk = use_funding ? not fundOverheated : true
-fundingTimeOk = avoid_near_funding ? not nearFunding : true
+fundingPenalty = use_funding and fundOverheated
+fundingTimePenalty = avoid_near_funding and nearFunding
 
-// --- Скоринг ---
+// --- Скоринг (мягкие фильтры) ---
 score = 0
 
 if sc_trend_ema200
@@ -289,27 +308,55 @@ if sc_squeeze and inSqueeze
 if sc_break_don
     score += (donBreakLong or donBreakShort) ? 1 : 0
 
-if sc_cvd and use_cvd
-    score += ((cvdConfirmLong and triggerLong) or (cvdConfirmShort and triggerShort)) ? 1 : 0
+if sc_cvd
+    score += ((cvdBonusLong and triggerLong) or (cvdBonusShort and triggerShort)) ? 1 : 0
 
-if sc_oi and use_oi
-    score += ((oiConfirmLong and triggerLong) or (oiConfirmShort and triggerShort)) ? 1 : 0
+if sc_oi
+    score += ((oiBonusLong and triggerLong) or (oiBonusShort and triggerShort)) ? 1 : 0
 
-if sc_funding_penalty and use_funding and fundOverheated
+if sc_funding_penalty and fundingPenalty
     score -= 1
 
-if sc_near_funding_penalty and avoid_near_funding and nearFunding
+if sc_near_funding_penalty and fundingTimePenalty
     score -= 1
 
 scoreOk = use_score ? score >= score_min : true
 
-// --- Финальные сигналы ---
-longSignal = triggerLong and cvdConfirmLong and oiConfirmLong and fundingOk and fundingTimeOk and scoreOk
-shortSignal = triggerShort and cvdConfirmShort and oiConfirmShort and fundingOk and fundingTimeOk and scoreOk
+// --- Финальные сигналы (убраны жесткие блокировки CVD/OI/Funding) ---
+longSignal = triggerLong and scoreOk
+shortSignal = triggerShort and scoreOk
 
 // Фиксируем сигналы только на закрытии бара
 longSignalConfirmed = longSignal and barstate.isconfirmed
 shortSignalConfirmed = shortSignal and barstate.isconfirmed
+
+// --- Диагностика статусов (почему нет входа) ---
+var string long_status = "NO SETUP"
+var string short_status = "NO SETUP"
+
+if fat_bar
+    long_status := donBreakLong ? "FAT BAR" : long_status
+    short_status := donBreakShort ? "FAT BAR" : short_status
+else if too_far_from_ema
+    long_status := donBreakLong ? "FAR FROM EMA" : long_status
+    short_status := donBreakShort ? "FAR FROM EMA" : short_status
+else if armed_long
+    bars_left = retest_expire_bars - (bar_index - armed_long_bar)
+    long_status := "ARMED (" + str.tostring(bars_left) + ")"
+else if armed_short
+    bars_left_s = retest_expire_bars - (bar_index - armed_short_bar)
+    short_status := "ARMED (" + str.tostring(bars_left_s) + ")"
+
+if longSignalConfirmed or retest_long_hit
+    long_status := "HIT"
+if shortSignalConfirmed or retest_short_hit
+    short_status := "HIT"
+
+if not scoreOk and (triggerLong or triggerShort)
+    if triggerLong
+        long_status := "SCORE LOW (" + str.tostring(score) + "/" + str.tostring(score_min) + ")"
+    if triggerShort
+        short_status := "SCORE LOW (" + str.tostring(score) + "/" + str.tostring(score_min) + ")"
 
 // ============================================================================
 // 4) ВЕДЕНИЕ СДЕЛКИ (SCALP MODE)
@@ -544,75 +591,80 @@ if show_labels and trade_active and barstate.islast
 // ============================================================================
 
 if show_panel and barstate.islast
-    var table panel = table.new(position.top_right, 2, 15, border_width=1)
+    var table panel = table.new(position.top_right, 2, 25, border_width=1)
     
     // Заголовок
-    table.cell(panel, 0, 0, "15m Speculative Futures", text_color=color.white, bgcolor=color.new(color.blue, 30))
+    profile_short = profile == "Starter" ? "START" : (profile == "Balanced" ? "BAL" : "STRICT")
+    table.cell(panel, 0, 0, "Scalp Suite [" + profile_short + "]", text_color=color.white, bgcolor=color.new(color.blue, 30))
     table.merge_cells(panel, 0, 0, 1, 0)
+    
+    // Диагностика Long/Short
+    table.cell(panel, 0, 1, "Long:", text_color=color.white)
+    long_color = long_status == "HIT" ? color.green : (str.contains(long_status, "ARMED") ? color.yellow : color.gray)
+    table.cell(panel, 1, 1, long_status, text_color=color.white, bgcolor=color.new(long_color, 70))
+    
+    table.cell(panel, 0, 2, "Short:", text_color=color.white)
+    short_color = short_status == "HIT" ? color.red : (str.contains(short_status, "ARMED") ? color.yellow : color.gray)
+    table.cell(panel, 1, 2, short_status, text_color=color.white, bgcolor=color.new(short_color, 70))
     
     // Статус сделки
     status_text = trade_active ? trade_dir : "NO TRADE"
     status_color = trade_active ? (trade_dir == "LONG" ? color.green : color.red) : color.gray
-    table.cell(panel, 0, 1, "Статус:", text_color=color.white)
-    table.cell(panel, 1, 1, status_text, text_color=color.white, bgcolor=color.new(status_color, 70))
+    table.cell(panel, 0, 3, "Позиция:", text_color=color.white)
+    table.cell(panel, 1, 3, status_text, text_color=color.white, bgcolor=color.new(status_color, 70))
     
-    // ATR Fast
-    table.cell(panel, 0, 2, "ATR(7):", text_color=color.white)
-    table.cell(panel, 1, 2, str.tostring(atr_fast, format.mintick), text_color=color.white)
+    // ATR Fast & Score
+    table.cell(panel, 0, 4, "ATR(7):", text_color=color.white)
+    table.cell(panel, 1, 4, str.tostring(atr_fast, format.mintick), text_color=color.white)
+    
+    table.cell(panel, 0, 5, "Score:", text_color=color.white)
+    score_text = str.tostring(score) + "/" + str.tostring(score_min)
+    score_color_val = score >= score_min ? color.green : color.red
+    table.cell(panel, 1, 5, score_text, text_color=color.white, bgcolor=color.new(score_color_val, 70))
     
     // Fat Bar флаг
-    table.cell(panel, 0, 3, "Fat Bar:", text_color=color.white)
+    table.cell(panel, 0, 6, "Fat Bar:", text_color=color.white)
     fat_text = fat_bar ? "YES" : "NO"
     fat_color = fat_bar ? color.red : color.green
-    table.cell(panel, 1, 3, fat_text, text_color=color.white, bgcolor=color.new(fat_color, 70))
-    
-    // Retest Status
-    if retest_enable
-        retest_status = armed_long ? "ARMED LONG" : (armed_short ? "ARMED SHORT" : "READY")
-        retest_color = (armed_long or armed_short) ? color.yellow : color.gray
-        table.cell(panel, 0, 4, "Retest:", text_color=color.white)
-        table.cell(panel, 1, 4, retest_status, text_color=color.white, bgcolor=color.new(retest_color, 70))
+    table.cell(panel, 1, 6, fat_text, text_color=color.white, bgcolor=color.new(fat_color, 70))
     
     // Если есть активная сделка
+    row = 7
     if trade_active
         R_current = math.abs(trade_entry - trade_sl)
         R_progress = trade_dir == "LONG" ? 
                      (close - trade_entry) / R_current : 
                      (trade_entry - close) / R_current
         
-        table.cell(panel, 0, 5, "Entry:", text_color=color.white)
-        table.cell(panel, 1, 5, str.tostring(trade_entry, format.mintick), text_color=color.white)
+        table.cell(panel, 0, row, "Entry:", text_color=color.white)
+        table.cell(panel, 1, row, str.tostring(trade_entry, format.mintick), text_color=color.white)
+        row += 1
         
-        table.cell(panel, 0, 6, "SL:", text_color=color.white)
-        table.cell(panel, 1, 6, str.tostring(trade_sl, format.mintick), text_color=color.white)
+        table.cell(panel, 0, row, "SL:", text_color=color.white)
+        table.cell(panel, 1, row, str.tostring(trade_sl, format.mintick), text_color=color.white)
+        row += 1
         
-        table.cell(panel, 0, 7, "Stop %:", text_color=color.white)
-        table.cell(panel, 1, 7, str.tostring(stop_pct, "#.##") + "%", text_color=color.white)
+        table.cell(panel, 0, row, "Stop %:", text_color=color.white)
+        table.cell(panel, 1, row, str.tostring(stop_pct, "#.##") + "%", text_color=color.white)
+        row += 1
         
-        table.cell(panel, 0, 8, "TP0:", text_color=color.white)
-        table.cell(panel, 1, 8, str.tostring(trade_tp0, format.mintick), text_color=color.white)
+        table.cell(panel, 0, row, "TP0→TP2:", text_color=color.white)
+        tp_marks = (tp0_hit ? "✓" : "○") + " " + (tp1_hit ? "✓" : "○") + " " + (tp2_hit ? "✓" : "○")
+        table.cell(panel, 1, row, tp_marks, text_color=color.white)
+        row += 1
         
-        table.cell(panel, 0, 9, "TP1:", text_color=color.white)
-        table.cell(panel, 1, 9, str.tostring(trade_tp1, format.mintick), text_color=color.white)
-        
-        table.cell(panel, 0, 10, "TP2:", text_color=color.white)
-        table.cell(panel, 1, 10, str.tostring(trade_tp2, format.mintick), text_color=color.white)
-        
-        table.cell(panel, 0, 11, "R now:", text_color=color.white)
+        table.cell(panel, 0, row, "R now:", text_color=color.white)
         r_text = str.tostring(R_progress, "#.##") + "R"
         r_color = R_progress > 0 ? color.green : color.red
-        table.cell(panel, 1, 11, r_text, text_color=color.white, bgcolor=color.new(r_color, 70))
+        table.cell(panel, 1, row, r_text, text_color=color.white, bgcolor=color.new(r_color, 70))
+        row += 1
         
-        table.cell(panel, 0, 12, "Bars:", text_color=color.white)
-        table.cell(panel, 1, 12, str.tostring(bar_index - trade_open_bar), text_color=color.white)
-    
-    // Score информация
-    table.cell(panel, 0, 13, "Score:", text_color=color.white)
-    score_color = score >= score_min ? color.green : color.red
-    table.cell(panel, 1, 13, str.tostring(score), text_color=color.white, bgcolor=color.new(score_color, 70))
+        table.cell(panel, 0, row, "Bars:", text_color=color.white)
+        bars_text = str.tostring(bar_index - trade_open_bar) + "/" + str.tostring(max_bars_in_trade)
+        table.cell(panel, 1, row, bars_text, text_color=color.white)
+        row += 1
     
     // Факторы
-    row = 14
     if use_cvd
         cvd_text = na(cvdDelta) ? "n/a" : str.tostring(cvdDelta, "#.##")
         table.cell(panel, 0, row, "CVD Δ:", text_color=color.white)
