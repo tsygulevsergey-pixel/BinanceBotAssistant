@@ -320,6 +320,47 @@ class DataLoader:
         finally:
             session.close()
     
+    def _is_missing_only_current_day(self, symbol: str, existing_count: int, expected_count: int) -> bool:
+        """Check if missing candle is only the current unclosed daily candle
+        
+        For 1d timeframe, if we expect 90 candles but only have 89, check if the missing
+        one is today's candle (which hasn't closed yet at 00:00 UTC).
+        
+        Args:
+            symbol: Trading symbol
+            existing_count: Actual candles in DB
+            expected_count: Expected candles for 90 days
+            
+        Returns:
+            bool: True if only missing today's unclosed candle (normal situation)
+        """
+        if expected_count - existing_count != 1:
+            return False
+        
+        session = db.get_session()
+        try:
+            last_candle = session.query(Candle).filter(
+                Candle.symbol == symbol,
+                Candle.timeframe == '1d'
+            ).order_by(Candle.open_time.desc()).first()
+            
+            if not last_candle:
+                return False
+            
+            now = datetime.now(pytz.UTC)
+            last_candle_time = last_candle.open_time if last_candle.open_time.tzinfo else pytz.UTC.localize(last_candle.open_time)
+            
+            today_candle_start = datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=pytz.UTC)
+            yesterday_candle_start = today_candle_start - timedelta(days=1)
+            
+            if last_candle_time.date() == yesterday_candle_start.date():
+                logger.debug(f"{symbol} 1d: missing only today's candle (normal, day not closed yet)")
+                return True
+            
+            return False
+        finally:
+            session.close()
+    
     def is_symbol_data_complete(self, symbol: str) -> bool:
         """Check if symbol has complete data for all required timeframes
         
@@ -339,6 +380,11 @@ class DataLoader:
             # Raised threshold from 95% to 99% for better data quality
             if existing_count < expected_count * 0.99:
                 coverage = (existing_count / expected_count * 100) if expected_count > 0 else 0
+                
+                if interval == '1d' and self._is_missing_only_current_day(symbol, existing_count, expected_count):
+                    logger.debug(f"{symbol} {interval}: {coverage:.1f}% coverage ({existing_count}/{expected_count} candles) - OK (current day not closed)")
+                    continue
+                
                 logger.warning(f"{symbol} {interval}: incomplete data ({coverage:.1f}% coverage, {existing_count}/{expected_count} candles)")
                 return False
         

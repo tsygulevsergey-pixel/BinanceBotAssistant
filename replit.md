@@ -82,7 +82,7 @@ Preferred communication style: Simple, everyday language.
 - **Loader Task**: Loads historical data, retries on failure, pushes symbols to a queue.
 - **Analyzer Task**: Consumes symbols from the queue for immediate analysis.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list.
-- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts.
+- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts. **Smart 1d Completeness Check (Oct 17, 2025)**: Fixed false alerts for 1d timeframe by intelligently detecting when only today's unclosed candle is missing (89/90 candles = 98.9%). System now checks if last candle is yesterday's, skipping alert if current day hasn't closed yet at 00:00 UTC. Eliminates false positives from Auto-Update Task and Periodic Gap Refill checks.
 
 ## Data Flow
 The system initializes by loading configurations, connecting to Binance, starting parallel loader/analyzer tasks, and launching the Telegram bot. Data is loaded in parallel for immediate analysis. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, running strategies, scoring signals, applying filters, and sending Telegram alerts. Persistence includes storing candles/trades in SQLite and logging signals.
