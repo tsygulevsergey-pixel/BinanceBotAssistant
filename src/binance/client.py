@@ -287,7 +287,13 @@ class BinanceClient:
                         logger.error(f"❌ OI History failed {response.status} for {symbol}: {await response.text()}")
                     response.raise_for_status()
                     data = await response.json()
-                    logger.debug(f"✅ OI History OK for {symbol}: {len(data) if data else 0} records")
+                    
+                    # КРИТИЧНО: INFO логирование для диагностики
+                    if not data or len(data) == 0:
+                        logger.warning(f"⚠️ OI History EMPTY for {symbol} (period={period}, limit={limit})")
+                    else:
+                        logger.info(f"✅ OI History OK for {symbol}: {len(data)} records")
+                    
                     return data
             except Exception as e:
                 logger.error(f"❌ OI History request failed for {symbol}: {e}")
