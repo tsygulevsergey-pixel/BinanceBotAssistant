@@ -434,8 +434,8 @@ class TradingBot:
             # Найти самое раннее закрытие
             next_candle_close = min(next_15m, next_1h, next_4h, next_1d)
             
-            # Добавить 31 секунду задержки для стабилизации данных Binance
-            target_time = next_candle_close + timedelta(seconds=31)
+            # Добавить 6 секунд задержки для стабилизации данных Binance (1-3s обработка + 3s запас)
+            target_time = next_candle_close + timedelta(seconds=6)
             
             # Вычислить время ожидания
             wait_seconds = (target_time - current_time).total_seconds()
@@ -454,7 +454,7 @@ class TradingBot:
             if wait_seconds > 0:
                 logger.info(
                     f"⏰ Next candle close: {', '.join(closing_tfs)} at {next_candle_close.strftime('%H:%M UTC')} "
-                    f"(+31s = {target_time.strftime('%H:%M:%S')}) | Waiting {wait_seconds:.0f}s"
+                    f"(+6s = {target_time.strftime('%H:%M:%S')}) | Waiting {wait_seconds:.0f}s"
                 )
                 
                 # Ждать до target_time, но показывать статус каждые 60 секунд
@@ -598,13 +598,6 @@ class TradingBot:
             return
         
         logger.info(f"🕯️  Candles closed: {', '.join(updated_timeframes)} - checking strategies")
-        
-        # ЗАДЕРЖКА 31 сек после закрытия ЛЮБОЙ свечи для стабилизации данных Binance
-        if updated_timeframes:
-            tf_list = ', '.join(updated_timeframes)
-            logger.info(f"⏳ Waiting 31 seconds for Binance to finalize {tf_list} candle data...")
-            await asyncio.sleep(31)
-            logger.info(f"✅ Delay completed - now loading stable candle data")
         
         symbols_to_check = self.ready_symbols.copy()
         if not symbols_to_check:
