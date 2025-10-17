@@ -130,8 +130,9 @@ class OpenInterestCalculator:
                 lookback=lookback
             )
             
-            logger.debug(f"{symbol} OI Metrics: OI={metrics['current_oi']:.0f}, "
-                        f"Delta={metrics['oi_delta']:.0f}, DOI%={metrics['doi_pct']:.2f}%")
+            # КРИТИЧНО: INFO логирование для видимости реальных значений
+            logger.info(f"📊 {symbol} OI: Current={metrics['current_oi']:.0f}, "
+                       f"Delta={metrics['oi_delta']:.0f}, DOI%={metrics['doi_pct']:.2f}%")
             
             return metrics
             
