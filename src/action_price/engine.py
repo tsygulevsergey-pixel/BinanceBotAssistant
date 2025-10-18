@@ -425,17 +425,24 @@ class ActionPriceEngine:
             else:
                 components['initiator_size'] = 0
             
-            # 2. Глубина подтверждения (|close−EMA200| в ATR)
+            # 2. НОВОЕ: Proximity to EMA200 (близость к EMA200 = ЛУЧШЕ!)
+            # БЫЛО: depth_atr >= 0.40 давало +2 (НЕПРАВИЛЬНО - далеко от EMA = перекуп!)
+            # СТАЛО: близко к EMA200 = высокий score (свежий breakout)
             depth = conf_close - ema200
             depth_atr = depth / atr_conf
-            if depth_atr >= 0.40:
-                components['confirm_depth'] = 2
-            elif depth_atr >= 0.35:
-                components['confirm_depth'] = 1
-            elif depth_atr < 0.30:
-                components['confirm_depth'] = -1
+            
+            # Близко к EMA200 = отлично (свежий пробой, низкий риск отката)
+            if depth_atr < 0.30:
+                components['confirm_depth'] = 2  # Очень близко!
+            elif depth_atr < 0.50:
+                components['confirm_depth'] = 1  # Близко
+            # Далеко от EMA200 = плохо (вход на вершине импульса)
+            elif depth_atr >= 1.0:
+                components['confirm_depth'] = -2  # Слишком далеко = штраф!
+            elif depth_atr >= 0.70:
+                components['confirm_depth'] = -1  # Далековато
             else:
-                components['confirm_depth'] = 0
+                components['confirm_depth'] = 0  # Нейтрально
             
             # 3. Положение close подтверждения
             if conf_close > max(ema5, ema9, ema13, ema21):
@@ -466,15 +473,22 @@ class ActionPriceEngine:
             else:
                 components['ema_fan'] = 0
             
-            # 6. Запас до внешней ATR-полосы
+            # 6. НОВОЕ: Overextension Penalty (штраф за перекупленность!)
+            # БЫЛО: gap_atr >= 0.50 давало +1 (близко к экстремуму = хорошо) - НЕПРАВИЛЬНО!
+            # СТАЛО: близко к ATR upper band = ПЕРЕКУПЛЕННОСТЬ = штраф
             gap_to_outer = atr_upper - conf_close
             gap_atr = gap_to_outer / atr_conf
-            if gap_atr >= 0.50:
-                components['gap_to_atr'] = 1
-            elif gap_atr < 0.30:
-                components['gap_to_atr'] = -1
+            
+            # Цена близко к верхней ATR полосе = перекупленность = плохо!
+            if gap_atr < 0.20:
+                components['gap_to_atr'] = -2  # Очень близко к экстремуму = сильный штраф!
+            elif gap_atr < 0.40:
+                components['gap_to_atr'] = -1  # Близковато
+            # Цена далеко от экстремумов = нормально (есть запас роста)
+            elif gap_atr >= 0.80:
+                components['gap_to_atr'] = 1  # Большой запас = хорошо
             else:
-                components['gap_to_atr'] = 0
+                components['gap_to_atr'] = 0  # Нейтрально
             
             # 7. Липучка к EMA200 (касания за 5 баров до инициатора)
             touches = 0
@@ -546,17 +560,23 @@ class ActionPriceEngine:
             else:
                 components['initiator_size'] = 0
             
-            # 2. Глубина подтверждения
+            # 2. НОВОЕ: Proximity to EMA200 (близость к EMA200 = ЛУЧШЕ!)
+            # SHORT: зеркально
             depth = ema200 - conf_close
             depth_atr = depth / atr_conf
-            if depth_atr >= 0.40:
-                components['confirm_depth'] = 2
-            elif depth_atr >= 0.35:
-                components['confirm_depth'] = 1
-            elif depth_atr < 0.30:
-                components['confirm_depth'] = -1
+            
+            # Близко к EMA200 = отлично
+            if depth_atr < 0.30:
+                components['confirm_depth'] = 2  # Очень близко!
+            elif depth_atr < 0.50:
+                components['confirm_depth'] = 1  # Близко
+            # Далеко от EMA200 = плохо
+            elif depth_atr >= 1.0:
+                components['confirm_depth'] = -2  # Слишком далеко = штраф!
+            elif depth_atr >= 0.70:
+                components['confirm_depth'] = -1  # Далековато
             else:
-                components['confirm_depth'] = 0
+                components['confirm_depth'] = 0  # Нейтрально
             
             # 3. Положение close подтверждения
             if conf_close < min(ema5, ema9, ema13, ema21):
@@ -587,15 +607,21 @@ class ActionPriceEngine:
             else:
                 components['ema_fan'] = 0
             
-            # 6. Запас до нижней ATR-полосы
+            # 6. НОВОЕ: Overextension Penalty (штраф за перепроданность!)
+            # SHORT: зеркально
             gap_to_outer = conf_close - atr_lower
             gap_atr = gap_to_outer / atr_conf
-            if gap_atr >= 0.50:
-                components['gap_to_atr'] = 1
-            elif gap_atr < 0.30:
-                components['gap_to_atr'] = -1
+            
+            # Цена близко к нижней ATR полосе = перепроданность = плохо!
+            if gap_atr < 0.20:
+                components['gap_to_atr'] = -2  # Очень близко к экстремуму = сильный штраф!
+            elif gap_atr < 0.40:
+                components['gap_to_atr'] = -1  # Близковато
+            # Цена далеко от экстремумов = нормально (есть запас падения)
+            elif gap_atr >= 0.80:
+                components['gap_to_atr'] = 1  # Большой запас = хорошо
             else:
-                components['gap_to_atr'] = 0
+                components['gap_to_atr'] = 0  # Нейтрально
             
             # 7. Липучка
             touches = 0
