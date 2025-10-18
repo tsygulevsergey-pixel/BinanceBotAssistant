@@ -201,7 +201,7 @@ if expired_short
 // СТОП-ЛОСС СИСТЕМА (4 КАНДИДАТА + CLAMP)
 // ============================================================================
 
-calc_stop_long(entry_price) =>
+calc_stop_long(simple float entry_price) =>
     // Кандидат 1: Swing Low
     swing_low = ta.lowest(low, swing_lookback)
     sl1 = swing_low - body_pad_ticks * syminfo.mintick
@@ -222,14 +222,12 @@ calc_stop_long(entry_price) =>
     // CLAMP по %
     sl_dist_pct = math.abs(entry_price - sl_price) / entry_price * 100
     
-    if sl_dist_pct > sl_max_pct
-        sl_price := entry_price * (1 - sl_max_pct / 100)
-    else if sl_dist_pct < sl_min_pct
-        sl_price := entry_price * (1 - sl_min_pct / 100)
+    final_sl = sl_dist_pct > sl_max_pct ? entry_price * (1 - sl_max_pct / 100) : 
+               (sl_dist_pct < sl_min_pct ? entry_price * (1 - sl_min_pct / 100) : sl_price)
     
-    [sl_price, sl_dist_pct]
+    [final_sl, sl_dist_pct]
 
-calc_stop_short(entry_price) =>
+calc_stop_short(simple float entry_price) =>
     // Кандидат 1: Swing High
     swing_high = ta.highest(high, swing_lookback)
     sl1 = swing_high + body_pad_ticks * syminfo.mintick
@@ -250,22 +248,20 @@ calc_stop_short(entry_price) =>
     // CLAMP по %
     sl_dist_pct = math.abs(sl_price - entry_price) / entry_price * 100
     
-    if sl_dist_pct > sl_max_pct
-        sl_price := entry_price * (1 + sl_max_pct / 100)
-    else if sl_dist_pct < sl_min_pct
-        sl_price := entry_price * (1 + sl_min_pct / 100)
+    final_sl = sl_dist_pct > sl_max_pct ? entry_price * (1 + sl_max_pct / 100) : 
+               (sl_dist_pct < sl_min_pct ? entry_price * (1 + sl_min_pct / 100) : sl_price)
     
-    [sl_price, sl_dist_pct]
+    [final_sl, sl_dist_pct]
 
 // ============================================================================
 // ПРОВЕРКА РАССТОЯНИЯ ДО ОБРАТНОЙ BB
 // ============================================================================
 
-check_bb_distance_long(entry_price, r_size) =>
+check_bb_distance_long(simple float entry_price, simple float r_size) =>
     dist_to_bb_upper = bb_upper - entry_price
     dist_to_bb_upper >= bb_opp_min_r * r_size
 
-check_bb_distance_short(entry_price, r_size) =>
+check_bb_distance_short(simple float entry_price, simple float r_size) =>
     dist_to_bb_lower = entry_price - bb_lower
     dist_to_bb_lower >= bb_opp_min_r * r_size
 
@@ -286,24 +282,12 @@ var bool tp0_hit = false
 var bool tp1_hit = false
 var int contra_ema_count = 0
 
-// Сброс позиции
-reset_position() =>
-    in_trade := false
-    entry_price := na
-    stop_price := na
-    tp0_price := na
-    tp1_price := na
-    tp2_price := na
-    entry_bar := 0
-    is_long := false
-    trail_stop := na
-    tp0_hit := false
-    tp1_hit := false
-    contra_ema_count := 0
-
 // Вход по ретесту
-entry_long = false
-entry_short = false
+var bool entry_long = false
+var bool entry_short = false
+
+entry_long := false
+entry_short := false
 
 if not in_trade and retest_long and not fat_bar
     [sl, sl_pct] = calc_stop_long(close)
@@ -385,12 +369,12 @@ if in_trade
     // Досрочный выход (3 бара против EMA20)
     if is_long
         if close < ema20
-            contra_ema_count += 1
+            contra_ema_count := contra_ema_count + 1
         else
             contra_ema_count := 0
     else
         if close > ema20
-            contra_ema_count += 1
+            contra_ema_count := contra_ema_count + 1
         else
             contra_ema_count := 0
     
@@ -398,14 +382,28 @@ if in_trade
     
     // Выход
     if hit_stop or hit_tp2 or timeout or early_exit
-        reset_position()
+        in_trade := false
+        entry_price := na
+        stop_price := na
+        tp0_price := na
+        tp1_price := na
+        tp2_price := na
+        entry_bar := 0
+        is_long := false
+        trail_stop := na
+        tp0_hit := false
+        tp1_hit := false
+        contra_ema_count := 0
 
 // ============================================================================
 // ДИАГНОСТИКА
 // ============================================================================
 
-long_status = "NO SETUP"
-short_status = "NO SETUP"
+var string long_status = "NO SETUP"
+var string short_status = "NO SETUP"
+
+long_status := "NO SETUP"
+short_status := "NO SETUP"
 
 if in_trade and is_long
     long_status := "IN TRADE"
