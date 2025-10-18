@@ -496,11 +496,6 @@ class BreakRetestStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется 50")
             return None
         
-        # ФАЗА 1: Блокировка bearish bias в TREND режиме
-        if regime == 'TREND' and bias.lower() == 'bearish':
-            strategy_logger.debug(f"    ❌ TREND + bearish bias = исторически убыточно (WR 12.5%)")
-            return None
-        
         # Рассчитать ATR, ADX и VWAP
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
         current_atr = atr.iloc[-1]
