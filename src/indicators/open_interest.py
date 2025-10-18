@@ -54,8 +54,8 @@ class OpenInterestCalculator:
         Рассчитать метрики OI из исторических данных
         
         Args:
-            oi_hist: Список словарей с Open Interest историей
-                     [{'openInterest': float, 'timestamp': int}, ...]
+            oi_hist: Список словарей с Open Interest историей от Binance API
+                     [{'sumOpenInterest': str, 'sumOpenInterestValue': str, 'timestamp': int}, ...]
             lookback: Количество периодов назад для сравнения
         
         Returns:
@@ -69,19 +69,15 @@ class OpenInterestCalculator:
                 'data_valid': False  # Флаг что данные - fallback
             }
         
-        # КРИТИЧНО: DEBUG логирование для диагностики формата данных
-        logger.debug(f"🔍 OI data sample (first): {oi_hist[0]}")
-        logger.debug(f"🔍 OI data sample (last): {oi_hist[-1]}")
-        
         # Сортируем по timestamp (от старых к новым)
         sorted_hist = sorted(oi_hist, key=lambda x: x.get('timestamp', 0))
         
-        # Текущий OI (последний)
-        current_oi = float(sorted_hist[-1].get('openInterest', 0))
+        # Текущий OI (последний) - Binance возвращает "sumOpenInterest", а не "openInterest"
+        current_oi = float(sorted_hist[-1].get('sumOpenInterest', 0))
         
         # Предыдущий OI (lookback периодов назад)
         lookback_idx = max(0, len(sorted_hist) - 1 - lookback)
-        previous_oi = float(sorted_hist[lookback_idx].get('openInterest', 0))
+        previous_oi = float(sorted_hist[lookback_idx].get('sumOpenInterest', 0))
         
         # Рассчитываем метрики
         oi_delta = OpenInterestCalculator.calculate_oi_delta(current_oi, previous_oi)
