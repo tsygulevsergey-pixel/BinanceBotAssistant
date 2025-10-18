@@ -419,9 +419,9 @@ action_price:
   atr_multiplier: 1.5  # Множитель для ATR полос (от EMA200)
   swing_length: 20  # Период для Swing High/Low
   
-  # Score пороги
-  score_standard_min: 3  # Минимальный score для STANDARD режима
-  score_scalp_min: 1  # Минимальный score для SCALP режима
+  # Score пороги - ФАЗА 1: Повышены для фильтрации слабых сигналов
+  score_standard_min: 6  # ФАЗА 1: Повышен с 3 до 6 (только качественные сигналы)
+  score_scalp_min: 3     # ФАЗА 1: Повышен с 1 до 3 (минимальный порог)
   
   # TP/SL параметры
   tp1_rr: 1.0  # TP1 = 1R (Risk)
