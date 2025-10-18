@@ -65,8 +65,14 @@ class GlukEngine:
             return None
         
         try:
-            # Валидация
-            df = df.copy().sort_values('open_time', ascending=True).reset_index(drop=True)
+            # Валидация - убрать timezone для совместимости с unclosed candle
+            df = df.copy()
+            
+            # Конвертировать open_time в timezone-naive если нужно
+            if pd.api.types.is_datetime64tz_dtype(df['open_time']):
+                df['open_time'] = df['open_time'].dt.tz_localize(None)
+            
+            df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
             
             # Расчет EMA200 (используя ВСЕ данные, включая незакрытую свечу!)
             df['ema200'] = df['close'].ewm(span=200, adjust=False).mean()
@@ -74,7 +80,12 @@ class GlukEngine:
             # Проверка последней свечи (должна быть незакрытой!)
             last_candle_time = df['open_time'].iloc[-1]
             now = datetime.now(pytz.UTC)
-            time_diff = (now - last_candle_time.replace(tzinfo=pytz.UTC)).total_seconds()
+            
+            # last_candle_time теперь timezone-naive, сделать его aware для сравнения
+            if not hasattr(last_candle_time, 'tzinfo') or last_candle_time.tzinfo is None:
+                last_candle_time = pytz.UTC.localize(last_candle_time)
+            
+            time_diff = (now - last_candle_time).total_seconds()
             
             # Если последняя свеча старше 16 минут - она закрыта (не то что нужно!)
             if time_diff > 960:  # 16 минут
