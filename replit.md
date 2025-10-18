@@ -73,8 +73,13 @@ Preferred communication style: Simple, everyday language.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list.
 - **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts, including smart 1-day completeness checks.
 
+### Strategy Execution Optimization
+- **Parallel Strategy Checks**: Regular strategies execute in parallel batches (20 symbols per batch) using asyncio.gather for 10x performance improvement
+- **Independent Execution**: Action Price and Gluk systems run independently with their own optimized execution paths
+- **Performance Benchmark**: Action Price (28s/221 symbols), Gluk (~1.5min), Regular strategies (optimized from 38+ min to ~3-5 min)
+
 ## Data Flow
-The system initializes by loading configurations, connecting to Binance, starting parallel data processing, and launching the Telegram bot. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, executing strategies, scoring signals, applying filters, and sending Telegram alerts. Data is persisted in SQLite, and signals are logged.
+The system initializes by loading configurations, connecting to Binance, starting parallel data processing, and launching the Telegram bot. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, executing strategies in parallel batches, scoring signals, applying filters, and sending Telegram alerts. Data is persisted in SQLite, and signals are logged.
 
 ## Error Handling & Resilience
 - **Smart Rate Limiting**: Prevents API bans.

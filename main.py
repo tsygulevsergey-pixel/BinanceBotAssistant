@@ -693,15 +693,42 @@ class TradingBot:
         
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
-        # 3. Проверить стратегии для каждого символа
+        # 3. Проверить стратегии для каждого символа (ПАРАЛЛЕЛЬНО)
         # Каждая стратегия проверяет блокировку независимо
-        for symbol in symbols_to_check:
-            try:
-                await self._check_symbol_signals(symbol, btc_data, updated_timeframes)
-            except Exception as e:
-                logger.error(f"Error checking {symbol}: {e}")
+        if symbols_to_check:
+            batch_size = 20  # Обрабатывать по 20 символов параллельно
+            total_batches = (len(symbols_to_check) + batch_size - 1) // batch_size
             
-            await asyncio.sleep(0.05)  # Небольшая пауза между символами
+            logger.info(f"🔄 Starting parallel strategy checks: {len(symbols_to_check)} symbols in {total_batches} batches (batch_size={batch_size})")
+            
+            for batch_idx in range(0, len(symbols_to_check), batch_size):
+                batch = symbols_to_check[batch_idx:batch_idx + batch_size]
+                batch_num = (batch_idx // batch_size) + 1
+                
+                # Параллельная проверка батча
+                tasks = [
+                    self._check_symbol_signals_safe(symbol, btc_data, updated_timeframes)
+                    for symbol in batch
+                ]
+                
+                await asyncio.gather(*tasks)
+                
+                logger.debug(f"  ✅ Batch {batch_num}/{total_batches} completed ({len(batch)} symbols)")
+            
+            logger.info(f"✅ All strategy checks completed for {len(symbols_to_check)} symbols")
+    
+    async def _check_symbol_signals_safe(self, symbol: str, btc_data, updated_timeframes: list):
+        """Обёртка для безопасной параллельной проверки сигналов (с обработкой ошибок)
+        
+        Args:
+            symbol: Символ для проверки
+            btc_data: BTC данные для фильтра
+            updated_timeframes: Список обновившихся таймфреймов
+        """
+        try:
+            await self._check_symbol_signals(symbol, btc_data, updated_timeframes)
+        except Exception as e:
+            logger.error(f"Error checking {symbol}: {e}")
     
     async def _check_symbol_signals(self, symbol: str, btc_data, updated_timeframes: list):
         """Проверить сигналы для одного символа
