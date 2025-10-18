@@ -1148,10 +1148,24 @@ class TradingBot:
                         # Заблокировать символ
                         self.gluk_blocker.block_symbol(symbol, gluk_signal['direction'])
                         
+                        # Отправить в Telegram
+                        await self.telegram_bot.send_signal({
+                            'strategy_name': '🧪 Gluk (Legacy AP)',
+                            'symbol': gluk_signal['symbol'],
+                            'direction': gluk_signal['direction'].upper(),
+                            'entry_price': gluk_signal['entry_price'],
+                            'stop_loss': gluk_signal['stop_loss'],
+                            'tp1': gluk_signal.get('take_profit_1'),
+                            'tp2': gluk_signal.get('take_profit_2'),
+                            'score': gluk_signal.get('confidence_score', 5.0),
+                            'regime': 'EXPERIMENTAL',
+                            'entry_type': 'MARKET'
+                        })
+                        
                         logger.info(
                             f"🧪 Gluk Signal: {gluk_signal['symbol']} {gluk_signal['direction']} "
                             f"@ {gluk_signal.get('entry_price', 0):.4f} "
-                            f"(Score: {gluk_signal.get('score', 0):.1f})"
+                            f"(Score: {gluk_signal.get('confidence_score', 0):.1f})"
                         )
                     else:
                         logger.warning(f"Gluk: {symbol} - failed to save signal to DB")
