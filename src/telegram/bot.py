@@ -47,6 +47,10 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("closed_ap_tp", self.cmd_closed_ap_tp))
         self.app.add_handler(CommandHandler("menu", self.cmd_menu))
         self.app.add_handler(CommandHandler("validate", self.cmd_validate))
+        # Gluk System commands (Legacy Action Price)
+        self.app.add_handler(CommandHandler("gluk", self.cmd_gluk_status))
+        self.app.add_handler(CommandHandler("gluk_signals", self.cmd_gluk_signals))
+        self.app.add_handler(CommandHandler("gluk_performance", self.cmd_gluk_performance))
         # Новые профессиональные команды
         self.app.add_handler(CommandHandler("regime_stats", self.cmd_regime_stats))
         self.app.add_handler(CommandHandler("confluence_stats", self.cmd_confluence_stats))
@@ -964,4 +968,131 @@ class TelegramBot:
             
         except Exception as e:
             logger.error(f"Error getting confluence stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_gluk_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать статус Gluk системы"""
+        if not update.message:
+            return
+        
+        try:
+            from src.database.models import GlukSignal
+            session = self.db.get_session()
+            
+            # Активные сигналы
+            active_signals = session.query(GlukSignal).filter(
+                GlukSignal.status == 'ACTIVE'
+            ).count()
+            
+            # Закрытые за 7 дней
+            start_date = datetime.now(pytz.UTC) - timedelta(days=7)
+            closed_signals = session.query(GlukSignal).filter(
+                GlukSignal.closed_at >= start_date,
+                GlukSignal.status.in_(['WIN', 'LOSS', 'TIME_STOP', 'BREAKEVEN'])
+            ).count()
+            
+            session.close()
+            
+            text = (
+                f"🧪 <b>Gluk System Status</b>\n"
+                f"<i>Legacy Action Price (unclosed candles)</i>\n\n"
+                f"🎯 Active signals: {active_signals}\n"
+                f"📊 Closed (7d): {closed_signals}\n\n"
+                f"ℹ️ Use /gluk_signals to see active\n"
+                f"ℹ️ Use /gluk_performance for stats"
+            )
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting Gluk status: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_gluk_signals(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать активные Gluk сигналы"""
+        if not update.message:
+            return
+        
+        try:
+            from src.database.models import GlukSignal
+            session = self.db.get_session()
+            
+            active_signals = session.query(GlukSignal).filter(
+                GlukSignal.status == 'ACTIVE'
+            ).order_by(GlukSignal.created_at.desc()).all()
+            
+            if not active_signals:
+                await update.message.reply_text("🧪 Нет активных Gluk сигналов")
+                session.close()
+                return
+            
+            text = f"🧪 <b>Active Gluk Signals ({len(active_signals)})</b>\n\n"
+            
+            for sig in active_signals[:10]:
+                direction_emoji = "🟢" if sig.direction.lower() == "long" else "🔴"
+                entry = sig.entry_price if sig.entry_price else 0
+                sl = sig.stop_loss if sig.stop_loss else 0
+                tp1 = sig.take_profit_1 if sig.take_profit_1 else 0
+                
+                text += (
+                    f"{direction_emoji} <b>{sig.symbol}</b> {sig.direction.lower()}\n"
+                    f"   Entry: {entry:.4f} | SL: {sl:.4f}\n"
+                    f"   TP1: {tp1:.4f}\n\n"
+                )
+            
+            session.close()
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting Gluk signals: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_gluk_performance(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать производительность Gluk за 7 дней"""
+        if not update.message:
+            return
+        
+        try:
+            from src.database.models import GlukSignal
+            session = self.db.get_session()
+            
+            start_date = datetime.now(pytz.UTC) - timedelta(days=7)
+            
+            signals = session.query(GlukSignal).filter(
+                GlukSignal.created_at >= start_date
+            ).all()
+            
+            if not signals:
+                await update.message.reply_text("🧪 Нет данных по Gluk за 7 дней")
+                session.close()
+                return
+            
+            total = len(signals)
+            active = sum(1 for s in signals if s.status == 'ACTIVE')
+            closed = sum(1 for s in signals if s.status in ['WIN', 'LOSS', 'TIME_STOP', 'BREAKEVEN'])
+            wins = sum(1 for s in signals if s.status == 'WIN')
+            losses = sum(1 for s in signals if s.status == 'LOSS')
+            
+            win_rate = (wins / closed * 100) if closed > 0 else 0
+            
+            pnl_list = [s.pnl_percent for s in signals if s.pnl_percent is not None]
+            avg_pnl = sum(pnl_list) / len(pnl_list) if pnl_list else 0
+            total_pnl = sum(pnl_list) if pnl_list else 0
+            
+            text = (
+                f"🧪 <b>Gluk Performance (7d)</b>\n\n"
+                f"📊 Total signals: {total}\n"
+                f"✅ Closed: {closed}\n"
+                f"🔄 Active: {active}\n\n"
+                f"🏆 Wins: {wins}\n"
+                f"❌ Losses: {losses}\n"
+                f"📊 Win Rate: <b>{win_rate:.1f}%</b>\n\n"
+                f"💰 Avg PnL: <b>{avg_pnl:+.2f}%</b>\n"
+                f"💵 Total PnL: <b>{total_pnl:+.2f}%</b>"
+            )
+            
+            session.close()
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting Gluk performance: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
