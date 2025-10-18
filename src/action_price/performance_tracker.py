@@ -180,7 +180,7 @@ class ActionPricePerformanceTracker:
                 # Обновить сигнал выходом в JSONL
                 self.signal_logger.update_signal_exit(
                     signal_id=signal.id,
-                    exit_reason=signal.close_reason if signal.close_reason else 'UNKNOWN',
+                    exit_reason=signal.exit_reason if signal.exit_reason else 'UNKNOWN',
                     timestamp_exit=signal.closed_at if signal.closed_at else datetime.now(pytz.UTC),
                     exit_price=float(signal.exit_price) if signal.exit_price else 0.0,
                     mfe_r=mfe_mae['mfe_r'],
