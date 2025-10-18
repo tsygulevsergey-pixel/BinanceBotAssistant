@@ -201,7 +201,7 @@ if expired_short
 // СТОП-ЛОСС СИСТЕМА (4 КАНДИДАТА + CLAMP)
 // ============================================================================
 
-calc_stop_long(simple float entry_price) =>
+calc_stop_long(float entry_price) =>
     // Кандидат 1: Swing Low
     swing_low = ta.lowest(low, swing_lookback)
     sl1 = swing_low - body_pad_ticks * syminfo.mintick
@@ -227,7 +227,7 @@ calc_stop_long(simple float entry_price) =>
     
     [final_sl, sl_dist_pct]
 
-calc_stop_short(simple float entry_price) =>
+calc_stop_short(float entry_price) =>
     // Кандидат 1: Swing High
     swing_high = ta.highest(high, swing_lookback)
     sl1 = swing_high + body_pad_ticks * syminfo.mintick
@@ -257,11 +257,11 @@ calc_stop_short(simple float entry_price) =>
 // ПРОВЕРКА РАССТОЯНИЯ ДО ОБРАТНОЙ BB
 // ============================================================================
 
-check_bb_distance_long(simple float entry_price, simple float r_size) =>
+check_bb_distance_long(float entry_price, float r_size) =>
     dist_to_bb_upper = bb_upper - entry_price
     dist_to_bb_upper >= bb_opp_min_r * r_size
 
-check_bb_distance_short(simple float entry_price, simple float r_size) =>
+check_bb_distance_short(float entry_price, float r_size) =>
     dist_to_bb_lower = entry_price - bb_lower
     dist_to_bb_lower >= bb_opp_min_r * r_size
 
