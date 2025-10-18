@@ -444,13 +444,11 @@ class ActionPriceEngine:
             else:
                 components['confirm_depth'] = 0  # Нейтрально
             
-            # 3. Положение close подтверждения
-            if conf_close > max(ema5, ema9, ema13, ema21):
-                components['close_position'] = 1
-            elif conf_close < ema21:
-                components['close_position'] = -1
-            else:
-                components['close_position'] = 0
+            # 3. ОТКЛЮЧЕНО: Положение close подтверждения
+            # БЫЛО: conf_close > max(ema5,9,13,21) = +1 (перекупленность!)
+            # Этот компонент поощрял OVERBOUGHT состояние = неправильно
+            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
+            components['close_position'] = 0
             
             # 4. Наклон EMA200 (за 10 баров)
             ema200_10bars_ago = indicators['ema200'].iloc[confirm_idx - 10]
@@ -463,15 +461,11 @@ class ActionPriceEngine:
             else:
                 components['slope200'] = 0
             
-            # 5. Веер EMA
-            bullish_fan = ema5 > ema9 and ema9 > ema13 and ema13 > ema21
-            fan_spread = (ema5 - ema21) / atr_conf
-            if bullish_fan and fan_spread >= 0.10:
-                components['ema_fan'] = 1
-            elif ema5 < ema9 and ema9 < ema13 and ema13 < ema21:  # Медвежий
-                components['ema_fan'] = -1
-            else:
-                components['ema_fan'] = 0
+            # 5. ОТКЛЮЧЕНО: Веер EMA
+            # БЫЛО: широкий fan_spread >= 0.10 = +1 (экстремум!)
+            # Широкий разброс EMA = цена на экстремуме = поздний вход
+            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
+            components['ema_fan'] = 0
             
             # 6. НОВОЕ: Overextension Penalty (штраф за перекупленность!)
             # БЫЛО: gap_atr >= 0.50 давало +1 (близко к экстремуму = хорошо) - НЕПРАВИЛЬНО!
@@ -490,7 +484,8 @@ class ActionPriceEngine:
             else:
                 components['gap_to_atr'] = 0  # Нейтрально
             
-            # 7. Липучка к EMA200 (касания за 5 баров до инициатора)
+            # 7. УСИЛЕНО: Липучка к EMA200 (штраф за ложный пробой)
+            # Если было много касаний EMA200 перед пробоем = слабый импульс
             touches = 0
             for i in range(initiator_idx - 5, initiator_idx):
                 bar_low = indicators['low'].iloc[i]
@@ -499,7 +494,8 @@ class ActionPriceEngine:
                 if bar_low <= ema200_bar <= bar_high:
                     touches += 1
             
-            components['lipuchka'] = -1 if touches >= 3 else 0
+            # УСИЛЕН ШТРАФ: было -1, стало -2
+            components['lipuchka'] = -2 if touches >= 3 else 0
             
             # 8. Цвет подтверждения
             confirm_green = conf_close > conf_open
@@ -510,7 +506,7 @@ class ActionPriceEngine:
             else:
                 components['confirm_color'] = 0
             
-            # 9. Break-and-Base (2-4 узких бара над EMA200 с удержанием EMA13/21)
+            # 9. УСИЛЕНО x2: Break-and-Base (консолидация = сильный сигнал!)
             # Упрощённая реализация: проверка 3 баров до подтверждения
             base_bars = 0
             for i in range(confirm_idx - 3, confirm_idx):
@@ -526,9 +522,10 @@ class ActionPriceEngine:
                     bar_range < 0.5 * bar_atr):
                     base_bars += 1
             
-            components['break_and_base'] = 1 if base_bars >= 2 else 0
+            # УСИЛЕН ВЕС: было +1, стало +2
+            components['break_and_base'] = 2 if base_bars >= 2 else 0
             
-            # 10. Retest-tag (продолжение тренда)
+            # 10. УСИЛЕНО x2: Retest-tag (pullback = best practice 2025!)
             # Упрощённо: если был контакт с EMA13/21 за 5 баров и структура бычья
             retest = False
             for i in range(confirm_idx - 5, confirm_idx):
@@ -542,12 +539,14 @@ class ActionPriceEngine:
                     retest = True
                     break
             
-            components['retest_tag'] = 1 if retest else 0
+            # УСИЛЕН ВЕС: было +1, стало +2 (pullback = ключевой фактор!)
+            components['retest_tag'] = 2 if retest else 0
             
-            # 11. Хвост инициатора (нижняя тень)
+            # 11. УСИЛЕНО x2: Хвост инициатора (rejection wick = сильный сигнал!)
             init_lower_wick = init_low - min(init_open, init_close)
             init_lower_wick_atr = init_lower_wick / atr_init
-            components['initiator_wick'] = 1 if init_lower_wick_atr >= 0.25 else 0
+            # УСИЛЕН ВЕС: было +1, стало +2 (wick показывает отклонение!)
+            components['initiator_wick'] = 2 if init_lower_wick_atr >= 0.25 else 0
             
         else:  # SHORT (зеркально)
             # 1. Размер инициатора
@@ -578,13 +577,11 @@ class ActionPriceEngine:
             else:
                 components['confirm_depth'] = 0  # Нейтрально
             
-            # 3. Положение close подтверждения
-            if conf_close < min(ema5, ema9, ema13, ema21):
-                components['close_position'] = 1
-            elif conf_close > ema21:
-                components['close_position'] = -1
-            else:
-                components['close_position'] = 0
+            # 3. ОТКЛЮЧЕНО: Положение close подтверждения
+            # БЫЛО: conf_close < min(ema5,9,13,21) = +1 (перепроданность!)
+            # Этот компонент поощрял OVERSOLD состояние = неправильно
+            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
+            components['close_position'] = 0
             
             # 4. Наклон EMA200
             ema200_10bars_ago = indicators['ema200'].iloc[confirm_idx - 10]
@@ -597,15 +594,11 @@ class ActionPriceEngine:
             else:
                 components['slope200'] = 0
             
-            # 5. Веер EMA
-            bearish_fan = ema5 < ema9 and ema9 < ema13 and ema13 < ema21
-            fan_spread = (ema21 - ema5) / atr_conf
-            if bearish_fan and fan_spread >= 0.10:
-                components['ema_fan'] = 1
-            elif ema5 > ema9 and ema9 > ema13 and ema13 > ema21:  # Бычий
-                components['ema_fan'] = -1
-            else:
-                components['ema_fan'] = 0
+            # 5. ОТКЛЮЧЕНО: Веер EMA
+            # БЫЛО: широкий fan_spread >= 0.10 = +1 (экстремум!)
+            # Широкий разброс EMA = цена на экстремуме = поздний вход
+            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
+            components['ema_fan'] = 0
             
             # 6. НОВОЕ: Overextension Penalty (штраф за перепроданность!)
             # SHORT: зеркально
@@ -623,7 +616,8 @@ class ActionPriceEngine:
             else:
                 components['gap_to_atr'] = 0  # Нейтрально
             
-            # 7. Липучка
+            # 7. УСИЛЕНО: Липучка (штраф за ложный пробой)
+            # Если было много касаний EMA200 перед пробоем = слабый импульс
             touches = 0
             for i in range(initiator_idx - 5, initiator_idx):
                 bar_low = indicators['low'].iloc[i]
@@ -632,7 +626,8 @@ class ActionPriceEngine:
                 if bar_low <= ema200_bar <= bar_high:
                     touches += 1
             
-            components['lipuchka'] = -1 if touches >= 3 else 0
+            # УСИЛЕН ШТРАФ: было -1, стало -2
+            components['lipuchka'] = -2 if touches >= 3 else 0
             
             # 8. Цвет подтверждения
             confirm_red = conf_close < conf_open
@@ -643,7 +638,7 @@ class ActionPriceEngine:
             else:
                 components['confirm_color'] = 0
             
-            # 9. Break-and-Base
+            # 9. УСИЛЕНО x2: Break-and-Base (консолидация = сильный сигнал!)
             base_bars = 0
             for i in range(confirm_idx - 3, confirm_idx):
                 bar_close = indicators['close'].iloc[i]
@@ -658,9 +653,10 @@ class ActionPriceEngine:
                     bar_range < 0.5 * bar_atr):
                     base_bars += 1
             
-            components['break_and_base'] = 1 if base_bars >= 2 else 0
+            # УСИЛЕН ВЕС: было +1, стало +2
+            components['break_and_base'] = 2 if base_bars >= 2 else 0
             
-            # 10. Retest-tag
+            # 10. УСИЛЕНО x2: Retest-tag (pullback = best practice 2025!)
             retest = False
             for i in range(confirm_idx - 5, confirm_idx):
                 bar_high = indicators['high'].iloc[i]
@@ -673,12 +669,14 @@ class ActionPriceEngine:
                     retest = True
                     break
             
-            components['retest_tag'] = 1 if retest else 0
+            # УСИЛЕН ВЕС: было +1, стало +2 (pullback = ключевой фактор!)
+            components['retest_tag'] = 2 if retest else 0
             
-            # 11. Хвост инициатора (верхняя тень)
+            # 11. УСИЛЕНО x2: Хвост инициатора (rejection wick = сильный сигнал!)
             init_upper_wick = init_high - max(init_open, init_close)
             init_upper_wick_atr = init_upper_wick / atr_init
-            components['initiator_wick'] = 1 if init_upper_wick_atr >= 0.25 else 0
+            # УСИЛЕН ВЕС: было +1, стало +2 (wick показывает отклонение!)
+            components['initiator_wick'] = 2 if init_upper_wick_atr >= 0.25 else 0
         
         # Итоговый score
         score_total = sum(components.values())
