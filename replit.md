@@ -26,7 +26,6 @@ Preferred communication style: Simple, everyday language.
 - **Signal Dataclass**: Standardized output for trading signals.
 - **5 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile.
 - **Action Price System**: An 11-component scoring system based on EMA200 Body Cross logic, with dynamic entry, take-profit, and stop-loss calculations, processing only fully closed 15m candles.
-- **Gluk System**: Experimental implementation of a legacy Action Price system using unclosed candle data.
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market states.
@@ -61,7 +60,6 @@ Preferred communication style: Simple, everyday language.
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals, exit conditions, and PnL.
 - **ActionPricePerformanceTracker**: Tracks Action Price signals, partial exits, breakeven logic, MFE/MAE, and logs to JSONL.
-- **GlukPerformanceTracker**: Independently monitors Gluk signals and performance.
 
 ### Configuration Management
 - Uses YAML for strategy parameters and thresholds, and environment variables for API keys. Supports `signals_only_mode` and `enabled` flags.
@@ -75,8 +73,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Strategy Execution Optimization
 - **Parallel Strategy Checks**: Regular strategies execute in parallel batches (20 symbols per batch) using asyncio.gather for 10x performance improvement
-- **Independent Execution**: Action Price and Gluk systems run independently with their own optimized execution paths
-- **Performance Benchmark**: Action Price (28s/221 symbols), Gluk (~1.5min), Regular strategies (optimized from 38+ min to ~3-5 min)
+- **Independent Execution**: Action Price system runs independently with its own optimized execution path
+- **Performance Benchmark**: Action Price (28s/221 symbols), Regular strategies (optimized from 38+ min to ~3-5 min)
 
 ## Data Flow
 The system initializes by loading configurations, connecting to Binance, starting parallel data processing, and launching the Telegram bot. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, executing strategies in parallel batches, scoring signals, applying filters, and sending Telegram alerts. Data is persisted in SQLite, and signals are logged.
