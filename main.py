@@ -55,6 +55,11 @@ from src.action_price.engine import ActionPriceEngine
 from src.action_price.performance_tracker import ActionPricePerformanceTracker
 from src.action_price.logger import ap_logger
 from src.action_price.signal_logger import ActionPriceSignalLogger
+
+# Gluk System imports (Legacy Action Price)
+from src.gluk.engine import GlukEngine
+from src.gluk.performance_tracker import GlukPerformanceTracker
+from src.gluk.blocking import GlukSymbolBlocker
 from src.database.models import ActionPriceSignal
 
 
@@ -81,6 +86,12 @@ class TradingBot:
         self.ap_performance_tracker: Optional[ActionPricePerformanceTracker] = None
         self.ap_signal_logger: Optional[ActionPriceSignalLogger] = None
         self.action_price_enabled = False
+        
+        # Gluk System components (Legacy Action Price - experimental)
+        self.gluk_engine: Optional[GlukEngine] = None
+        self.gluk_performance_tracker: Optional[GlukPerformanceTracker] = None
+        self.gluk_blocker: Optional[GlukSymbolBlocker] = None
+        self.gluk_enabled = False
         
         # Компоненты бота
         self.strategy_manager = StrategyManager(binance_client=None)  # Will be set after client init
@@ -350,6 +361,32 @@ class TradingBot:
         else:
             reason = "testnet mode" if use_testnet else "disabled in config"
             logger.info(f"⏸️  Action Price disabled ({reason})")
+        
+        # Gluk System (Legacy Action Price - EXPERIMENTAL)
+        gluk_enabled = config.get('gluk.enabled', False)
+        
+        if gluk_enabled:
+            self.gluk_enabled = True
+            gluk_config = config.get('gluk', {})
+            
+            # Создать blocker (независимая блокировка)
+            self.gluk_blocker = GlukSymbolBlocker(db)
+            
+            # Создать engine (legacy логика с indices -2/-1)
+            self.gluk_engine = GlukEngine(gluk_config, self.client)
+            
+            # Запуск Performance Tracker
+            self.gluk_performance_tracker = GlukPerformanceTracker(
+                self.client,
+                db,
+                check_interval,
+                self.gluk_blocker.unblock_symbol  # Callback для разблокировки
+            )
+            asyncio.create_task(self.gluk_performance_tracker.start())
+            logger.info("🧪 Gluk System initialized (EXPERIMENTAL - Legacy AP with unclosed candles)")
+            logger.info(f"🧪 Gluk timeframe: {gluk_config.get('timeframe', '15m')}")
+        else:
+            logger.info("⏸️  Gluk System disabled")
         
         # Создание валидатора стратегий
         strategy_validator = StrategyValidator(
@@ -639,6 +676,20 @@ class TradingBot:
                 tf_4h_close = TimeframeSync.should_update_timeframe('4h', consumer_id='action_price')
                 force_zone_recalc = (now.hour == 0 and now.minute == 0) or tf_4h_close
                 await self._check_action_price_signals(now, symbols_for_ap, force_zone_recalc)
+        
+        # Gluk System - параллельный анализ с unclosed свечами
+        if self.gluk_enabled and self.gluk_engine:
+            # Gluk проверяет те же символы что и AP (с обновленными свечами)
+            symbols_for_gluk = []
+            if '15m' in updated_by_tf:
+                symbols_for_gluk.extend(updated_by_tf['15m'])
+            if '1h' in updated_by_tf:
+                symbols_for_gluk.extend(updated_by_tf['1h'])
+            
+            symbols_for_gluk = list(set(symbols_for_gluk))
+            
+            if symbols_for_gluk:
+                await self._check_gluk_signals(now, symbols_for_gluk)
         
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
@@ -1010,6 +1061,115 @@ class TradingBot:
             f"  ✅ Signals found: {signals_found}"
         )
     
+    async def _check_gluk_signals(self, current_time: datetime, symbols_with_updated_candles: list = None):
+        """Проверить Gluk сигналы для символов с обновленными свечами
+        
+        КРИТИЧНО: Gluk использует НЕЗАКРЫТУЮ текущую свечу (indices -2/-1)
+        Это legacy версия Action Price с 82.98% Win Rate
+        
+        Args:
+            current_time: Текущее время
+            symbols_with_updated_candles: Список символов с успешно загруженными свечами
+        """
+        if not self.gluk_engine or not self.data_loader:
+            return
+        
+        # Если не указаны символы - использовать все готовые
+        if symbols_with_updated_candles is None:
+            symbols_to_check = self.ready_symbols.copy()
+        else:
+            symbols_to_check = symbols_with_updated_candles
+        
+        if not symbols_to_check:
+            return
+        
+        logger.info(f"🧪 Checking Gluk signals (Legacy AP with unclosed candles)")
+        logger.info(f"  📊 Symbols to check: {len(symbols_to_check)}")
+        
+        signals_found = 0
+        symbols_analyzed = 0
+        symbols_blocked = 0
+        
+        for symbol in symbols_to_check:
+            # Проверить блокировку через gluk_blocker
+            if self.gluk_blocker.is_blocked(symbol):
+                symbols_blocked += 1
+                logger.debug(f"Gluk: {symbol} - Blocked (active signal)")
+                continue
+            
+            symbols_analyzed += 1
+            
+            try:
+                # Получить закрытые свечи из БД (15m)
+                df_closed = self.data_loader.get_candles(symbol, '15m', limit=300)
+                
+                if df_closed is None or len(df_closed) < 200:
+                    logger.debug(f"Gluk: {symbol} - Insufficient data")
+                    continue
+                
+                # Получить текущую незакрытую свечу через REST API
+                import pandas as pd
+                klines = await self.client.get_klines(symbol, '15m', limit=1)
+                
+                if not klines or len(klines) == 0:
+                    logger.debug(f"Gluk: {symbol} - No current candle from API")
+                    continue
+                
+                # Преобразовать k-line в формат DataFrame
+                current_kline = klines[0]
+                unclosed_candle = {
+                    'open_time': pd.to_datetime(current_kline[0], unit='ms', utc=True),
+                    'open': float(current_kline[1]),
+                    'high': float(current_kline[2]),
+                    'low': float(current_kline[3]),
+                    'close': float(current_kline[4]),  # ПРОМЕЖУТОЧНЫЙ close!
+                    'volume': float(current_kline[5]),
+                    'taker_buy_base': float(current_kline[9]) if len(current_kline) > 9 else 0,
+                    'taker_buy_quote': float(current_kline[10]) if len(current_kline) > 10 else 0
+                }
+                
+                # Добавить unclosed свечу в конец df
+                df_with_unclosed = pd.concat([df_closed, pd.DataFrame([unclosed_candle])], ignore_index=True)
+                
+                # Анализ через Gluk engine (legacy логика с indices -2/-1)
+                gluk_signal = await self.gluk_engine.analyze(
+                    symbol=symbol,
+                    df=df_with_unclosed  # ВАЖНО: включает незакрытую свечу!
+                )
+                
+                # Обработать сигнал
+                if gluk_signal:
+                    # Сохранить в БД
+                    save_success = self._save_gluk_signal(gluk_signal)
+                    
+                    if save_success:
+                        signals_found += 1
+                        
+                        # Заблокировать символ
+                        self.gluk_blocker.block_symbol(symbol, gluk_signal['direction'])
+                        
+                        logger.info(
+                            f"🧪 Gluk Signal: {gluk_signal['symbol']} {gluk_signal['direction']} "
+                            f"@ {gluk_signal.get('entry_price', 0):.4f} "
+                            f"(Score: {gluk_signal.get('score', 0):.1f})"
+                        )
+                    else:
+                        logger.warning(f"Gluk: {symbol} - failed to save signal to DB")
+            
+            except Exception as e:
+                logger.error(f"Gluk: Error checking {symbol}: {e}", exc_info=True)
+            
+            await asyncio.sleep(0.05)
+        
+        # Логировать итоги
+        logger.info(
+            f"🧪 Gluk analysis complete:\n"
+            f"  📊 Total symbols: {len(symbols_to_check)}\n"
+            f"  🔍 Analyzed: {symbols_analyzed}\n"
+            f"  🚫 Blocked: {symbols_blocked}\n"
+            f"  ✅ Signals found: {signals_found}"
+        )
+    
     async def _fast_catchup_phase(self):
         """FAST CATCHUP: Быстрая параллельная догрузка gaps для existing symbols"""
         if not self.fast_catchup or not self.coordinator:
@@ -1366,6 +1526,44 @@ class TradingBot:
         except Exception as e:
             session.rollback()
             ap_logger.error(f"Failed to save AP signal to DB: {e}", exc_info=True)
+            return False
+        finally:
+            session.close()
+    
+    def _save_gluk_signal(self, gluk_signal: Dict) -> bool:
+        """
+        Сохранить Gluk сигнал в БД
+        
+        Returns:
+            bool: True если успешно сохранено, False если ошибка
+        """
+        from src.database.models import GlukSignal
+        
+        session = db.get_session()
+        try:
+            signal = GlukSignal(
+                context_hash=gluk_signal.get('context_hash', f"{gluk_signal['symbol']}_{gluk_signal['direction']}_{int(datetime.now(pytz.UTC).timestamp())}"),
+                symbol=gluk_signal['symbol'],
+                timeframe=gluk_signal['timeframe'],
+                direction=gluk_signal['direction'],
+                entry_price=float(gluk_signal['entry_price']),
+                stop_loss=float(gluk_signal['stop_loss']),
+                take_profit_1=float(gluk_signal['take_profit_1']) if gluk_signal.get('take_profit_1') else None,
+                take_profit_2=float(gluk_signal['take_profit_2']) if gluk_signal.get('take_profit_2') else None,
+                score=float(gluk_signal.get('score', 0)),
+                status='ACTIVE',
+                meta_data=gluk_signal.get('meta_data', {}),
+                created_at=datetime.now(pytz.UTC)
+            )
+            
+            session.add(signal)
+            session.commit()
+            logger.info(f"💾 Gluk: Saved signal to DB: {gluk_signal['symbol']} {gluk_signal['direction']}")
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Gluk: Failed to save signal to DB: {e}", exc_info=True)
             return False
         finally:
             session.close()

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-17T00:29:05.615047+00:00",
+  "timestamp": "2025-10-18T01:09:38.905228+00:00",
   "symbols_info": {
     "BTCUSDT": {
       "pricePrecision": 2,
@@ -3713,6 +3713,30 @@
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "status": "PENDING_TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "ZBTUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "status": "PENDING_TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "RVVUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "status": "PENDING_TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "LABUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "RIVERUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     }
   }
