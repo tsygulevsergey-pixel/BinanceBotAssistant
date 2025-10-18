@@ -156,6 +156,43 @@ The system initializes by loading configurations, connecting to Binance, startin
 
 **NOTE:** Full pullback/retest "wait" logic (monitoring pending signals) можно добавить в следующей итерации если потребуется.
 
+## 🎯 PHASE 3: Advanced Filters & Multi-Confirmation (PLANNED)
+**Goal:** Professional-grade filters to reach 70-80% WR target
+
+**Planned Changes:**
+1. **Multi-Timeframe Confirmation** (HTF Alignment):
+   - Check 4H EMA200 trend alignment
+   - Rule: enter only if 15m AND 4H both aligned
+   - Effect: eliminate counter-trend entries (+10-15% WR)
+
+2. **ADX Filter Strengthening**:
+   - OLD: ADX threshold = 14 (too weak)
+   - NEW: ADX threshold = 25 (strong trend only)
+   - Rule: skip if ADX < 25 (choppy market)
+   - Effect: fewer false breakouts (+5-10% WR)
+
+3. **VWAP Integration** (institutional flow):
+   - Add VWAP as confluence factor
+   - Prefer entries near VWAP (institutional support)
+   - Effect: better fill quality, institutional alignment
+
+4. **Position Stacking Prevention**:
+   - Limit: max 1 active position per symbol
+   - Avoid multiple entries on same setup
+   - Effect: cleaner risk management
+
+5. **Zone-based Dynamic TP** (optional):
+   - Instead of fixed 1R/2R
+   - TP adjusted to nearest S/R zone
+   - Effect: better R:R ratios
+
+**Expected Results:**
+- Win Rate: 55-65% (Phase 2) → **70-80%** (Phase 3)
+- Profit Factor: 1.8-2.2 → **2.5-3.0**
+- Trade frequency: ~30% reduction (quality over quantity)
+
+**Status:** ⏳ WAITING - will implement after Phase 1+2 testing complete
+
 # External Dependencies
 
 ## Exchange Integration
