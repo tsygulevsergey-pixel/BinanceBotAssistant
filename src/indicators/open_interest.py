@@ -69,6 +69,10 @@ class OpenInterestCalculator:
                 'data_valid': False  # Флаг что данные - fallback
             }
         
+        # КРИТИЧНО: DEBUG логирование для диагностики формата данных
+        logger.debug(f"🔍 OI data sample (first): {oi_hist[0]}")
+        logger.debug(f"🔍 OI data sample (last): {oi_hist[-1]}")
+        
         # Сортируем по timestamp (от старых к новым)
         sorted_hist = sorted(oi_hist, key=lambda x: x.get('timestamp', 0))
         
