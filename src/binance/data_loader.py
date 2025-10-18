@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import pytz
 import pandas as pd
+import math
 from src.utils.logger import logger
 from src.utils.config import config
 from src.binance.client import BinanceClient
@@ -29,7 +30,7 @@ class DataLoader:
     
     async def download_historical_klines(self, symbol: str, interval: str, 
                                         start_date: datetime, end_date: datetime, max_retries: int = 3):
-        total_days = max(1, int((end_date - start_date).total_seconds() / 86400))
+        total_days = max(1, math.ceil((end_date - start_date).total_seconds() / 86400))
         logger.info(f"Downloading historical klines for {symbol} {interval} from {start_date} to {end_date} ({total_days} days)")
         
         current_date = start_date
