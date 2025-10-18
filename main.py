@@ -1117,8 +1117,9 @@ class TradingBot:
                 
                 # Преобразовать k-line в формат DataFrame
                 current_kline = klines[0]
+                # КРИТИЧНО: Создать БЕЗ timezone для совместимости с БД
                 unclosed_candle = {
-                    'open_time': pd.to_datetime(current_kline[0], unit='ms', utc=True),
+                    'open_time': pd.to_datetime(current_kline[0], unit='ms'),  # Без utc=True!
                     'open': float(current_kline[1]),
                     'high': float(current_kline[2]),
                     'low': float(current_kline[3]),

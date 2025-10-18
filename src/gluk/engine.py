@@ -65,12 +65,22 @@ class GlukEngine:
             return None
         
         try:
-            # Валидация - убрать timezone для совместимости с unclosed candle
+            # Валидация - ПРИНУДИТЕЛЬНО убрать timezone для совместимости
             df = df.copy()
             
-            # Конвертировать open_time в timezone-naive если нужно
-            if pd.api.types.is_datetime64tz_dtype(df['open_time']):
-                df['open_time'] = df['open_time'].dt.tz_localize(None)
+            # АГРЕССИВНАЯ конвертация: убрать timezone у ВСЕХ timestamps
+            # Это нужно потому что df_closed (из БД) имеет UTC, а unclosed (из API) тоже UTC
+            # Но при concat они могут конфликтовать
+            try:
+                # Попытка 1: Если колонка timezone-aware, убрать timezone
+                if hasattr(df['open_time'].dtype, 'tz') and df['open_time'].dtype.tz is not None:
+                    df['open_time'] = df['open_time'].dt.tz_localize(None)
+            except:
+                # Попытка 2: Принудительная конвертация через replace
+                try:
+                    df['open_time'] = pd.to_datetime(df['open_time']).dt.tz_localize(None)
+                except:
+                    pass
             
             df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
             

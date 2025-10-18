@@ -1,0 +1,182 @@
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:32 EEST | ERROR    | gluk | [Gluk] Error analyzing SKATEUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:32 EEST | ERROR    | gluk | [Gluk] Error analyzing AXSUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:33 EEST | ERROR    | gluk | [Gluk] Error analyzing 1000PEPEUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:33 EEST | ERROR    | gluk | [Gluk] Error analyzing PNUTUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:33 EEST | ERROR    | gluk | [Gluk] Error analyzing FHEUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:34 EEST | ERROR    | gluk | [Gluk] Error analyzing INUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:34 EEST | ERROR    | gluk | [Gluk] Error analyzing EDENUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:34 EEST | ERROR    | gluk | [Gluk] Error analyzing OPUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:35 EEST | ERROR    | gluk | [Gluk] Error analyzing AAVEUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:35 EEST | ERROR    | gluk | [Gluk] Error analyzing MERLUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:35 EEST | ERROR    | gluk | [Gluk] Error analyzing ENSUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:36 EEST | ERROR    | gluk | [Gluk] Error analyzing ARBUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:36 EEST | ERROR    | gluk | [Gluk] Error analyzing BLESSUSDT: Cannot compare tz-naive and tz-aware timestamps
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\gluk\engine.py", line 75, in analyze
+    df = df.sort_values('open_time', ascending=True).reset_index(drop=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\frame.py", line 7222, in sort_values
+    indexer = nargsort(
+              ^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\pandas\core\sorting.py", line 439, in nargsort
+    indexer = non_nan_idx[non_nans.argsort(kind=kind)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/tslibs/timestamps.pyx", line 387, in pandas._libs.tslibs.timestamps._Timestamp.__richcmp__
+TypeError: Cannot compare tz-naive and tz-aware timestamps
+2025-10-18 12:31:36 EEST | ERROR    | gluk | [Gluk] Error analyzing 2ZUSDT: Cannot compare tz-naive and tz-aware timestamps
