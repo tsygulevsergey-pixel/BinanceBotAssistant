@@ -1,0 +1,138 @@
+2025-10-18 12:46:40 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:46:40 EEST | WARNING  | trading_bot | Gluk: CLOUSDT - failed to save signal to DB
+2025-10-18 12:46:43 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:46:43 EEST | WARNING  | trading_bot | Gluk: ETHUSDT - failed to save signal to DB
+2025-10-18 12:46:48 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:46:48 EEST | WARNING  | trading_bot | Gluk: AGTUSDT - failed to save signal to DB
+2025-10-18 12:47:00 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=876+1, binance=1 (diff: -875)
+2025-10-18 12:47:02 EEST | INFO     | trading_bot | 📊 Loading: 237/237 (100.0%) | Queue: 0 ready | Ready: 237 symbols | Failed: 0 | 6 strategies | 0 signals | Rate: 0.2% | Next check in 784s
+2025-10-18 12:47:08 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:47:08 EEST | WARNING  | trading_bot | Gluk: GALAUSDT - failed to save signal to DB
+2025-10-18 12:47:09 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:47:09 EEST | WARNING  | trading_bot | Gluk: BNBUSDT - failed to save signal to DB
+2025-10-18 12:47:18 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:47:18 EEST | WARNING  | trading_bot | Gluk: LTCUSDT - failed to save signal to DB
+2025-10-18 12:47:47 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:47:47 EEST | WARNING  | trading_bot | Gluk: CUDISUSDT - failed to save signal to DB
+2025-10-18 12:47:50 EEST | ERROR    | trading_bot | Gluk: Failed to save signal to DB: 'score' is an invalid keyword argument for GlukSignal
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1559, in _save_gluk_signal
+    signal = GlukSignal(
+             ^^^^^^^^^^^
+  File "<string>", line 4, in __init__
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 571, in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state.py", line 569, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+TypeError: 'score' is an invalid keyword argument for GlukSignal
+2025-10-18 12:47:50 EEST | WARNING  | trading_bot | Gluk: CAKEUSDT - failed to save signal to DB
