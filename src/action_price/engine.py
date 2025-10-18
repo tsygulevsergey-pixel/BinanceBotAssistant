@@ -55,9 +55,17 @@ class ActionPriceEngine:
         self.tp1_rr = config.get('tp1_rr', 1.0)
         self.tp2_rr = config.get('tp2_rr', 2.0)
         self.sl_buffer_atr = config.get('sl_buffer_atr', 0.1)
-        self.max_sl_percent = config.get('max_sl_percent', 10.0)  # Максимальный SL в %
+        self.max_sl_percent = config.get('max_sl_percent', 15.0)  # ФАЗА 2: Повышен с 10% до 15%
         
-        logger.info(f"✅ Action Price Engine initialized (EMA200 Body Cross, TF={self.timeframe})")
+        # ФАЗА 2: Volume Confirmation параметры
+        self.volume_avg_period = config.get('volume_avg_period', 20)
+        self.volume_breakout_multiplier = config.get('volume_breakout_multiplier', 1.2)
+        
+        # ФАЗА 2: Entry Timing & Pullback параметры
+        self.pullback_depth_immediate = config.get('pullback_depth_immediate', 1.5)
+        self.pullback_depth_wait = config.get('pullback_depth_wait', 2.5)
+        
+        logger.info(f"✅ Action Price Engine initialized (EMA200 Body Cross, TF={self.timeframe}, Phase 2 active)")
     
     async def analyze(self, symbol: str, df: pd.DataFrame, df_1h: pd.DataFrame = None) -> Optional[Dict]:
         """
@@ -444,11 +452,24 @@ class ActionPriceEngine:
             else:
                 components['confirm_depth'] = 0  # Нейтрально
             
-            # 3. ОТКЛЮЧЕНО: Положение close подтверждения
-            # БЫЛО: conf_close > max(ema5,9,13,21) = +1 (перекупленность!)
-            # Этот компонент поощрял OVERBOUGHT состояние = неправильно
-            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
-            components['close_position'] = 0
+            # 3. ФАЗА 2: Положение close подтверждения (ПЕРЕРАБОТАН!)
+            # НОВАЯ ЛОГИКА: награждать pullback зону (EMA200-EMA13), штрафовать overbought
+            # LONG: в бычьем тренде EMA200 < EMA13 < EMA21 < EMA9 < EMA5
+            if ema200 <= conf_close <= ema13:
+                # ИДЕАЛЬНО: цена в pullback зоне между EMA200 (снизу) и EMA13 (сверху)
+                components['close_position'] = 2
+            elif ema13 < conf_close <= ema21:
+                # ХОРОШО: близко к EMA13
+                components['close_position'] = 1
+            elif conf_close > ema5:
+                # ПЛОХО: выше всех EMA = overbought
+                components['close_position'] = -2
+            elif conf_close > ema200:
+                # НОРМАЛЬНО: выше EMA200 но не экстремум
+                components['close_position'] = 0
+            else:
+                # Цена ниже EMA200 для LONG = странно
+                components['close_position'] = -1
             
             # 4. Наклон EMA200 (за 10 баров)
             ema200_10bars_ago = indicators['ema200'].iloc[confirm_idx - 10]
@@ -461,11 +482,29 @@ class ActionPriceEngine:
             else:
                 components['slope200'] = 0
             
-            # 5. ОТКЛЮЧЕНО: Веер EMA
-            # БЫЛО: широкий fan_spread >= 0.10 = +1 (экстремум!)
-            # Широкий разброс EMA = цена на экстремуме = поздний вход
-            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
-            components['ema_fan'] = 0
+            # 5. ФАЗА 2: Веер EMA (ПЕРЕРАБОТАН!)
+            # НОВАЯ ЛОГИКА: компактное выравнивание = ранний тренд (хорошо), широкий разброс = поздний вход (плохо)
+            bullish_fan = ema5 > ema9 and ema9 > ema13 and ema13 > ema21
+            fan_spread = (ema5 - ema21) / atr_conf
+            
+            if bullish_fan:
+                if fan_spread < 0.05:
+                    # Очень компактное выравнивание = ранний тренд
+                    components['ema_fan'] = 2
+                elif fan_spread < 0.10:
+                    # Компактное
+                    components['ema_fan'] = 1
+                elif fan_spread >= 0.20:
+                    # Широкий разброс = поздний/экстремум вход
+                    components['ema_fan'] = -2
+                else:
+                    components['ema_fan'] = 0
+            elif ema5 < ema9 and ema9 < ema13 and ema13 < ema21:
+                # Медвежий веер на бычьем сигнале = плохо
+                components['ema_fan'] = -2
+            else:
+                # Нет четкого веера = нейтрально
+                components['ema_fan'] = 0
             
             # 6. НОВОЕ: Overextension Penalty (штраф за перекупленность!)
             # БЫЛО: gap_atr >= 0.50 давало +1 (близко к экстремуму = хорошо) - НЕПРАВИЛЬНО!
@@ -548,6 +587,32 @@ class ActionPriceEngine:
             # УСИЛЕН ВЕС: было +1, стало +2 (wick показывает отклонение!)
             components['initiator_wick'] = 2 if init_lower_wick_atr >= 0.25 else 0
             
+            # 12. ФАЗА 2: Volume Confirmation (2025 best practice!)
+            # Проверка что breakout произошел с хорошим объемом
+            init_volume = indicators['volume'].iloc[initiator_idx]
+            
+            # Рассчитать средний объем за volume_avg_period баров ДО инициатора
+            if initiator_idx >= self.volume_avg_period:
+                volume_lookback_start = initiator_idx - self.volume_avg_period
+                avg_volume = indicators['volume'].iloc[volume_lookback_start:initiator_idx].mean()
+                
+                volume_ratio = init_volume / avg_volume if avg_volume > 0 else 0
+                
+                if volume_ratio >= self.volume_breakout_multiplier * 1.5:
+                    # Очень сильный объем (>= 1.8× среднего)
+                    components['volume_confirmation'] = 2
+                elif volume_ratio >= self.volume_breakout_multiplier:
+                    # Хороший объем (>= 1.2× среднего)
+                    components['volume_confirmation'] = 1
+                elif volume_ratio < 0.8:
+                    # Слабый объем (< 0.8× среднего) = плохо
+                    components['volume_confirmation'] = -1
+                else:
+                    components['volume_confirmation'] = 0
+            else:
+                # Недостаточно данных для расчета среднего объема
+                components['volume_confirmation'] = 0
+            
         else:  # SHORT (зеркально)
             # 1. Размер инициатора
             init_body = abs(init_close - init_open)
@@ -577,11 +642,24 @@ class ActionPriceEngine:
             else:
                 components['confirm_depth'] = 0  # Нейтрально
             
-            # 3. ОТКЛЮЧЕНО: Положение close подтверждения
-            # БЫЛО: conf_close < min(ema5,9,13,21) = +1 (перепроданность!)
-            # Этот компонент поощрял OVERSOLD состояние = неправильно
-            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
-            components['close_position'] = 0
+            # 3. ФАЗА 2: Положение close подтверждения (ПЕРЕРАБОТАН!)
+            # НОВАЯ ЛОГИКА: награждать pullback зону (EMA13-EMA200), штрафовать oversold
+            # SHORT: в медвежьем тренде EMA5 < EMA9 < EMA21 < EMA13 < EMA200
+            if ema13 <= conf_close <= ema200:
+                # ИДЕАЛЬНО: цена в pullback зоне между EMA13 (снизу) и EMA200 (сверху)
+                components['close_position'] = 2
+            elif ema21 <= conf_close < ema13:
+                # ХОРОШО: близко к EMA13
+                components['close_position'] = 1
+            elif conf_close < ema5:
+                # ПЛОХО: ниже всех EMA = oversold
+                components['close_position'] = -2
+            elif conf_close < ema200:
+                # НОРМАЛЬНО: ниже EMA200 но не экстремум
+                components['close_position'] = 0
+            else:
+                # Цена выше EMA200 для SHORT = странно
+                components['close_position'] = -1
             
             # 4. Наклон EMA200
             ema200_10bars_ago = indicators['ema200'].iloc[confirm_idx - 10]
@@ -594,11 +672,29 @@ class ActionPriceEngine:
             else:
                 components['slope200'] = 0
             
-            # 5. ОТКЛЮЧЕНО: Веер EMA
-            # БЫЛО: широкий fan_spread >= 0.10 = +1 (экстремум!)
-            # Широкий разброс EMA = цена на экстремуме = поздний вход
-            # ВРЕМЕННО ОБНУЛЁН до переработки в Фазе 2
-            components['ema_fan'] = 0
+            # 5. ФАЗА 2: Веер EMA (ПЕРЕРАБОТАН!)
+            # НОВАЯ ЛОГИКА: компактное выравнивание = ранний тренд (хорошо), широкий разброс = поздний вход (плохо)
+            bullish_fan = ema5 > ema9 and ema9 > ema13 and ema13 > ema21
+            fan_spread = (ema5 - ema21) / atr_conf
+            
+            if bullish_fan:
+                if fan_spread < 0.05:
+                    # Очень компактное выравнивание = ранний тренд
+                    components['ema_fan'] = 2
+                elif fan_spread < 0.10:
+                    # Компактное
+                    components['ema_fan'] = 1
+                elif fan_spread >= 0.20:
+                    # Широкий разброс = поздний/экстремум вход
+                    components['ema_fan'] = -2
+                else:
+                    components['ema_fan'] = 0
+            elif ema5 < ema9 and ema9 < ema13 and ema13 < ema21:
+                # Медвежий веер на бычьем сигнале = плохо
+                components['ema_fan'] = -2
+            else:
+                # Нет четкого веера = нейтрально
+                components['ema_fan'] = 0
             
             # 6. НОВОЕ: Overextension Penalty (штраф за перепроданность!)
             # SHORT: зеркально
@@ -677,6 +773,32 @@ class ActionPriceEngine:
             init_upper_wick_atr = init_upper_wick / atr_init
             # УСИЛЕН ВЕС: было +1, стало +2 (wick показывает отклонение!)
             components['initiator_wick'] = 2 if init_upper_wick_atr >= 0.25 else 0
+            
+            # 12. ФАЗА 2: Volume Confirmation (2025 best practice!)
+            # SHORT: та же логика что и для LONG
+            init_volume = indicators['volume'].iloc[initiator_idx]
+            
+            # Рассчитать средний объем за volume_avg_period баров ДО инициатора
+            if initiator_idx >= self.volume_avg_period:
+                volume_lookback_start = initiator_idx - self.volume_avg_period
+                avg_volume = indicators['volume'].iloc[volume_lookback_start:initiator_idx].mean()
+                
+                volume_ratio = init_volume / avg_volume if avg_volume > 0 else 0
+                
+                if volume_ratio >= self.volume_breakout_multiplier * 1.5:
+                    # Очень сильный объем (>= 1.8× среднего)
+                    components['volume_confirmation'] = 2
+                elif volume_ratio >= self.volume_breakout_multiplier:
+                    # Хороший объем (>= 1.2× среднего)
+                    components['volume_confirmation'] = 1
+                elif volume_ratio < 0.8:
+                    # Слабый объем (< 0.8× среднего) = плохо
+                    components['volume_confirmation'] = -1
+                else:
+                    components['volume_confirmation'] = 0
+            else:
+                # Недостаточно данных для расчета среднего объема
+                components['volume_confirmation'] = 0
         
         # Итоговый score
         score_total = sum(components.values())

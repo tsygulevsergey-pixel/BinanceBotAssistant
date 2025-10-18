@@ -427,10 +427,19 @@ action_price:
   tp1_rr: 1.0  # TP1 = 1R (Risk)
   tp2_rr: 2.0  # TP2 = 2R (только для STANDARD)
   sl_buffer_atr: 0.1  # Буфер SL = 0.1×ATR от экстремума инициатора
-  max_sl_percent: 10.0  # Максимальный SL в % от entry (5.0 = 5%, 10.0 = 10%)
+  max_sl_percent: 15.0  # ФАЗА 2: Повышен с 10% до 15% для динамических стопов (адаптация к волатильности)
   
   # Буфер для подтверждения (защита от касаний EMA200)
   confirm_buffer_atr: 0.1  # Low/High должны быть на расстоянии 0.1×ATR от EMA200
+  
+  # ФАЗА 2: Volume Confirmation (2025 best practice)
+  volume_avg_period: 20  # Период для расчета среднего объема
+  volume_breakout_multiplier: 1.2  # Breakout volume должен быть >= 1.2× среднего
+  
+  # ФАЗА 2: Entry Timing & Pullback Logic
+  pullback_depth_immediate: 1.5  # Immediate entry если depth < 1.5 ATR (не переразогнан)
+  pullback_depth_wait: 2.5  # Wait for pullback если 1.5 <= depth < 2.5 ATR
+  # Skip если depth >= 2.5 ATR (слишком далеко, высокий риск отката)
   
   # Зоны S/R
   zones:
