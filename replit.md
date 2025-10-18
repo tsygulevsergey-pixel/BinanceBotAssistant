@@ -6,6 +6,51 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot, designe
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Analysis (Oct 18, 2025)
+
+## Action Price Critical Findings
+
+### Current Performance (28 trades, Oct 16-18):
+- **Win Rate:** 28.6% pure, 46.4% with BE
+- **Profit Factor:** 0.98 (almost break-even)
+- **Results:** 8 wins (TP1/TP2), 15 losses (SL), 5 BE
+- **Key Issue:** 53.6% trades hit Stop Loss
+
+### CRITICAL PROBLEM: Inverted Scoring System
+**PARADOX:** Higher score = Higher loss probability
+- **Winners avg score:** 3.6
+- **Losers avg score:** 5.5 (53% higher!)
+
+**Problematic Components (losers score higher):**
+- `confirm_depth`: losers=1.57 vs winners=1.11 (+41%) - rewards distance from EMA200
+- `gap_to_atr`: losers=0.86 vs winners=0.67 (+28%) - rewards extremes
+- `close_position`: losers=0.76 vs winners=0.11 (+590%) - rewards overbought/oversold
+- `ema_fan`: losers=0.29 vs winners=0.00 - wider spread = worse
+
+**Root Cause:** System rewards characteristics that predict reversals (overbought/oversold extremes) instead of sustainable breakouts.
+
+### Missing Best Practices (from 75-85% WR strategies):
+1. **No Pullback/Retest Requirement** - enters immediately after breakout (catches end of impulse)
+2. **Entry Timing** - enters when price is FAR from EMA200, guaranteeing retracement
+3. **Volume Confirmation** - not used at all
+4. **Dynamic ATR Stops** - SL capped at max_sl_percent=10%, too tight for volatile coins
+5. **Trend Strength Filter** - ADX threshold=14 too low (should be 25+)
+6. **Proximity Scoring** - should reward CLOSENESS to EMA200, not distance
+
+### Recommended Fixes (Priority Order):
+1. **Invert proximity scoring** - penalize distance from EMA200, reward closeness
+2. **Add pullback requirement** - wait for retest before entry
+3. **Dynamic SL** - remove or adapt max_sl_percent based on volatility
+4. **Volume filter** - breakout volume > avg, pullback volume < breakout
+5. **Raise ADX threshold** - 14 → 25 (filter out ranging markets)
+6. **Rebalance weights** - raise score_standard_min to 6.0, strengthen lipuchka penalty
+
+### Expected Improvements:
+- Phase 1 (scoring fixes): 28.6% → 40-45% WR
+- Phase 2 (pullback + dynamic SL): 45% → 55-65% WR  
+- Phase 3 (advanced filters): 65% → 70-80% WR
+- Target Profit Factor: 2.0-2.5
+
 # System Architecture
 
 ## Core Components
