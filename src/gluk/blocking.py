@@ -12,7 +12,7 @@ from typing import Optional
 from datetime import datetime
 import pytz
 
-from src.gluk.models import GlukBlocking
+from src.database.models import GlukBlocking
 
 logger = logging.getLogger(__name__)
 

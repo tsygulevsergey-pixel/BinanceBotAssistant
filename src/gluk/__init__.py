@@ -16,9 +16,11 @@ Gluk (Legacy Action Price System)
 from .engine import GlukEngine
 from .performance_tracker import GlukPerformanceTracker
 from .blocking import GlukSymbolBlocker
+from .logger import gluk_logger
 
 __all__ = [
     'GlukEngine',
     'GlukPerformanceTracker',
     'GlukSymbolBlocker',
+    'gluk_logger',
 ]
