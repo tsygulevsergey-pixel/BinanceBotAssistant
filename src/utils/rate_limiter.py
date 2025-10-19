@@ -154,32 +154,38 @@ class RateLimiter:
             retry_after: Время ожидания из заголовка Retry-After (при бане)
         """
         async with self.lock:  # ← THREAD-SAFE обновление
+            prev_current_weight = self.current_weight
+            
             # Логировать только значительные изменения
-            if actual_weight != self.current_weight:
-                diff = actual_weight - self.current_weight
+            if actual_weight != prev_current_weight:
+                diff = actual_weight - prev_current_weight
                 if abs(diff) > 50:  # Логировать только при большом расхождении
                     logger.info(
-                        f"📊 Rate limiter sync: local={self.current_weight}+{self.pending_weight}, "
+                        f"📊 Rate limiter sync: local={prev_current_weight}+{self.pending_weight}, "
                         f"binance={actual_weight} (diff: {diff:+d})"
                     )
             
-            # Вычислить сколько веса реально добавилось (от Binance)
-            # При сбросе счётчика Binance (новая минута) diff может быть отрицательным
-            weight_added = max(0, actual_weight - self.current_weight)
-            
-            # ВСЕГДА синхронизировать с Binance (единственный источник правды)
-            self.current_weight = actual_weight
-            
-            # Освободить pending weight на величину добавленного веса
-            # Это учитывает что ответ пришёл от ОДНОГО запроса, остальные ещё в полёте
-            self.pending_weight = max(0, self.pending_weight - weight_added)
-            
-            # Если Binance сбросил счётчик (новая минута) - сбросить pending
-            if actual_weight < self.pending_weight:
+            # КРИТИЧНО: Проверить сброс счётчика Binance (новая минута)
+            # Если actual_weight МЕНЬШЕ prev_current_weight - значит Binance сбросил счётчик
+            if actual_weight < prev_current_weight:
+                # Новая минута - полный сброс
+                self.current_weight = actual_weight
                 self.pending_weight = 0
-            
-            # Очистить локальную историю
-            self.requests.clear()
+                self.requests.clear()
+                logger.debug(f"✅ Binance counter reset detected, local counters synchronized")
+            else:
+                # Нормальное обновление (в пределах той же минуты)
+                weight_added = actual_weight - prev_current_weight
+                
+                # ВСЕГДА синхронизировать с Binance (единственный источник правды)
+                self.current_weight = actual_weight
+                
+                # Освободить pending weight на величину добавленного веса
+                # Это учитывает что ответ пришёл от ОДНОГО запроса, остальные ещё в полёте
+                self.pending_weight = max(0, self.pending_weight - weight_added)
+                
+                # Очистить локальную историю
+                self.requests.clear()
         
         # Если есть Retry-After - значит IP бан или временная блокировка
         if retry_after:
