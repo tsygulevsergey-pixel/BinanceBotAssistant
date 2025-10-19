@@ -51,9 +51,17 @@ class ActionPriceEngine:
         self.score_standard_min = config.get('score_standard_min', 3)
         self.score_scalp_min = config.get('score_scalp_min', 1)
         
-        # TP/SL параметры
+        # TP/SL параметры - НОВАЯ СИСТЕМА 30/40/30
         self.tp1_rr = config.get('tp1_rr', 1.0)
-        self.tp2_rr = config.get('tp2_rr', 2.0)
+        self.tp2_rr = config.get('tp2_rr', 2.0)  # TP2 для STANDARD
+        self.tp2_scalp_rr = config.get('tp2_scalp_rr', 1.5)  # TP2 для SCALP (новое!)
+        self.tp3_trail_atr = config.get('tp3_trail_atr', 1.2)  # Trailing stop distance
+        
+        # Разделение позиции (30/40/30)
+        self.tp1_size = config.get('tp1_size', 0.30)
+        self.tp2_size = config.get('tp2_size', 0.40)
+        self.trail_size = config.get('trail_size', 0.30)
+        
         self.sl_buffer_atr = config.get('sl_buffer_atr', 0.1)
         self.max_sl_percent = config.get('max_sl_percent', 15.0)  # ФАЗА 2: Повышен с 10% до 15%
         
@@ -853,7 +861,13 @@ class ActionPriceEngine:
             
             # TP от Close подтверждающей
             tp1 = confirm_close + risk_r * self.tp1_rr
-            tp2 = confirm_close + risk_r * self.tp2_rr if mode == 'STANDARD' else None
+            # TP2 теперь для обоих режимов, но с разным RR
+            if mode == 'STANDARD':
+                tp2 = confirm_close + risk_r * self.tp2_rr  # 2R для STANDARD
+            elif mode == 'SCALP':
+                tp2 = confirm_close + risk_r * self.tp2_scalp_rr  # 1.5R для SCALP
+            else:
+                tp2 = None
             
         else:  # SHORT
             # SL за экстремумом инициатора (high + буфер)
@@ -866,7 +880,13 @@ class ActionPriceEngine:
             
             # TP от Close подтверждающей
             tp1 = confirm_close - risk_r * self.tp1_rr
-            tp2 = confirm_close - risk_r * self.tp2_rr if mode == 'STANDARD' else None
+            # TP2 теперь для обоих режимов, но с разным RR
+            if mode == 'STANDARD':
+                tp2 = confirm_close - risk_r * self.tp2_rr  # 2R для STANDARD
+            elif mode == 'SCALP':
+                tp2 = confirm_close - risk_r * self.tp2_scalp_rr  # 1.5R для SCALP
+            else:
+                tp2 = None
         
         # Получить актуальную рыночную цену через REST API
         entry = confirm_close  # Fallback если API недоступен
