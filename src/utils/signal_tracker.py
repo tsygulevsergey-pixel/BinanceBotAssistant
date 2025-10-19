@@ -138,7 +138,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -155,7 +155,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -174,7 +174,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -191,7 +191,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -222,7 +222,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -239,7 +239,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -258,7 +258,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -275,7 +275,7 @@ class SignalPerformanceTracker:
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
-                            self.lock_manager.release_lock(symbol)
+                            self.lock_manager.release_lock(symbol, signal.direction, signal.strategy_name)
                             if self.on_signal_closed_callback:
                                 self.on_signal_closed_callback(symbol, signal.strategy_name)
                             
@@ -345,7 +345,7 @@ class SignalPerformanceTracker:
                 signal.exit_type = exit_type  # type: ignore
                 signal.closed_at = datetime.now(pytz.UTC)  # type: ignore
                 
-                self.lock_manager.release_lock(symbol_str)
+                self.lock_manager.release_lock(symbol_str, signal.direction, signal.strategy_name)
                 
                 # Вызвать callback для разблокировки символа
                 if self.on_signal_closed_callback:

@@ -8,6 +8,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Per-Strategy Signal Lock System (2025-10-19)
+- **Problem**: SignalLockManager blocked symbol+direction globally across ALL strategies. Only first strategy (Break & Retest) could generate signals - others blocked even though enabled.
+- **Root Cause**: Lock check only filtered by `symbol` + `direction`, missing `strategy_name` parameter.
+- **Fix Applied**:
+  - **SQLite**: Added `strategy_name` to lock query filter (signal_lock.py line 136-140)
+  - **Redis**: Changed lock key from `signal_lock:{symbol}:{direction}` to `signal_lock:{symbol}:{direction}:{strategy_name}`
+  - **Release**: Updated `release_lock()` signature to accept `strategy_name` parameter
+  - **Signal Tracker**: All 8 `release_lock()` calls now pass `direction` and `strategy_name`
+- **New Behavior**:
+  - ✅ Multiple strategies CAN signal same symbol+direction simultaneously (e.g., Liquidity Sweep LONG BTCUSDT + Break & Retest LONG BTCUSDT)
+  - ❌ Same strategy CANNOT have >1 active signal on same symbol+direction
+  - 🔓 Lock releases only for specific strategy when its signal closes (TP/SL)
+- **Impact**: All 6 enabled strategies (Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile, ATR Momentum) can now independently generate signals on the same symbols.
+
 ## Statistics & Display Fixes (2025-10-19)
 - **Fixed Breakeven Statistics**: Corrected exit_type mislabeling in signal_tracker.py (lines 154, 238) - breakeven exits (pnl=0) were incorrectly marked as "TP1".
 - **Fixed Action Price R:R Display**: Changed from single incorrect R:R (calculated for TP2) to per-level display showing accurate risk-reward for each target (TP1, TP2, TP3 if exists).
