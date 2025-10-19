@@ -38,7 +38,10 @@ class BinanceClient:
         self.symbols_info: Dict[str, Dict] = {}
     
     async def __aenter__(self):
-        self.session = aiohttp.ClientSession()
+        # КРИТИЧНО: Установить timeout чтобы избежать бесконечного зависания
+        # total=60 - максимум 60 секунд на весь запрос (connect + read + write)
+        timeout = aiohttp.ClientTimeout(total=60)
+        self.session = aiohttp.ClientSession(timeout=timeout)
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
