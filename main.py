@@ -1464,12 +1464,13 @@ class TradingBot:
             if confluence_flags.get('zone_sr'):
                 confluences.append('S/R Zone')
             
-            # Рассчитать R:R
+            # Рассчитать R:R для TP1 (основная цель)
             entry = ap_signal['entry_price']
             sl = ap_signal['stop_loss']
+            tp1 = ap_signal.get('take_profit_1')
             tp2 = ap_signal.get('take_profit_2')
             risk = abs(entry - sl)
-            rr_ratio = abs(tp2 - entry) / risk if tp2 and risk > 0 else 2.0
+            rr_ratio = abs(tp1 - entry) / risk if tp1 and risk > 0 else 0.0
             
             # Форматировать цены с точностью Binance
             symbol = ap_signal['symbol']
