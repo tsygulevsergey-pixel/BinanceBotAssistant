@@ -1464,13 +1464,12 @@ class TradingBot:
             if confluence_flags.get('zone_sr'):
                 confluences.append('S/R Zone')
             
-            # Рассчитать R:R для TP1 (основная цель)
+            # Получить цены и риск для расчёта R:R
             entry = ap_signal['entry_price']
             sl = ap_signal['stop_loss']
             tp1 = ap_signal.get('take_profit_1')
             tp2 = ap_signal.get('take_profit_2')
             risk = abs(entry - sl)
-            rr_ratio = abs(tp1 - entry) / risk if tp1 and risk > 0 else 0.0
             
             # Форматировать цены с точностью Binance
             symbol = ap_signal['symbol']
@@ -1487,14 +1486,25 @@ class TradingBot:
                 f"🛑 Стоп: <b>{sl_fmt}</b>\n"
             )
             
-            if ap_signal.get('take_profit_1'):
-                tp1_fmt = self.client.format_price(symbol, ap_signal['take_profit_1'])
-                message += f"🎯 TP1 (30%): <b>{tp1_fmt}</b>\n"
+            # Показать TP уровни с их R:R
+            if tp1:
+                tp1_fmt = self.client.format_price(symbol, tp1)
+                rr1 = abs(tp1 - entry) / risk if risk > 0 else 0.0
+                message += f"🎯 TP1 (30%): <b>{tp1_fmt}</b> | R:R <b>1:{rr1:.1f}</b>\n"
+            
             if tp2:
                 tp2_fmt = self.client.format_price(symbol, tp2)
-                message += f"🎯 TP2 (40%): <b>{tp2_fmt}</b>\n"
+                rr2 = abs(tp2 - entry) / risk if risk > 0 else 0.0
+                message += f"🎯 TP2 (40%): <b>{tp2_fmt}</b> | R:R <b>1:{rr2:.1f}</b>\n"
             
-            message += f"📈 R:R: <b>1:{rr_ratio:.1f}</b>\n\n"
+            # Если есть TP3 (для будущего расширения)
+            tp3 = ap_signal.get('take_profit_3')
+            if tp3:
+                tp3_fmt = self.client.format_price(symbol, tp3)
+                rr3 = abs(tp3 - entry) / risk if risk > 0 else 0.0
+                message += f"🎯 TP3 (30%): <b>{tp3_fmt}</b> | R:R <b>1:{rr3:.1f}</b>\n"
+            
+            message += "\n"
             
             # Добавить таблицу с деталями свечей
             from datetime import datetime
