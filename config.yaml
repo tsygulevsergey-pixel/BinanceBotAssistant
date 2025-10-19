@@ -275,13 +275,18 @@ strategies:
     atr_multiplier: 0.8
     breakout_atr: 0.25
   
-  # #6 ATR Momentum - ОТКЛЮЧЕНО (редкие сигналы, использовать как фильтр)
+  # #6 ATR Momentum ⭐ АКТИВИРОВАНО - Explosive impulse breakouts (УЛУЧШЕНО 2025)
   momentum:
-    enabled: false
+    enabled: true
     impulse_atr: 1.4
     close_percentile: 20  # top 20%
-    min_distance_resistance: 1.5
+    min_distance_resistance: 2.0  # Было 1.5 → строже (гарантируем runway)
     pullback_ema: [9, 20]
+    
+    # НОВЫЕ ФИЛЬТРЫ 2025:
+    htf_ema200_check: true        # Проверка HTF тренда (1H/4H EMA200)
+    prefer_pin_bar: true           # Бонус +0.5 если импульс-бар = Pin Bar
+    volume_threshold: 2.0          # Volume >2× (уже было, теперь в config)
   
   # #7 VWAP Mean Reversion - ОТКЛЮЧЕНО (работает только в range, опасен в трендах)
   vwap_mr:

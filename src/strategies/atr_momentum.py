@@ -27,18 +27,92 @@ class ATRMomentumStrategy(BaseStrategy):
         
         self.impulse_atr = strategy_config.get('impulse_atr', 1.4)
         self.close_percentile = strategy_config.get('close_percentile', 20)  # top 20%
-        self.min_distance_resistance = strategy_config.get('min_distance_resistance', 1.5)
+        self.min_distance_resistance = strategy_config.get('min_distance_resistance', 2.0)  # УЛУЧШЕНО: 2.0 ATR
         self.pullback_ema = strategy_config.get('pullback_ema', [9, 20])
-        self.volume_threshold = 2.0  # >2× по мануалу
+        self.volume_threshold = strategy_config.get('volume_threshold', 2.0)
         self.breakout_atr_min = 0.2
         self.breakout_atr_max = 0.3
         self.timeframe = '15m'  # Для отслеживания импульсов
+        
+        # НОВЫЕ ФИЛЬТРЫ 2025:
+        self.htf_ema200_check = strategy_config.get('htf_ema200_check', True)
+        self.prefer_pin_bar = strategy_config.get('prefer_pin_bar', True)
     
     def get_timeframe(self) -> str:
         return self.timeframe
     
     def get_category(self) -> str:
         return "breakout"
+    
+    def _check_higher_timeframe_trend(self, df_1h: Optional[pd.DataFrame], df_4h: Optional[pd.DataFrame], 
+                                      direction: str) -> tuple[bool, bool]:
+        """
+        НОВОЕ 2025: Higher Timeframe Confirmation
+        Проверяет тренд на 1H и 4H таймфреймах используя EMA200 (или EMA50 если данных мало)
+        Возвращает: (подтверждено, есть_данные)
+        """
+        from src.indicators.technical import calculate_ema
+        
+        # Проверка 1H
+        if df_1h is None or len(df_1h) < 50:
+            strategy_logger.debug(f"    ⚠️ HTF: нет данных 1H (минимум 50 баров)")
+            return (False, False)
+        
+        ema_period_1h = 200 if len(df_1h) >= 200 else 50
+        
+        # Проверка 4H
+        if df_4h is None or len(df_4h) < 50:
+            strategy_logger.debug(f"    ⚠️ HTF: нет данных 4H (минимум 50 баров)")
+            return (False, False)
+        
+        ema_period_4h = 200 if len(df_4h) >= 200 else 50
+        
+        # Расчёт EMA
+        ema_1h = calculate_ema(df_1h['close'], period=ema_period_1h)
+        price_1h = df_1h['close'].iloc[-1]
+        
+        ema_4h = calculate_ema(df_4h['close'], period=ema_period_4h)
+        price_4h = df_4h['close'].iloc[-1]
+        
+        if direction == 'LONG':
+            trend_1h = price_1h > ema_1h.iloc[-1]
+            trend_4h = price_4h > ema_4h.iloc[-1]
+            confirmed = trend_1h and trend_4h
+            strategy_logger.debug(f"    📊 HTF Check LONG: 1H={'✅' if trend_1h else '❌'}, 4H={'✅' if trend_4h else '❌'}")
+            return (confirmed, True)
+        else:  # SHORT
+            trend_1h = price_1h < ema_1h.iloc[-1]
+            trend_4h = price_4h < ema_4h.iloc[-1]
+            confirmed = trend_1h and trend_4h
+            strategy_logger.debug(f"    📊 HTF Check SHORT: 1H={'✅' if trend_1h else '❌'}, 4H={'✅' if trend_4h else '❌'}")
+            return (confirmed, True)
+    
+    def _check_pin_bar(self, bar_data: Dict, direction: str) -> bool:
+        """
+        НОВОЕ 2025: Проверка Pin Bar паттерна
+        Pin Bar = длинный хвост (тень) + маленькое тело
+        """
+        body_size = abs(bar_data['close'] - bar_data['open'])
+        
+        if direction == 'LONG':
+            # Bullish Pin Bar: длинный нижний хвост
+            lower_wick = min(bar_data['open'], bar_data['close']) - bar_data['low']
+            upper_wick = bar_data['high'] - max(bar_data['open'], bar_data['close'])
+            
+            # Условия: нижний хвост > 2× тела И > верхнего хвоста
+            if body_size > 0 and lower_wick > body_size * 2.0 and lower_wick > upper_wick * 1.5:
+                return True
+                
+        else:  # SHORT
+            # Bearish Pin Bar: длинный верхний хвост
+            upper_wick = bar_data['high'] - max(bar_data['open'], bar_data['close'])
+            lower_wick = min(bar_data['open'], bar_data['close']) - bar_data['low']
+            
+            # Условия: верхний хвост > 2× тела И > нижнего хвоста
+            if body_size > 0 and upper_wick > body_size * 2.0 and upper_wick > lower_wick * 1.5:
+                return True
+        
+        return False
     
     def check_signal(self, symbol: str, df: pd.DataFrame, 
                      regime: str, bias: str, 
@@ -100,6 +174,20 @@ class ATRMomentumStrategy(BaseStrategy):
         impulse_high = df['high'].iloc[impulse_bar_idx]
         impulse_low = df['low'].iloc[impulse_bar_idx]
         
+        # НОВОЕ 2025: Проверка Pin Bar на impulse bar (бонус к score)
+        impulse_bar_data = {
+            'high': df['high'].iloc[impulse_bar_idx],
+            'low': df['low'].iloc[impulse_bar_idx],
+            'open': df['open'].iloc[impulse_bar_idx],
+            'close': df['close'].iloc[impulse_bar_idx]
+        }
+        has_pin_bar = False
+        if self.prefer_pin_bar:
+            # Проверяем LONG Pin Bar на impulse bar
+            has_pin_bar = self._check_pin_bar(impulse_bar_data, 'LONG')
+            if has_pin_bar:
+                strategy_logger.debug(f"    ✅ Pin Bar обнаружен на импульс-баре {impulse_bar_idx}!")
+        
         # Объём
         avg_volume = df['volume'].rolling(20).mean().iloc[-1]
         current_volume = df['volume'].iloc[-1]
@@ -122,6 +210,19 @@ class ATRMomentumStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Слишком близко к сопротивлению: {distance_to_resistance:.2f} ATR < {self.min_distance_resistance} ATR")
             return None
         
+        # НОВОЕ 2025: HTF Trend Confirmation
+        if self.htf_ema200_check:
+            df_1h = indicators.get('df_1h')
+            df_4h = indicators.get('df_4h')
+            htf_confirmed, htf_data_available = self._check_higher_timeframe_trend(df_1h, df_4h, 'LONG')
+            
+            if htf_data_available and not htf_confirmed:
+                strategy_logger.debug(f"    ❌ LONG импульс OK, но Higher TF не подтверждает тренд (1H/4H EMA200)")
+                return None
+            
+            if htf_confirmed:
+                strategy_logger.debug(f"    ✅ Higher TF подтверждает LONG тренд (1H+4H > EMA200)")
+        
         # LONG: пробой high импульса или pullback к EMA9/20
         if bias != 'Bearish':
             # Вариант 1: пробой high импульса ≥0.2-0.3 ATR
@@ -142,6 +243,12 @@ class ATRMomentumStrategy(BaseStrategy):
                 
                 base_score = 1.0
                 confirmations = []
+                
+                # НОВОЕ 2025: Pin Bar бонус
+                if has_pin_bar:
+                    base_score += 0.5
+                    confirmations.append('pin_bar_impulse')
+                    strategy_logger.debug(f"    ✅ Pin Bar на импульсе - бонус +0.5 к score")
                 
                 cvd_change = indicators.get('cvd_change')
                 doi_pct = indicators.get('doi_pct')
@@ -186,6 +293,8 @@ class ATRMomentumStrategy(BaseStrategy):
                         'distance_to_resistance_atr': float(distance_to_resistance),
                         'entry_type': 'breakout',
                         'confirmations': confirmations,
+                        'has_pin_bar': has_pin_bar,  # НОВОЕ 2025
+                        'htf_check_enabled': self.htf_ema200_check,  # НОВОЕ 2025
                         'cvd_change': float(cvd_change) if cvd_change is not None else None,
                         'doi_pct': float(doi_pct) if doi_pct is not None else None,
                         'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None
@@ -212,6 +321,12 @@ class ATRMomentumStrategy(BaseStrategy):
                 
                 base_score = 1.0
                 confirmations = []
+                
+                # НОВОЕ 2025: Pin Bar бонус
+                if has_pin_bar:
+                    base_score += 0.5
+                    confirmations.append('pin_bar_impulse')
+                    strategy_logger.debug(f"    ✅ Pin Bar на импульсе - бонус +0.5 к score")
                 
                 cvd_change = indicators.get('cvd_change')
                 doi_pct = indicators.get('doi_pct')
@@ -256,6 +371,8 @@ class ATRMomentumStrategy(BaseStrategy):
                         'atr_median': float(atr_median),
                         'entry_type': 'pullback',
                         'confirmations': confirmations,
+                        'has_pin_bar': has_pin_bar,  # НОВОЕ 2025
+                        'htf_check_enabled': self.htf_ema200_check,  # НОВОЕ 2025
                         'cvd_change': float(cvd_change) if cvd_change is not None else None,
                         'doi_pct': float(doi_pct) if doi_pct is not None else None,
                         'depth_imbalance': float(depth_imbalance) if depth_imbalance is not None else None

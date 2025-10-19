@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **BaseStrategy**: Abstract class for trading strategies.
 - **StrategyManager**: Orchestrates strategy execution based on market regimes.
 - **Signal Dataclass**: Standardized output for trading signals.
-- **5 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile.
+- **6 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile, ATR Momentum.
 - **Action Price System**: An 11-component scoring system based on EMA200 Body Cross logic, with dynamic entry, take-profit, and stop-loss calculations, processing only fully closed 15m candles.
 
 ### Market Analysis System
@@ -195,6 +195,56 @@ The system initializes by loading configurations, connecting to Binance, startin
 - Trade frequency: ~30% reduction (quality over quantity)
 
 **Status:** ⏳ WAITING - will implement after Phase 1+2 testing complete
+
+# Recent Changes (December 2025)
+
+## ✅ ATR Momentum Strategy ACTIVATED (Dec 19, 2025)
+**Goal:** Add explosive impulse breakout detection with professional 2025 filters
+
+**Changes Implemented:**
+1. **Enabled ATR Momentum** ✅:
+   - Strategy activated after detailed isolation architecture verification
+   - Catches explosive moves (≥1.4× median ATR) with conviction (close in top 20%)
+   - Dual entry modes: aggressive breakout OR conservative pullback to EMA9/20
+
+2. **HTF EMA200 Confirmation** (NEW FILTER) ✅:
+   - Checks 1H + 4H timeframes for trend alignment
+   - Filters out counter-trend impulses (major improvement)
+   - Graceful degradation: uses EMA50 if <200 bars available
+
+3. **Pin Bar Bonus** (NEW FILTER) ✅:
+   - Detects Pin Bar pattern on impulse bar (long wick + small body)
+   - Awards +0.5 score bonus for high-conviction setups
+   - Added to metadata for Telegram signal display
+
+4. **Increased min_distance_resistance** ✅:
+   - OLD: 1.5 ATR runway to resistance
+   - NEW: 2.0 ATR runway (stricter quality check)
+   - Prevents late entries near resistance
+
+5. **Config Parameters** ✅:
+   ```yaml
+   momentum:
+     enabled: true
+     impulse_atr: 1.4
+     min_distance_resistance: 2.0  # Was 1.5
+     htf_ema200_check: true         # NEW
+     prefer_pin_bar: true            # NEW
+     volume_threshold: 2.0
+   ```
+
+**Architecture Confirmation:**
+- ✅ Full strategy isolation verified (independent execution, per-strategy symbol blocking)
+- ✅ No impact on existing strategies (MA/VWAP Pullback, Break & Retest, Volume Profile, Liquidity Sweep, Order Flow)
+- ✅ Separate config parameters, scoring, and performance tracking
+
+**Expected Results:**
+- Catches early explosive trend starts (complementary to Break & Retest's pullback approach)
+- HTF filter eliminates counter-trend entries
+- Pin Bar bonus identifies high-conviction impulses
+- 2.0 ATR runway ensures adequate profit potential
+
+**Implementation Status:** ✅ **COMPLETED & ACTIVE**
 
 # External Dependencies
 
