@@ -242,6 +242,9 @@ class ActionPriceSignal(Base):
     partial_exit_2_at = Column(DateTime)
     partial_exit_2_price = Column(Float)
     
+    # Trailing stop state (персистентность для 30% остатка после TP2)
+    trailing_peak_price = Column(Float)  # Пик цены после TP2 для trailing stop
+    
     exit_price = Column(Float)
     exit_reason = Column(String(50))
     pnl = Column(Float)

@@ -307,20 +307,22 @@ class ActionPricePerformanceTracker:
                 # Trailing distance из config (1.2 ATR по умолчанию)
                 trail_distance = atr * 1.2  # Можно взять из config если нужно
                 
-                # Отслеживаем пик после TP2
-                if not hasattr(signal, 'peak_price_after_tp2'):
-                    # Первая проверка после TP2 - установить пик
-                    signal.peak_price_after_tp2 = current_price
+                # КРИТИЧНО: Используем БД поле для персистентности
+                if signal.trailing_peak_price is None:
+                    # Первая проверка после TP2 - установить пик и сохранить в БД
+                    signal.trailing_peak_price = current_price
+                    logger.debug(f"🎯 Trailing stop initialized: {signal.symbol} peak={current_price:.4f}")
                 
                 if direction == 'LONG':
-                    # Обновить пик если цена выше
-                    if current_price > signal.peak_price_after_tp2:
-                        signal.peak_price_after_tp2 = current_price
+                    # Обновить пик если цена выше (сохраняем в БД!)
+                    if current_price > signal.trailing_peak_price:
+                        signal.trailing_peak_price = current_price
+                        logger.debug(f"📈 New peak (LONG): {signal.symbol} peak={current_price:.4f}")
                     
                     # Проверить trailing stop: откат от пика >= trail_distance
-                    if signal.peak_price_after_tp2 - current_price >= trail_distance:
+                    if signal.trailing_peak_price - current_price >= trail_distance:
                         total_pnl = self._calculate_total_pnl(signal, current_price, entry)
-                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.peak_price_after_tp2:.4f} → current {current_price:.4f} (pullback {signal.peak_price_after_tp2 - current_price:.4f} >= {trail_distance:.4f})")
+                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.trailing_peak_price:.4f} → current {current_price:.4f} (pullback {signal.trailing_peak_price - current_price:.4f} >= {trail_distance:.4f})")
                         return {
                             'exit_price': current_price,
                             'reason': 'TRAILING_STOP',
@@ -329,14 +331,15 @@ class ActionPricePerformanceTracker:
                             'status': 'WIN'
                         }
                 else:  # SHORT
-                    # Обновить пик (минимум для SHORT)
-                    if current_price < signal.peak_price_after_tp2:
-                        signal.peak_price_after_tp2 = current_price
+                    # Обновить пик (минимум для SHORT) и сохранить в БД!
+                    if current_price < signal.trailing_peak_price:
+                        signal.trailing_peak_price = current_price
+                        logger.debug(f"📉 New peak (SHORT): {signal.symbol} peak={current_price:.4f}")
                     
                     # Проверить trailing stop: откат от пика >= trail_distance
-                    if current_price - signal.peak_price_after_tp2 >= trail_distance:
+                    if current_price - signal.trailing_peak_price >= trail_distance:
                         total_pnl = self._calculate_total_pnl(signal, current_price, entry)
-                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.peak_price_after_tp2:.4f} → current {current_price:.4f} (pullback {current_price - signal.peak_price_after_tp2:.4f} >= {trail_distance:.4f})")
+                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.trailing_peak_price:.4f} → current {current_price:.4f} (pullback {current_price - signal.trailing_peak_price:.4f} >= {trail_distance:.4f})")
                         return {
                             'exit_price': current_price,
                             'reason': 'TRAILING_STOP',
