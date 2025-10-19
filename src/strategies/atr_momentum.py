@@ -212,8 +212,8 @@ class ATRMomentumStrategy(BaseStrategy):
         
         # НОВОЕ 2025: HTF Trend Confirmation
         if self.htf_ema200_check:
-            df_1h = indicators.get('df_1h')
-            df_4h = indicators.get('df_4h')
+            df_1h = indicators.get('1h')  # ИСПРАВЛЕНО: правильный ключ
+            df_4h = indicators.get('4h')  # ИСПРАВЛЕНО: правильный ключ
             htf_confirmed, htf_data_available = self._check_higher_timeframe_trend(df_1h, df_4h, 'LONG')
             
             if htf_data_available and not htf_confirmed:
