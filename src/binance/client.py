@@ -39,8 +39,10 @@ class BinanceClient:
     
     async def __aenter__(self):
         # КРИТИЧНО: Установить timeout чтобы избежать бесконечного зависания
-        # total=60 - максимум 60 секунд на весь запрос (connect + read + write)
-        timeout = aiohttp.ClientTimeout(total=60)
+        # total=20 - максимум 20 секунд на весь запрос (connect + read + write)
+        # Снижено с 60 до 20: нормальные запросы занимают <2 сек, 
+        # но 20 сек достаточно для retry и не блокирует бота на плохих токенах
+        timeout = aiohttp.ClientTimeout(total=20)
         self.session = aiohttp.ClientSession(timeout=timeout)
         return self
     
