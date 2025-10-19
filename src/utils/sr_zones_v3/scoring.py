@@ -30,8 +30,8 @@ class ZoneScorer:
         self.w4 = w4_confluence
         self.w5 = w5_noise
         
-        # Нормализация весов к 100
-        total = w1_touches + w2_reactions + w3_freshness + w4_confluence
+        # Нормализация весов к 100 (все 5 весов включая noise)
+        total = w1_touches + w2_reactions + w3_freshness + w4_confluence + w5_noise
         self.norm_w1 = w1_touches / total
         self.norm_w2 = w2_reactions / total
         self.norm_w3 = w3_freshness / total
