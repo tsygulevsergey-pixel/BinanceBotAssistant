@@ -633,3 +633,104 @@ action_price:
   performance:
     track_partial_exits: true  # Отслеживать частичные фиксации
     separate_stats: true  # Отдельная статистика от основных стратегий
+
+# =============================================================================
+# S/R ZONES V3 - Professional Implementation (2025 Best Practices)
+# =============================================================================
+# Основано на институциональной методологии:
+# - DBSCAN кластеризация для консолидации зон
+# - Валидация реакций (откат ≥0.7 ATR в m баров)
+# - Multi-factor scoring: Touches + Reactions + Freshness + Confluence - Noise
+# - R⇄S flip mechanism с подтверждением закрепления
+# - Multi-timeframe анализ: D → H4 → H1 → M15
+#
+# ВАЖНО: V3 система создана НО НЕ ИНТЕГРИРОВАНА в бота!
+# Текущий бот использует старую систему (src/utils/sr_zones_15m.py)
+# V3 находится в src/utils/sr_zones_v3/ и не влияет на работу бота
+# =============================================================================
+
+sr_zones_v3:
+  enabled: false  # V3 система не активна (требуется интеграция в стратегии)
+  
+  # Fractal swing detection (k = кол-во баров вокруг для проверки)
+  fractal_k:
+    '1d': 4
+    '4h': 3
+    '1h': 3
+    '15m': 2
+  
+  # DBSCAN clustering
+  clustering:
+    epsilon_atr_mult: 0.6  # ε = 0.6 × ATR_TF
+    min_samples: 2  # Минимум точек для формирования кластера
+  
+  # Адаптивная ширина зон (в ATR multiples)
+  zone_width:
+    '1d':
+      min: 0.8
+      max: 1.6
+    '4h':
+      min: 0.6
+      max: 1.2
+    '1h':
+      min: 0.5
+      max: 1.0
+    '15m':
+      min: 0.35
+      max: 0.7
+    min_pct: 0.001  # 0.1% минимальная ширина от цены
+  
+  # Валидация реакций
+  reaction:
+    atr_mult: 0.7  # Минимальная реакция ≥0.7 ATR для valid touch
+    bars_window:
+      '1d': 5
+      '4h': 6
+      '1h': 8
+      '15m': 12
+  
+  # Flip (R⇄S) detection
+  flip:
+    body_break_atr: 0.3  # b1 = 0.3 ATR пробой телом
+    confirmation_bars: 2  # N = 2 бара для закрепления
+    retest_reaction_atr: 0.4  # r2 = 0.4 ATR для валидации ретеста
+    weight_multiplier: 0.6  # Старый score × 0.6 после flip
+  
+  # Freshness decay (exponential)
+  freshness:
+    tau_days:
+      '1d': 20
+      '4h': 10
+      '1h': 5
+      '15m': 2
+  
+  # Multi-TF merge
+  merge:
+    overlap_threshold: 0.40  # 40% пересечение для объединения зон
+  
+  # Scoring weights (w1..w5)
+  scoring:
+    w1_touches: 24
+    w2_reactions: 28
+    w3_freshness: 18
+    w4_confluence: 22
+    w5_noise: 12
+  
+  # Strength classification thresholds
+  strength_classes:
+    key: 80      # ≥80 = "key" level
+    strong: 60   # 60-79 = "strong"
+    normal: 40   # 40-59 = "normal"
+    # <40 = "weak"
+  
+  # Zone expiry (no touches in T days)
+  expiry_days:
+    '1d': 60
+    '4h': 30
+    '1h': 15
+    '15m': 5
+  
+  # Confluence factors
+  confluence:
+    ema200_proximity_atr: 0.5  # В пределах 0.5 ATR от EMA200
+    round_number_tolerance_pct: 0.002  # ±0.2% для круглых чисел

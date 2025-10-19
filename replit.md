@@ -96,6 +96,26 @@ The system loads configurations, connects to Binance, starts parallel data proce
 ### ATR Momentum Strategy
 - Activated strategy to catch explosive moves (≥1.4× median ATR) with HTF EMA200 Confirmation (1H + 4H), Pin Bar Bonus (+0.5 score), and RSI Overextension Filter.
 
+### S/R Zones V3 System (Created but NOT Integrated)
+- **Status**: Fully implemented in `src/utils/sr_zones_v3/` but NOT yet integrated into bot strategies
+- **Current System**: Bot continues using V2 system (`src/utils/sr_zones_15m.py`)
+- **Architecture**: Modular design with 5 components:
+  - **Clustering** (`clustering.py`): DBSCAN-based zone consolidation (ε=0.6×ATR)
+  - **Validation** (`validation.py`): Reaction strength measurement (≥0.7 ATR retracement in m bars)
+  - **Scoring** (`scoring.py`): Multi-factor scoring system (Touches + Reactions + Freshness + Confluence - Noise)
+  - **Flip Detection** (`flip.py`): R⇄S zone role switching with confirmation (body break + 2-bar confirmation or retest)
+  - **Builder** (`builder.py`): Main orchestrator for multi-TF zone construction (D→H4→H1→M15)
+- **Methodology**: Based on 2024-2025 institutional trading best practices
+- **Key Features**:
+  - Adaptive fractal swing detection (k varies by TF: 1d=4, 4h=3, 1h=3, 15m=2)
+  - Zone width adapts by timeframe and volatility (e.g., 15m: 0.35-0.7 ATR)
+  - Freshness decay using exponential function (τ varies by TF)
+  - Multi-TF merge with 40% overlap threshold
+  - Strength classification: key (80+), strong (60-79), normal (40-59), weak (<40)
+  - Confluence detection (EMA200, round numbers)
+- **Configuration**: Full parameter set in `config.yaml` under `sr_zones_v3` (enabled: false)
+- **Next Steps**: Requires integration via Adapter Pattern to enable A/B testing alongside existing V2 system
+
 # External Dependencies
 
 ## Exchange Integration
