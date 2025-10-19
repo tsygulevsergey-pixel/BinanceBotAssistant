@@ -8,11 +8,22 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Statistics & Display Fixes (2025-10-19)
+- **Fixed Breakeven Statistics**: Corrected exit_type mislabeling in signal_tracker.py (lines 154, 238) - breakeven exits (pnl=0) were incorrectly marked as "TP1".
+- **Fixed Action Price R:R Display**: Changed from single incorrect R:R (calculated for TP2) to per-level display showing accurate risk-reward for each target (TP1, TP2, TP3 if exists).
+- **Created fix_breakeven.py**: One-time database correction script for historical records with exit_type='TP1' where pnl_percent=0.0 and exit_price=entry_price.
+
 ## Rate Limiter & Signal Checker Optimization (2025-10-19)
 - **Fixed Rate Limiter Drift**: Corrected counter reset detection when Binance resets to new minute (prevents -108 drift accumulation).
 - **Fixed Signal Checker Blocking**: Changed from held lock to flag-based concurrency control to prevent cycle blocking during slow candle refresh.
 - **Added Monitoring**: Cycle duration logging and counter reset tracking for performance monitoring.
 - **Impact**: Eliminates "Previous signal check still running" warnings and downstream Telegram NetworkError symptoms.
+
+## Action Price Score Logic Discussion (2025-10-19)
+- **Current Behavior**: Score < 4.0 = TP1 only; 4.0-6.0 = TP1+TP2; >6.0 = TP1+TP2+trail.
+- **Observation**: LTCUSDT Score 3.0 signal captured strong impulse (+0.73% peak) but closed at TP1 only (+0.11%), missing additional +0.62% potential profit.
+- **Decision**: Monitor more signals before making architectural changes. MFE/MAE data in JSONL logs will help analyze if low-score signals frequently have high upside potential.
+- **Future Consideration**: Dynamic trailing stop after TP1 for low-score signals that show strong momentum continuation.
 
 # System Architecture
 
