@@ -29,7 +29,24 @@ class TelegramBot:
             logger.error("Telegram bot token not configured")
             return
         
-        self.app = Application.builder().token(self.token).build()
+        # Proxy support для обхода блокировок Telegram
+        builder = Application.builder().token(self.token)
+        
+        proxy_url = config.get_secret('telegram_proxy_url')
+        if proxy_url:
+            logger.info(f"🌐 Using proxy for Telegram: {proxy_url}")
+            from httpx import AsyncClient, Proxy
+            
+            # Создаём HTTP клиент с proxy
+            http_client = AsyncClient(proxy=proxy_url, timeout=30.0)
+            
+            # Применяем к builder
+            builder = builder.get_updates_http_version("1.1").http_version("1.1")
+            # Note: python-telegram-bot v20+ использует httpx, proxy передаётся через request
+            import telegram.request
+            builder = builder.request(telegram.request.HTTPXRequest(client=http_client))
+        
+        self.app = builder.build()
         self.bot = self.app.bot
         
         self.app.add_handler(CommandHandler("start", self.cmd_start))
