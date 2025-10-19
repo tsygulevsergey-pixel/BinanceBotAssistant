@@ -82,7 +82,7 @@ The system loads configurations, connects to Binance, starts parallel data proce
 - **Exponential Backoff**: Retry logic for transient errors.
 - **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
 - **Graceful Shutdown**: Clean resource cleanup and state persistence.
-- **Timeout Protection**: HTTP requests and WebSocket connections include timeouts to prevent indefinite hangs.
+- **Timeout Protection**: HTTP requests (30s timeout), WebSocket connections (30s timeout) prevent indefinite hangs. Optimized for both individual requests and bulk API calls (24h ticker for 522 symbols).
 
 ## Feature Specifications
 
