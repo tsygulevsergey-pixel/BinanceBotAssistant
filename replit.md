@@ -6,6 +6,14 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## Rate Limiter & Signal Checker Optimization (2025-10-19)
+- **Fixed Rate Limiter Drift**: Corrected counter reset detection when Binance resets to new minute (prevents -108 drift accumulation).
+- **Fixed Signal Checker Blocking**: Changed from held lock to flag-based concurrency control to prevent cycle blocking during slow candle refresh.
+- **Added Monitoring**: Cycle duration logging and counter reset tracking for performance monitoring.
+- **Impact**: Eliminates "Previous signal check still running" warnings and downstream Telegram NetworkError symptoms.
+
 # System Architecture
 
 ## Core Components
