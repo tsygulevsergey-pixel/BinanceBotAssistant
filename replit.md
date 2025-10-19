@@ -25,11 +25,13 @@ Preferred communication style: Simple, everyday language.
 - **Decision**: Monitor more signals before making architectural changes. MFE/MAE data in JSONL logs will help analyze if low-score signals frequently have high upside potential.
 - **Future Consideration**: Dynamic trailing stop after TP1 for low-score signals that show strong momentum continuation.
 
-## Critical Bug Fix: Bot Freeze (2025-10-19)
+## Critical Bug Fix: Bot Freeze & Timeout Protection (2025-10-19)
 - **Symptom**: Bot froze for 10+ hours (11:44 - 22:00) with no main loop activity, but Performance Tracker continued working.
-- **Root Cause**: aiohttp.ClientSession created WITHOUT timeout in src/binance/client.py line 41. When Binance API failed to respond to Open Interest History request, bot hung indefinitely on `await response`.
-- **Fix**: Added ClientTimeout(total=60) to prevent infinite hangs. HTTP requests now timeout after 60 seconds max.
-- **Impact**: Prevents future bot freezes caused by network issues or unresponsive API endpoints.
+- **Root Cause #1**: aiohttp.ClientSession created WITHOUT timeout in src/binance/client.py line 46. When Binance API failed to respond to Open Interest History request, bot hung indefinitely on `await response`.
+- **Root Cause #2**: WebSocket connection without timeout in src/binance/websocket.py line 64. Could potentially hang indefinitely on connection.
+- **Fix #1**: Added ClientTimeout(total=60) to aiohttp session. HTTP requests now timeout after 60 seconds max.
+- **Fix #2**: Added asyncio.wait_for(timeout=30) to WebSocket connection. Connection attempts timeout after 30 seconds max.
+- **Impact**: Comprehensive protection against infinite hangs from network issues or unresponsive endpoints (HTTP + WebSocket).
 
 # System Architecture
 

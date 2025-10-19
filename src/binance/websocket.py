@@ -55,7 +55,12 @@ class BinanceWebSocket:
         base_url = self.WS_TESTNET_URL if self.use_testnet else self.WS_BASE_URL
         url = f"{base_url}/stream?streams={stream_names}"
         
-        self.ws = await websockets.connect(url)
+        # КРИТИЧНО: Добавить timeout чтобы избежать бесконечного зависания при подключении
+        # Если timeout сработает - Exception будет обработан в start() и произойдёт reconnect
+        self.ws = await asyncio.wait_for(
+            websockets.connect(url),
+            timeout=30
+        )
         env = "TESTNET" if self.use_testnet else "PRODUCTION"
         logger.info(f"WebSocket connected [{env}] for {self.symbol} with streams: {streams}")
     
