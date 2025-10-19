@@ -29,25 +29,35 @@ class TelegramBot:
             logger.error("Telegram bot token not configured")
             return
         
-        # Proxy support для обхода блокировок Telegram
-        builder = Application.builder().token(self.token)
-        
-        proxy_url = config.get_secret('telegram_proxy_url')
-        if proxy_url:
-            logger.info(f"🌐 Using proxy for Telegram: {proxy_url}")
-            from httpx import AsyncClient, Proxy
+        try:
+            # Proxy support (опционально)
+            builder = Application.builder().token(self.token)
             
-            # Создаём HTTP клиент с proxy
-            http_client = AsyncClient(proxy=proxy_url, timeout=30.0)
+            # Увеличенные таймауты для стабильности (особенно на Windows)
+            from telegram.request import HTTPXRequest
             
-            # Применяем к builder
-            builder = builder.get_updates_http_version("1.1").http_version("1.1")
-            # Note: python-telegram-bot v20+ использует httpx, proxy передаётся через request
-            import telegram.request
-            builder = builder.request(telegram.request.HTTPXRequest(client=http_client))
-        
-        self.app = builder.build()
-        self.bot = self.app.bot
+            proxy_url = config.get_secret('telegram_proxy_url')
+            if proxy_url:
+                logger.info(f"🌐 Using proxy for Telegram: {proxy_url}")
+                from httpx import AsyncClient
+                http_client = AsyncClient(proxy=proxy_url, timeout=60.0)
+                builder = builder.request(HTTPXRequest(client=http_client))
+            else:
+                # Увеличенный таймаут для подключения (помогает на медленных сетях)
+                builder = builder.connect_timeout(30.0).read_timeout(30.0).write_timeout(30.0)
+            
+            # Retry логика для временных сбоев
+            builder = builder.pool_timeout(30.0)
+            
+            self.app = builder.build()
+            self.bot = self.app.bot
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize Telegram bot: {e}")
+            logger.warning("⚠️  Bot will continue WITHOUT Telegram notifications")
+            logger.warning("⚠️  Check your TELEGRAM_BOT_TOKEN and internet connection")
+            self.app = None
+            self.bot = None
+            return
         
         self.app.add_handler(CommandHandler("start", self.cmd_start))
         self.app.add_handler(CommandHandler("help", self.cmd_help))
@@ -70,15 +80,25 @@ class TelegramBot:
         # Обработчик нажатий на кнопки клавиатуры
         self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_keyboard_buttons))
         
-        await self.app.initialize()
-        await self.app.start()
-        
-        # Запуск polling в фоновом режиме для получения команд
-        if self.app.updater:
-            asyncio.create_task(self.app.updater.start_polling(drop_pending_updates=True))
-            logger.info("Telegram bot started with polling")
-        else:
-            logger.warning("Telegram updater not available - commands will not work")
+        try:
+            await self.app.initialize()
+            await self.app.start()
+            
+            # Запуск polling в фоновом режиме для получения команд
+            if self.app.updater:
+                asyncio.create_task(self.app.updater.start_polling(
+                    drop_pending_updates=True,
+                    allowed_updates=Update.ALL_TYPES
+                ))
+                logger.info("✅ Telegram bot started with polling")
+            else:
+                logger.warning("⚠️  Telegram updater not available - commands will not work")
+        except Exception as e:
+            logger.error(f"❌ Failed to start Telegram polling: {e}")
+            logger.warning("⚠️  Bot will continue WITHOUT Telegram notifications")
+            logger.warning("💡 This is usually a temporary network issue. Bot will keep trying...")
+            self.app = None
+            self.bot = None
     
     async def stop(self):
         if self.app:
@@ -90,6 +110,13 @@ class TelegramBot:
             except Exception as e:
                 logger.error(f"Error stopping Telegram bot: {e}")
         logger.info("Telegram bot stopped")
+    
+    def _is_telegram_available(self) -> bool:
+        """Проверить доступность Telegram бота"""
+        if self.bot is None or self.app is None:
+            logger.debug("⚠️  Telegram not available - skipping notification")
+            return False
+        return True
     
     def get_main_keyboard(self):
         """Создать главную клавиатуру с кнопками"""
