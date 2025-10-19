@@ -101,6 +101,23 @@ scoring:
   funding_extreme_penalty: -1
   btc_against_penalty: -2
   btc_filter_tf: "1h"  # BTC filter timeframe
+  
+  # CVD Divergence Confirmation (2025 Best Practice)
+  # Используется как CONFIRMATION FILTER (не trigger!)
+  cvd_divergence:
+    enabled: false  # БЕЗОПАСНОСТЬ: начинаем с отключенного
+    check_15m: true  # Проверять divergence на 15m (основной TF)
+    check_1h: true   # Проверять divergence на 1H (HTF confirmation)
+    
+    # Scoring weights (multi-timeframe approach):
+    score_15m: 0.3   # Умеренный бонус (15m может быть шумно)
+    score_1h: 0.5    # Сильный бонус (1H надежнее)
+    score_both: 0.8  # Максимальный бонус (оба TF совпадают!)
+    
+    # Detection parameters:
+    lookback_bars: 20        # Баров для поиска peaks/troughs
+    min_divergence: 0.3      # Минимальная сила divergence (30%)
+    require_volume: true     # Требовать volume confirmation
 
 # Scanning
 scanning:

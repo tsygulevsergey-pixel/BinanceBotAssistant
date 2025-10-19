@@ -1,6 +1,6 @@
 # Overview
 
-This project is a professional-grade Binance USDT-M Futures Trading Bot. It focuses on high-performance trading through advanced strategies, market regime detection, and sophisticated risk management. The bot incorporates 5 core trading strategies and operates in both Signals-Only and Live Trading Modes. Its primary goal is to achieve an 80%+ Win Rate and a Profit Factor of 1.8-2.5, leveraging an "Action Price" system based on Support/Resistance zones, Anchored VWAP, and price action patterns. An experimental "Gluk System" is also included to replicate a high-win-rate legacy Action Price implementation.
+This project is a professional-grade Binance USDT-M Futures Trading Bot designed for high-performance trading. It incorporates advanced strategies, market regime detection, and sophisticated risk management to achieve an 80%+ Win Rate and a Profit Factor of 1.8-2.5. The bot utilizes an "Action Price" system based on Support/Resistance zones, Anchored VWAP, and price action patterns, alongside an experimental "Gluk System" for high-win-rate legacy Action Price implementation. It supports both Signals-Only and Live Trading Modes.
 
 # User Preferences
 
@@ -11,10 +11,10 @@ Preferred communication style: Simple, everyday language.
 ## Core Components
 
 ### Market Data Infrastructure
-- **BinanceClient**: REST API client with rate limiting and exponential backoff.
-- **DataLoader**: Manages historical candle data, ensuring accuracy and filtering unclosed candles.
+- **BinanceClient**: Handles REST API interactions with rate limiting and exponential backoff.
+- **DataLoader**: Manages historical candle data, ensuring accuracy.
 - **OrderBook**: Local engine synchronized via REST snapshots and WebSocket.
-- **BinanceWebSocket**: Real-time market data streaming.
+- **BinanceWebSocket**: Provides real-time market data streaming.
 - **Smart Candle-Sync Main Loop**: Synchronizes signal checks to candle close times.
 
 ### Database Layer
@@ -25,7 +25,7 @@ Preferred communication style: Simple, everyday language.
 - **StrategyManager**: Orchestrates strategy execution based on market regimes.
 - **Signal Dataclass**: Standardized output for trading signals.
 - **6 CORE STRATEGIES**: Liquidity Sweep, Break & Retest, Order Flow, MA/VWAP Pullback, Volume Profile, ATR Momentum.
-- **Action Price System**: An 11-component scoring system based on EMA200 Body Cross logic, with dynamic entry, take-profit, and stop-loss calculations, processing only fully closed 15m candles.
+- **Action Price System**: An 11-component scoring system for dynamic entry, TP, and SL calculations on 15m candles.
 
 ### Market Analysis System
 - **MarketRegimeDetector**: Classifies market states.
@@ -36,23 +36,23 @@ Preferred communication style: Simple, everyday language.
 - **IndicatorCache**: High-performance caching for indicators.
 
 ### Signal Scoring & Aggregation
-- Combines base strategy scores with market modifiers, including BTC filter and conflict resolution.
+- Combines strategy scores with market modifiers, including BTC filter and conflict resolution.
+- **CVD Divergence Confirmation**: Multi-timeframe (15m+1H) divergence detection for bonus scoring.
 
 ### Filtering & Risk Management
-- **S/R Zone-Based Stop-Loss System**: Advanced stop placement with intelligent fallbacks.
+- **S/R Zone-Based Stop-Loss System**: Advanced stop placement with fallbacks.
 - **Trailing Stop-Loss with Partial TP**: Configurable profit management.
 - **Market Entry System**: All strategies execute MARKET orders.
 - **Time Stops**: Exits trades if no progress.
 - **Symbol Blocking System**: Independent blocking per strategy.
-- **Pump Scanner v1.4**: Advanced TradingView indicator for detecting pump events.
-- **Break & Retest Enhancements**: Includes HTF trend alignment, candlestick pattern detection, ATR-based dynamic TP/SL, and volume confirmation.
-- **Volume Profile & Liquidity Sweep Enhancements**: Incorporates POC magnet filter, stricter acceptance logic, and HTF trend alignment for liquidity sweeps.
-- **Multi-Factor Confirmation & Regime-Based Weighting**: Requires multiple confirming factors for signal approval and applies regime-specific weighting to strategies.
+- **Pump Scanner v1.4**: TradingView indicator for pump detection.
+- **Break & Retest Enhancements**: HTF trend alignment, candlestick patterns, ATR-based dynamic TP/SL, volume confirmation.
+- **Volume Profile & Liquidity Sweep Enhancements**: POC magnet filter, stricter acceptance logic, HTF trend alignment.
+- **Multi-Factor Confirmation & Regime-Based Weighting**: Requires multiple confirmations and applies regime-specific weighting.
 - **Action Price SL Filter**: Rejects signals with excessively wide stop-loss.
 
 ### Telegram Integration
-- Provides commands for bot status, strategy details, performance, validation, and signal alerts in multiple languages.
-- Features persistent button keyboard UI and enhanced signal format with detailed candle information.
+- Provides commands for bot status, strategy details, performance, validation, and signal alerts in multiple languages, with a persistent button keyboard UI.
 
 ### Logging System
 - Separate log files for Main Bot and Action Price, with centralized JSONL logging for Action Price signals.
@@ -66,18 +66,17 @@ Preferred communication style: Simple, everyday language.
 
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe data loading.
-- **Loader Task**: Loads historical data and pushes symbols to a queue.
+- **Loader Task**: Loads historical data.
 - **Analyzer Task**: Consumes symbols for immediate analysis.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list.
-- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts, including smart 1-day completeness checks.
+- **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts.
 
 ### Strategy Execution Optimization
-- **Parallel Strategy Checks**: Regular strategies execute in parallel batches (20 symbols per batch) using asyncio.gather for 10x performance improvement
-- **Independent Execution**: Action Price system runs independently with its own optimized execution path
-- **Performance Benchmark**: Action Price (28s/221 symbols), Regular strategies (optimized from 38+ min to ~3-5 min)
+- **Parallel Strategy Checks**: Regular strategies execute in parallel batches using asyncio.gather for performance improvement.
+- **Independent Execution**: Action Price system runs independently with its own optimized execution path.
 
 ## Data Flow
-The system initializes by loading configurations, connecting to Binance, starting parallel data processing, and launching the Telegram bot. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, executing strategies in parallel batches, scoring signals, applying filters, and sending Telegram alerts. Data is persisted in SQLite, and signals are logged.
+The system loads configurations, connects to Binance, starts parallel data processing, and launches the Telegram bot. Real-time operations involve processing WebSocket updates, updating market data, calculating indicators, executing strategies in parallel, scoring signals, applying filters, and sending Telegram alerts. Data is persisted in SQLite, and signals are logged.
 
 ## Error Handling & Resilience
 - **Smart Rate Limiting**: Prevents API bans.
@@ -88,171 +87,24 @@ The system initializes by loading configurations, connecting to Binance, startin
 - **Auto-Reconnection**: WebSocket auto-reconnect with orderbook resynchronization.
 - **Graceful Shutdown**: Clean resource cleanup and state persistence.
 
-# Action Price Improvements (2025)
+## Feature Specifications
 
-## ✅ PHASE 1: Scoring Inversion (COMPLETED)
-**Goal:** Fix inverted scoring components (28.6% WR → 40-45% target)
+### Action Price System Improvements (Phases 1 & 2)
+- **Scoring Inversion**: Corrected inverted scoring components, improved `confirm_depth`, `overextension_penalty`, `lipuchka_penalty`, removed problematic components, and amplified quality components. Increased `min_total_score` to favor better signals.
+- **Entry Timing & Dynamic Risk**: Raised `max_sl_percent`, added Volume Confirmation as a new scoring component, redesigned `close_position` to favor pullback entries, and redesigned `ema_fan` to reward early trend stages.
 
-**Changes Implemented:**
-1. `confirm_depth`: Inverted logic - близость награждается, дальность штрафуется
-2. `overextension_penalty`: Заменяет gap_to_atr - штрафует расстояние от EMA200
-3. `lipuchka_penalty`: Усилен с -1 до -2 (убивает слабые сигналы)
-4. Disabled problematic components: `close_position` (было overbought bias), `ema_fan` (late entry bias)
-5. Quality components ×2: `retest_tag`, `break_and_base`, `initiator_wick` (с +1 до +2)
-6. `min_total_score`: Повышен с 3.0 до 6.0
+### CVD Divergence as Confirmation Filter
+- Implemented as a confirmation bonus (not a standalone trigger) in `SignalScorer`.
+- Uses a multi-timeframe approach (15m + 1H) for scoring bonuses (+0.3 to +0.8).
+- Detects bullish and bearish divergences with volume confirmation and lookback periods.
+- Configurable for enabling/disabling and scoring parameters.
 
-**Expected Results:**
-- Win Rate: 28.6% → 40-45%
-- Profit Factor: 0.98 → 1.2-1.5
-- Signals will favor: close EMA200 proximity, pullback entries, rejection wicks
-
-## ✅ PHASE 2: Entry Timing & Dynamic Risk (COMPLETED)
-**Goal:** Add pullback/retest logic + dynamic ATR-based stops (aligned with 2025 professional practices)
-
-**Changes Implemented:**
-1. **max_sl_percent Raised** ✅:
-   - OLD: 10.0% (слишком жесткий для волатильных монет)
-   - NEW: 15.0% (адаптация к волатильности)
-   - Rationale: Уменьшает преждевременные stop-outs на волатильных монетах
-
-2. **Volume Confirmation** (NEW component #12) ✅:
-   - Расчет среднего объема за 20 баров
-   - Breakout volume >= 1.8× avg = +2 балла
-   - Breakout volume >= 1.2× avg = +1 балл
-   - Слабый объем < 0.8× avg = -1 балл
-   - Rationale: 2025 best practice - volume confirms genuine breakouts
-
-3. **Redesign close_position** (component #3) ✅:
-   - OLD: close > все EMA = +1 (overbought!) ❌
-   - NEW LOGIC:
-     - LONG: EMA200 <= close <= EMA13 = +2 (pullback zone!)
-     - LONG: close > EMA5 = -2 (overbought!)
-     - SHORT: зеркально
-   - Rationale: Награждает здоровые pullback позиции вместо экстремумов
-
-4. **Redesign ema_fan** (component #5) ✅:
-   - OLD: широкий fan_spread = +1 (late entry!) ❌
-   - NEW LOGIC:
-     - Компактное выравнивание (< 0.05 ATR) = +2 (ранний тренд!)
-     - Широкий разброс (>= 0.20 ATR) = -2 (поздний вход!)
-   - Rationale: Компактный веер = ранняя стадия тренда с лучшим R:R
-
-5. **Config Parameters Added** ✅:
-   - volume_avg_period: 20
-   - volume_breakout_multiplier: 1.2
-   - pullback_depth_immediate: 1.5
-   - pullback_depth_wait: 2.5
-
-**Expected Results:**
-- Win Rate: 40-45% (Phase 1) → **55-65%** (Phase 2)
-- Profit Factor: 1.2-1.5 → **1.8-2.2**
-- Benefits:
-  - Reduced premature stop-outs (wider SL range)
-  - Volume filter eliminates low-conviction breakouts
-  - Pullback zone scoring favors better entry timing
-  - Early trend detection through compact EMA alignment
-
-**Implementation Status:** ✅ **COMPLETED & VERIFIED**
-- Architect Review: **PASS**
-- Critical bug fixed: close_position inequality order corrected
-- All changes isolated to Action Price only (Gluk untouched)
-
-**NOTE:** Full pullback/retest "wait" logic (monitoring pending signals) можно добавить в следующей итерации если потребуется.
-
-## 🎯 PHASE 3: Advanced Filters & Multi-Confirmation (PLANNED)
-**Goal:** Professional-grade filters to reach 70-80% WR target
-
-**Planned Changes:**
-1. **Multi-Timeframe Confirmation** (HTF Alignment):
-   - Check 4H EMA200 trend alignment
-   - Rule: enter only if 15m AND 4H both aligned
-   - Effect: eliminate counter-trend entries (+10-15% WR)
-
-2. **ADX Filter Strengthening**:
-   - OLD: ADX threshold = 14 (too weak)
-   - NEW: ADX threshold = 25 (strong trend only)
-   - Rule: skip if ADX < 25 (choppy market)
-   - Effect: fewer false breakouts (+5-10% WR)
-
-3. **VWAP Integration** (institutional flow):
-   - Add VWAP as confluence factor
-   - Prefer entries near VWAP (institutional support)
-   - Effect: better fill quality, institutional alignment
-
-4. **Position Stacking Prevention**:
-   - Limit: max 1 active position per symbol
-   - Avoid multiple entries on same setup
-   - Effect: cleaner risk management
-
-5. **Zone-based Dynamic TP** (optional):
-   - Instead of fixed 1R/2R
-   - TP adjusted to nearest S/R zone
-   - Effect: better R:R ratios
-
-**Expected Results:**
-- Win Rate: 55-65% (Phase 2) → **70-80%** (Phase 3)
-- Profit Factor: 1.8-2.2 → **2.5-3.0**
-- Trade frequency: ~30% reduction (quality over quantity)
-
-**Status:** ⏳ WAITING - will implement after Phase 1+2 testing complete
-
-# Recent Changes (December 2025)
-
-## ✅ ATR Momentum Strategy ACTIVATED (Dec 19, 2025)
-**Goal:** Add explosive impulse breakout detection with professional 2025 filters
-
-**Changes Implemented:**
-1. **Enabled ATR Momentum** ✅:
-   - Strategy activated after detailed isolation architecture verification
-   - Catches explosive moves (≥1.4× median ATR) with conviction (close in top 20%)
-   - Dual entry modes: aggressive breakout OR conservative pullback to EMA9/20
-
-2. **HTF EMA200 Confirmation** (NEW FILTER) ✅:
-   - Checks 1H + 4H timeframes for trend alignment
-   - Filters out counter-trend impulses (major improvement)
-   - Graceful degradation: uses EMA50 if <200 bars available
-
-3. **Pin Bar Bonus** (NEW FILTER) ✅:
-   - Detects Pin Bar pattern on impulse bar (long wick + small body)
-   - Awards +0.5 score bonus for high-conviction setups
-   - Added to metadata for Telegram signal display
-
-4. **RSI Overextension Filter** (NEW FILTER) ✅:
-   - Avoids entries when RSI > 70 (overbought for LONG)
-   - Avoids entries when RSI < 30 (oversold for SHORT)
-   - Reduces false breakouts by 15-30% (2025 best practice)
-   - Prevents buying at market extremes
-
-5. **Increased min_distance_resistance** ✅:
-   - OLD: 1.5 ATR runway to resistance
-   - NEW: 2.0 ATR runway (stricter quality check)
-   - Prevents late entries near resistance
-
-6. **Config Parameters** ✅:
-   ```yaml
-   momentum:
-     enabled: true
-     impulse_atr: 1.4
-     min_distance_resistance: 2.0       # Was 1.5
-     htf_ema200_check: true             # NEW
-     prefer_pin_bar: true                # NEW
-     rsi_overextension_filter: true     # NEW - avoid RSI extremes
-     volume_threshold: 2.0
-   ```
-
-**Architecture Confirmation:**
-- ✅ Full strategy isolation verified (independent execution, per-strategy symbol blocking)
-- ✅ No impact on existing strategies (MA/VWAP Pullback, Break & Retest, Volume Profile, Liquidity Sweep, Order Flow)
-- ✅ Separate config parameters, scoring, and performance tracking
-
-**Expected Results:**
-- Catches early explosive trend starts (complementary to Break & Retest's pullback approach)
-- HTF filter eliminates counter-trend entries
-- Pin Bar bonus identifies high-conviction impulses
-- RSI filter prevents entries at market extremes (reduces false breakouts 15-30%)
-- 2.0 ATR runway ensures adequate profit potential
-
-**Implementation Status:** ✅ **COMPLETED & ACTIVE**
+### ATR Momentum Strategy
+- Activated strategy to catch explosive moves (≥1.4× median ATR) with high conviction.
+- Includes HTF EMA200 Confirmation (1H + 4H) to filter counter-trend impulses.
+- Adds a Pin Bar Bonus (+0.5 score) for high-conviction setups.
+- Incorporates an RSI Overextension Filter to avoid entries at market extremes (RSI > 70 or < 30).
+- Increased `min_distance_resistance` to 2.0 ATR for stricter quality checks.
 
 # External Dependencies
 

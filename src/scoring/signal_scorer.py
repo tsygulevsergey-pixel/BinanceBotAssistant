@@ -33,6 +33,18 @@ class SignalScorer:
         # BTC filter TF
         self.btc_filter_tf = config.get('scoring.btc_filter_tf', '1h')
         
+        # CVD Divergence parameters (2025 Best Practice - Confirmation Filter)
+        cvd_div_config = config.get('scoring.cvd_divergence', {})
+        self.cvd_divergence_enabled = cvd_div_config.get('enabled', False)
+        self.cvd_check_15m = cvd_div_config.get('check_15m', True)
+        self.cvd_check_1h = cvd_div_config.get('check_1h', True)
+        self.cvd_score_15m = cvd_div_config.get('score_15m', 0.3)
+        self.cvd_score_1h = cvd_div_config.get('score_1h', 0.5)
+        self.cvd_score_both = cvd_div_config.get('score_both', 0.8)
+        self.cvd_lookback_bars = cvd_div_config.get('lookback_bars', 20)
+        self.cvd_min_divergence = cvd_div_config.get('min_divergence', 0.3)
+        self.cvd_require_volume = cvd_div_config.get('require_volume', True)
+        
     def score_signal(
         self,
         signal: Signal,
@@ -139,6 +151,12 @@ class SignalScorer:
         score += atr_penalty
         if atr_penalty < 0:
             components.append(f"ATR: {atr_penalty:.1f} (extreme volatility)")
+        
+        # +0.3-0.8: CVD Divergence confirmation (2025 Best Practice)
+        cvd_div_bonus = self._score_cvd_divergence(signal, indicators)
+        score += cvd_div_bonus
+        if cvd_div_bonus > 0:
+            components.append(f"CVD Div: +{cvd_div_bonus:.1f}")
         
         # Логируем детальный breakdown
         logger.info(
@@ -336,6 +354,178 @@ class SignalScorer:
             return -0.5
         
         return 0.0
+    
+    def _score_cvd_divergence(self, signal: Signal, indicators: Dict) -> float:
+        """
+        CVD Divergence Confirmation Bonus (2025 Best Practice)
+        
+        Multi-timeframe approach:
+        - 15m divergence: +0.3 (умеренный бонус)
+        - 1H divergence: +0.5 (сильный бонус)
+        - Оба совпадают: +0.8 (максимальный бонус!)
+        
+        Используется как CONFIRMATION FILTER, не trigger!
+        """
+        try:
+            # Проверка: включено ли?
+            if not self.cvd_divergence_enabled:
+                return 0.0
+            
+            # Проверка: есть ли данные?
+            if not isinstance(indicators.get('15m'), dict) and not isinstance(indicators.get('1h'), dict):
+                logger.debug(f"{signal.symbol} CVD Divergence: нет данных TF")
+                return 0.0
+            
+            div_15m = False
+            div_1h = False
+            
+            # Check 15m divergence
+            if self.cvd_check_15m and isinstance(indicators.get('15m_data'), dict):
+                df_15m = indicators.get('15m_data', {}).get('df')
+                cvd_15m = indicators.get('15m_data', {}).get('cvd')
+                
+                if df_15m is not None and cvd_15m is not None and len(df_15m) >= self.cvd_lookback_bars:
+                    div_15m = self._detect_divergence_single_tf(
+                        df_15m, cvd_15m, signal.direction
+                    )
+            
+            # Check 1H divergence
+            if self.cvd_check_1h and isinstance(indicators.get('1h_data'), dict):
+                df_1h = indicators.get('1h_data', {}).get('df')
+                cvd_1h = indicators.get('1h_data', {}).get('cvd')
+                
+                if df_1h is not None and cvd_1h is not None and len(df_1h) >= self.cvd_lookback_bars:
+                    div_1h = self._detect_divergence_single_tf(
+                        df_1h, cvd_1h, signal.direction
+                    )
+            
+            # Scoring logic
+            if div_15m and div_1h:
+                # Both timeframes confirm → VERY STRONG!
+                logger.debug(f"{signal.symbol} +{self.cvd_score_both:.1f} CVD Divergence (15m+1H aligned!)")
+                return self.cvd_score_both
+            elif div_1h:
+                # 1H only → STRONG
+                logger.debug(f"{signal.symbol} +{self.cvd_score_1h:.1f} CVD Divergence (1H)")
+                return self.cvd_score_1h
+            elif div_15m:
+                # 15m only → MODERATE
+                logger.debug(f"{signal.symbol} +{self.cvd_score_15m:.1f} CVD Divergence (15m)")
+                return self.cvd_score_15m
+            
+            return 0.0
+            
+        except Exception as e:
+            # Graceful degradation: если ошибка → возвращаем 0
+            logger.warning(f"{signal.symbol} CVD Divergence check failed: {e}")
+            return 0.0
+    
+    def _detect_divergence_single_tf(self, df: pd.DataFrame, cvd_series: pd.Series, direction: str) -> bool:
+        """
+        Детектирует divergence на одном таймфрейме
+        
+        Returns:
+            True если обнаружена divergence в сторону сигнала
+        """
+        try:
+            # Последние N баров для анализа
+            price_tail = df['close'].tail(self.cvd_lookback_bars).reset_index(drop=True)
+            cvd_tail = cvd_series.tail(self.cvd_lookback_bars).reset_index(drop=True)
+            
+            # Volume проверка (если требуется)
+            if self.cvd_require_volume:
+                volume_tail = df['volume'].tail(self.cvd_lookback_bars).reset_index(drop=True)
+                median_volume = volume_tail.median()
+            else:
+                median_volume = 0
+            
+            # Находим локальные peaks и troughs
+            price_highs = self._find_local_peaks(price_tail, order=3)
+            price_lows = self._find_local_troughs(price_tail, order=3)
+            
+            # BEARISH DIVERGENCE для SHORT
+            if direction == 'SHORT' and len(price_highs) >= 2:
+                last_price_high_idx = price_highs[-1]
+                prev_price_high_idx = price_highs[-2]
+                
+                last_price_high = price_tail[last_price_high_idx]
+                prev_price_high = price_tail[prev_price_high_idx]
+                
+                # Цена делает Higher High
+                if last_price_high > prev_price_high:
+                    last_cvd = cvd_tail[last_price_high_idx]
+                    prev_cvd = cvd_tail[prev_price_high_idx]
+                    
+                    # CVD делает Lower High (дивергенция!)
+                    if last_cvd < prev_cvd:
+                        cvd_drop = (prev_cvd - last_cvd) / (abs(prev_cvd) + 1e-8)
+                        
+                        # Volume check
+                        if self.cvd_require_volume:
+                            last_volume = volume_tail[last_price_high_idx]
+                            if last_volume < median_volume:
+                                return False  # Volume слабый
+                        
+                        if cvd_drop > self.cvd_min_divergence:
+                            return True  # ✅ Bearish divergence найдена!
+            
+            # BULLISH DIVERGENCE для LONG
+            if direction == 'LONG' and len(price_lows) >= 2:
+                last_price_low_idx = price_lows[-1]
+                prev_price_low_idx = price_lows[-2]
+                
+                last_price_low = price_tail[last_price_low_idx]
+                prev_price_low = price_tail[prev_price_low_idx]
+                
+                # Цена делает Lower Low
+                if last_price_low < prev_price_low:
+                    last_cvd = cvd_tail[last_price_low_idx]
+                    prev_cvd = cvd_tail[prev_price_low_idx]
+                    
+                    # CVD делает Higher Low (дивергенция!)
+                    if last_cvd > prev_cvd:
+                        cvd_rise = (last_cvd - prev_cvd) / (abs(prev_cvd) + 1e-8)
+                        
+                        # Volume check
+                        if self.cvd_require_volume:
+                            last_volume = volume_tail[last_price_low_idx]
+                            if last_volume < median_volume:
+                                return False  # Volume слабый
+                        
+                        if cvd_rise > self.cvd_min_divergence:
+                            return True  # ✅ Bullish divergence найдена!
+            
+            return False
+            
+        except Exception as e:
+            logger.debug(f"CVD divergence detection error: {e}")
+            return False
+    
+    def _find_local_peaks(self, series: pd.Series, order: int = 3) -> list:
+        """
+        Найти локальные максимумы (пики)
+        order = минимальное расстояние между пиками
+        """
+        peaks = []
+        for i in range(order, len(series) - order):
+            # Проверяем что точка выше соседей
+            if all(series[i] >= series[i-j] for j in range(1, order+1)) and \
+               all(series[i] >= series[i+j] for j in range(1, order+1)):
+                peaks.append(i)
+        return peaks
+    
+    def _find_local_troughs(self, series: pd.Series, order: int = 3) -> list:
+        """
+        Найти локальные минимумы (впадины)
+        order = минимальное расстояние между минимумами
+        """
+        troughs = []
+        for i in range(order, len(series) - order):
+            # Проверяем что точка ниже соседей
+            if all(series[i] <= series[i-j] for j in range(1, order+1)) and \
+               all(series[i] <= series[i+j] for j in range(1, order+1)):
+                troughs.append(i)
+        return troughs
     
     def should_enter(self, score: float) -> bool:
         """Проверить, достаточен ли score для входа"""

@@ -776,6 +776,23 @@ class TradingBot:
         # NOTE: CVD теперь берется из indicators[self.timeframe]['cvd'] в каждой стратегии
         indicators = {
             **cached_indicators,  # Все закешированные индикаторы по таймфреймам (включая CVD)
+            # Nested timeframe data with both DataFrames and indicators (for CVD Divergence)
+            # This allows both old style (indicators['1h'] = DataFrame) and new style (indicators['15m_data']['df'])
+            '15m_data': {
+                'df': timeframe_data.get('15m'),
+                **cached_indicators.get('15m', {})
+            },
+            '1h_data': {
+                'df': timeframe_data.get('1h'),
+                **cached_indicators.get('1h', {})
+            },
+            '4h_data': {
+                'df': timeframe_data.get('4h'),
+                **cached_indicators.get('4h', {})
+            },
+            # Keep backward compatibility for Break&Retest (expects direct DataFrames)
+            '1h': timeframe_data.get('1h'),  # DataFrame 1H для HTF проверки
+            '4h': timeframe_data.get('4h'),  # DataFrame 4H для HTF проверки
             'doi_pct': oi_metrics['doi_pct'],  # Реальные данные Open Interest Delta %
             'oi_delta': oi_metrics['oi_delta'],  # Абсолютное изменение OI
             'oi_data_valid': oi_metrics.get('data_valid', False),  # Флаг валидности OI данных
@@ -789,10 +806,7 @@ class TradingBot:
             'funding_extreme': False,  # TODO: Рассчитать из API Funding Rate
             'btc_bias': self.btc_filter.get_btc_bias(btc_data) if btc_data is not None else 'Neutral',
             'h4_swing_high': h4_swing_high,
-            'h4_swing_low': h4_swing_low,
-            # ДОБАВЛЕНО: DataFrame'ы для Higher Timeframe Confirmation в Break & Retest
-            '1h': timeframe_data.get('1h'),  # DataFrame 1H для HTF проверки
-            '4h': timeframe_data.get('4h')   # DataFrame 4H для HTF проверки
+            'h4_swing_low': h4_swing_low
         }
         
         # Валидация индикаторов (только для первого символа или периодически)
