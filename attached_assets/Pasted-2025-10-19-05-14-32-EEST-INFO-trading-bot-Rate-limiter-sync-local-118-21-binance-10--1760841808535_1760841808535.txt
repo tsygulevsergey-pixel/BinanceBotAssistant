@@ -1,0 +1,356 @@
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=118+21, binance=10 (diff: -108)
+2025-10-19 05:14:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XMRUSDT 1h
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Saved 1 klines for XMRUSDT 1h
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:14:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DASHUSDT 1h
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Saved 1 klines for DASHUSDT 1h
+2025-10-19 05:14:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ADAUSDT 1h
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Saved 1 klines for ADAUSDT 1h
+2025-10-19 05:14:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 15m
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Saved 1 klines for ZECUSDT 15m
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Downloading historical klines for ZECUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:14:32 EEST | INFO     | trading_bot | Signal generated: Break & Retest | MAGICUSDT SHORT | Score: 5.06 | Entry: MARKET
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | MAGICUSDT SHORT scoring breakdown:
+  Base: 5.1 | Vol: +1.0 (ratio=3.61) | CVD: 0 (val=0) | ΔOI: 0 (-0.27%) | Imbalance: 0 (ratio=0.18) | Funding: 0 | BTC: 0 (down 0.21%, neutral)
+  Final Score: 6.1
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | 🔒 Lock acquired (SQLite): MAGICUSDT SHORT (Break & Retest) TTL=3600s
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | ✅ VALID SIGNAL: Break & Retest | MAGICUSDT SHORT @ 0.1405 | Score: 6.1 | SL: 0.1413 | TP1: 0.1393 | TP2: 0.1385
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:00 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 15m
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | Saved 2 klines for BNBUSDT 15m
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | Downloading historical klines for BNBUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:00 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZECUSDT 1h
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | Saved 1 klines for ZECUSDT 1h
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | 💾 Signal saved to DB: MAGICUSDT SHORT (ID: 60, Strategy ID: 949095948)
+2025-10-19 05:15:00 EEST | INFO     | trading_bot | 🔒 Break & Retest: MAGICUSDT blocked (active signal)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BNBUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 1 klines for BNBUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 15m
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 2 klines for THETAUSDT 15m
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Downloading historical klines for THETAUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=83+29, binance=10 (diff: -73)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 15m
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 2 klines for ATOMUSDT 15m
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Downloading historical klines for ATOMUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 15m
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 2 klines for BATUSDT 15m
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Downloading historical klines for BATUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | ✅ OI History OK for EDUUSDT: 30 records
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | 📊 EDUUSDT OI: Current=21330076, Delta=-201480, DOI%=-0.94%
+2025-10-19 05:15:11 EEST | WARNING  | trading_bot | ⏳ Previous signal check still running, skipping this cycle
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - THETAUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 1 klines for THETAUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ATOMUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 1 klines for ATOMUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:11 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BATUSDT 1h
+2025-10-19 05:15:11 EEST | INFO     | trading_bot | Saved 1 klines for BATUSDT 1h
+2025-10-19 05:15:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 15m
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Saved 2 klines for ALGOUSDT 15m
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Downloading historical klines for ALGOUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for 1000PEPEUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 1000PEPEUSDT OI: Current=12073366963, Delta=-62098610, DOI%=-0.51%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for 1000FLOKIUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 1000FLOKIUSDT OI: Current=151231250, Delta=152548, DOI%=0.10%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for SUIUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 SUIUSDT OI: Current=50727631, Delta=58748, DOI%=0.12%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for UMAUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 UMAUSDT OI: Current=4384719, Delta=-1596, DOI%=-0.04%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for NMRUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 NMRUSDT OI: Current=758594, Delta=138, DOI%=0.02%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for YGGUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 YGGUSDT OI: Current=50305128, Delta=68395, DOI%=0.14%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for TWTUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 TWTUSDT OI: Current=7093825, Delta=3389, DOI%=0.05%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for ORDIUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 ORDIUSDT OI: Current=1738089, Delta=-1275, DOI%=-0.07%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for PENDLEUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 PENDLEUSDT OI: Current=5798768, Delta=14580, DOI%=0.25%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for WLDUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 WLDUSDT OI: Current=46010091, Delta=11820, DOI%=0.03%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for SEIUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 SEIUSDT OI: Current=132099586, Delta=-71338, DOI%=-0.05%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for PYTHUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 PYTHUSDT OI: Current=76156539, Delta=-39383, DOI%=-0.05%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for CAKEUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 CAKEUSDT OI: Current=8814356, Delta=1699, DOI%=0.02%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for KASUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 KASUSDT OI: Current=85471169, Delta=-60615, DOI%=-0.07%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for ARKMUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 ARKMUSDT OI: Current=16027132, Delta=2358, DOI%=0.01%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for 1000BONKUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 1000BONKUSDT OI: Current=1668238894, Delta=1458321, DOI%=0.09%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for TIAUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 TIAUSDT OI: Current=32297838, Delta=-7885, DOI%=-0.02%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for SUPERUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 SUPERUSDT OI: Current=12367309, Delta=3079, DOI%=0.02%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ✅ OI History OK for JTOUSDT: 30 records
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | 📊 JTOUSDT OI: Current=8741632, Delta=28650, DOI%=0.33%
+2025-10-19 05:15:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 15m
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Saved 2 klines for COMPUSDT 15m
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Downloading historical klines for COMPUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 15m
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Saved 2 klines for DOGEUSDT 15m
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Downloading historical klines for DOGEUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | ⏰ Next candle close: 15m at 02:30 UTC (+6s = 02:30:06) | Waiting 878s
+2025-10-19 05:15:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ALGOUSDT 1h
+2025-10-19 05:15:28 EEST | INFO     | trading_bot | Saved 1 klines for ALGOUSDT 1h
+2025-10-19 05:21:51 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - COMPUSDT 1h
+2025-10-19 05:21:51 EEST | INFO     | trading_bot | Saved 1 klines for COMPUSDT 1h
+2025-10-19 05:21:51 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOGEUSDT 1h
+2025-10-19 05:21:51 EEST | INFO     | trading_bot | Saved 1 klines for DOGEUSDT 1h
+2025-10-19 05:21:51 EEST | INFO     | trading_bot |   📦 Mini-batch 1/11: ✅ 20 / ❌ 0
+2025-10-19 05:22:02 EEST | INFO     | trading_bot | Downloading historical klines for SNXUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:02 EEST | INFO     | trading_bot | Downloading historical klines for DOTUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:02 EEST | INFO     | trading_bot | Downloading historical klines for CRVUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:02 EEST | INFO     | trading_bot | Downloading historical klines for SOLUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for WUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 WUSDT OI: Current=163085187, Delta=26713, DOI%=0.02%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for ETHFIUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 ETHFIUSDT OI: Current=22865938, Delta=4325, DOI%=0.02%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for ENAUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 ENAUSDT OI: Current=400548226, Delta=-195460, DOI%=-0.05%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for WIFUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 WIFUSDT OI: Current=48063758, Delta=31128, DOI%=0.06%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for OMUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 OMUSDT OI: Current=189640330, Delta=-265442, DOI%=-0.14%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for 1000SATSUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 1000SATSUSDT OI: Current=142544617045, Delta=-206105033, DOI%=-0.14%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=150+73, binance=10 (diff: -140)
+2025-10-19 05:22:03 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SOLUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Saved 2 klines for SOLUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Downloading historical klines for SOLUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:03 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOTUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Saved 2 klines for DOTUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Downloading historical klines for DOTUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for AXLUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 AXLUSDT OI: Current=17248182, Delta=-38200, DOI%=-0.22%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SNXUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Saved 2 klines for SNXUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Downloading historical klines for SNXUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for RENDERUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 RENDERUSDT OI: Current=4303746, Delta=7997, DOI%=0.19%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for ZROUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 ZROUSDT OI: Current=6245410, Delta=2197, DOI%=0.04%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for TONUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 TONUSDT OI: Current=10726185, Delta=-2074, DOI%=-0.02%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for BOMEUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 BOMEUSDT OI: Current=4706657030, Delta=-770436, DOI%=-0.02%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for JUPUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 JUPUSDT OI: Current=63866445, Delta=36085, DOI%=0.06%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CRVUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Saved 2 klines for CRVUSDT 15m
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | Downloading historical klines for CRVUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for POLUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 POLUSDT OI: Current=93794533, Delta=29400, DOI%=0.03%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for ONDOUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 ONDOUSDT OI: Current=37537226, Delta=-56967, DOI%=-0.15%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for 1000RATSUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 1000RATSUSDT OI: Current=214877606, Delta=-12650, DOI%=-0.01%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for TAOUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 TAOUSDT OI: Current=128892, Delta=-921, DOI%=-0.71%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for BBUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 BBUSDT OI: Current=58936441, Delta=121776, DOI%=0.21%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for STRKUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 STRKUSDT OI: Current=112805147, Delta=-204322, DOI%=-0.18%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for POPCATUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 POPCATUSDT OI: Current=39993094, Delta=-141191, DOI%=-0.35%
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | ✅ OI History OK for IOUSDT: 30 records
+2025-10-19 05:22:03 EEST | INFO     | trading_bot | 📊 IOUSDT OI: Current=14335926, Delta=36240, DOI%=0.25%
+2025-10-19 05:24:31 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SOLUSDT 1h
+2025-10-19 05:24:31 EEST | INFO     | trading_bot | Saved 1 klines for SOLUSDT 1h
+2025-10-19 05:24:31 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - DOTUSDT 1h
+2025-10-19 05:24:31 EEST | INFO     | trading_bot | Saved 1 klines for DOTUSDT 1h
+2025-10-19 05:24:59 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SNXUSDT 1h
+2025-10-19 05:24:59 EEST | INFO     | trading_bot | Saved 1 klines for SNXUSDT 1h
+2025-10-19 05:27:21 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - CRVUSDT 1h
+2025-10-19 05:27:21 EEST | INFO     | trading_bot | Saved 1 klines for CRVUSDT 1h
+2025-10-19 05:30:53 EEST | WARNING  | trading_bot | ⏳ Previous signal check still running, skipping this cycle
+2025-10-19 05:31:06 EEST | INFO     | trading_bot | Downloading historical klines for UNIUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:06 EEST | INFO     | trading_bot | Downloading historical klines for AVAXUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:06 EEST | INFO     | trading_bot | Downloading historical klines for NEARUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:06 EEST | INFO     | trading_bot | Downloading historical klines for AAVEUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:06 EEST | ERROR    | trading_bot | Error checking signal 60 (MAGICUSDT):
+2025-10-19 05:31:06 EEST | INFO     | trading_bot | 🔄 Updating symbol list by volume...
+2025-10-19 05:31:06 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-19 05:31:19 EEST | INFO     | trading_bot | ⏰ Next candle close: 15m at 02:45 UTC (+6s = 02:45:06) | Waiting 827s
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=122+69, binance=10 (diff: -112)
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AAVEUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 3 klines for AAVEUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Downloading historical klines for AAVEUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEARUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 3 klines for NEARUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Downloading historical klines for NEARUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AVAXUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 3 klines for AVAXUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Downloading historical klines for AVAXUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for SUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 SUSDT OI: Current=61103671, Delta=-126264, DOI%=-0.21%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for AI16ZUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 AI16ZUSDT OI: Current=85386018, Delta=-249167, DOI%=-0.29%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for BIOUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 BIOUSDT OI: Current=136398478, Delta=14574, DOI%=0.01%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for NEIROUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 NEIROUSDT OI: Current=36047592331, Delta=38988526, DOI%=0.11%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for MORPHOUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 MORPHOUSDT OI: Current=3543756, Delta=8836, DOI%=0.25%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for ZEREBROUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 ZEREBROUSDT OI: Current=454118241, Delta=1460543, DOI%=0.32%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - UNIUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 3 klines for UNIUSDT 15m
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Downloading historical klines for UNIUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for TRUMPUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 TRUMPUSDT OI: Current=7270094, Delta=1563, DOI%=0.02%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for PNUTUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 PNUTUSDT OI: Current=73272700, Delta=411682, DOI%=0.57%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for VIRTUALUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 VIRTUALUSDT OI: Current=15366437, Delta=-11871, DOI%=-0.08%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for KOMAUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 KOMAUSDT OI: Current=153730061, Delta=7511273, DOI%=5.14%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for SLERFUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 SLERFUSDT OI: Current=63862553, Delta=-1471913, DOI%=-2.25%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for FARTCOINUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 FARTCOINUSDT OI: Current=116551966, Delta=-73208, DOI%=-0.06%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for SPXUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 SPXUSDT OI: Current=11426631, Delta=4183, DOI%=0.04%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for AVAAIUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 AVAAIUSDT OI: Current=209077443, Delta=-307654, DOI%=-0.15%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for DEGOUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 DEGOUSDT OI: Current=9085989, Delta=-2265, DOI%=-0.02%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for EIGENUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 EIGENUSDT OI: Current=20518660, Delta=-3649, DOI%=-0.02%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for HIPPOUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 HIPPOUSDT OI: Current=2336282270, Delta=6930034, DOI%=0.30%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for PENGUUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 PENGUUSDT OI: Current=1522435746, Delta=-1016500, DOI%=-0.07%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for ARCUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 ARCUSDT OI: Current=313787002, Delta=1630652, DOI%=0.52%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | ✅ OI History OK for MOODENGUSDT: 30 records
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | 📊 MOODENGUSDT OI: Current=62078504, Delta=30778, DOI%=0.05%
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AAVEUSDT 1h
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 1 klines for AAVEUSDT 1h
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Downloading historical klines for FILUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - NEARUSDT 1h
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 1 klines for NEARUSDT 1h
+2025-10-19 05:31:20 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - AVAXUSDT 1h
+2025-10-19 05:31:20 EEST | INFO     | trading_bot | Saved 1 klines for AVAXUSDT 1h
+2025-10-19 05:31:50 EEST | INFO     | trading_bot | Downloading historical klines for BELUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:31:50 EEST | INFO     | trading_bot | Downloading historical klines for ZENUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:34:22 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - UNIUSDT 1h
+2025-10-19 05:34:22 EEST | INFO     | trading_bot | Saved 1 klines for UNIUSDT 1h
+2025-10-19 05:34:52 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=95+25, binance=41 (diff: -54)
+2025-10-19 05:34:52 EEST | INFO     | trading_bot | Found 522 USDT-M perpetual futures pairs
+2025-10-19 05:34:52 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=41+65, binance=97 (diff: +56)
+2025-10-19 05:41:17 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - FILUSDT 15m
+2025-10-19 05:41:17 EEST | INFO     | trading_bot | Saved 3 klines for FILUSDT 15m
+2025-10-19 05:41:17 EEST | INFO     | trading_bot | Downloading historical klines for FILUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:41:17 EEST | INFO     | trading_bot | Downloading historical klines for SANDUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:41:17 EEST | WARNING  | trading_bot | Error downloading BELUSDT 15m on 2025-10-19: TimeoutError. Retry 1/3 in 2s
+2025-10-19 05:41:17 EEST | WARNING  | trading_bot | Error downloading ZENUSDT 15m on 2025-10-19: TimeoutError. Retry 1/3 in 2s
+2025-10-19 05:41:17 EEST | ERROR    | trading_bot | Error updating symbols:
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client_reqrep.py", line 541, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\streams.py", line 680, in read
+    await self._waiter
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 1215, in _update_symbols_task
+    new_symbols = await self._fetch_symbols_by_volume()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 163, in _fetch_symbols_by_volume
+    ticker_data = await self.client.get_24h_ticker()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\binance\client.py", line 317, in get_24h_ticker
+    return await self._request('GET', '/fapi/v1/ticker/24hr', params=params, weight=weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\binance\client.py", line 97, in _request
+    return await self.rate_limiter.execute_with_backoff(_do_request, weight=weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\utils\rate_limiter.py", line 100, in execute_with_backoff
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\binance\client.py", line 78, in _do_request
+    async with self.session.request(method, url, params=params, headers=headers) as response:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client_reqrep.py", line 536, in start
+    with self._timer:
+         ^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\helpers.py", line 685, in __exit__
+    raise asyncio.TimeoutError from exc_val
+TimeoutError
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=131+40, binance=10 (diff: -121)
+2025-10-19 05:41:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SANDUSDT 15m
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Saved 3 klines for SANDUSDT 15m
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Downloading historical klines for SANDUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📉 TP1 HIT (30%): ALICEUSDT SHORT | Partial close at 0.3657 (+0.43%) | SL moved to -0.5R 0.3683 (aggressive trailing)
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for PIPPINUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 PIPPINUSDT OI: Current=544922829, Delta=-9322932, DOI%=-1.68%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for KAITOUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 KAITOUSDT OI: Current=10598873, Delta=-23469, DOI%=-0.22%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for BERAUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 BERAUSDT OI: Current=11043367, Delta=16111, DOI%=0.15%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for IPUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 IPUSDT OI: Current=5185892, Delta=3532, DOI%=0.07%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for KERNELUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 KERNELUSDT OI: Current=23560648, Delta=-45577, DOI%=-0.19%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for FHEUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 FHEUSDT OI: Current=78285356, Delta=-833424, DOI%=-1.05%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for HYPERUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 HYPERUSDT OI: Current=14699240, Delta=-43923, DOI%=-0.30%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for TUTUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 TUTUSDT OI: Current=192621544, Delta=336944, DOI%=0.18%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for BIDUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 BIDUSDT OI: Current=23675649, Delta=4333, DOI%=0.02%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for FORMUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 FORMUSDT OI: Current=28481339, Delta=18238, DOI%=0.06%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for STOUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 STOUSDT OI: Current=41483181, Delta=-57458, DOI%=-0.14%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for PAXGUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 PAXGUSDT OI: Current=23550, Delta=-11, DOI%=-0.05%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for DOODUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 DOODUSDT OI: Current=604646068, Delta=6737458, DOI%=1.13%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for PUNDIXUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 PUNDIXUSDT OI: Current=9600095, Delta=-80218, DOI%=-0.83%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for MLNUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 MLNUSDT OI: Current=694043, Delta=-32990, DOI%=-4.54%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for EPTUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 EPTUSDT OI: Current=834980020, Delta=4923178, DOI%=0.59%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for BANKUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 BANKUSDT OI: Current=73124111, Delta=-111489, DOI%=-0.15%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for WALUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 WALUSDT OI: Current=27255540, Delta=-114508, DOI%=-0.42%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BELUSDT 15m
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Saved 3 klines for BELUSDT 15m
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Downloading historical klines for BELUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:41:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ZENUSDT 15m
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Saved 3 klines for ZENUSDT 15m
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Downloading historical klines for ZENUSDT 1h from 2025-10-19 01:00:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:41:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - FILUSDT 1h
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Saved 1 klines for FILUSDT 1h
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for SKYAIUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 SKYAIUSDT OI: Current=118763197, Delta=-481293, DOI%=-0.40%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | ✅ OI History OK for OGUSDT: 30 records
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | 📊 OGUSDT OI: Current=694931, Delta=-1307, DOI%=-0.19%
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Downloading historical klines for MANAUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+2025-10-19 05:41:28 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - SANDUSDT 1h
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Saved 1 klines for SANDUSDT 1h
+2025-10-19 05:41:28 EEST | INFO     | trading_bot | Downloading historical klines for ALICEUSDT 15m from 2025-10-19 01:45:00+00:00 to 2025-10-19 02:05:18.768091+00:00 (1 days)
+
+
