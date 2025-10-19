@@ -37,6 +37,7 @@ class ATRMomentumStrategy(BaseStrategy):
         # НОВЫЕ ФИЛЬТРЫ 2025:
         self.htf_ema200_check = strategy_config.get('htf_ema200_check', True)
         self.prefer_pin_bar = strategy_config.get('prefer_pin_bar', True)
+        self.rsi_overextension_filter = strategy_config.get('rsi_overextension_filter', True)
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -209,6 +210,30 @@ class ATRMomentumStrategy(BaseStrategy):
         if distance_to_resistance < self.min_distance_resistance:
             strategy_logger.debug(f"    ❌ Слишком близко к сопротивлению: {distance_to_resistance:.2f} ATR < {self.min_distance_resistance} ATR")
             return None
+        
+        # НОВОЕ 2025: RSI Overextension Filter
+        if self.rsi_overextension_filter:
+            rsi_14 = indicators.get('15m', {}).get('rsi_14') if isinstance(indicators.get('15m'), dict) else None
+            
+            # Если RSI не в закешированных индикаторах, вычисляем напрямую
+            if rsi_14 is None:
+                from src.indicators.technical import calculate_rsi
+                rsi_14 = calculate_rsi(df['close'], period=14)
+            
+            if rsi_14 is not None and len(rsi_14) > 0:
+                current_rsi = rsi_14.iloc[-1]
+                
+                # Для LONG: избегать overbought (RSI > 70)
+                if bias != 'Bearish' and current_rsi > 70:
+                    strategy_logger.debug(f"    ❌ RSI overbought: {current_rsi:.1f} > 70 (избегаем покупок на экстремумах)")
+                    return None
+                
+                # Для SHORT: избегать oversold (RSI < 30)
+                if bias == 'Bearish' and current_rsi < 30:
+                    strategy_logger.debug(f"    ❌ RSI oversold: {current_rsi:.1f} < 30 (избегаем продаж на экстремумах)")
+                    return None
+                
+                strategy_logger.debug(f"    ✅ RSI в норме: {current_rsi:.1f} (30-70 диапазон)")
         
         # НОВОЕ 2025: HTF Trend Confirmation
         if self.htf_ema200_check:

@@ -287,6 +287,7 @@ strategies:
     htf_ema200_check: true        # Проверка HTF тренда (1H/4H EMA200)
     prefer_pin_bar: true           # Бонус +0.5 если импульс-бар = Pin Bar
     volume_threshold: 2.0          # Volume >2× (уже было, теперь в config)
+    rsi_overextension_filter: true  # Избегать RSI >70 (overbought) или <30 (oversold)
   
   # #7 VWAP Mean Reversion - ОТКЛЮЧЕНО (работает только в range, опасен в трендах)
   vwap_mr:
