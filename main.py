@@ -93,6 +93,7 @@ class TradingBot:
         
         self._check_signals_lock = asyncio.Lock()
         self._check_signals_task: Optional[asyncio.Task] = None
+        self._is_checking_signals = False  # Флаг для индикации работы (без блокировки)
         
         self._register_strategies()
     
@@ -495,7 +496,8 @@ class TradingBot:
             # Время пришло - запустить проверку сигналов (если есть готовые символы)
             if len(self.ready_symbols) > 0:
                 # Запускаем только если предыдущая проверка завершена
-                if not self._check_signals_lock.locked():
+                # Используем флаг вместо lock.locked() для проверки
+                if not self._is_checking_signals:
                     logger.info(f"🚀 Candles closed: {', '.join(closing_tfs)} - starting signal check...")
                     self._check_signals_task = asyncio.create_task(self._check_signals_wrapper())
                 else:
@@ -560,19 +562,38 @@ class TradingBot:
         return updated_by_tf
     
     async def _check_signals_wrapper(self):
-        """Обёртка для _check_signals с Lock и логированием времени выполнения"""
+        """Обёртка для _check_signals с логированием времени выполнения
+        
+        Note: Использует флаг вместо lock чтобы не блокировать следующие циклы
+        во время медленных операций (загрузка candles, rate limiter sleep).
+        """
+        # Проверить флаг с lock (атомарная операция)
         async with self._check_signals_lock:
-            start_time = datetime.now()
-            try:
-                await self._check_signals()
-            except Exception as e:
-                logger.error(f"Error in _check_signals: {e}", exc_info=True)
-            finally:
-                elapsed = (datetime.now() - start_time).total_seconds()
-                if elapsed > 90:
-                    logger.warning(f"⚠️ Signal check took {elapsed:.1f}s (>90s tolerance)")
-                else:
-                    logger.debug(f"✅ Signal check completed in {elapsed:.1f}s")
+            if self._is_checking_signals:
+                logger.debug("Signal check already in progress (concurrent protection)")
+                return
+            self._is_checking_signals = True
+        
+        start_time = datetime.now()
+        try:
+            # Выполнить проверку БЕЗ lock (не блокируем следующие циклы)
+            await self._check_signals()
+        except Exception as e:
+            logger.error(f"Error in _check_signals: {e}", exc_info=True)
+        finally:
+            # Сбросить флаг с lock (атомарная операция)
+            async with self._check_signals_lock:
+                self._is_checking_signals = False
+            
+            elapsed = (datetime.now() - start_time).total_seconds()
+            
+            # Логировать cycle duration для мониторинга
+            if elapsed > 90:
+                logger.warning(f"⚠️ Signal check took {elapsed:.1f}s (>90s tolerance)")
+            elif elapsed > 60:
+                logger.info(f"⏱️  Signal check took {elapsed:.1f}s (>60s, monitor for drift)")
+            else:
+                logger.debug(f"✅ Signal check completed in {elapsed:.1f}s")
     
     async def _check_signals(self):
         """Проверить сигналы для всех готовых символов"""

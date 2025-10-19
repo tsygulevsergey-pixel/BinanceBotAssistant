@@ -169,10 +169,14 @@ class RateLimiter:
             # Если actual_weight МЕНЬШЕ prev_current_weight - значит Binance сбросил счётчик
             if actual_weight < prev_current_weight:
                 # Новая минута - полный сброс
+                prev_pending = self.pending_weight
                 self.current_weight = actual_weight
                 self.pending_weight = 0
                 self.requests.clear()
-                logger.debug(f"✅ Binance counter reset detected, local counters synchronized")
+                logger.info(
+                    f"🔄 Binance counter reset: {prev_current_weight}→{actual_weight}, "
+                    f"cleared pending={prev_pending}"
+                )
             else:
                 # Нормальное обновление (в пределах той же минуты)
                 weight_added = actual_weight - prev_current_weight
