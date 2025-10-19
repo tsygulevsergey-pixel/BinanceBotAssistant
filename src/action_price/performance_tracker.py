@@ -279,33 +279,71 @@ class ActionPricePerformanceTracker:
                 logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
                 return None
         
-        # Проверка TP2 (полный выход)
-        if tp2:
+        # Проверка TP2 (частичный выход 40%, остаток на trailing)
+        if tp2 and not signal.partial_exit_2_at:
             if direction == 'LONG' and current_price >= tp2:
-                # Записываем TP2 hit для статистики
+                # Записываем TP2 hit
                 signal.partial_exit_2_at = datetime.now(pytz.UTC)
                 signal.partial_exit_2_price = tp2
-                # Рассчитываем общий PnL с учётом частичных выходов
-                total_pnl = self._calculate_total_pnl(signal, tp2, entry)
-                return {
-                    'exit_price': tp2,
-                    'reason': 'TAKE_PROFIT_2',
-                    'pnl_percent': total_pnl,
-                    'pnl': total_pnl,
-                    'status': 'WIN'
-                }
+                logger.info(f"🎯🎯 AP TP2 hit: {signal.symbol} {signal.pattern_type} at {tp2}, trailing stop active for 30% remainder")
+                # НЕ закрываем сигнал - остаток 30% на trailing stop
+                return None
             elif direction == 'SHORT' and current_price <= tp2:
-                # Записываем TP2 hit для статистики
+                # Записываем TP2 hit
                 signal.partial_exit_2_at = datetime.now(pytz.UTC)
                 signal.partial_exit_2_price = tp2
-                total_pnl = self._calculate_total_pnl(signal, tp2, entry)
-                return {
-                    'exit_price': tp2,
-                    'reason': 'TAKE_PROFIT_2',
-                    'pnl_percent': total_pnl,
-                    'pnl': total_pnl,
-                    'status': 'WIN'
-                }
+                logger.info(f"🎯🎯 AP TP2 hit: {signal.symbol} {signal.pattern_type} at {tp2}, trailing stop active for 30% remainder")
+                # НЕ закрываем сигнал - остаток 30% на trailing stop
+                return None
+        
+        # НОВОЕ: Trailing stop после TP2 (для остатка 30%)
+        if signal.partial_exit_2_at:
+            # Получить ATR из meta_data
+            atr = None
+            if signal.meta_data and 'atr_15m' in signal.meta_data:
+                atr = signal.meta_data['atr_15m']
+            
+            if atr:
+                # Trailing distance из config (1.2 ATR по умолчанию)
+                trail_distance = atr * 1.2  # Можно взять из config если нужно
+                
+                # Отслеживаем пик после TP2
+                if not hasattr(signal, 'peak_price_after_tp2'):
+                    # Первая проверка после TP2 - установить пик
+                    signal.peak_price_after_tp2 = current_price
+                
+                if direction == 'LONG':
+                    # Обновить пик если цена выше
+                    if current_price > signal.peak_price_after_tp2:
+                        signal.peak_price_after_tp2 = current_price
+                    
+                    # Проверить trailing stop: откат от пика >= trail_distance
+                    if signal.peak_price_after_tp2 - current_price >= trail_distance:
+                        total_pnl = self._calculate_total_pnl(signal, current_price, entry)
+                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.peak_price_after_tp2:.4f} → current {current_price:.4f} (pullback {signal.peak_price_after_tp2 - current_price:.4f} >= {trail_distance:.4f})")
+                        return {
+                            'exit_price': current_price,
+                            'reason': 'TRAILING_STOP',
+                            'pnl_percent': total_pnl,
+                            'pnl': total_pnl,
+                            'status': 'WIN'
+                        }
+                else:  # SHORT
+                    # Обновить пик (минимум для SHORT)
+                    if current_price < signal.peak_price_after_tp2:
+                        signal.peak_price_after_tp2 = current_price
+                    
+                    # Проверить trailing stop: откат от пика >= trail_distance
+                    if current_price - signal.peak_price_after_tp2 >= trail_distance:
+                        total_pnl = self._calculate_total_pnl(signal, current_price, entry)
+                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.peak_price_after_tp2:.4f} → current {current_price:.4f} (pullback {current_price - signal.peak_price_after_tp2:.4f} >= {trail_distance:.4f})")
+                        return {
+                            'exit_price': current_price,
+                            'reason': 'TRAILING_STOP',
+                            'pnl_percent': total_pnl,
+                            'pnl': total_pnl,
+                            'status': 'WIN'
+                        }
         
         # Если TP1 достигнут но нет TP2, закрываем по TP1
         if tp1 and signal.partial_exit_1_at and not tp2:
@@ -318,8 +356,27 @@ class ActionPricePerformanceTracker:
                 'status': 'WIN'
             }
         
+        # КРИТИЧНО: Time stop после TP2 (закрываем если висит > 72 часов после TP2)
+        if signal.partial_exit_2_at:
+            # Убедимся что partial_exit_2_at имеет timezone
+            tp2_time = signal.partial_exit_2_at
+            if tp2_time.tzinfo is None:
+                tp2_time = pytz.UTC.localize(tp2_time)
+            
+            hours_since_tp2 = (datetime.now(pytz.UTC) - tp2_time).total_seconds() / 3600
+            if hours_since_tp2 > 72:  # 3 дня после TP2
+                # Закрываем остаток по текущей цене
+                total_pnl = self._calculate_total_pnl(signal, current_price, entry)
+                return {
+                    'exit_price': current_price,
+                    'reason': 'TIME_STOP_AFTER_TP2',
+                    'pnl_percent': total_pnl,
+                    'pnl': total_pnl,
+                    'status': 'WIN' if total_pnl > 0 else 'LOSS'
+                }
+        
         # КРИТИЧНО: Time stop после TP1 (закрываем если висит > 48 часов после TP1)
-        if signal.partial_exit_1_at:
+        elif signal.partial_exit_1_at:
             # Убедимся что partial_exit_1_at имеет timezone
             tp1_time = signal.partial_exit_1_at
             if tp1_time.tzinfo is None:
@@ -327,7 +384,7 @@ class ActionPricePerformanceTracker:
             
             hours_since_tp1 = (datetime.now(pytz.UTC) - tp1_time).total_seconds() / 3600
             if hours_since_tp1 > 48:
-                # Закрываем по текущей цене (trailing stop logic)
+                # Закрываем по текущей цене (остаток 70%)
                 total_pnl = self._calculate_total_pnl(signal, current_price, entry)
                 return {
                     'exit_price': current_price,
@@ -365,7 +422,7 @@ class ActionPricePerformanceTracker:
                             final_exit_price: float, entry: float,
                             is_breakeven: bool = False) -> float:
         """
-        Рассчитать общий PnL с учётом частичных фиксаций
+        Рассчитать общий PnL с учётом частичных фиксаций (30/40/30)
         
         Args:
             signal: Сигнал
@@ -378,35 +435,66 @@ class ActionPricePerformanceTracker:
         """
         direction = signal.direction.upper() if signal.direction else 'LONG'
         
-        # Если есть частичный выход на TP1
-        if signal.partial_exit_1_at and signal.partial_exit_1_price:
+        # НОВАЯ СИСТЕМА 30/40/30
+        tp1_size = 0.30  # 30% на TP1
+        tp2_size = 0.40  # 40% на TP2
+        trail_size = 0.30  # 30% на trailing
+        
+        # Проверяем наличие частичных выходов
+        has_tp1 = signal.partial_exit_1_at and signal.partial_exit_1_price
+        has_tp2 = signal.partial_exit_2_at and signal.partial_exit_2_price
+        
+        if has_tp1:
             tp1_price = float(signal.partial_exit_1_price)
-            # Профессиональный подход: 30% @ TP1, 40% @ TP2, 30% trailing
-            tp1_pct = 0.30  # 30% на TP1
-            tp2_pct = 0.70  # 70% остаток (40% на TP2 + 30% trailing)
             
-            if direction == 'LONG':
-                pnl_tp1 = ((tp1_price - entry) / entry) * 100 * tp1_pct
+            if has_tp2:
+                # ВСЕ 3 УРОВНЯ: TP1 (30%) + TP2 (40%) + Trail (30%)
+                tp2_price = float(signal.partial_exit_2_price)
                 
-                # Если breakeven - остаток закрыт по entry (0% PnL)
-                if is_breakeven:
-                    pnl_remainder = 0.0
-                else:
-                    pnl_remainder = ((final_exit_price - entry) / entry) * 100 * tp2_pct
-            else:  # SHORT
-                pnl_tp1 = ((entry - tp1_price) / entry) * 100 * tp1_pct
+                if direction == 'LONG':
+                    pnl_tp1 = ((tp1_price - entry) / entry) * 100 * tp1_size
+                    pnl_tp2 = ((tp2_price - entry) / entry) * 100 * tp2_size
+                    
+                    if is_breakeven:
+                        pnl_trail = 0.0  # Breakeven после TP2
+                    else:
+                        pnl_trail = ((final_exit_price - entry) / entry) * 100 * trail_size
+                else:  # SHORT
+                    pnl_tp1 = ((entry - tp1_price) / entry) * 100 * tp1_size
+                    pnl_tp2 = ((entry - tp2_price) / entry) * 100 * tp2_size
+                    
+                    if is_breakeven:
+                        pnl_trail = 0.0
+                    else:
+                        pnl_trail = ((entry - final_exit_price) / entry) * 100 * trail_size
                 
-                # Если breakeven - остаток закрыт по entry (0% PnL)
-                if is_breakeven:
-                    pnl_remainder = 0.0
-                else:
-                    pnl_remainder = ((entry - final_exit_price) / entry) * 100 * tp2_pct
-            
-            total_pnl = pnl_tp1 + pnl_remainder
-            logger.debug(f"PnL calc: {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + Remainder: {pnl_remainder:.2f}% (70%) = Total: {total_pnl:.2f}%")
-            return total_pnl
+                total_pnl = pnl_tp1 + pnl_tp2 + pnl_trail
+                logger.debug(f"PnL calc (3 levels): {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + TP2: {pnl_tp2:.2f}% (40%) + Trail: {pnl_trail:.2f}% (30%) = Total: {total_pnl:.2f}%")
+                return total_pnl
+            else:
+                # ТОЛЬКО TP1 + ОСТАТОК (70%): TP1 (30%) + Remainder (70%)
+                remainder_size = tp2_size + trail_size  # 70%
+                
+                if direction == 'LONG':
+                    pnl_tp1 = ((tp1_price - entry) / entry) * 100 * tp1_size
+                    
+                    if is_breakeven:
+                        pnl_remainder = 0.0
+                    else:
+                        pnl_remainder = ((final_exit_price - entry) / entry) * 100 * remainder_size
+                else:  # SHORT
+                    pnl_tp1 = ((entry - tp1_price) / entry) * 100 * tp1_size
+                    
+                    if is_breakeven:
+                        pnl_remainder = 0.0
+                    else:
+                        pnl_remainder = ((entry - final_exit_price) / entry) * 100 * remainder_size
+                
+                total_pnl = pnl_tp1 + pnl_remainder
+                logger.debug(f"PnL calc (2 levels): {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + Remainder: {pnl_remainder:.2f}% (70%) = Total: {total_pnl:.2f}%")
+                return total_pnl
         else:
-            # Полный выход без частичных фиксаций
+            # Полный выход без частичных фиксаций (100%)
             if direction == 'LONG':
                 return ((final_exit_price - entry) / entry) * 100
             else:
@@ -451,10 +539,9 @@ class ActionPricePerformanceTracker:
                     'avg_loss': 0.0,
                     'tp1_count': 0,
                     'tp2_count': 0,
+                    'trailing_stop_count': 0,
                     'breakeven_count': 0,
-                    'time_stop_count': 0,
-                    'time_stop_total_pnl': 0.0,
-                    'time_stop_avg_pnl': 0.0
+                    'time_stop_count': 0
                 }
             
             total = len(signals)
@@ -462,11 +549,12 @@ class ActionPricePerformanceTracker:
             wins = [s for s in closed if s.status == 'WIN']
             losses = [s for s in closed if s.status == 'LOSS']
             
-            # Подсчет TP1/TP2/Breakeven по exit_reason (взаимоисключающие)
-            # Логика: если TP2 - считаем только TP2, если Breakeven - считаем только Breakeven
+            # Подсчет exit reasons (взаимоисключающие)
             tp1_count = len([s for s in closed if s.exit_reason == 'TAKE_PROFIT_1'])
             tp2_count = len([s for s in closed if s.exit_reason == 'TAKE_PROFIT_2'])
+            trailing_stop_count = len([s for s in closed if s.exit_reason == 'TRAILING_STOP'])
             breakeven_count = len([s for s in closed if s.exit_reason == 'BREAKEVEN'])
+            time_stop_count = len([s for s in closed if 'TIME_STOP' in (s.exit_reason or '')])
             
             win_rate = (len(wins) / len(closed) * 100) if closed else 0.0
             
@@ -490,10 +578,9 @@ class ActionPricePerformanceTracker:
                 'avg_loss': round(sum(float(s.pnl_percent) for s in losses_with_pnl) / len(losses_with_pnl), 2) if losses_with_pnl else 0.0,
                 'tp1_count': tp1_count,
                 'tp2_count': tp2_count,
-                'breakeven_count': breakeven_count,  # ✅ Теперь используется! SL=entry после TP1
-                'time_stop_count': 0,  # AP не использует time_stop
-                'time_stop_total_pnl': 0.0,
-                'time_stop_avg_pnl': 0.0
+                'trailing_stop_count': trailing_stop_count,  # НОВОЕ: Трейлинг стоп для 30% остатка
+                'breakeven_count': breakeven_count,
+                'time_stop_count': time_stop_count
             }
             
         finally:
