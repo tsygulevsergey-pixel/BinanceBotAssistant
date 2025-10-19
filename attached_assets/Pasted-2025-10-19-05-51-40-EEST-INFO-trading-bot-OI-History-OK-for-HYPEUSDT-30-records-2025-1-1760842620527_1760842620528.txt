@@ -1,0 +1,34 @@
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for HYPEUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 HYPEUSDT OI: Current=4144812, Delta=-22569, DOI%=-0.54%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for AGTUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 AGTUSDT OI: Current=982121450, Delta=2268371, DOI%=0.23%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for SQDUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 SQDUSDT OI: Current=11450909, Delta=-30967, DOI%=-0.27%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for HUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 HUSDT OI: Current=162379737, Delta=-433361, DOI%=-0.27%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for MERLUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 MERLUSDT OI: Current=98593151, Delta=-64858, DOI%=-0.07%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for LAUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 LAUSDT OI: Current=22618557, Delta=-75316, DOI%=-0.33%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for BDXNUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 BDXNUSDT OI: Current=83160782, Delta=492758, DOI%=0.60%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for SOONUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 SOONUSDT OI: Current=28039973, Delta=-24436, DOI%=-0.09%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for SKATEUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 SKATEUSDT OI: Current=56707558, Delta=9343, DOI%=0.02%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for MYXUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 MYXUSDT OI: Current=3709553, Delta=810, DOI%=0.02%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for VELVETUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 VELVETUSDT OI: Current=21230209, Delta=82370, DOI%=0.39%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for ZORAUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 ZORAUSDT OI: Current=185846394, Delta=-536055, DOI%=-0.29%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for TAUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 TAUSDT OI: Current=96155884, Delta=227538, DOI%=0.24%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for MUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 MUSDT OI: Current=8371513, Delta=-4227, DOI%=-0.05%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for TREEUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 TREEUSDT OI: Current=19044517, Delta=-81110, DOI%=-0.42%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for PROVEUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 PROVEUSDT OI: Current=11011766, Delta=129132, DOI%=1.19%
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | ✅ OI History OK for PUMPUSDT: 30 records
+2025-10-19 05:51:40 EEST | INFO     | trading_bot | 📊 PUMPUSDT OI: Current=33490755938, Delta=36412470, DOI%=0.11%
