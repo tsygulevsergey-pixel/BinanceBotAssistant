@@ -151,7 +151,7 @@ class SignalPerformanceTracker:
                             signal.status = "WIN"
                             signal.exit_price = entry
                             signal.exit_reason = "WIN"
-                            signal.exit_type = "TP1"
+                            signal.exit_type = "BREAKEVEN"
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
@@ -235,7 +235,7 @@ class SignalPerformanceTracker:
                             signal.status = "WIN"
                             signal.exit_price = entry
                             signal.exit_reason = "WIN"
-                            signal.exit_type = "TP1"
+                            signal.exit_type = "BREAKEVEN"
                             signal.pnl_percent = pnl_percent
                             signal.closed_at = kline.open_time
                             
