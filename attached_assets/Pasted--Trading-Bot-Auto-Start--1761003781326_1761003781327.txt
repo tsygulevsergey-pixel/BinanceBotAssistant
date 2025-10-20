@@ -1,0 +1,200 @@
+============================================================
+  Trading Bot - Auto Start
+============================================================
+
+[OK] Python is installed
+
+[INFO] Activating virtual environment...
+[INFO] Checking dependencies...
+[OK] Dependencies already installed
+
+============================================================
+  Starting bot...
+============================================================
+
+2025-10-21 02:42:02 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-21 02:42:03 EEST | INFO     | 🎯 Action Price Logger initialized - log file: logs/action_price_2025-10-21_02-42-03.log
+2025-10-21 02:42:05 EEST | INFO     | V3_SR | 📍 V3 S/R Logger initialized - log file: logs/v3_2025-10-21_02-42-05.log
+2025-10-21 02:42:05 EEST | INFO     | trading_bot | 🎯 Multi-Factor Confirmation System initialized: min_factors=3, volume_mult=1.5x
+2025-10-21 02:42:05 EEST | INFO     | trading_bot | 📊 Regime Strategy Weights initialized: min_threshold=0.5
+2025-10-21 02:42:05 EEST | INFO     | trading_bot |   min_threshold: 0.5
+2025-10-21 02:42:05 EEST | INFO     | trading_bot |   TREND: {'Break & Retest': 1.5, 'MA/VWAP Pullback': 1.3, 'Volume Profile': 0.8, 'Liquidity Sweep': 0.9, 'Order Flow': 1.0}
+2025-10-21 02:42:05 EEST | INFO     | trading_bot |   RANGE: {'Break & Retest': 0.8, 'MA/VWAP Pullback': 0.9, 'Volume Profile': 1.5, 'Liquidity Sweep': 1.3, 'Order Flow': 1.0}
+2025-10-21 02:42:05 EEST | INFO     | trading_bot |   SQUEEZE: {'Break & Retest': 1.2, 'MA/VWAP Pullback': 0.9, 'Volume Profile': 1.0, 'Liquidity Sweep': 1.0, 'Order Flow': 1.5}
+2025-10-21 02:42:05 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-21 02:42:29 EEST | WARNING  | trading_bot | Redis unavailable (Timeout connecting to server), using SQLite fallback for signal locks
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Donchian Breakout
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Squeeze Breakout
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: ORB/IRB
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: MA/VWAP Pullback
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Break & Retest
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: ATR Momentum
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: VWAP Mean Reversion
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Range Fade
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Volume Profile
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: RSI/Stoch MR
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Liquidity Sweep
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Order Flow
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: CVD Divergence
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Time-of-Day
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Cash-and-Carry
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered strategy: Market Making
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Registered 16 strategies
+2025-10-21 02:42:29 EEST | INFO     | trading_bot |
+📊 Всего стратегий: 16
+✅ Включено: 7
+❌ Выключено: 9
+
+🟢 Активные стратегии:
+  - MA/VWAP Pullback
+  - Break & Retest
+  - ATR Momentum
+  - Volume Profile
+  - Liquidity Sweep
+  - Order Flow
+  - Cash-and-Carry
+
+🔴 Выключенные стратегии:
+  - Donchian Breakout
+  - Squeeze Breakout
+  - ORB/IRB
+  - VWAP Mean Reversion
+  - Range Fade
+  - RSI/Stoch MR
+  - CVD Divergence
+  - Time-of-Day
+  - Market Making
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | ============================================================
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Trading Bot Starting...
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | ============================================================
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | 📦 Loaded precision info from cache for 617 symbols (age: 19.2 min)
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Initializing bot...
+2025-10-21 02:42:29 EEST | INFO     | trading_bot | Rate limit status: 0/1320 (90% threshold) | Hard limit: 2400 | Usage: 0.0%
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: AGTUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: BTRUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: DASHUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 MA/VWAP Pullback: MLNUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: PEOPLEUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: POLUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: RSRUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 MA/VWAP Pullback: SOLUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: TAOUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 MA/VWAP Pullback: WLFIUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Break & Retest: XLMUSDT blocked (active signal)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 🔒 Loaded 13 active signals (Main: 11, AP: 2)
+2025-10-21 02:42:30 EEST | INFO     | trading_bot |    • Main strategies: 11 symbols blocked across 2 strategies
+2025-10-21 02:42:30 EEST | INFO     | trading_bot |    • Action Price: 2 symbols blocked
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | Fetching USDT-M futures pairs by volume...
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | Found 522 USDT-M perpetual futures pairs
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | Filtered to 221 pairs with volume >= $10,000,000
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 📊 Data refresh disabled in config - skipping
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | Starting parallel data loading for 221 symbols...
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | Analyzer task started - ready to consume symbols from queue
+2025-10-21 02:42:30 EEST | INFO     | trading_bot | 📊 Analyzing restart state...
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | 📊 Restart analysis:
+  ✅ Existing symbols with gaps: 221 (857 total requests)
+  🆕 New symbols: 0
+  📈 Total symbols: 221
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | ⚡ BURST CATCHUP starting:
+  📦 Symbols with gaps: 221
+  📊 Total gaps: 857
+  🕐 15m gaps: 221 (442 candles)
+  🕑 1h gaps: 218 (218 candles)
+  🕓 4h gaps: 215 (215 candles)
+  🕔 1d gaps: 203 (203 candles)
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | ⚡ Starting BURST CATCHUP mode:
+  📦 Symbols to update: 221
+  📊 Total requests: 857
+  🔄 Parallel workers: 1
+  ⏱️  Estimated time: 259 seconds
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | 📦 Splitting 221 symbols into 12 batches (batch size: 20, pause: 0.5s)
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | 📊 Processing batch 1/12 (20 symbols: BTCUSDT ... KNCUSDT)
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | Symbol analyzer task started
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:31 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 15m
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | Saved 1 klines for BTCUSDT 15m
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:31 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 1h
+2025-10-21 02:42:31 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 1h
+2025-10-21 02:42:32 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 4h
+2025-10-21 02:42:32 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 4h
+2025-10-21 02:42:32 EEST | INFO     | trading_bot | Downloading historical klines for BTCUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BTCUSDT 1d
+2025-10-21 02:42:32 EEST | INFO     | trading_bot | Saved 0 klines for BTCUSDT 1d
+2025-10-21 02:42:32 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 15m
+2025-10-21 02:42:33 EEST | INFO     | trading_bot | Saved 1 klines for ETHUSDT 15m
+2025-10-21 02:42:33 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:33 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 1h
+2025-10-21 02:42:33 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 1h
+2025-10-21 02:42:33 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:33 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 4h
+2025-10-21 02:42:33 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 4h
+2025-10-21 02:42:33 EEST | INFO     | trading_bot | Downloading historical klines for ETHUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETHUSDT 1d
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Saved 0 klines for ETHUSDT 1d
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 15m
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Saved 1 klines for BCHUSDT 15m
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 1h
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 1h
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:34 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 4h
+2025-10-21 02:42:34 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 4h
+2025-10-21 02:42:35 EEST | INFO     | trading_bot | Downloading historical klines for BCHUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:35 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - BCHUSDT 1d
+2025-10-21 02:42:35 EEST | INFO     | trading_bot | Saved 0 klines for BCHUSDT 1d
+2025-10-21 02:42:35 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:35 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 15m
+2025-10-21 02:42:35 EEST | INFO     | trading_bot | Saved 1 klines for XRPUSDT 15m
+2025-10-21 02:42:35 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:35 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 1h
+2025-10-21 02:42:35 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 1h
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:36 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 4h
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 4h
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Downloading historical klines for XRPUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:36 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - XRPUSDT 1d
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Saved 0 klines for XRPUSDT 1d
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:36 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 15m
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Saved 1 klines for LTCUSDT 15m
+2025-10-21 02:42:36 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:37 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 1h
+2025-10-21 02:42:37 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 1h
+2025-10-21 02:42:37 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:37 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 4h
+2025-10-21 02:42:37 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 4h
+2025-10-21 02:42:37 EEST | INFO     | trading_bot | Downloading historical klines for LTCUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:37 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LTCUSDT 1d
+2025-10-21 02:42:37 EEST | INFO     | trading_bot | Saved 0 klines for LTCUSDT 1d
+2025-10-21 02:42:37 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 15m
+2025-10-21 02:42:38 EEST | INFO     | trading_bot | Saved 1 klines for TRXUSDT 15m
+2025-10-21 02:42:38 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 1h
+2025-10-21 02:42:38 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 1h
+2025-10-21 02:42:38 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:38 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 4h
+2025-10-21 02:42:38 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 4h
+2025-10-21 02:42:38 EEST | INFO     | trading_bot | Downloading historical klines for TRXUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:39 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - TRXUSDT 1d
+2025-10-21 02:42:39 EEST | INFO     | trading_bot | Saved 0 klines for TRXUSDT 1d
+2025-10-21 02:42:39 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:39 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 15m
+2025-10-21 02:42:39 EEST | INFO     | trading_bot | Saved 1 klines for ETCUSDT 15m
+2025-10-21 02:42:39 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:39 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 1h
+2025-10-21 02:42:39 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 1h
+2025-10-21 02:42:39 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 4h from 2025-10-20 20:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:40 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 4h
+2025-10-21 02:42:40 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 4h
+2025-10-21 02:42:40 EEST | INFO     | trading_bot | Downloading historical klines for ETCUSDT 1d from 2025-10-20 00:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:40 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - ETCUSDT 1d
+2025-10-21 02:42:40 EEST | INFO     | trading_bot | Saved 0 klines for ETCUSDT 1d
+2025-10-21 02:42:40 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 15m from 2025-10-20 23:15:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
+2025-10-21 02:42:40 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - LINKUSDT 15m
+2025-10-21 02:42:40 EEST | INFO     | trading_bot | Saved 1 klines for LINKUSDT 15m
+2025-10-21 02:42:40 EEST | INFO     | trading_bot | Downloading historical klines for LINKUSDT 1h from 2025-10-20 23:00:00+00:00 to 2025-10-20 23:42:30.738194+00:00 (1 days)
