@@ -656,7 +656,7 @@ class DataLoader:
             } for c in reversed(candles)]
             
             df = pd.DataFrame(data)
-            df['open_time'] = pd.to_datetime(df['open_time'])
+            df['open_time'] = pd.to_datetime(df['open_time'], utc=True)
             # ВАЖНО: НЕ делать set_index - Action Price требует open_time как колонку для timestamp-based selection
             # df.set_index('open_time', inplace=True)
             
