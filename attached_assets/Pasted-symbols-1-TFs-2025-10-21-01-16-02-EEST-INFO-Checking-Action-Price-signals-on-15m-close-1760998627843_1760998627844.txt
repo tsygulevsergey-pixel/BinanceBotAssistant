@@ -1,0 +1,85 @@
+symbols × 1 TFs
+2025-10-21 01:16:02 EEST | INFO     | 🎯 Checking Action Price signals on 15m close (force_recalc=False)
+  📊 Symbols with updated candles: 218
+2025-10-21 01:16:02 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=512+0, binance=603 (diff: +91)
+❌ SHORT Confirm FAILED | H:1.72660 >= EMA:1.72466 (high must be BELOW EMA200!) | C:1.72500 >= EMA:1.72466
+❌ SHORT Confirm FAILED | H:0.16376 >= EMA:0.16351 (high must be BELOW EMA200!) | C:0.16243 < EMA:0.16351
+❌ LONG Confirm FAILED | L:1.12370 <= EMA:1.12860 (low must be ABOVE EMA200!) | C:1.12660 <= EMA:1.12860
+❌ SHORT Confirm FAILED | H:190.07000 >= EMA:189.08452 (high must be BELOW EMA200!) | C:189.98000 >= EMA:189.08452
+❌ LONG Confirm FAILED | L:1.01860 <= EMA:1.02306 (low must be ABOVE EMA200!) | C:1.05450 > EMA:1.02306
+2025-10-21 01:16:26 EEST | INFO     | trading_bot | 📊 Loading: 218/218 (100.0%) | Queue: 0 ready | Ready: 218 symbols | Failed: 0 | 7 strategies | 7 signals | Rate: 25.4% | Next check in 820s
+2025-10-21 01:16:30 EEST | INFO     | 🎯 Action Price analysis complete:
+  📊 Total symbols: 218
+  🔍 Analyzed: 217
+  🚫 Blocked: 1
+  ✅ Signals found: 0
+2025-10-21 01:16:30 Финляндия (лето) | INFO     | V3_SR | 🔷 Checking V3 S/R signals for 218 symbols
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for DOODUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for INUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for 1000FLOKIUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for IOUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for WLDUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for TRUTHUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for API3USDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:30 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for XPINUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for TAUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for MEMEUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for FETUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for CFXUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for BNBUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ZROUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:31 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for MUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for LINKUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for COMPUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for XMRUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for YGGUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for WALUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ZECUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for WUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for BANUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for LABUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:32 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for TONUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for AGTUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for DASHUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for OPUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for AIAUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for CLOUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for PROVEUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ARUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ADAUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:33 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for FARTCOINUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for SYRUPUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for BDXNUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for CUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for VFYUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ZEREBROUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for LDOUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for IMXUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for BLESSUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:34 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ICPUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for PYTHUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ZKCUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for 1000SATSUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for BELUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for AXSUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for 1000SHIBUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ONDOUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:35 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for AEROUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for NILUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for MITOUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for COAIUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for LTCUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for MORPHOUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for VIRTUALUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for UBUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:36 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for PENDLEUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for MIRAUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for SUSHIUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for FFUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for ETHUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for XANUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for OMUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for WIFUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for PUMPUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:37 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for USELESSUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'
+2025-10-21 01:16:38 Финляндия (лето) | ERROR    | V3_SR | Error building V3 zones for DYDXUSDT: SRZonesV3Builder.build_zones() missing 4 required positional arguments: 'df_4h', 'df_1h', 'df_15m', and 'current_price'

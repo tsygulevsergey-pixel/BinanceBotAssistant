@@ -65,7 +65,11 @@ When user shares logs or reports errors:
 - Provides commands for bot status, strategy details, performance, validation, and signal alerts with a persistent button keyboard UI.
 
 ### Logging System
-- Separate log files for Main Bot and Action Price, with centralized JSONL logging for Action Price signals.
+- **Main Bot Log**: Standard logging for core bot operations
+- **Action Price Log**: `logs/action_price_[дата]_[время].log` - separate file created at bot startup
+- **V3 S/R Log**: `logs/v3_[дата]_[время].log` - separate file for V3 S/R strategy (added October 2025)
+- **JSONL Logging**: Centralized JSONL logging for Action Price and V3 S/R signals
+- **Log Levels**: DEBUG for detailed inner loops, INFO for key events and signal creation
 
 ### Performance Tracking System
 - **SignalPerformanceTracker**: Monitors active signals, exit conditions, and PnL.
