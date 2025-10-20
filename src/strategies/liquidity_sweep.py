@@ -250,9 +250,15 @@ class LiquiditySweepStrategy(BaseStrategy):
         prev_close = df['close'].iloc[-2]
         
         # CVD из своего timeframe, fallback к верхнеуровневому или 0
-        cvd = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
-        depth_imbalance = indicators.get('depth_imbalance', 1.0)
-        doi_pct = indicators.get('doi_pct', 0)
+        cvd_raw = indicators.get(self.timeframe, {}).get('cvd', indicators.get('cvd', 0))
+        # Ensure cvd is scalar
+        cvd = cvd_raw.iloc[-1] if isinstance(cvd_raw, pd.Series) else cvd_raw
+        
+        depth_imb_raw = indicators.get('depth_imbalance', 1.0)
+        depth_imbalance = depth_imb_raw.iloc[-1] if isinstance(depth_imb_raw, pd.Series) else depth_imb_raw
+        
+        doi_pct_raw = indicators.get('doi_pct', 0)
+        doi_pct = doi_pct_raw.iloc[-1] if isinstance(doi_pct_raw, pd.Series) else doi_pct_raw
         
         # История последних 3 closes
         recent_closes = df['close'].tail(3).values

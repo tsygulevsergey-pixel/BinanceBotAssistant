@@ -157,7 +157,22 @@ class SRZonesV3Strategy:
         # Build zones using V3 Builder
         try:
             logger.info(f"🔨 Building V3 zones for {symbol}...")
-            zones = self.zone_builder.build_zones(symbol, dfs)
+            
+            # Get current price
+            current_price = dfs.get('15m')['close'].iloc[-1] if '15m' in dfs and len(dfs['15m']) > 0 else None
+            if current_price is None:
+                logger.error(f"❌ {symbol}: No 15m data for current price")
+                return {}
+            
+            # Build zones with correct signature
+            zones = self.zone_builder.build_zones(
+                symbol=symbol,
+                df_1d=dfs.get('1d'),
+                df_4h=dfs.get('4h'),
+                df_1h=dfs.get('1h'),
+                df_15m=dfs.get('15m'),
+                current_price=current_price
+            )
             
             # Count zones by TF
             zone_counts = {tf: len(z) for tf, z in zones.items()}
