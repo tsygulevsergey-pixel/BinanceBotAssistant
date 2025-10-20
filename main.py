@@ -728,10 +728,16 @@ class TradingBot:
         
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
+        # 2.7. ПАРАЛЛЕЛЬНО загрузить orderbook для всех символов (ОПТИМИЗАЦИЯ)
+        # Вместо последовательных запросов внутри каждого символа - один batch запрос
+        orderbook_cache = {}
+        if symbols_to_check:
+            orderbook_cache = await self._fetch_all_orderbooks_parallel(symbols_to_check)
+        
         # 3. Проверить стратегии для каждого символа (ПАРАЛЛЕЛЬНО)
         # Каждая стратегия проверяет блокировку независимо
         if symbols_to_check:
-            batch_size = 20  # Обрабатывать по 20 символов параллельно
+            batch_size = 50  # ОПТИМИЗАЦИЯ: было 20, стало 50 (меньше батчей = быстрее)
             total_batches = (len(symbols_to_check) + batch_size - 1) // batch_size
             
             logger.info(f"🔄 Starting parallel strategy checks: {len(symbols_to_check)} symbols in {total_batches} batches (batch_size={batch_size})")
@@ -742,7 +748,7 @@ class TradingBot:
                 
                 # Параллельная проверка батча
                 tasks = [
-                    self._check_symbol_signals_safe(symbol, btc_data, updated_timeframes)
+                    self._check_symbol_signals_safe(symbol, btc_data, updated_timeframes, orderbook_cache)
                     for symbol in batch
                 ]
                 
@@ -752,26 +758,28 @@ class TradingBot:
             
             logger.info(f"✅ All strategy checks completed for {len(symbols_to_check)} symbols")
     
-    async def _check_symbol_signals_safe(self, symbol: str, btc_data, updated_timeframes: list):
+    async def _check_symbol_signals_safe(self, symbol: str, btc_data, updated_timeframes: list, orderbook_cache: Dict):
         """Обёртка для безопасной параллельной проверки сигналов (с обработкой ошибок)
         
         Args:
             symbol: Символ для проверки
             btc_data: BTC данные для фильтра
             updated_timeframes: Список обновившихся таймфреймов
+            orderbook_cache: Кеш с предзагруженными orderbook данными
         """
         try:
-            await self._check_symbol_signals(symbol, btc_data, updated_timeframes)
+            await self._check_symbol_signals(symbol, btc_data, updated_timeframes, orderbook_cache)
         except Exception as e:
             logger.error(f"Error checking {symbol}: {e}")
     
-    async def _check_symbol_signals(self, symbol: str, btc_data, updated_timeframes: list):
+    async def _check_symbol_signals(self, symbol: str, btc_data, updated_timeframes: list, orderbook_cache: Dict):
         """Проверить сигналы для одного символа
         
         Args:
             symbol: Символ для проверки
             btc_data: BTC данные для фильтра
             updated_timeframes: Список обновившихся таймфреймов (свечи которых закрылись)
+            orderbook_cache: Кеш с предзагруженными orderbook данными
         
         Note: Свечи уже обновлены параллельно в _check_signals через Runtime Fast Catchup
         """
@@ -850,13 +858,15 @@ class TradingBot:
             lookback=5
         )
         
-        # Получить реальные данные Orderbook Depth из API
-        depth_metrics = await OrderbookAnalyzer.fetch_and_calculate_depth(
-            client=self.client,
-            symbol=symbol,
-            limit=20,
-            use_weighted=True  # Используем взвешенный расчёт
-        )
+        # ОПТИМИЗАЦИЯ: Получить orderbook из кеша (уже загружен параллельно)
+        # Вместо медленного API запроса для каждого символа - используем предзагруженные данные
+        depth_metrics = orderbook_cache.get(symbol, {
+            'depth_imbalance': 0.0,
+            'bid_volume': 0.0,
+            'ask_volume': 0.0,
+            'spread_pct': 0.0,
+            'data_valid': False  # Fallback если символа нет в кеше
+        })
         
         # Indicators для стратегий (объединяем кешированные + дополнительные)
         # NOTE: CVD теперь берется из indicators[self.timeframe]['cvd'] в каждой стратегии
