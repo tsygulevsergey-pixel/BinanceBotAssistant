@@ -561,6 +561,71 @@ class TradingBot:
         
         return updated_by_tf
     
+    async def _fetch_all_orderbooks_parallel(self, symbols: list) -> Dict[str, Dict]:
+        """
+        ОПТИМИЗАЦИЯ: Параллельная загрузка orderbook для всех символов с агрессивным timeout
+        
+        Args:
+            symbols: Список символов для загрузки orderbook
+            
+        Returns:
+            Dict[symbol, orderbook_metrics]: Словарь с данными orderbook по символам
+        """
+        start_time = datetime.now()
+        
+        # Semaphore для контроля параллелизма (max 100 одновременно)
+        # Orderbook - лёгкий запрос (weight=2), можем больше параллелизма
+        semaphore = asyncio.Semaphore(100)
+        
+        async def fetch_one_orderbook(symbol: str):
+            """Загрузить orderbook для одного символа с aggressive timeout"""
+            async with semaphore:
+                try:
+                    # Timeout 5 секунд - плохие токены падают быстро
+                    metrics = await OrderbookAnalyzer.fetch_and_calculate_depth(
+                        client=self.client,
+                        symbol=symbol,
+                        limit=20,
+                        use_weighted=True,
+                        timeout=5.0  # Агрессивный timeout
+                    )
+                    return (symbol, metrics)
+                except Exception as e:
+                    logger.debug(f"Orderbook fetch failed for {symbol}: {e}")
+                    return (symbol, {
+                        'depth_imbalance': 0.0,
+                        'bid_volume': 0.0,
+                        'ask_volume': 0.0,
+                        'spread_pct': 0.0,
+                        'data_valid': False
+                    })
+        
+        # Создать задачи для всех символов
+        tasks = [fetch_one_orderbook(symbol) for symbol in symbols]
+        
+        # Запустить все параллельно (Semaphore ограничивает до 100 одновременно)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Собрать результаты в словарь
+        orderbook_cache = {}
+        valid_count = 0
+        for result in results:
+            if isinstance(result, tuple) and len(result) == 2:
+                symbol, metrics = result
+                orderbook_cache[symbol] = metrics
+                if metrics.get('data_valid', False):
+                    valid_count += 1
+        
+        elapsed = (datetime.now() - start_time).total_seconds()
+        
+        logger.info(
+            f"⚡ Parallel Orderbook Fetch: {valid_count}/{len(symbols)} valid "
+            f"in {elapsed:.2f}s ({len(symbols)/elapsed:.1f} req/s) | "
+            f"Timeout: 5s per symbol"
+        )
+        
+        return orderbook_cache
+    
     async def _check_signals_wrapper(self):
         """Обёртка для _check_signals с логированием времени выполнения
         
