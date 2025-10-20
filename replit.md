@@ -80,10 +80,15 @@ When user shares logs or reports errors:
 
 ### Parallel Data Loading Architecture
 - **SymbolLoadCoordinator**: Manages thread-safe data loading.
-- **Loader Task**: Loads historical data.
+- **Loader Task**: Loads historical data with freshness optimization.
 - **Analyzer Task**: Consumes symbols for immediate analysis.
 - **Symbol Auto-Update Task**: Automatically updates the symbol list.
 - **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts.
+- **Smart Data Freshness Check (October 2025)**: Pre-API validation checks DB freshness before requesting Binance:
+  - Checks if last candle covers current time period (e.g., 18:40 → current 15m candle is 18:30-18:45)
+  - SKIPs API request if data is fresh (massive startup speedup on restarts)
+  - Only downloads missing/outdated candles
+  - Effect: 10-20 sec startup on short restarts (<15 min) vs 8 min without optimization
 
 ### Database Performance Optimization (October 2025)
 - **BULK UPSERT**: Candle persistence optimized using SQLite INSERT OR REPLACE (100-500x faster).
