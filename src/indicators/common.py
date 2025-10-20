@@ -8,6 +8,7 @@ from typing import Dict
 from src.indicators.technical import TechnicalIndicators
 from src.indicators.cvd import CVDCalculator
 from src.indicators.vwap import VWAPCalculator
+from src.indicators.volume_profile import VolumeProfile
 
 
 def calculate_common_indicators(df: pd.DataFrame, timeframe: str = '1h') -> Dict:
@@ -94,5 +95,22 @@ def calculate_common_indicators(df: pd.DataFrame, timeframe: str = '1h') -> Dict
     # Для Volume Profile - volume statistics
     indicators['volume_mean_20'] = df['volume'].rolling(20).mean()
     indicators['volume_std_20'] = df['volume'].rolling(20).std()
+    
+    # === Volume Profile (POC, VAH, VAL) - ВЕКТОРИЗОВАННЫЙ ===
+    # Кешируется в IndicatorCache для быстрого доступа
+    try:
+        vp_result = VolumeProfile.calculate_profile(df, num_bins=50)
+        if vp_result:
+            indicators['volume_profile'] = vp_result
+            # Добавляем ключевые уровни отдельно для удобства
+            indicators['vpoc'] = vp_result.get('vpoc')
+            indicators['vah'] = vp_result.get('vah')
+            indicators['val'] = vp_result.get('val')
+    except Exception as e:
+        # Если ошибка - не падать, просто пропустить VP
+        indicators['volume_profile'] = None
+        indicators['vpoc'] = None
+        indicators['vah'] = None
+        indicators['val'] = None
     
     return indicators

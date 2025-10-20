@@ -50,11 +50,22 @@ class VolumeProfileStrategy(BaseStrategy):
             strategy_logger.debug(f"    ❌ Недостаточно данных: {len(df)} баров, требуется {self.lookback_bars}")
             return None
         
-        # Рассчитать Volume Profile
-        vp_result = calculate_volume_profile(df, num_bins=50)
-        vah = vp_result['vah']
-        val = vp_result['val']
-        poc = vp_result['poc']
+        # Использовать закешированный Volume Profile из indicators
+        # VP теперь рассчитывается ОДИН РАЗ в calculate_common_indicators и кешируется
+        vp_result = indicators.get(self.timeframe, {}).get('volume_profile')
+        
+        # Fallback: если VP не в кеше (старая версия), рассчитать вручную
+        if not vp_result:
+            strategy_logger.debug(f"    ⚠️  VP не найден в кеше, рассчитываем вручную")
+            vp_result = calculate_volume_profile(df, num_bins=50)
+        
+        vah = vp_result.get('vah')
+        val = vp_result.get('val')
+        poc = vp_result.get('poc')
+        
+        if not vah or not val or not poc:
+            strategy_logger.debug(f"    ❌ Не удалось получить VP levels (VAH/VAL/POC)")
+            return None
         
         # ATR для измерений
         atr = calculate_atr(df['high'], df['low'], df['close'], period=14)
