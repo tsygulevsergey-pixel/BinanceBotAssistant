@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-20T08:51:53.285471+00:00",
+  "timestamp": "2025-10-20T11:16:31.473305+00:00",
   "symbols_info": {
     "BTCUSDT": {
       "pricePrecision": 2,
@@ -3736,6 +3736,12 @@
     "RIVERUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "\u5e01\u5b89\u4eba\u751fUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     }
