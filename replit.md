@@ -96,25 +96,70 @@ The system loads configurations, connects to Binance, starts parallel data proce
 ### ATR Momentum Strategy
 - Activated strategy to catch explosive moves (≥1.4× median ATR) with HTF EMA200 Confirmation (1H + 4H), Pin Bar Bonus (+0.5 score), and RSI Overextension Filter.
 
-### S/R Zones V3 System (Created but NOT Integrated)
-- **Status**: Fully implemented in `src/utils/sr_zones_v3/` but NOT yet integrated into bot strategies
-- **Current System**: Bot continues using V2 system (`src/utils/sr_zones_15m.py`)
-- **Architecture**: Modular design with 5 components:
-  - **Clustering** (`clustering.py`): DBSCAN-based zone consolidation (ε=0.6×ATR)
-  - **Validation** (`validation.py`): Reaction strength measurement (≥0.7 ATR retracement in m bars)
-  - **Scoring** (`scoring.py`): Multi-factor scoring system (Touches + Reactions + Freshness + Confluence - Noise)
-  - **Flip Detection** (`flip.py`): R⇄S zone role switching with confirmation (body break + 2-bar confirmation or retest)
-  - **Builder** (`builder.py`): Main orchestrator for multi-TF zone construction (D→H4→H1→M15)
-- **Methodology**: Based on 2024-2025 institutional trading best practices
-- **Key Features**:
-  - Adaptive fractal swing detection (k varies by TF: 1d=4, 4h=3, 1h=3, 15m=2)
-  - Zone width adapts by timeframe and volatility (e.g., 15m: 0.35-0.7 ATR)
-  - Freshness decay using exponential function (τ varies by TF)
-  - Multi-TF merge with 40% overlap threshold
-  - Strength classification: key (80+), strong (60-79), normal (40-59), weak (<40)
-  - Confluence detection (EMA200, round numbers)
-- **Configuration**: Full parameter set in `config.yaml` under `sr_zones_v3` (enabled: false)
-- **Next Steps**: Requires integration via Adapter Pattern to enable A/B testing alongside existing V2 system
+### V3 S/R Strategy System ✅ FULLY INTEGRATED (October 2025)
+- **Status**: PRODUCTION READY - Fully integrated and running parallel to existing 6 strategies + Action Price
+- **Implementation**: Complete independent trading strategy using V3 zones
+- **Location**: `src/v3_sr/` (strategy.py, performance_tracker.py, helpers.py, signal_logger.py, logger.py)
+
+#### Two Core Setups
+1. **Flip-Retest Setup**:
+   - Zone breaks (body close beyond zone + buffer)
+   - N-bar confirmation (default: 2 closes beyond)
+   - Retest within timeout (default: 12 bars)
+   - Entry triggers: Engulfing, CHoCH
+   
+2. **Sweep-Return Setup**:
+   - Liquidity sweep (wick beyond zone, body stays inside)
+   - Wick/body ratio validation (≥1.2)
+   - Fast return (≤3 bars default)
+   - A-grade detection (wick ratio ≥2.0, return ≤2 bars)
+
+#### Architecture Components
+- **Database Tables** (auto-created via SQLAlchemy):
+  - `v3_sr_signals`: Main signals table (setup_type, zone_strength, tp1/tp2_hit, trailing, mfe/mae)
+  - `v3_sr_zone_events`: Zone touch event logging
+  - `v3_sr_signal_locks`: Independent symbol blocking (symbol+direction keys)
+
+- **Performance Tracking**:
+  - Partial exits: TP1 (50%) → move SL to BE → TP2 (50%)
+  - Trailing stop after TP1 (configurable ATR multiplier)
+  - MFE/MAE tracking in R-multiples
+  - JSONL logging for offline analysis
+
+- **Signal Scoring**:
+  - Base: 50 points
+  - Zone quality bonuses: Key (+20), Strong (+15), HTF (+15)
+  - Setup bonuses: Flip-Retest (+10), A-grade Sweep (+20)
+  - VWAP alignment (+5)
+  - Min confidence threshold: 65%
+
+#### Integration Points
+- **Main Loop**: Runs on 15m/1h candle closes (parallel with Action Price)
+- **Data Flow**: Uses same DataLoader, multi-TF data (15m/1h/4h/1d)
+- **Independent Blocking**: Separate from main strategies and Action Price
+- **Telegram Commands**: /v3_status, /v3_signals, /v3_stats, /v3_zones
+- **Configuration**: `config.yaml` → `sr_zones_v3_strategy` section
+
+#### Key Features
+- **VWAP Bias Filter**: Enforces directional alignment (epsilon: 0.05 ATR)
+- **A-grade Exception**: High-quality sweeps bypass VWAP filter
+- **Zone Context**: Stores nearest support/resistance in signals
+- **Market Regime Filtering**: Configurable allowed regimes (TREND/RANGE)
+- **Adaptive SL/TP**: Calculated from zone boundaries + ATR buffers
+- **Entry Timeframes**: 15m and 1H (configurable)
+- **Context Timeframes**: 4H and 1D for zone quality
+
+#### V3 Zones Infrastructure
+Base system in `src/utils/sr_zones_v3/`:
+- **Clustering**: DBSCAN-based zone consolidation (ε=0.6×ATR)
+- **Validation**: Reaction strength measurement (≥0.7 ATR retracement)
+- **Scoring**: Multi-factor (Touches + Reactions + Freshness + Confluence - Noise)
+- **Flip Detection**: R⇄S role switching with confirmation
+- **Builder**: Multi-TF orchestrator (D→H4→H1→M15)
+- Adaptive fractal swing detection (k varies by TF)
+- Zone width adapts by volatility (e.g., 15m: 0.35-0.7 ATR)
+- Freshness decay using exponential function
+- Strength classification: key (80+), strong (60-79), normal (40-59), weak (<40)
 
 # External Dependencies
 
