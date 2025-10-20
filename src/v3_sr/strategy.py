@@ -85,14 +85,17 @@ class SRZonesV3Strategy:
         if not self.enabled:
             return None
         
+        logger.info(f"🔍 Analyzing {symbol} | Regime: {market_regime}")
+        
         # Check if symbol is blocked for V3
         if await self._is_symbol_blocked(symbol):
+            logger.info(f"🔒 {symbol} blocked (active signal)")
             return None
         
         # Filter by market regime
         allowed_regimes = self.config.get('filters', {}).get('allowed_regimes', ['TREND', 'RANGE'])
         if market_regime not in allowed_regimes:
-            logger.debug(f"V3 SR: {symbol} regime {market_regime} not in allowed list")
+            logger.info(f"❌ {symbol} regime {market_regime} not in allowed list {allowed_regimes}")
             return None
         
         # Build/update zones for all timeframes
@@ -104,7 +107,7 @@ class SRZonesV3Strategy:
         })
         
         if not zones:
-            logger.debug(f"V3 SR: {symbol} no zones built")
+            logger.info(f"⚠️ {symbol} no zones built")
             return None
         
         # Try entry timeframes (15m, 1h)
@@ -148,15 +151,22 @@ class SRZonesV3Strategy:
         """
         # Simple cache check (можно улучшить с TTL)
         if symbol in self.zone_cache:
+            logger.debug(f"📦 {symbol} zones loaded from cache")
             return self.zone_cache[symbol]
         
         # Build zones using V3 Builder
         try:
+            logger.info(f"🔨 Building V3 zones for {symbol}...")
             zones = self.zone_builder.build_zones(symbol, dfs)
+            
+            # Count zones by TF
+            zone_counts = {tf: len(z) for tf, z in zones.items()}
+            logger.info(f"✅ {symbol} zones built: {zone_counts}")
+            
             self.zone_cache[symbol] = zones
             return zones
         except Exception as e:
-            logger.error(f"Error building V3 zones for {symbol}: {e}")
+            logger.error(f"❌ Error building V3 zones for {symbol}: {e}")
             return {}
     
     async def _check_flip_retest(self, symbol: str, entry_tf: str, df: pd.DataFrame,
@@ -208,6 +218,8 @@ class SRZonesV3Strategy:
         min_strength = self.config.get('general', {}).get('zone_min_strength', 60)
         strong_zones = [z for z in all_zones if z.get('strength', 0) >= min_strength]
         
+        logger.info(f"  📊 {symbol} {entry_tf} Flip-Retest check: {len(strong_zones)} strong zones (min strength: {min_strength})")
+        
         if not strong_zones:
             return None
         
@@ -231,6 +243,8 @@ class SRZonesV3Strategy:
                 if break_idx is None:
                     continue
                 
+                logger.debug(f"  🔺 {symbol} {entry_tf} LONG: Zone break found at bar {break_idx} (R @ {zone_high:.4f})")
+                
                 # Check confirmation (closes above zone)
                 confirmed = True
                 for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
@@ -239,7 +253,10 @@ class SRZonesV3Strategy:
                         break
                 
                 if not confirmed:
+                    logger.debug(f"  ❌ {symbol} {entry_tf} LONG: Break not confirmed")
                     continue
+                
+                logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Break confirmed ({confirm_closes} closes)")
                 
                 # Check retest (price returned to zone)
                 retest_found = False
@@ -247,13 +264,20 @@ class SRZonesV3Strategy:
                     low = df['low'].iloc[i]
                     # Price touches zone edge (within delta)
                     if low <= zone_high + (retest_delta_atr * atr):
+                        logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Retest found at bar {i}")
+                        
                         # Check entry trigger
                         if i < len(df) - 1:
                             trigger = self._check_entry_trigger(df, i, i+1, 'LONG', flip_config)
                             if trigger:
+                                logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Entry trigger confirmed ({trigger})")
+                                
                                 # VWAP bias check
                                 if not await self._check_vwap_bias(df, 'LONG', indicators):
+                                    logger.debug(f"  ❌ {symbol} {entry_tf} LONG: VWAP bias failed")
                                     continue
+                                
+                                logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Flip-Retest signal!")
                                 
                                 # Build signal
                                 return await self._build_flip_retest_signal(
@@ -275,6 +299,8 @@ class SRZonesV3Strategy:
                 if break_idx is None:
                     continue
                 
+                logger.debug(f"  🔻 {symbol} {entry_tf} SHORT: Zone break found at bar {break_idx} (S @ {zone_low:.4f})")
+                
                 # Check confirmation
                 confirmed = True
                 for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
@@ -283,17 +309,27 @@ class SRZonesV3Strategy:
                         break
                 
                 if not confirmed:
+                    logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: Break not confirmed")
                     continue
+                
+                logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Break confirmed ({confirm_closes} closes)")
                 
                 # Check retest
                 for i in range(break_idx + confirm_closes, len(df)):
                     high = df['high'].iloc[i]
                     if high >= zone_low - (retest_delta_atr * atr):
+                        logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Retest found at bar {i}")
+                        
                         if i < len(df) - 1:
                             trigger = self._check_entry_trigger(df, i, i+1, 'SHORT', flip_config)
                             if trigger:
+                                logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Entry trigger confirmed ({trigger})")
+                                
                                 if not await self._check_vwap_bias(df, 'SHORT', indicators):
+                                    logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: VWAP bias failed")
                                     continue
+                                
+                                logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Flip-Retest signal!")
                                 
                                 return await self._build_flip_retest_signal(
                                     symbol, entry_tf, df, zone, 'SHORT',
@@ -347,6 +383,8 @@ class SRZonesV3Strategy:
         min_strength = self.config.get('general', {}).get('zone_min_strength', 60)
         strong_zones = [z for z in all_zones if z.get('strength', 0) >= min_strength]
         
+        logger.info(f"  📊 {symbol} {entry_tf} Sweep-Return check: {len(strong_zones)} strong zones (min strength: {min_strength})")
+        
         if not strong_zones:
             return None
         
@@ -380,21 +418,30 @@ class SRZonesV3Strategy:
                 if sweep_idx is None:
                     continue
                 
+                logger.debug(f"  💧 {symbol} {entry_tf} LONG: Support sweep found at bar {sweep_idx} (S @ {zone_low:.4f})")
+                
                 # Check return (price back inside/above zone)
                 for i in range(sweep_idx + 1, min(sweep_idx + max_bars + 1, len(df))):
                     bar = df.iloc[i]
                     
                     # Return condition
                     if return_body_inside and bar['close'] > zone_low:
+                        logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Fast return at bar {i} (within {i - sweep_idx} bars)")
+                        
                         # Check entry trigger
                         if i < len(df) - 1:
                             # Check A-grade sweep
                             is_a_grade = self._check_a_grade_sweep(df, sweep_idx, i, sweep_config)
+                            if is_a_grade:
+                                logger.info(f"  ⭐ {symbol} {entry_tf} LONG: A-GRADE sweep detected!")
                             
                             # VWAP bias (allow exception for A-grade)
                             vwap_ok = await self._check_vwap_bias(df, 'LONG', indicators)
                             if not vwap_ok and not is_a_grade:
+                                logger.debug(f"  ❌ {symbol} {entry_tf} LONG: VWAP bias failed (not A-grade)")
                                 continue
+                            
+                            logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Sweep-Return signal!")
                             
                             # Build signal
                             return await self._build_sweep_return_signal(
@@ -422,16 +469,25 @@ class SRZonesV3Strategy:
                 if sweep_idx is None:
                     continue
                 
+                logger.debug(f"  💧 {symbol} {entry_tf} SHORT: Resistance sweep found at bar {sweep_idx} (R @ {zone_high:.4f})")
+                
                 for i in range(sweep_idx + 1, min(sweep_idx + max_bars + 1, len(df))):
                     bar = df.iloc[i]
                     
                     if return_body_inside and bar['close'] < zone_high:
+                        logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Fast return at bar {i} (within {i - sweep_idx} bars)")
+                        
                         if i < len(df) - 1:
                             is_a_grade = self._check_a_grade_sweep(df, sweep_idx, i, sweep_config)
+                            if is_a_grade:
+                                logger.info(f"  ⭐ {symbol} {entry_tf} SHORT: A-GRADE sweep detected!")
                             
                             vwap_ok = await self._check_vwap_bias(df, 'SHORT', indicators)
                             if not vwap_ok and not is_a_grade:
+                                logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: VWAP bias failed (not A-grade)")
                                 continue
+                            
+                            logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Sweep-Return signal!")
                             
                             return await self._build_sweep_return_signal(
                                 symbol, entry_tf, df, zone, 'SHORT',
@@ -552,6 +608,8 @@ class SRZonesV3Strategy:
             'atr': atr
         }
         
+        logger.info(f"🚀 FLIP-RETEST SIGNAL CREATED: {symbol} {direction} {entry_tf} | Entry: {entry_price:.4f} | SL: {sl_price:.4f} | TP1: {tp1_price:.4f} | TP2: {tp2_price:.4f} | Conf: {confidence}%")
+        
         return signal_data
     
     async def _build_sweep_return_signal(self, symbol: str, entry_tf: str, df: pd.DataFrame,
@@ -594,6 +652,9 @@ class SRZonesV3Strategy:
             'atr': atr,
             'is_a_grade': is_a_grade
         }
+        
+        a_grade_tag = " [A-GRADE]" if is_a_grade else ""
+        logger.info(f"🚀 SWEEP-RETURN SIGNAL CREATED{a_grade_tag}: {symbol} {direction} {entry_tf} | Entry: {entry_price:.4f} | SL: {sl_price:.4f} | TP1: {tp1_price:.4f} | TP2: {tp2_price:.4f} | Conf: {confidence}%")
         
         return signal_data
     
