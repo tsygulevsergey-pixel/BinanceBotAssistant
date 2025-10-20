@@ -43,9 +43,9 @@ class MAVWAPPullbackStrategy(BaseStrategy):
                      regime: str, bias: str, 
                      indicators: Dict) -> Optional[Signal]:
         
-        # Работает в TREND режиме
-        if regime != 'TREND':
-            strategy_logger.debug(f"    ❌ Режим {regime}, требуется TREND")
+        # PRO 2024-2025: Работает в TREND и SQUEEZE режимах
+        if regime not in ['TREND', 'SQUEEZE']:
+            strategy_logger.debug(f"    ❌ Режим {regime}, требуется TREND или SQUEEZE")
             return None
         
         if len(df) < 200:
@@ -67,9 +67,10 @@ class MAVWAPPullbackStrategy(BaseStrategy):
         current_adx = adx.iloc[-1] if adx is not None and not pd.isna(adx.iloc[-1]) else 0
         current_vwap = vwap.iloc[-1] if vwap is not None and not pd.isna(vwap.iloc[-1]) else current_close
         
-        # Проверка H4 тренда (ADX>20)
-        if current_adx <= self.adx_threshold:
-            strategy_logger.debug(f"    ❌ ADX слабый: {current_adx:.1f} <= {self.adx_threshold}")
+        # Проверка ADX (PRO 2024-2025: мягче для SQUEEZE)
+        adx_threshold = self.adx_threshold if regime == 'TREND' else 15  # Для SQUEEZE ADX >15
+        if current_adx <= adx_threshold:
+            strategy_logger.debug(f"    ❌ ADX слабый: {current_adx:.1f} <= {adx_threshold} (режим {regime})")
             return None
         
         # Определить тренд по EMA50

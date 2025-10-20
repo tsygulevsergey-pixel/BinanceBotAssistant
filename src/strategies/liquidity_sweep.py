@@ -30,7 +30,7 @@ class LiquiditySweepStrategy(BaseStrategy):
         
         self.timeframe = '15m'
         self.lookback_bars = 50
-        self.sweep_min_atr = 0.1  # Минимальный прокол 0.1 ATR
+        self.sweep_min_atr = 0.05  # PRO 2024-2025: Минимальный прокол 0.05 ATR (было 0.1)
         self.sweep_max_atr = 0.3  # Максимальный прокол 0.3 ATR
         self.sweep_min_pct = 0.001  # 0.1% минимум
         self.sweep_max_pct = 0.002  # 0.2% максимум

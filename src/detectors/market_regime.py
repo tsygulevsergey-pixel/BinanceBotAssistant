@@ -16,7 +16,7 @@ class MarketRegime(Enum):
 
 class MarketRegimeDetector:
     def __init__(self):
-        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 20)
+        self.adx_threshold = config.get('market_detector.trend.adx_threshold', 25)
         self.bb_percentile_threshold = config.get('market_detector.range.bb_percentile', 30)
         self.squeeze_bb_percentile = config.get('market_detector.squeeze.bb_percentile', 25)
         self.squeeze_min_bars = config.get('market_detector.squeeze.min_bars', 12)
@@ -63,11 +63,18 @@ class MarketRegimeDetector:
         regime = MarketRegime.UNDECIDED
         confidence = 0.0
         
-        # ПРИОРИТЕТ 1: TREND - сильный тренд с высоким ADX и выровненными EMA
-        if adx > self.adx_threshold and ema_aligned:
+        # ПРИОРИТЕТ 1: TREND - сильный тренд с высоким ADX (EMA alignment как бонус)
+        # ПО СТАНДАРТАМ 2024-2025: ADX >25 = TREND, EMA aligned дает бонус к confidence
+        if adx > self.adx_threshold:
             regime = MarketRegime.TREND
+            # Base confidence от ADX
             confidence = min(adx / 40, 1.0)
-            logger.debug(f"Regime: TREND | ADX={adx:.1f} > {self.adx_threshold}, EMA aligned={ema_aligned}")
+            # БОНУС за EMA alignment (+20% к confidence, макс 1.0)
+            if ema_aligned:
+                confidence = min(confidence + 0.2, 1.0)
+                logger.debug(f"Regime: TREND | ADX={adx:.1f} > {self.adx_threshold}, EMA aligned={ema_aligned} (confidence boost)")
+            else:
+                logger.debug(f"Regime: TREND | ADX={adx:.1f} > {self.adx_threshold}, EMA not aligned (no boost)")
         
         # ПРИОРИТЕТ 2: SQUEEZE - очень узкая консолидация (BB width < 25 + длительность)
         elif is_squeeze:

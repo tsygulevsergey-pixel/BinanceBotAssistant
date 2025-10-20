@@ -56,8 +56,9 @@ class BreakRetestStrategy(BaseStrategy):
     def get_category(self) -> str:
         return "pullback"
     
-    def _find_swing_high_low(self, df: pd.DataFrame, end_pos: int, lookback: int = 20, buffer: int = 3) -> Dict:
+    def _find_swing_high_low(self, df: pd.DataFrame, end_pos: int, lookback: int = 20, buffer: int = 2) -> Dict:
         """Найти swing high/low с буфером N баров
+        PRO 2024-2025: buffer=2 для 15m (buffer=3 слишком строгий)
         Args:
             end_pos: ПОЛОЖИТЕЛЬНЫЙ индекс окончания поиска
         """
@@ -429,7 +430,8 @@ class BreakRetestStrategy(BaseStrategy):
             bar_adx = adx.iloc[i]
             
             # Найти swing high/low перед этим баром (передаем ПОЛОЖИТЕЛЬНЫЙ индекс!)
-            swings = self._find_swing_high_low(df, pos_idx, lookback=20, buffer=3)
+            # PRO 2024-2025: buffer=2 для 15m timeframe
+            swings = self._find_swing_high_low(df, pos_idx, lookback=20, buffer=2)
             
             if swings['swing_high'] is None and swings['swing_low'] is None:
                 continue
@@ -584,6 +586,7 @@ class BreakRetestStrategy(BaseStrategy):
                         return None
                     
                     # ФАЗА 1: Higher Timeframe Confirmation (только для TREND)
+                    # PRO 2024-2025: HTF = БОНУС к score, НЕ блокировка!
                     htf_confirmed = True
                     htf_has_data = False
                     if regime == 'TREND':
@@ -591,15 +594,13 @@ class BreakRetestStrategy(BaseStrategy):
                         df_4h = indicators.get('4h')
                         htf_confirmed, htf_has_data = self._check_higher_timeframe_trend(df_1h, df_4h, 'LONG')
                         
-                        # Если есть данные но не подтверждается - блокируем
-                        if htf_has_data and not htf_confirmed:
-                            strategy_logger.debug(f"    ❌ LONG ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA200)")
-                            return None  # Строгая блокировка для TREND режима
-                        
-                        if htf_confirmed:
-                            strategy_logger.debug(f"    ✅ Higher TF подтверждает LONG тренд (1H+4H > EMA200)")
+                        # PRO 2024-2025: НЕ блокируем, только логируем для score
+                        if htf_has_data and htf_confirmed:
+                            strategy_logger.debug(f"    ✅ Higher TF подтверждает LONG тренд (1H+4H > EMA200) - БОНУС к score!")
+                        elif htf_has_data and not htf_confirmed:
+                            strategy_logger.debug(f"    ⚠️ Higher TF НЕ подтверждает тренд - БЕЗ бонуса")
                         else:
-                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки EMA200 (штраф к score)")
+                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки EMA200 - небольшой штраф")
                     
                     # ФАЗА 2: Bollinger Bands фильтр (только для TREND)
                     bb_good = True
@@ -731,6 +732,7 @@ class BreakRetestStrategy(BaseStrategy):
                         return None
                     
                     # ФАЗА 1: Higher Timeframe Confirmation (только для TREND)
+                    # PRO 2024-2025: HTF = БОНУС к score, НЕ блокировка!
                     htf_confirmed = True
                     htf_has_data = False
                     if regime == 'TREND':
@@ -738,15 +740,13 @@ class BreakRetestStrategy(BaseStrategy):
                         df_4h = indicators.get('4h')
                         htf_confirmed, htf_has_data = self._check_higher_timeframe_trend(df_1h, df_4h, 'SHORT')
                         
-                        # Если есть данные но не подтверждается - блокируем
-                        if htf_has_data and not htf_confirmed:
-                            strategy_logger.debug(f"    ❌ SHORT ретест OK, но Higher TF не подтверждает тренд (1H/4H EMA200)")
-                            return None  # Строгая блокировка для TREND режима
-                        
-                        if htf_confirmed:
-                            strategy_logger.debug(f"    ✅ Higher TF подтверждает SHORT тренд (1H+4H < EMA200)")
+                        # PRO 2024-2025: НЕ блокируем, только логируем для score
+                        if htf_has_data and htf_confirmed:
+                            strategy_logger.debug(f"    ✅ Higher TF подтверждает SHORT тренд (1H+4H < EMA200) - БОНУС к score!")
+                        elif htf_has_data and not htf_confirmed:
+                            strategy_logger.debug(f"    ⚠️ Higher TF НЕ подтверждает тренд - БЕЗ бонуса")
                         else:
-                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки EMA200 (штраф к score)")
+                            strategy_logger.debug(f"    ⚠️ Higher TF: недостаточно данных для проверки EMA200 - небольшой штраф")
                     
                     # ФАЗА 2: Bollinger Bands фильтр (только для TREND)
                     bb_good = True

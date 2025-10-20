@@ -60,11 +60,12 @@ market_detector:
     execution: ["1m"]
   
   trend:
-    adx_threshold: 20  # Базовый порог (не используется больше)
+    adx_threshold: 25  # PRO 2024-2025: ADX >25 = TREND (было 20)
     adx_threshold_trend: 25  # ФАЗА 1: Строже для TREND режима
     adx_threshold_squeeze: 15  # ФАЗА 1: Мягче для SQUEEZE режима
     ema_periods: [20, 50, 200]
     late_trend_atr_multiplier: 1.8
+    ema_alignment_optional: true  # PRO 2024-2025: EMA alignment = бонус, не обязательно
   
   range:
     adx_threshold: 20
