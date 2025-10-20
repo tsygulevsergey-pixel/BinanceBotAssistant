@@ -735,3 +735,199 @@ sr_zones_v3:
   confluence:
     ema200_proximity_atr: 0.5  # В пределах 0.5 ATR от EMA200
     round_number_tolerance_pct: 0.002  # ±0.2% для круглых чисел
+
+
+# =============================================================================
+# S/R ZONES V3 STRATEGY - Flip-Retest & Sweep-Return Signals
+# =============================================================================
+# ОТДЕЛЬНАЯ СТРАТЕГИЯ для тестирования V3 S/R системы
+# - Flip-Retest: пробой зоны → закрепление → ретест → вход
+# - Sweep-Return: ложный пробой (ликвидность) → быстрый возврат → вход
+# - VWAP Bias: торгуем в сторону VWAP
+# - Multi-TF: 15m/1H entry, 4H/D context
+# - Независимое отслеживание сигналов и блокировок
+# =============================================================================
+
+sr_zones_v3_strategy:
+  enabled: true  # Включить V3 S/R стратегию
+  
+  # General Settings
+  general:
+    entry_timeframes: ["15m", "1h"]  # Таймфреймы для входа (пропускаем M1, M5)
+    context_timeframes: ["4h", "1d"]  # Таймфреймы для контекста
+    
+    # Минимальная сила зоны для использования
+    zone_min_strength: 60  # Порог (60 = "strong", 80 = "key")
+    
+    # Clock skew tolerance
+    clock_skew_tolerance_ms: 1500
+  
+  # Flip-Retest Setup Parameters
+  flip_retest:
+    enabled: true
+    
+    # Пробой зоны (Break)
+    break_body_buffer_atr: 0.3  # Сколько ATR должно закрытие уйти за границу зоны
+    
+    # Закрепление (Confirmation)
+    confirm_closes: 2  # Сколько закрытий подряд за зоной
+    
+    # Ретест (Retest)
+    retest_timeout_bars: 12  # Сколько баров ждём ретест после закрепления
+    retest_accept_delta_atr: 0.25  # Максимальная дистанция ретеста от края зоны (в ATR)
+    
+    # Триггеры входа
+    entry_triggers:
+      - "engulfing"  # Поглощающая свеча
+      - "choch"  # Change of Character
+    
+    # Scoring bonuses
+    htf_zone_confluence_bonus: 15  # Бонус если зона пересекается с D/H4
+    ema200_confluence_bonus: 10  # Бонус если EMA200 поддерживает
+  
+  # Sweep-Return Setup Parameters
+  sweep_return:
+    enabled: true
+    
+    # Параметры выноса (Sweep)
+    sweep_max_bars: 3  # Ложный пробой должен вернуться за уровень ≤ N баров
+    sweep_min_wick_ratio: 1.2  # Отношение хвоста к телу у свечи-выноса
+    
+    # Параметры возврата (Return)
+    return_body_inside: true  # Требуем закрытие обратно внутрь диапазона
+    
+    # Scoring bonuses (A-grade sweep)
+    a_grade_wick_ratio: 2.0  # Хвост/тело >= 2.0
+    a_grade_return_bars: 2  # Возврат за <= 2 бара
+    a_grade_bonus: 20  # Бонус для A-grade sweep
+    
+    # Volume confirmation
+    require_volume_spike: true  # Требовать spike volume на sweep
+    volume_spike_mult: 1.5  # Минимальный множитель volume
+  
+  # VWAP Bias Filter
+  vwap_bias:
+    enabled: true
+    use_intraday_vwap: true  # Daily VWAP (с начала UTC дня)
+    use_anchored_vwap: true  # Anchored VWAP (от swing high/low)
+    
+    # Правило bias
+    bias_rule: "trade_with_vwap_side"  # Лонги над VWAP, шорты под VWAP
+    bias_epsilon_atr: 0.05  # Зона толерантности (ε = 0.05 × ATR)
+    
+    # Исключения
+    bias_violation_allowed: false  # Допускать контртренд (только A-grade sweep)
+    allow_sweep_exception: true  # A-grade sweep может быть против VWAP
+  
+  # SL/TP Calculation
+  sl_tp:
+    # Stop Loss
+    sl_buffer_atr: 0.25  # Добавка к противоположной границе зоны
+    
+    # Take Profit 1
+    tp1_target: "nearest_local_zone"  # "nearest_local_zone" или "1R"
+    tp1_min_r: 0.8  # Минимум 0.8R для TP1
+    
+    # Take Profit 2
+    tp2_target: "next_htf_zone"  # "next_htf_zone" или "2R+"
+    tp2_min_r: 2.0  # Минимум 2.0R для TP2
+    tp2_max_r: 4.0  # Максимум 4.0R для TP2
+    
+    # Risk Management
+    max_sl_atr: 2.5  # Максимальный SL в ATR (защита от слишком широких стопов)
+    
+    # Partial Exits
+    tp1_size: 0.50  # 50% exit at TP1
+    tp2_trail_size: 0.50  # 50% trail to TP2
+    
+    # Post-TP1 Management
+    move_to_be_after_tp1: true  # Переместить SL в BE после TP1
+    trail_after_tp1: true  # Включить trailing после TP1
+    trail_atr_mult: 0.5  # Trailing distance (0.5 × ATR)
+  
+  # Signal Quality & Confidence
+  quality:
+    # Минимальная confidence для сигнала
+    min_confidence: 65  # Отбрасываем сигналы с confidence < 65
+    
+    # Confluence bonuses
+    htf_d_zone_bonus: 20  # Бонус если зона на D TF
+    htf_h4_zone_bonus: 15  # Бонус если зона на H4 TF
+    multiple_tf_zones_bonus: 10  # Бонус если зоны на нескольких TF
+    ema200_support_bonus: 10  # Бонус если EMA200 поддерживает
+    volume_confirmation_bonus: 5  # Бонус если volume подтверждает
+    
+    # Penalties
+    against_htf_zone_penalty: -30  # Штраф если против старшей зоны
+    weak_zone_penalty: -15  # Штраф если зона "weak"
+  
+  # Signal Validity
+  validity:
+    # Timeout для исполнения сигнала (в барах entry TF)
+    timeout_bars:
+      "15m": 12  # 12 × 15m = 3 часа
+      "1h": 8  # 8 × 1h = 8 часов
+    
+    # Дебаунс (не создавать новый сигнал если предыдущий активен)
+    debounce_enabled: true
+    
+    # Отмена сигнала при чистом пробое в противоположную сторону
+    cancel_on_opposite_break: true
+    cancel_break_atr: 0.5  # Пробой на 0.5 ATR отменяет сигнал
+  
+  # Zone Touch Logging (для анализа качества)
+  zone_logging:
+    log_all_touches: true  # Логировать все касания зон
+    
+    # Reaction window
+    reaction_window_bars: 8  # Сколько баров после касания проверяем откат
+    reaction_threshold_atr: 0.7  # Минимальный откат ≥ 0.7 ATR
+    
+    # Database persistence
+    persist_latency_budget_ms: 50  # Лимит на запись в БД события
+  
+  # Performance Tracker Settings
+  performance_tracker:
+    check_interval_seconds: 60  # Проверять активные сигналы каждые 60 сек
+    
+    # Trailing stop settings
+    trailing_update_threshold_atr: 0.1  # Обновлять trailing только если цена сдвинулась на 0.1 ATR
+    
+    # JSONL Logging
+    jsonl_log_file: "logs/v3_sr_signals.jsonl"  # Путь к JSONL логу
+    jsonl_flush_interval: 5  # Flush каждые 5 событий
+  
+  # Symbol Blocking (независимое от других стратегий)
+  blocking:
+    enabled: true  # Блокировать символ после сигнала
+    block_same_direction: true  # Блокировать только то же направление
+    block_opposite_direction: false  # НЕ блокировать противоположное
+    unblock_on_close: true  # Разблокировать при закрытии сигнала
+  
+  # Risk Management Filters
+  filters:
+    # Максимум одновременных сигналов
+    max_concurrent_signals: 10
+    
+    # Фильтр по volatility regime
+    allow_low_volatility: true
+    allow_normal_volatility: true
+    allow_high_volatility: false  # Пропускаем экстремальную волатильность
+    
+    # Фильтр по market regime
+    allowed_regimes:
+      - "TREND"
+      - "RANGE"
+      # "BREAKOUT" пропускаем (слишком рискованно)
+  
+  # Telegram Notifications
+  telegram:
+    send_signals: true  # Отправлять сигналы в Telegram
+    send_exits: true  # Отправлять уведомления о закрытии
+    send_zone_events: false  # НЕ отправлять каждое касание зоны (слишком много)
+    
+    # Формат сообщений
+    include_zone_context: true  # Показывать ближайшие зоны S/R
+    include_htf_context: true  # Показывать старшие таймфреймы
+    include_confidence_breakdown: true  # Показывать детали confidence
+    include_r_multiples: true  # Показывать R-кратность
