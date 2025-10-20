@@ -25,7 +25,7 @@ class Candle(Base):
     taker_buy_quote = Column(Float)
     
     __table_args__ = (
-        Index('idx_candles_symbol_timeframe_time', 'symbol', 'timeframe', 'open_time'),
+        Index('idx_candles_symbol_timeframe_time', 'symbol', 'timeframe', 'open_time', unique=True),
     )
 
 
