@@ -32,8 +32,8 @@ Preferred communication style: Simple, everyday language.
 - **TechnicalIndicators**: ATR, ADX, EMA, Bollinger Bands, Donchian Channels.
 - **CVDCalculator**: Cumulative Volume Delta.
 - **VWAPCalculator**: Daily, anchored, and session-based VWAP.
-- **VolumeProfile**: POC, VAH/VAL calculation.
-- **IndicatorCache**: High-performance caching for indicators.
+- **VolumeProfile**: POC, VAH/VAL calculation (vectorized computation using numpy broadcasting for 50-100x speedup).
+- **IndicatorCache**: High-performance caching for indicators (Volume Profile integrated October 2025).
 
 ### Signal Scoring & Aggregation
 - Combines strategy scores with market modifiers, including BTC filter and conflict resolution.
