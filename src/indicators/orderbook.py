@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, List, Optional
 from src.utils.logger import logger
 
@@ -96,7 +97,8 @@ class OrderbookAnalyzer:
     @staticmethod
     async def fetch_and_calculate_depth(client, symbol: str, 
                                         limit: int = 20,
-                                        use_weighted: bool = False) -> Dict[str, float]:
+                                        use_weighted: bool = False,
+                                        timeout: float = 5.0) -> Dict[str, float]:
         """
         Получить orderbook из API и рассчитать метрики
         
@@ -105,6 +107,7 @@ class OrderbookAnalyzer:
             symbol: Trading symbol (e.g., 'BTCUSDT')
             limit: Depth limit (5, 10, 20, 50, 100, 500, 1000)
             use_weighted: Использовать взвешенный расчёт
+            timeout: Максимальное время ожидания в секундах (default=5.0)
         
         Returns:
             Dict с метриками: {
@@ -115,8 +118,10 @@ class OrderbookAnalyzer:
             }
         """
         try:
-            # Получаем orderbook
-            orderbook = await client.get_depth(symbol=symbol, limit=limit)
+            # АГРЕССИВНЫЙ TIMEOUT: 5 секунд вместо 30
+            # Плохие токены (low-volume) падают быстро без блокировки всего цикла
+            async with asyncio.timeout(timeout):
+                orderbook = await client.get_depth(symbol=symbol, limit=limit)
             
             if not orderbook or 'bids' not in orderbook or 'asks' not in orderbook:
                 logger.debug(f"No orderbook data for {symbol}")
@@ -175,8 +180,17 @@ class OrderbookAnalyzer:
                 'data_valid': True  # Флаг что данные реальные
             }
             
+        except asyncio.TimeoutError:
+            logger.warning(f"⏱️ Orderbook timeout for {symbol} (>{timeout}s) - using fallback")
+            return {
+                'depth_imbalance': 0.0,
+                'bid_volume': 0.0,
+                'ask_volume': 0.0,
+                'spread_pct': 0.0,
+                'data_valid': False  # Флаг что данные - fallback
+            }
         except Exception as e:
-            logger.error(f"Error fetching orderbook for {symbol}: {e}")
+            logger.debug(f"Error fetching orderbook for {symbol}: {e}")
             return {
                 'depth_imbalance': 0.0,
                 'bid_volume': 0.0,
