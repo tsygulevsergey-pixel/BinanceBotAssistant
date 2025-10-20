@@ -313,10 +313,7 @@ class SignalPerformanceTracker:
             logger.debug(f"Checking {len(active_signals)} active signals")
             
             for signal in active_signals:
-                try:
-                    await self._check_signal(signal, session)
-                except Exception as e:
-                    logger.error(f"Error checking signal {signal.id}: {e}", exc_info=True)
+                await self._check_signal(signal, session)
             
             session.commit()
             
@@ -358,8 +355,14 @@ class SignalPerformanceTracker:
                     f"| PnL: {pnl_r:+.2f}% ({exit_type})"
                 )
                 
+        except asyncio.TimeoutError:
+            # Network timeout - skip this check cycle, will retry on next iteration
+            logger.warning(f"⏱️ Timeout checking signal {signal.id} ({signal.symbol}) - will retry next cycle")
+        except asyncio.CancelledError:
+            # Request was cancelled - skip without logging
+            logger.debug(f"Request cancelled for signal {signal.id}")
         except Exception as e:
-            logger.error(f"Error checking signal {signal.id} ({signal.symbol}): {e}")
+            logger.error(f"Error checking signal {signal.id} ({signal.symbol}): {e}", exc_info=True)
     
     def _check_exit_conditions(self, signal: Signal, current_price: float) -> Optional[tuple]:
         """

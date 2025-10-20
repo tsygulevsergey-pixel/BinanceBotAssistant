@@ -71,10 +71,7 @@ class ActionPricePerformanceTracker:
             logger.info(f"🔍 Checking {len(active_signals)} active AP signals for exit conditions")
             
             for signal in active_signals:
-                try:
-                    await self._check_signal(signal, session)
-                except Exception as e:
-                    logger.error(f"Error checking AP signal {signal.id}: {e}", exc_info=True)
+                await self._check_signal(signal, session)
             
             session.commit()
             
@@ -126,6 +123,12 @@ class ActionPricePerformanceTracker:
                     except Exception as e:
                         logger.error(f"Error in AP close callback: {e}")
         
+        except asyncio.TimeoutError:
+            # Network timeout - skip this check cycle, will retry on next iteration
+            logger.warning(f"⏱️ Timeout checking AP signal {signal.id} ({signal.symbol}) - will retry next cycle")
+        except asyncio.CancelledError:
+            # Request was cancelled - skip without logging
+            logger.debug(f"Request cancelled for AP signal {signal.id}")
         except Exception as e:
             logger.error(f"Error checking AP signal {signal.id}: {e}", exc_info=True)
     

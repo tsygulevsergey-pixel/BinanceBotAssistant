@@ -75,10 +75,7 @@ class V3SRPerformanceTracker:
             logger.info(f"🔍 Checking {len(active_signals)} active V3 SR signals for exit conditions")
             
             for signal in active_signals:
-                try:
-                    await self._check_signal(signal, session)
-                except Exception as e:
-                    logger.error(f"Error checking V3 SR signal {signal.id}: {e}", exc_info=True)
+                await self._check_signal(signal, session)
             
             session.commit()
             
@@ -116,6 +113,12 @@ class V3SRPerformanceTracker:
                     pnl_override=exit_result.get('pnl_override')  # Use saved TP1 PnL if breakeven
                 )
         
+        except asyncio.TimeoutError:
+            # Network timeout - skip this check cycle, will retry on next iteration
+            logger.warning(f"⏱️ Timeout checking V3 SR signal {signal.id} ({signal.symbol}) - will retry next cycle")
+        except asyncio.CancelledError:
+            # Request was cancelled - skip without logging
+            logger.debug(f"Request cancelled for V3 SR signal {signal.id}")
         except Exception as e:
             logger.error(f"Error checking V3 SR signal {signal.id}: {e}", exc_info=True)
     
