@@ -626,6 +626,71 @@ class TradingBot:
         
         return orderbook_cache
     
+    async def _fetch_all_open_interest_parallel(self, symbols: list) -> Dict[str, Dict]:
+        """
+        ОПТИМИЗАЦИЯ: Параллельная загрузка Open Interest для всех символов с агрессивным timeout
+        
+        Args:
+            symbols: Список символов для загрузки OI
+            
+        Returns:
+            Dict[symbol, oi_metrics]: Словарь с данными Open Interest по символам
+        """
+        start_time = datetime.now()
+        
+        # Semaphore для контроля параллелизма (max 100 одновременно)
+        # OI History - лёгкий запрос (weight=1), можем больше параллелизма
+        semaphore = asyncio.Semaphore(100)
+        
+        async def fetch_one_oi(symbol: str):
+            """Загрузить OI для одного символа с aggressive timeout"""
+            async with semaphore:
+                try:
+                    # Timeout 5 секунд - плохие токены падают быстро
+                    metrics = await OpenInterestCalculator.fetch_and_calculate_oi(
+                        client=self.client,
+                        symbol=symbol,
+                        period='5m',
+                        limit=30,
+                        lookback=5,
+                        timeout=5.0  # Агрессивный timeout
+                    )
+                    return (symbol, metrics)
+                except Exception as e:
+                    logger.debug(f"OI fetch failed for {symbol}: {e}")
+                    return (symbol, {
+                        'oi_delta': 0.0,
+                        'doi_pct': 0.0,
+                        'current_oi': 0.0,
+                        'data_valid': False
+                    })
+        
+        # Создать задачи для всех символов
+        tasks = [fetch_one_oi(symbol) for symbol in symbols]
+        
+        # Запустить все параллельно (Semaphore ограничивает до 100 одновременно)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Собрать результаты в словарь
+        oi_cache = {}
+        valid_count = 0
+        for result in results:
+            if isinstance(result, tuple) and len(result) == 2:
+                symbol, metrics = result
+                oi_cache[symbol] = metrics
+                if metrics.get('data_valid', False):
+                    valid_count += 1
+        
+        elapsed = (datetime.now() - start_time).total_seconds()
+        
+        logger.info(
+            f"⚡ Parallel Open Interest Fetch: {valid_count}/{len(symbols)} valid "
+            f"in {elapsed:.2f}s ({len(symbols)/elapsed:.1f} req/s) | "
+            f"Timeout: 5s per symbol"
+        )
+        
+        return oi_cache
+    
     async def _check_signals_wrapper(self):
         """Обёртка для _check_signals с логированием времени выполнения
         
@@ -734,6 +799,13 @@ class TradingBot:
         if symbols_to_check:
             orderbook_cache = await self._fetch_all_orderbooks_parallel(symbols_to_check)
         
+        # 2.8. ПАРАЛЛЕЛЬНО загрузить Open Interest для всех символов (ОПТИМИЗАЦИЯ)
+        # Было: 211 символов × 30 секунд = 105 минут последовательно
+        # Стало: все 211 символов паралельно за 5-15 секунд!
+        oi_cache = {}
+        if symbols_to_check:
+            oi_cache = await self._fetch_all_open_interest_parallel(symbols_to_check)
+        
         # 3. Проверить стратегии для каждого символа (ПАРАЛЛЕЛЬНО)
         # Каждая стратегия проверяет блокировку независимо
         if symbols_to_check:
@@ -748,7 +820,7 @@ class TradingBot:
                 
                 # Параллельная проверка батча
                 tasks = [
-                    self._check_symbol_signals_safe(symbol, btc_data, updated_timeframes, orderbook_cache)
+                    self._check_symbol_signals_safe(symbol, btc_data, updated_timeframes, orderbook_cache, oi_cache)
                     for symbol in batch
                 ]
                 
@@ -758,7 +830,8 @@ class TradingBot:
             
             logger.info(f"✅ All strategy checks completed for {len(symbols_to_check)} symbols")
     
-    async def _check_symbol_signals_safe(self, symbol: str, btc_data, updated_timeframes: list, orderbook_cache: Dict):
+    async def _check_symbol_signals_safe(self, symbol: str, btc_data, updated_timeframes: list, 
+                                         orderbook_cache: Dict, oi_cache: Dict):
         """Обёртка для безопасной параллельной проверки сигналов (с обработкой ошибок)
         
         Args:
@@ -766,13 +839,15 @@ class TradingBot:
             btc_data: BTC данные для фильтра
             updated_timeframes: Список обновившихся таймфреймов
             orderbook_cache: Кеш с предзагруженными orderbook данными
+            oi_cache: Кеш с предзагруженными Open Interest данными
         """
         try:
-            await self._check_symbol_signals(symbol, btc_data, updated_timeframes, orderbook_cache)
+            await self._check_symbol_signals(symbol, btc_data, updated_timeframes, orderbook_cache, oi_cache)
         except Exception as e:
             logger.error(f"Error checking {symbol}: {e}")
     
-    async def _check_symbol_signals(self, symbol: str, btc_data, updated_timeframes: list, orderbook_cache: Dict):
+    async def _check_symbol_signals(self, symbol: str, btc_data, updated_timeframes: list, 
+                                    orderbook_cache: Dict, oi_cache: Dict):
         """Проверить сигналы для одного символа
         
         Args:
@@ -780,6 +855,7 @@ class TradingBot:
             btc_data: BTC данные для фильтра
             updated_timeframes: Список обновившихся таймфреймов (свечи которых закрылись)
             orderbook_cache: Кеш с предзагруженными orderbook данными
+            oi_cache: Кеш с предзагруженными Open Interest данными
         
         Note: Свечи уже обновлены параллельно в _check_signals через Runtime Fast Catchup
         """
@@ -849,14 +925,15 @@ class TradingBot:
                 # Используем закешированные индикаторы
                 cached_indicators[tf] = cached
         
-        # Получить реальные данные Open Interest из API
-        oi_metrics = await OpenInterestCalculator.fetch_and_calculate_oi(
-            client=self.client,
-            symbol=symbol,
-            period='5m',
-            limit=30,
-            lookback=5
-        )
+        # ОПТИМИЗАЦИЯ: Использовать предзагруженный OI кеш вместо индивидуальных API запитів
+        # Було: кожен символ робить свій запит (211 символів × 30 сек = 105 хвилин!)
+        # Стало: все завантажено паралельно на початку циклу за 5-15 секунд
+        oi_metrics = oi_cache.get(symbol, {
+            'oi_delta': 0.0,
+            'doi_pct': 0.0,
+            'current_oi': 0.0,
+            'data_valid': False
+        })
         
         # ОПТИМИЗАЦИЯ: Получить orderbook из кеша (уже загружен параллельно)
         # Вместо медленного API запроса для каждого символа - используем предзагруженные данные
