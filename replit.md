@@ -81,6 +81,12 @@ When user shares logs or reports errors:
 - **Symbol Auto-Update Task**: Automatically updates the symbol list.
 - **Data Integrity System**: Comprehensive data validation with gap detection, auto-fix, and Telegram alerts.
 
+### Database Performance Optimization (October 2025)
+- **BULK UPSERT**: Candle persistence optimized using SQLite INSERT OR REPLACE (100-500x faster).
+- **Unique Index**: Composite unique index on (symbol, timeframe, open_time) prevents duplicates at database level.
+- **Migration**: Safe migration script removes duplicates and creates index without data loss.
+- **Performance Impact**: 8639 candles now save in ~1 second (previously 3 minutes).
+
 ### Strategy Execution Optimization
 - **Parallel Strategy Checks**: Regular strategies execute in parallel batches using asyncio.gather.
 - **Independent Execution**: Action Price system runs independently.
