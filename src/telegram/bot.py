@@ -4,7 +4,7 @@ from telegram import Update, Bot, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyb
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from src.utils.config import config
 from src.utils.logger import logger
-from src.database.models import Signal, ActionPriceSignal
+from src.database.models import Signal, ActionPriceSignal, V3SRSignal
 from src.database.db import Database
 import pytz
 
@@ -20,6 +20,7 @@ class TelegramBot:
         self.startup_message_sent = False
         self.performance_tracker = None
         self.ap_performance_tracker = None  # Action Price tracker
+        self.v3_performance_tracker = None  # V3 S/R tracker
         self.strategy_validator = None
         self.binance_client = binance_client
         self.db = Database()
@@ -77,6 +78,11 @@ class TelegramBot:
         # Новые профессиональные команды
         self.app.add_handler(CommandHandler("regime_stats", self.cmd_regime_stats))
         self.app.add_handler(CommandHandler("confluence_stats", self.cmd_confluence_stats))
+        # V3 S/R Strategy commands
+        self.app.add_handler(CommandHandler("v3_status", self.cmd_v3_status))
+        self.app.add_handler(CommandHandler("v3_signals", self.cmd_v3_signals))
+        self.app.add_handler(CommandHandler("v3_stats", self.cmd_v3_stats))
+        self.app.add_handler(CommandHandler("v3_zones", self.cmd_v3_zones))
         # Обработчик нажатий на кнопки клавиатуры
         self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_keyboard_buttons))
         
@@ -122,7 +128,8 @@ class TelegramBot:
         """Создать главную клавиатуру с кнопками"""
         keyboard = [
             [KeyboardButton("📊 Производительность"), KeyboardButton("🎯 Action Price")],
-            [KeyboardButton("📋 Закрытые сигналы"), KeyboardButton("📈 Закрытые AP")]
+            [KeyboardButton("📋 Закрытые сигналы"), KeyboardButton("📈 Закрытые AP")],
+            [KeyboardButton("🔷 V3 S/R"), KeyboardButton("📊 V3 Stats")]
         ]
         return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
@@ -141,6 +148,10 @@ class TelegramBot:
             await self.cmd_closed(update, context)
         elif text == "📈 Закрытые AP":
             await self.cmd_closed_ap(update, context)
+        elif text == "🔷 V3 S/R":
+            await self.cmd_v3_signals(update, context)
+        elif text == "📊 V3 Stats":
+            await self.cmd_v3_stats(update, context)
     
     async def cmd_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Показать/скрыть главную клавиатуру"""
@@ -204,7 +215,12 @@ class TelegramBot:
             "/closed [часы] - Закрытые сигналы (по умолчанию 24ч)\n"
             "/closed_ap [часы] - Все закрытые Action Price (по умолчанию 24ч)\n"
             "/closed_ap_sl [часы] - Только Stop Loss Action Price\n"
-            "/closed_ap_tp [часы] - Только TP/BE Action Price\n"
+            "/closed_ap_tp [часы] - Только TP/BE Action Price\n\n"
+            "<b>🔷 V3 S/R Strategy:</b>\n"
+            "/v3_status - Статус V3 стратегии\n"
+            "/v3_signals - Активные V3 сигналы\n"
+            "/v3_stats - Статистика V3 (7 дней)\n"
+            "/v3_zones - Информация о зонах\n\n"
             "/validate - Проверка корректности стратегий\n"
             "/regime_stats - Статистика по режимам рынка\n"
             "/confluence_stats - Эффективность confluence\n"
@@ -1009,3 +1025,231 @@ class TelegramBot:
         except Exception as e:
             logger.error(f"Error getting confluence stats: {e}", exc_info=True)
             await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    # ========== V3 S/R STRATEGY COMMANDS ==========
+    
+    async def cmd_v3_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать статус V3 S/R стратегии"""
+        if not update.message:
+            return
+        
+        if not self.v3_performance_tracker:
+            await update.message.reply_text("⚠️ V3 S/R стратегия не активирована")
+            return
+        
+        try:
+            session = self.db.get_session()
+            
+            # Active signals
+            active = session.query(V3SRSignal).filter(
+                V3SRSignal.status.in_(['PENDING', 'ACTIVE'])
+            ).count()
+            
+            # Today's signals
+            today_start = datetime.now(pytz.UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+            today_signals = session.query(V3SRSignal).filter(
+                V3SRSignal.created_at >= today_start
+            ).count()
+            
+            # Total signals
+            total = session.query(V3SRSignal).count()
+            
+            # Setups breakdown
+            flip_count = session.query(V3SRSignal).filter(
+                V3SRSignal.setup_type == 'FlipRetest'
+            ).count()
+            sweep_count = session.query(V3SRSignal).filter(
+                V3SRSignal.setup_type == 'SweepReturn'
+            ).count()
+            
+            session.close()
+            
+            text = (
+                f"🔷 <b>V3 S/R Strategy Status</b>\n\n"
+                f"🔄 Активных сигналов: {active}\n"
+                f"📅 Сигналов сегодня: {today_signals}\n"
+                f"📊 Всего сигналов: {total}\n\n"
+                f"<b>Setups:</b>\n"
+                f"├─ Flip-Retest: {flip_count}\n"
+                f"└─ Sweep-Return: {sweep_count}\n\n"
+                f"Используй /v3_signals для деталей\n"
+                f"Используй /v3_stats для статистики"
+            )
+            
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting V3 status: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_v3_signals(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать активные V3 S/R сигналы"""
+        if not update.message:
+            return
+        
+        try:
+            session = self.db.get_session()
+            
+            active_signals = session.query(V3SRSignal).filter(
+                V3SRSignal.status.in_(['PENDING', 'ACTIVE'])
+            ).order_by(V3SRSignal.created_at.desc()).limit(10).all()
+            
+            if not active_signals:
+                await update.message.reply_text("📭 Нет активных V3 S/R сигналов")
+                session.close()
+                return
+            
+            text = f"🔷 <b>V3 S/R Active Signals ({len(active_signals)})</b>\n\n"
+            
+            for sig in active_signals:
+                # Time since created
+                created_dt = sig.created_at if sig.created_at else datetime.now(pytz.UTC)
+                age_minutes = int((datetime.now(pytz.UTC) - created_dt).total_seconds() / 60)
+                
+                # Calculate current R if possible
+                current_r = 0.0
+                if sig.entry_price and sig.stop_loss:
+                    # Would need current price - simplified for now
+                    current_r = 0.0
+                
+                # Direction emoji
+                dir_emoji = "🟢" if sig.direction == 'LONG' else "🔴"
+                
+                # Setup emoji
+                setup_emoji = "🔄" if sig.setup_type == 'FlipRetest' else "⚡"
+                
+                text += (
+                    f"{dir_emoji} <b>{sig.symbol}</b> {sig.direction}\n"
+                    f"├─ Setup: {setup_emoji} {sig.setup_type}\n"
+                    f"├─ Entry TF: {sig.entry_tf}\n"
+                    f"├─ Entry: {sig.entry_price:.4f}\n"
+                    f"├─ SL: {sig.stop_loss:.4f}\n"
+                    f"├─ TP1: {sig.take_profit_1:.4f} | TP2: {sig.take_profit_2:.4f}\n"
+                    f"├─ Confidence: {sig.confidence:.0f}%\n"
+                    f"└─ Age: {age_minutes}m\n\n"
+                )
+            
+            session.close()
+            
+            # Split if too long
+            if len(text) > self.TELEGRAM_MAX_LENGTH:
+                text = text[:self.TELEGRAM_MAX_LENGTH-100] + "\n\n... (список обрезан)"
+            
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting V3 signals: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_v3_stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать статистику V3 S/R за 7 дней"""
+        if not update.message:
+            return
+        
+        try:
+            days = 7
+            start_time = datetime.now(pytz.UTC) - timedelta(days=days)
+            
+            session = self.db.get_session()
+            
+            # Total signals
+            all_signals = session.query(V3SRSignal).filter(
+                V3SRSignal.created_at >= start_time
+            ).all()
+            
+            total = len(all_signals)
+            closed = len([s for s in all_signals if s.status == 'CLOSED'])
+            active = len([s for s in all_signals if s.status in ['PENDING', 'ACTIVE']])
+            
+            if closed == 0:
+                await update.message.reply_text(f"📊 V3 S/R: Нет закрытых сигналов за {days} дней")
+                session.close()
+                return
+            
+            # Calculate metrics
+            closed_signals = [s for s in all_signals if s.status == 'CLOSED']
+            
+            wins = len([s for s in closed_signals if s.pnl_percent and s.pnl_percent > 0])
+            losses = len([s for s in closed_signals if s.pnl_percent and s.pnl_percent <= 0])
+            win_rate = (wins / closed * 100) if closed > 0 else 0
+            
+            pnl_list = [s.pnl_percent for s in closed_signals if s.pnl_percent is not None]
+            avg_pnl = sum(pnl_list) / len(pnl_list) if pnl_list else 0
+            total_pnl = sum(pnl_list) if pnl_list else 0
+            
+            wins_pnl = [p for p in pnl_list if p > 0]
+            losses_pnl = [p for p in pnl_list if p <= 0]
+            avg_win = sum(wins_pnl) / len(wins_pnl) if wins_pnl else 0
+            avg_loss = sum(losses_pnl) / len(losses_pnl) if losses_pnl else 0
+            
+            # TP1/TP2 stats
+            tp1_hit = len([s for s in closed_signals if s.tp1_hit])
+            tp2_hit = len([s for s in closed_signals if s.tp2_hit])
+            be_exits = len([s for s in closed_signals if s.exit_reason == 'BE'])
+            
+            # Setups breakdown
+            flip_signals = [s for s in closed_signals if s.setup_type == 'FlipRetest']
+            sweep_signals = [s for s in closed_signals if s.setup_type == 'SweepReturn']
+            
+            flip_wins = len([s for s in flip_signals if s.pnl_percent and s.pnl_percent > 0])
+            flip_wr = (flip_wins / len(flip_signals) * 100) if flip_signals else 0
+            
+            sweep_wins = len([s for s in sweep_signals if s.pnl_percent and s.pnl_percent > 0])
+            sweep_wr = (sweep_wins / len(sweep_signals) * 100) if sweep_signals else 0
+            
+            session.close()
+            
+            text = (
+                f"📊 <b>V3 S/R Performance ({days} дней)</b>\n\n"
+                f"📈 Всего сигналов: {total}\n"
+                f"✅ Закрыто: {closed}\n"
+                f"🔄 Активных: {active}\n\n"
+                f"🏆 Побед: {wins}\n"
+                f"❌ Поражений: {losses}\n"
+                f"📊 Win Rate: <b>{win_rate:.1f}%</b>\n\n"
+                f"🎯 TP1 Hit: {tp1_hit} ({tp1_hit/closed*100:.0f}%)\n"
+                f"🎯 TP2 Hit: {tp2_hit} ({tp2_hit/closed*100:.0f}%)\n"
+                f"⚖️ Breakeven: {be_exits}\n\n"
+                f"💰 Средний PnL: <b>{avg_pnl:+.2f}%</b>\n"
+                f"💵 Общий PnL: <b>{total_pnl:+.2f}%</b>\n\n"
+                f"🟢 Средняя победа: {avg_win:+.2f}%\n"
+                f"🔴 Среднее поражение: {avg_loss:+.2f}%\n\n"
+                f"<b>Setups Performance:</b>\n"
+                f"├─ 🔄 Flip-Retest: {len(flip_signals)} | WR: {flip_wr:.0f}%\n"
+                f"└─ ⚡ Sweep-Return: {len(sweep_signals)} | WR: {sweep_wr:.0f}%"
+            )
+            
+            await update.message.reply_text(text, parse_mode='HTML')
+            
+        except Exception as e:
+            logger.error(f"Error getting V3 stats: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Ошибка: {e}")
+    
+    async def cmd_v3_zones(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать информацию о V3 зонах (упрощенная версия)"""
+        if not update.message:
+            return
+        
+        text = (
+            "🔷 <b>V3 S/R Zones System</b>\n\n"
+            "V3 использует многоуровневую систему зон:\n\n"
+            "<b>Timeframes:</b>\n"
+            "├─ 1D: Ключевые зоны (Key)\n"
+            "├─ 4H: Сильные зоны (Strong)\n"
+            "├─ 1H: Средние зоны (Normal)\n"
+            "└─ 15M: Локальные зоны (Local)\n\n"
+            "<b>Качество зон:</b>\n"
+            "├─ 80+ : Key (ключевая)\n"
+            "├─ 60-79: Strong (сильная)\n"
+            "├─ 40-59: Normal (нормальная)\n"
+            "└─ <40 : Weak (слабая)\n\n"
+            "<b>Особенности:</b>\n"
+            "✅ Адаптивная ширина (ATR)\n"
+            "✅ Flip detection (R→S, S→R)\n"
+            "✅ Freshness decay\n"
+            "✅ Confluence с EMA200\n\n"
+            "Зоны обновляются автоматически\n"
+            "при анализе символов"
+        )
+        
+        await update.message.reply_text(text, parse_mode='HTML')
