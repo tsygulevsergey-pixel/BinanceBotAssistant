@@ -157,15 +157,25 @@ class ZoneScorer:
             return 0.0
         
         # Найти последнее касание
-        last_touch = max(touches, key=lambda t: t['timestamp'])
-        last_ts = last_touch['timestamp']
-        
-        # Конвертировать в datetime если нужно
-        if isinstance(last_ts, pd.Timestamp):
-            last_ts = last_ts.to_pydatetime()
-        
-        # Дельта времени в днях
-        delta_days = (current_time - last_ts).total_seconds() / 86400
+        try:
+            last_touch = max(touches, key=lambda t: t['timestamp'])
+            last_ts = last_touch['timestamp']
+            
+            # Конвертировать в datetime если нужно
+            if isinstance(last_ts, pd.Timestamp):
+                last_ts = last_ts.to_pydatetime()
+            elif isinstance(last_ts, (int, float)):
+                # Если это индекс или timestamp в секундах, вернуть default freshness
+                return 0.5
+            elif not isinstance(last_ts, datetime):
+                # Неизвестный тип - вернуть default freshness
+                return 0.5
+            
+            # Дельта времени в днях
+            delta_days = (current_time - last_ts).total_seconds() / 86400
+        except (TypeError, AttributeError, KeyError) as e:
+            # Ошибка при обработке timestamp - вернуть default freshness
+            return 0.5
         
         # Экспоненциальное затухание
         freshness = np.exp(-delta_days / tau_days)
