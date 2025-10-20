@@ -388,7 +388,7 @@ class TradingBot:
         
         if v3_enabled:
             self.v3_enabled = True
-            v3_config = config.data  # Full config for V3
+            v3_config = config._config  # Full config dictionary for V3
             
             # Create JSONL logger for V3
             self.v3_signal_logger = V3SRSignalLogger()
