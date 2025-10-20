@@ -19,3 +19,4 @@ websockets>=15.0.1
 redis>=5.0.0
 pytest
 openpyxl
+scikit-learn
