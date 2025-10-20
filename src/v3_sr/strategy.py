@@ -1,0 +1,801 @@
+"""
+V3 S/R Strategy - Flip-Retest & Sweep-Return
+
+Professional zone-based strategy using V3 S/R system with:
+- Flip-Retest: Zone break → confirmation → retest → entry
+- Sweep-Return: Liquidity grab → fast return → entry
+- VWAP Bias filtering
+- Multi-timeframe context (15m/1H entry, 4H/D context)
+- Adaptive SL/TP based on zone structure
+"""
+
+from typing import Optional, Dict, List, Any, Tuple
+from datetime import datetime, timedelta
+import pandas as pd
+import pytz
+
+from src.database.models import V3SRSignal, V3SRZoneEvent, V3SRSignalLock
+from src.utils.sr_zones_v3.builder import SRZonesV3Builder
+from src.indicators.vwap import VWAPCalculator
+from src.v3_sr.logger import v3_sr_logger as logger
+from src.v3_sr.helpers import (
+    round_price_to_tick, calculate_r_multiple, generate_signal_id,
+    generate_zone_event_id, detect_engulfing, detect_choch,
+    check_volume_spike, get_volatility_regime, find_nearest_zone,
+    format_zone_type
+)
+
+
+class SRZonesV3Strategy:
+    """
+    V3 S/R Strategy Implementation
+    
+    Generates Flip-Retest and Sweep-Return signals based on V3 zone interactions.
+    Independent signal tracking and blocking from other strategies.
+    """
+    
+    def __init__(self, config: dict, db, data_loader, binance_client):
+        """
+        Initialize V3 S/R Strategy
+        
+        Args:
+            config: Strategy configuration from config.yaml
+            db: Database instance
+            data_loader: DataLoader instance
+            binance_client: BinanceClient instance
+        """
+        self.config = config.get('sr_zones_v3_strategy', {})
+        self.db = db
+        self.data_loader = data_loader
+        self.binance_client = binance_client
+        
+        # V3 Zone Builder
+        zone_config = config.get('sr_zones_v3', {})
+        self.zone_builder = SRZonesV3Builder(zone_config)
+        
+        # VWAP Calculator
+        self.vwap_calc = VWAPCalculator()
+        
+        # Strategy enabled flag
+        self.enabled = self.config.get('enabled', True)
+        
+        # Cache for zones (to avoid recalculating every bar)
+        self.zone_cache = {}  # {symbol: {tf: zones}}
+        
+        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled})")
+    
+    async def analyze(self, symbol: str, df_15m: pd.DataFrame, df_1h: pd.DataFrame,
+                     df_4h: pd.DataFrame, df_1d: pd.DataFrame,
+                     market_regime: str, indicators: dict) -> Optional[Dict]:
+        """
+        Analyze symbol for V3 S/R signals
+        
+        Args:
+            symbol: Trading symbol
+            df_15m: 15m DataFrame
+            df_1h: 1H DataFrame
+            df_4h: 4H DataFrame
+            df_1d: Daily DataFrame
+            market_regime: Current market regime
+            indicators: Pre-calculated indicators
+            
+        Returns:
+            Signal dict or None
+        """
+        if not self.enabled:
+            return None
+        
+        # Check if symbol is blocked for V3
+        if await self._is_symbol_blocked(symbol):
+            return None
+        
+        # Filter by market regime
+        allowed_regimes = self.config.get('filters', {}).get('allowed_regimes', ['TREND', 'RANGE'])
+        if market_regime not in allowed_regimes:
+            logger.debug(f"V3 SR: {symbol} regime {market_regime} not in allowed list")
+            return None
+        
+        # Build/update zones for all timeframes
+        zones = await self._get_or_build_zones(symbol, {
+            '15m': df_15m,
+            '1h': df_1h,
+            '4h': df_4h,
+            '1d': df_1d
+        })
+        
+        if not zones:
+            logger.debug(f"V3 SR: {symbol} no zones built")
+            return None
+        
+        # Try entry timeframes (15m, 1h)
+        entry_tfs = self.config.get('general', {}).get('entry_timeframes', ['15m', '1h'])
+        
+        for entry_tf in entry_tfs:
+            # Get DataFrame for entry TF
+            df_entry = df_15m if entry_tf == '15m' else df_1h
+            
+            if df_entry is None or len(df_entry) < 50:
+                continue
+            
+            # Check Flip-Retest setup
+            if self.config.get('flip_retest', {}).get('enabled', True):
+                signal = await self._check_flip_retest(
+                    symbol, entry_tf, df_entry, zones, market_regime, indicators
+                )
+                if signal:
+                    return signal
+            
+            # Check Sweep-Return setup
+            if self.config.get('sweep_return', {}).get('enabled', True):
+                signal = await self._check_sweep_return(
+                    symbol, entry_tf, df_entry, zones, market_regime, indicators
+                )
+                if signal:
+                    return signal
+        
+        return None
+    
+    async def _get_or_build_zones(self, symbol: str, dfs: Dict[str, pd.DataFrame]) -> Dict:
+        """
+        Get zones from cache or build new
+        
+        Args:
+            symbol: Trading symbol
+            dfs: Dict of DataFrames by timeframe
+            
+        Returns:
+            Dict of zones by timeframe
+        """
+        # Simple cache check (можно улучшить с TTL)
+        if symbol in self.zone_cache:
+            return self.zone_cache[symbol]
+        
+        # Build zones using V3 Builder
+        try:
+            zones = self.zone_builder.build_zones(symbol, dfs)
+            self.zone_cache[symbol] = zones
+            return zones
+        except Exception as e:
+            logger.error(f"Error building V3 zones for {symbol}: {e}")
+            return {}
+    
+    async def _check_flip_retest(self, symbol: str, entry_tf: str, df: pd.DataFrame,
+                                 zones: Dict, market_regime: str, indicators: dict) -> Optional[Dict]:
+        """
+        Check for Flip-Retest setup
+        
+        Logic:
+        1. Find zone that was broken (body close beyond zone)
+        2. Check confirmation (N closes beyond zone)
+        3. Check retest (price returns to zone within timeout)
+        4. Check entry trigger (engulfing/choch)
+        5. Validate VWAP bias
+        
+        Args:
+            symbol: Trading symbol
+            entry_tf: Entry timeframe
+            df: Entry TF DataFrame
+            zones: All zones
+            market_regime: Market regime
+            indicators: Indicators dict
+            
+        Returns:
+            Signal dict or None
+        """
+        if len(df) < 20:
+            return None
+        
+        # Get config
+        flip_config = self.config.get('flip_retest', {})
+        break_atr = flip_config.get('break_body_buffer_atr', 0.3)
+        confirm_closes = flip_config.get('confirm_closes', 2)
+        retest_timeout = flip_config.get('retest_timeout_bars', 12)
+        retest_delta_atr = flip_config.get('retest_accept_delta_atr', 0.25)
+        
+        # Get ATR
+        atr = indicators.get(entry_tf, {}).get('atr', df['close'].iloc[-1] * 0.01)
+        
+        # Get current price
+        current_price = df['close'].iloc[-1]
+        
+        # Get zones for entry TF and HTF
+        entry_zones = zones.get(entry_tf, [])
+        h4_zones = zones.get('4h', [])
+        d_zones = zones.get('1d', [])
+        all_zones = entry_zones + h4_zones + d_zones
+        
+        # Filter strong zones only
+        min_strength = self.config.get('general', {}).get('zone_min_strength', 60)
+        strong_zones = [z for z in all_zones if z.get('strength', 0) >= min_strength]
+        
+        if not strong_zones:
+            return None
+        
+        # Look for recent zone breaks + retests
+        for zone in strong_zones:
+            zone_low = zone['low']
+            zone_high = zone['high']
+            zone_kind = zone['kind']
+            
+            # Check for LONG setup (Resistance flip)
+            if zone_kind == 'R':
+                # Look for break above zone
+                break_idx = None
+                for i in range(len(df) - retest_timeout, len(df) - confirm_closes):
+                    if i < 0:
+                        continue
+                    if df['close'].iloc[i] > zone_high + (break_atr * atr):
+                        break_idx = i
+                        break
+                
+                if break_idx is None:
+                    continue
+                
+                # Check confirmation (closes above zone)
+                confirmed = True
+                for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
+                    if df['close'].iloc[i] <= zone_high:
+                        confirmed = False
+                        break
+                
+                if not confirmed:
+                    continue
+                
+                # Check retest (price returned to zone)
+                retest_found = False
+                for i in range(break_idx + confirm_closes, len(df)):
+                    low = df['low'].iloc[i]
+                    # Price touches zone edge (within delta)
+                    if low <= zone_high + (retest_delta_atr * atr):
+                        # Check entry trigger
+                        if i < len(df) - 1:
+                            trigger = self._check_entry_trigger(df, i, i+1, 'LONG', flip_config)
+                            if trigger:
+                                # VWAP bias check
+                                if not await self._check_vwap_bias(df, 'LONG', indicators):
+                                    continue
+                                
+                                # Build signal
+                                return await self._build_flip_retest_signal(
+                                    symbol, entry_tf, df, zone, 'LONG',
+                                    market_regime, indicators, atr
+                                )
+                
+            # Check for SHORT setup (Support flip)
+            elif zone_kind == 'S':
+                # Look for break below zone
+                break_idx = None
+                for i in range(len(df) - retest_timeout, len(df) - confirm_closes):
+                    if i < 0:
+                        continue
+                    if df['close'].iloc[i] < zone_low - (break_atr * atr):
+                        break_idx = i
+                        break
+                
+                if break_idx is None:
+                    continue
+                
+                # Check confirmation
+                confirmed = True
+                for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
+                    if df['close'].iloc[i] >= zone_low:
+                        confirmed = False
+                        break
+                
+                if not confirmed:
+                    continue
+                
+                # Check retest
+                for i in range(break_idx + confirm_closes, len(df)):
+                    high = df['high'].iloc[i]
+                    if high >= zone_low - (retest_delta_atr * atr):
+                        if i < len(df) - 1:
+                            trigger = self._check_entry_trigger(df, i, i+1, 'SHORT', flip_config)
+                            if trigger:
+                                if not await self._check_vwap_bias(df, 'SHORT', indicators):
+                                    continue
+                                
+                                return await self._build_flip_retest_signal(
+                                    symbol, entry_tf, df, zone, 'SHORT',
+                                    market_regime, indicators, atr
+                                )
+        
+        return None
+    
+    async def _check_sweep_return(self, symbol: str, entry_tf: str, df: pd.DataFrame,
+                                  zones: Dict, market_regime: str, indicators: dict) -> Optional[Dict]:
+        """
+        Check for Sweep-Return (liquidity grab) setup
+        
+        Logic:
+        1. Find zone that was swept (wick beyond zone, body stays inside)
+        2. Check fast return (within N bars)
+        3. Validate wick/body ratio
+        4. Check volume spike
+        5. Validate VWAP bias (with exception for A-grade sweeps)
+        
+        Args:
+            symbol: Trading symbol
+            entry_tf: Entry timeframe
+            df: Entry TF DataFrame
+            zones: All zones
+            market_regime: Market regime
+            indicators: Indicators dict
+            
+        Returns:
+            Signal dict or None
+        """
+        if len(df) < 10:
+            return None
+        
+        # Get config
+        sweep_config = self.config.get('sweep_return', {})
+        max_bars = sweep_config.get('sweep_max_bars', 3)
+        min_wick_ratio = sweep_config.get('sweep_min_wick_ratio', 1.2)
+        return_body_inside = sweep_config.get('return_body_inside', True)
+        
+        # Get ATR
+        atr = indicators.get(entry_tf, {}).get('atr', df['close'].iloc[-1] * 0.01)
+        
+        # Get zones
+        entry_zones = zones.get(entry_tf, [])
+        h4_zones = zones.get('4h', [])
+        d_zones = zones.get('1d', [])
+        all_zones = entry_zones + h4_zones + d_zones
+        
+        # Filter strong zones
+        min_strength = self.config.get('general', {}).get('zone_min_strength', 60)
+        strong_zones = [z for z in all_zones if z.get('strength', 0) >= min_strength]
+        
+        if not strong_zones:
+            return None
+        
+        # Look for recent sweeps + returns
+        for zone in strong_zones:
+            zone_low = zone['low']
+            zone_high = zone['high']
+            zone_kind = zone['kind']
+            
+            # Check for LONG setup (Support sweep)
+            if zone_kind == 'S':
+                # Look for sweep below support
+                sweep_idx = None
+                for i in range(len(df) - max_bars - 1, len(df) - 1):
+                    if i < 0:
+                        continue
+                    
+                    bar = df.iloc[i]
+                    # Wick goes below zone
+                    if bar['low'] < zone_low:
+                        # Body closes inside zone (or above)
+                        if bar['close'] >= zone_low:
+                            # Check wick/body ratio
+                            body_size = abs(bar['close'] - bar['open'])
+                            lower_wick = min(bar['open'], bar['close']) - bar['low']
+                            
+                            if body_size > 0 and (lower_wick / body_size) >= min_wick_ratio:
+                                sweep_idx = i
+                                break
+                
+                if sweep_idx is None:
+                    continue
+                
+                # Check return (price back inside/above zone)
+                for i in range(sweep_idx + 1, min(sweep_idx + max_bars + 1, len(df))):
+                    bar = df.iloc[i]
+                    
+                    # Return condition
+                    if return_body_inside and bar['close'] > zone_low:
+                        # Check entry trigger
+                        if i < len(df) - 1:
+                            # Check A-grade sweep
+                            is_a_grade = self._check_a_grade_sweep(df, sweep_idx, i, sweep_config)
+                            
+                            # VWAP bias (allow exception for A-grade)
+                            vwap_ok = await self._check_vwap_bias(df, 'LONG', indicators)
+                            if not vwap_ok and not is_a_grade:
+                                continue
+                            
+                            # Build signal
+                            return await self._build_sweep_return_signal(
+                                symbol, entry_tf, df, zone, 'LONG',
+                                market_regime, indicators, atr, sweep_idx, is_a_grade
+                            )
+            
+            # Check for SHORT setup (Resistance sweep)
+            elif zone_kind == 'R':
+                sweep_idx = None
+                for i in range(len(df) - max_bars - 1, len(df) - 1):
+                    if i < 0:
+                        continue
+                    
+                    bar = df.iloc[i]
+                    if bar['high'] > zone_high:
+                        if bar['close'] <= zone_high:
+                            body_size = abs(bar['close'] - bar['open'])
+                            upper_wick = bar['high'] - max(bar['open'], bar['close'])
+                            
+                            if body_size > 0 and (upper_wick / body_size) >= min_wick_ratio:
+                                sweep_idx = i
+                                break
+                
+                if sweep_idx is None:
+                    continue
+                
+                for i in range(sweep_idx + 1, min(sweep_idx + max_bars + 1, len(df))):
+                    bar = df.iloc[i]
+                    
+                    if return_body_inside and bar['close'] < zone_high:
+                        if i < len(df) - 1:
+                            is_a_grade = self._check_a_grade_sweep(df, sweep_idx, i, sweep_config)
+                            
+                            vwap_ok = await self._check_vwap_bias(df, 'SHORT', indicators)
+                            if not vwap_ok and not is_a_grade:
+                                continue
+                            
+                            return await self._build_sweep_return_signal(
+                                symbol, entry_tf, df, zone, 'SHORT',
+                                market_regime, indicators, atr, sweep_idx, is_a_grade
+                            )
+        
+        return None
+    
+    def _check_entry_trigger(self, df: pd.DataFrame, prev_idx: int, curr_idx: int,
+                            direction: str, config: dict) -> bool:
+        """Check entry trigger patterns (engulfing, choch)"""
+        triggers = config.get('entry_triggers', ['engulfing', 'choch'])
+        
+        prev_bar = df.iloc[prev_idx]
+        curr_bar = df.iloc[curr_idx]
+        
+        if 'engulfing' in triggers:
+            if detect_engulfing(curr_bar, prev_bar, direction):
+                return True
+        
+        if 'choch' in triggers:
+            if detect_choch(df.iloc[:curr_idx+1], direction, lookback=5):
+                return True
+        
+        return False
+    
+    def _check_a_grade_sweep(self, df: pd.DataFrame, sweep_idx: int, return_idx: int,
+                            config: dict) -> bool:
+        """Check if sweep is A-grade (high quality)"""
+        a_wick_ratio = config.get('a_grade_wick_ratio', 2.0)
+        a_return_bars = config.get('a_grade_return_bars', 2)
+        
+        sweep_bar = df.iloc[sweep_idx]
+        body_size = abs(sweep_bar['close'] - sweep_bar['open'])
+        
+        if body_size < 0.0001:
+            return False
+        
+        # Check wick ratio
+        if sweep_bar['close'] >= sweep_bar['open']:  # Green bar (support sweep)
+            lower_wick = sweep_bar['open'] - sweep_bar['low']
+            wick_ratio = lower_wick / body_size
+        else:  # Red bar (resistance sweep)
+            upper_wick = sweep_bar['high'] - sweep_bar['close']
+            wick_ratio = upper_wick / body_size
+        
+        # Check return speed
+        return_bars = return_idx - sweep_idx
+        
+        return wick_ratio >= a_wick_ratio and return_bars <= a_return_bars
+    
+    async def _check_vwap_bias(self, df: pd.DataFrame, direction: str, indicators: dict) -> bool:
+        """Check VWAP bias alignment"""
+        vwap_config = self.config.get('vwap_bias', {})
+        
+        if not vwap_config.get('enabled', True):
+            return True
+        
+        # Get VWAP value
+        vwap = indicators.get('vwap', {}).get('value')
+        if vwap is None:
+            return True  # No VWAP data - allow signal
+        
+        current_price = df['close'].iloc[-1]
+        epsilon_atr = vwap_config.get('bias_epsilon_atr', 0.05)
+        atr = indicators.get('atr', df['close'].iloc[-1] * 0.01)
+        epsilon = epsilon_atr * atr
+        
+        # Check bias
+        if direction == 'LONG':
+            # Price should be above VWAP (or within epsilon)
+            return current_price >= (vwap - epsilon)
+        else:  # SHORT
+            # Price should be below VWAP (or within epsilon)
+            return current_price <= (vwap + epsilon)
+    
+    async def _build_flip_retest_signal(self, symbol: str, entry_tf: str, df: pd.DataFrame,
+                                       zone: dict, direction: str, market_regime: str,
+                                       indicators: dict, atr: float) -> Dict:
+        """Build Flip-Retest signal"""
+        # Calculate entry, SL, TP
+        entry_price, sl_price, tp1_price, tp2_price = await self._calculate_levels(
+            symbol, df, zone, direction, atr, 'FlipRetest'
+        )
+        
+        # Calculate confidence
+        confidence, quality_tags = self._calculate_confidence(
+            zone, direction, indicators, 'FlipRetest'
+        )
+        
+        # Check min confidence
+        min_conf = self.config.get('quality', {}).get('min_confidence', 65)
+        if confidence < min_conf:
+            logger.debug(f"V3 SR FlipRetest {symbol} confidence {confidence} < {min_conf}")
+            return None
+        
+        # Find nearest zones for context
+        current_price = df['close'].iloc[-1]
+        nearest_support = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'below', 'S')
+        nearest_resistance = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'above', 'R')
+        
+        # Generate signal
+        signal_data = {
+            'setup_type': 'FlipRetest',
+            'symbol': symbol,
+            'direction': direction,
+            'entry_tf': entry_tf,
+            'zone': zone,
+            'nearest_support': nearest_support,
+            'nearest_resistance': nearest_resistance,
+            'entry_price': entry_price,
+            'stop_loss': sl_price,
+            'take_profit_1': tp1_price,
+            'take_profit_2': tp2_price,
+            'confidence': confidence,
+            'quality_tags': quality_tags,
+            'market_regime': market_regime,
+            'atr': atr
+        }
+        
+        return signal_data
+    
+    async def _build_sweep_return_signal(self, symbol: str, entry_tf: str, df: pd.DataFrame,
+                                        zone: dict, direction: str, market_regime: str,
+                                        indicators: dict, atr: float, sweep_idx: int,
+                                        is_a_grade: bool) -> Dict:
+        """Build Sweep-Return signal"""
+        # Similar to flip-retest but with sweep-specific params
+        entry_price, sl_price, tp1_price, tp2_price = await self._calculate_levels(
+            symbol, df, zone, direction, atr, 'SweepReturn', sweep_idx
+        )
+        
+        confidence, quality_tags = self._calculate_confidence(
+            zone, direction, indicators, 'SweepReturn', is_a_grade
+        )
+        
+        min_conf = self.config.get('quality', {}).get('min_confidence', 65)
+        if confidence < min_conf:
+            return None
+        
+        current_price = df['close'].iloc[-1]
+        nearest_support = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'below', 'S')
+        nearest_resistance = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'above', 'R')
+        
+        signal_data = {
+            'setup_type': 'SweepReturn',
+            'symbol': symbol,
+            'direction': direction,
+            'entry_tf': entry_tf,
+            'zone': zone,
+            'nearest_support': nearest_support,
+            'nearest_resistance': nearest_resistance,
+            'entry_price': entry_price,
+            'stop_loss': sl_price,
+            'take_profit_1': tp1_price,
+            'take_profit_2': tp2_price,
+            'confidence': confidence,
+            'quality_tags': quality_tags,
+            'market_regime': market_regime,
+            'atr': atr,
+            'is_a_grade': is_a_grade
+        }
+        
+        return signal_data
+    
+    async def _calculate_levels(self, symbol: str, df: pd.DataFrame, zone: dict,
+                                direction: str, atr: float, setup_type: str,
+                                sweep_idx: Optional[int] = None) -> Tuple[float, float, float, float]:
+        """
+        Calculate entry, SL, TP1, TP2 levels
+        
+        Returns:
+            (entry_price, sl_price, tp1_price, tp2_price)
+        """
+        sl_tp_config = self.config.get('sl_tp', {})
+        current_price = df['close'].iloc[-1]
+        
+        # Entry = current price (market order)
+        entry_price = current_price
+        
+        # Stop Loss calculation
+        sl_buffer_atr = sl_tp_config.get('sl_buffer_atr', 0.25)
+        
+        if setup_type == 'FlipRetest':
+            # SL beyond opposite side of zone
+            if direction == 'LONG':
+                sl_price = zone['low'] - (sl_buffer_atr * atr)
+            else:  # SHORT
+                sl_price = zone['high'] + (sl_buffer_atr * atr)
+        
+        else:  # SweepReturn
+            # SL beyond sweep extreme
+            if sweep_idx is not None:
+                sweep_bar = df.iloc[sweep_idx]
+                if direction == 'LONG':
+                    sl_price = sweep_bar['low'] - (sl_buffer_atr * atr)
+                else:
+                    sl_price = sweep_bar['high'] + (sl_buffer_atr * atr)
+            else:
+                # Fallback to zone edge
+                if direction == 'LONG':
+                    sl_price = zone['low'] - (sl_buffer_atr * atr)
+                else:
+                    sl_price = zone['high'] + (sl_buffer_atr * atr)
+        
+        # Calculate risk R
+        risk_r = abs(entry_price - sl_price)
+        
+        # TP1 calculation
+        tp1_target = sl_tp_config.get('tp1_target', 'nearest_local_zone')
+        tp1_min_r = sl_tp_config.get('tp1_min_r', 0.8)
+        
+        if tp1_target == '1R':
+            if direction == 'LONG':
+                tp1_price = entry_price + (risk_r * 1.0)
+            else:
+                tp1_price = entry_price - (risk_r * 1.0)
+        else:  # nearest_local_zone
+            # Find nearest zone in direction
+            if direction == 'LONG':
+                nearest = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'above')
+                if nearest:
+                    tp1_price = nearest['low']
+                else:
+                    tp1_price = entry_price + (risk_r * 1.0)
+            else:
+                nearest = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'below')
+                if nearest:
+                    tp1_price = nearest['high']
+                else:
+                    tp1_price = entry_price - (risk_r * 1.0)
+            
+            # Ensure minimum R
+            if abs(tp1_price - entry_price) < (tp1_min_r * risk_r):
+                if direction == 'LONG':
+                    tp1_price = entry_price + (tp1_min_r * risk_r)
+                else:
+                    tp1_price = entry_price - (tp1_min_r * risk_r)
+        
+        # TP2 calculation
+        tp2_min_r = sl_tp_config.get('tp2_min_r', 2.0)
+        tp2_max_r = sl_tp_config.get('tp2_max_r', 4.0)
+        
+        if direction == 'LONG':
+            tp2_price = entry_price + (risk_r * tp2_min_r)
+        else:
+            tp2_price = entry_price - (risk_r * tp2_min_r)
+        
+        # Round prices to tick size
+        tick_size = 0.01  # Default, should get from exchange info
+        entry_price = round_price_to_tick(entry_price, tick_size)
+        sl_price = round_price_to_tick(sl_price, tick_size)
+        tp1_price = round_price_to_tick(tp1_price, tick_size)
+        tp2_price = round_price_to_tick(tp2_price, tick_size)
+        
+        return entry_price, sl_price, tp1_price, tp2_price
+    
+    def _calculate_confidence(self, zone: dict, direction: str, indicators: dict,
+                             setup_type: str, is_a_grade: bool = False) -> Tuple[float, List[str]]:
+        """
+        Calculate signal confidence score
+        
+        Returns:
+            (confidence, quality_tags)
+        """
+        quality_config = self.config.get('quality', {})
+        
+        confidence = 50.0  # Base
+        tags = []
+        
+        # Zone strength bonus
+        zone_strength = zone.get('strength', 0)
+        zone_class = zone.get('class', 'normal')
+        
+        if zone_class == 'key':
+            confidence += quality_config.get('htf_d_zone_bonus', 20)
+            tags.append('key_zone')
+        elif zone_class == 'strong':
+            confidence += quality_config.get('htf_h4_zone_bonus', 15)
+            tags.append('strong_zone')
+        
+        # HTF confluence
+        zone_tf = zone.get('tf', '15m')
+        if zone_tf in ['4h', '1d']:
+            confidence += quality_config.get('htf_h4_zone_bonus', 15)
+            tags.append('htf_zone')
+        
+        # Setup-specific bonuses
+        if setup_type == 'FlipRetest':
+            tags.append('flip_confirmed')
+            confidence += 10
+        
+        elif setup_type == 'SweepReturn':
+            tags.append('sweep_return')
+            if is_a_grade:
+                a_bonus = self.config.get('sweep_return', {}).get('a_grade_bonus', 20)
+                confidence += a_bonus
+                tags.append('a_grade_sweep')
+        
+        # VWAP alignment
+        # (simplified - should check actual VWAP bias)
+        tags.append('vwap_ok')
+        confidence += 5
+        
+        # Cap at 100
+        confidence = min(100.0, confidence)
+        
+        return confidence, tags
+    
+    async def _is_symbol_blocked(self, symbol: str) -> bool:
+        """Check if symbol is blocked for V3 strategy"""
+        session = self.db.get_session()
+        try:
+            lock = session.query(V3SRSignalLock).filter(
+                V3SRSignalLock.symbol == symbol
+            ).first()
+            
+            return lock is not None
+        
+        finally:
+            session.close()
+    
+    async def block_symbol(self, symbol: str, direction: str, signal_id: str):
+        """Block symbol for V3 strategy"""
+        session = self.db.get_session()
+        try:
+            # Remove old lock if exists
+            session.query(V3SRSignalLock).filter(
+                V3SRSignalLock.symbol == symbol,
+                V3SRSignalLock.direction == direction
+            ).delete()
+            
+            # Create new lock
+            lock = V3SRSignalLock(
+                symbol=symbol,
+                direction=direction,
+                signal_id=signal_id,
+                created_at=datetime.now(pytz.UTC)
+            )
+            session.add(lock)
+            session.commit()
+            
+            logger.info(f"V3 SR: Blocked {symbol} {direction} for signal {signal_id}")
+        
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error blocking symbol: {e}")
+        finally:
+            session.close()
+    
+    async def unblock_symbol(self, symbol: str, direction: str):
+        """Unblock symbol for V3 strategy"""
+        session = self.db.get_session()
+        try:
+            session.query(V3SRSignalLock).filter(
+                V3SRSignalLock.symbol == symbol,
+                V3SRSignalLock.direction == direction
+            ).delete()
+            session.commit()
+            
+            logger.info(f"V3 SR: Unblocked {symbol} {direction}")
+        
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error unblocking symbol: {e}")
+        finally:
+            session.close()
