@@ -1887,61 +1887,6 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Error unblocking symbol {symbol} for V3: {e}", exc_info=True)
     
-    async def stop(self):
-        import traceback
-        logger.info("Stopping bot...")
-        logger.debug(f"Stop called from: {''.join(traceback.format_stack()[-3:-1])}")
-        self.running = False
-        
-        # Ждём завершения координатора если он ещё работает
-        if self.coordinator and not self.coordinator.is_loading_complete():
-            logger.info("Waiting for coordinator to finish loading...")
-            await asyncio.sleep(2)  # Даём время на graceful shutdown
-        
-        if self.coordinator:
-            self.coordinator.signal_shutdown()
-        
-        if self.performance_tracker:
-            await self.performance_tracker.stop()
-        
-        if self.ap_performance_tracker:
-            await self.ap_performance_tracker.stop()
-        
-        await self.telegram_bot.stop()
-        
-        # Закрываем сессию BinanceClient
-        if self.client:
-            try:
-                await self.client.__aexit__(None, None, None)
-                logger.info("BinanceClient session closed")
-            except Exception as e:
-                logger.error(f"Error closing BinanceClient session: {e}")
-        
-        logger.info("Bot stopped")
-
-
-def main():
-    bot = TradingBot()
-    
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    
-    def signal_handler(sig, frame):
-        logger.info(f"Received signal {sig}")
-        loop.create_task(bot.stop())
-    
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    
-    try:
-        loop.run_until_complete(bot.start())
-    finally:
-        loop.close()
-
-
-if __name__ == "__main__":
-    main()
-    
     async def _check_v3_sr_signals(self, current_time: datetime, symbols_with_updated_candles: list = None):
         """Проверить V3 S/R сигналы
         
@@ -2096,3 +2041,58 @@ if __name__ == "__main__":
             
         except Exception as e:
             v3_sr_logger.error(f"Error sending V3 Telegram: {e}", exc_info=True)
+    
+    async def stop(self):
+        import traceback
+        logger.info("Stopping bot...")
+        logger.debug(f"Stop called from: {''.join(traceback.format_stack()[-3:-1])}")
+        self.running = False
+        
+        # Ждём завершения координатора если он ещё работает
+        if self.coordinator and not self.coordinator.is_loading_complete():
+            logger.info("Waiting for coordinator to finish loading...")
+            await asyncio.sleep(2)  # Даём время на graceful shutdown
+        
+        if self.coordinator:
+            self.coordinator.signal_shutdown()
+        
+        if self.performance_tracker:
+            await self.performance_tracker.stop()
+        
+        if self.ap_performance_tracker:
+            await self.ap_performance_tracker.stop()
+        
+        await self.telegram_bot.stop()
+        
+        # Закрываем сессию BinanceClient
+        if self.client:
+            try:
+                await self.client.__aexit__(None, None, None)
+                logger.info("BinanceClient session closed")
+            except Exception as e:
+                logger.error(f"Error closing BinanceClient session: {e}")
+        
+        logger.info("Bot stopped")
+
+
+def main():
+    bot = TradingBot()
+    
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    def signal_handler(sig, frame):
+        logger.info(f"Received signal {sig}")
+        loop.create_task(bot.stop())
+    
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
+    try:
+        loop.run_until_complete(bot.start())
+    finally:
+        loop.close()
+
+
+if __name__ == "__main__":
+    main()
