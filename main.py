@@ -57,6 +57,13 @@ from src.action_price.logger import ap_logger
 from src.action_price.signal_logger import ActionPriceSignalLogger
 from src.database.models import ActionPriceSignal
 
+# V3 S/R Strategy imports
+from src.v3_sr.strategy import SRZonesV3Strategy
+from src.v3_sr.performance_tracker import V3SRPerformanceTracker
+from src.v3_sr.logger import v3_sr_logger
+from src.v3_sr.signal_logger import V3SRSignalLogger
+from src.database.models import V3SRSignal
+
 
 class TradingBot:
     def __init__(self):
@@ -81,6 +88,13 @@ class TradingBot:
         self.ap_performance_tracker: Optional[ActionPricePerformanceTracker] = None
         self.ap_signal_logger: Optional[ActionPriceSignalLogger] = None
         self.action_price_enabled = False
+        
+        # V3 S/R Strategy components
+        self.v3_sr_strategy: Optional[SRZonesV3Strategy] = None
+        self.v3_performance_tracker: Optional[V3SRPerformanceTracker] = None
+        self.v3_signal_logger: Optional[V3SRSignalLogger] = None
+        self.symbols_blocked_v3: set = set()  # Blocked symbols for V3
+        self.v3_enabled = False
         
         # Компоненты бота
         self.strategy_manager = StrategyManager(binance_client=None)  # Will be set after client init
@@ -368,6 +382,43 @@ class TradingBot:
         # Связать Action Price tracker если активирован
         if self.ap_performance_tracker:
             self.telegram_bot.set_ap_performance_tracker(self.ap_performance_tracker)
+        
+        # V3 S/R Strategy Engine
+        v3_enabled = config.get('sr_zones_v3_strategy.enabled', True)
+        
+        if v3_enabled:
+            self.v3_enabled = True
+            v3_config = config.data  # Full config for V3
+            
+            # Create JSONL logger for V3
+            self.v3_signal_logger = V3SRSignalLogger()
+            
+            # Create V3 S/R Strategy
+            self.v3_sr_strategy = SRZonesV3Strategy(
+                config=v3_config,
+                db=db,
+                data_loader=self.data_loader,
+                binance_client=self.client
+            )
+            
+            # Start V3 Performance Tracker
+            self.v3_performance_tracker = V3SRPerformanceTracker(
+                self.client,
+                db,
+                check_interval,
+                self._unblock_symbol_v3,  # Callback for V3 unblock
+                self.v3_signal_logger,  # JSONL logger
+                v3_config.get('sr_zones_v3_strategy', {})
+            )
+            asyncio.create_task(self.v3_performance_tracker.start())
+            v3_sr_logger.info("🔷 V3 S/R Strategy initialized")
+            v3_sr_logger.info(f"🔷 Entry timeframes: {v3_config.get('sr_zones_v3_strategy', {}).get('general', {}).get('entry_timeframes', ['15m', '1h'])}")
+        else:
+            logger.info("⏸️  V3 S/R Strategy disabled in config")
+        
+        # Связать V3 tracker если активирован
+        if self.v3_performance_tracker:
+            self.telegram_bot.v3_performance_tracker = self.v3_performance_tracker
         
         # Отправка приветственного сообщения
         signals_only = config.get('binance.signals_only_mode', False)
@@ -790,6 +841,19 @@ class TradingBot:
                 tf_4h_close = TimeframeSync.should_update_timeframe('4h', consumer_id='action_price')
                 force_zone_recalc = (now.hour == 0 and now.minute == 0) or tf_4h_close
                 await self._check_action_price_signals(now, symbols_for_ap, force_zone_recalc)
+        
+        # 2.6. ЗАПУСК V3 S/R STRATEGY после обновления свечей
+        if self.v3_enabled and ('15m' in updated_timeframes or '1h' in updated_timeframes):
+            symbols_for_v3 = []
+            if '15m' in updated_by_tf:
+                symbols_for_v3.extend(updated_by_tf['15m'])
+            if '1h' in updated_by_tf and '15m' not in updated_by_tf:
+                symbols_for_v3.extend(updated_by_tf['1h'])
+            
+            symbols_for_v3 = list(set(symbols_for_v3))
+            
+            if symbols_for_v3:
+                await self._check_v3_sr_signals(now, symbols_for_v3)
         
         btc_data = self.data_loader.get_candles('BTCUSDT', '1h', limit=100)
         
@@ -1812,6 +1876,17 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Error unblocking symbol {symbol} for AP: {e}", exc_info=True)
     
+    def _unblock_symbol_v3(self, symbol: str, direction: str):
+        """Разблокировать символ для V3 S/R (сигнал закрыт)"""
+        try:
+            # V3 uses symbol+direction key for blocking
+            key = f"{symbol}_{direction}"
+            if key in self.symbols_blocked_v3:
+                self.symbols_blocked_v3.discard(key)
+                v3_sr_logger.info(f"🔓 V3: {symbol} {direction} unblocked (signal closed)")
+        except Exception as e:
+            logger.error(f"Error unblocking symbol {symbol} for V3: {e}", exc_info=True)
+    
     async def stop(self):
         import traceback
         logger.info("Stopping bot...")
@@ -1866,3 +1941,158 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    async def _check_v3_sr_signals(self, current_time: datetime, symbols_with_updated_candles: list = None):
+        """Проверить V3 S/R сигналы
+        
+        Args:
+            current_time: Текущее время
+            symbols_with_updated_candles: Список символов с обновленными свечами
+        """
+        if not self.v3_sr_strategy or not self.data_loader:
+            return
+        
+        # Use ready symbols if not specified
+        if symbols_with_updated_candles is None:
+            symbols_to_check = self.ready_symbols.copy()
+        else:
+            symbols_to_check = symbols_with_updated_candles
+        
+        if not symbols_to_check:
+            return
+        
+        v3_sr_logger.info(f"🔷 Checking V3 S/R signals for {len(symbols_to_check)} symbols")
+        
+        signals_found = 0
+        symbols_analyzed = 0
+        
+        for symbol in symbols_to_check:
+            # Check if blocked for V3 (any direction)
+            if f"{symbol}_LONG" in self.symbols_blocked_v3 or f"{symbol}_SHORT" in self.symbols_blocked_v3:
+                continue
+            
+            symbols_analyzed += 1
+            
+            try:
+                # Load multi-timeframe data
+                timeframe_data = {}
+                for tf in ['15m', '1h', '4h', '1d']:
+                    limits = {'15m': 500, '1h': 500, '4h': 500, '1d': 200}
+                    df = self.data_loader.get_candles(symbol, tf, limit=limits.get(tf, 200))
+                    if df is not None and len(df) > 0:
+                        timeframe_data[tf] = df
+                
+                # Require minimum 15m, 1h, 4h, 1d data
+                if not all(tf in timeframe_data for tf in ['15m', '1h']):
+                    continue
+                
+                # Calculate indicators
+                indicators = {}
+                indicators['atr'] = timeframe_data['15m']['atr'].iloc[-1] if 'atr' in timeframe_data['15m'].columns else 0.0
+                
+                # Detect market regime (simplified)
+                regime = 'TREND'  # Simplified - should use MarketRegimeDetector
+                
+                # Analyze with V3 strategy
+                v3_signal = await self.v3_sr_strategy.analyze(
+                    symbol=symbol,
+                    df_15m=timeframe_data.get('15m'),
+                    df_1h=timeframe_data.get('1h'),
+                    df_4h=timeframe_data.get('4h'),
+                    df_1d=timeframe_data.get('1d'),
+                    market_regime=regime,
+                    indicators=indicators
+                )
+                
+                # Process signal
+                if v3_signal:
+                    # Save to DB
+                    save_success = self._save_v3_sr_signal(v3_signal)
+                    
+                    if save_success:
+                        signals_found += 1
+                        
+                        # Block symbol+direction
+                        key = f"{symbol}_{v3_signal['direction']}"
+                        self.symbols_blocked_v3.add(key)
+                        
+                        # Send to Telegram
+                        await self._send_v3_sr_telegram(v3_signal)
+                        
+                        v3_sr_logger.info(
+                            f"🔷 V3 Signal: {symbol} {v3_signal['direction']} "
+                            f"{v3_signal['setup_type']} @ {v3_signal.get('entry_price', 0):.4f} "
+                            f"(Confidence: {v3_signal.get('confidence', 0):.1f}%)"
+                        )
+            
+            except Exception as e:
+                v3_sr_logger.error(f"Error checking V3 for {symbol}: {e}", exc_info=True)
+            
+            await asyncio.sleep(0.05)
+        
+        v3_sr_logger.info(
+            f"🔷 V3 S/R analysis complete: "
+            f"Analyzed: {symbols_analyzed}, Signals: {signals_found}"
+        )
+    
+    def _save_v3_sr_signal(self, v3_signal: Dict) -> bool:
+        """Save V3 S/R signal to database"""
+        session = db.get_session()
+        try:
+            signal = V3SRSignal(
+                signal_id=v3_signal.get('signal_id', f"{v3_signal['symbol']}_{int(datetime.now(pytz.UTC).timestamp())}"),
+                symbol=v3_signal['symbol'],
+                setup_type=v3_signal['setup_type'],
+                direction=v3_signal['direction'],
+                entry_tf=v3_signal['entry_tf'],
+                entry_price=float(v3_signal['entry_price']),
+                stop_loss=float(v3_signal['stop_loss']),
+                take_profit_1=float(v3_signal['take_profit_1']),
+                take_profit_2=float(v3_signal['take_profit_2']),
+                risk_r=float(v3_signal.get('risk_r', abs(v3_signal['entry_price'] - v3_signal['stop_loss']))),
+                confidence=float(v3_signal['confidence']),
+                market_regime=v3_signal.get('market_regime', 'UNKNOWN'),
+                zone_strength=v3_signal['zone'].get('strength', 0) if v3_signal.get('zone') else 0,
+                zone_timeframe=v3_signal['zone'].get('tf', 'unknown') if v3_signal.get('zone') else 'unknown',
+                atr_value=float(v3_signal.get('atr', 0)),
+                status='PENDING',
+                created_at=datetime.now(pytz.UTC)
+            )
+            
+            session.add(signal)
+            session.commit()
+            
+            v3_sr_logger.info(f"✅ V3 signal saved to DB: {v3_signal['symbol']} {v3_signal['direction']}")
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            v3_sr_logger.error(f"❌ Error saving V3 signal to DB: {e}", exc_info=True)
+            return False
+        finally:
+            session.close()
+    
+    async def _send_v3_sr_telegram(self, v3_signal: Dict):
+        """Send V3 S/R signal to Telegram"""
+        try:
+            dir_emoji = "🟢" if v3_signal['direction'] == 'LONG' else "🔴"
+            setup_emoji = "🔄" if v3_signal['setup_type'] == 'FlipRetest' else "⚡"
+            
+            message = (
+                f"{dir_emoji} <b>V3 S/R {v3_signal['setup_type']}</b>\n\n"
+                f"Symbol: {v3_signal['symbol']}\n"
+                f"Direction: {v3_signal['direction']}\n"
+                f"Setup: {setup_emoji} {v3_signal['setup_type']}\n"
+                f"Entry TF: {v3_signal['entry_tf']}\n\n"
+                f"Entry: {v3_signal['entry_price']:.4f}\n"
+                f"SL: {v3_signal['stop_loss']:.4f}\n"
+                f"TP1: {v3_signal['take_profit_1']:.4f} (50%)\n"
+                f"TP2: {v3_signal['take_profit_2']:.4f} (50%)\n\n"
+                f"Confidence: {v3_signal['confidence']:.0f}%\n"
+                f"Regime: {v3_signal.get('market_regime', 'UNKNOWN')}"
+            )
+            
+            await self.telegram_bot.send_signal_alert(message)
+            
+        except Exception as e:
+            v3_sr_logger.error(f"Error sending V3 Telegram: {e}", exc_info=True)
