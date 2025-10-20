@@ -1,3 +1,4 @@
+import asyncio
 import pandas as pd
 from typing import Dict, Optional
 from src.utils.logger import logger
@@ -93,7 +94,8 @@ class OpenInterestCalculator:
     
     @staticmethod
     async def fetch_and_calculate_oi(client, symbol: str, period: str = '5m', 
-                                     limit: int = 30, lookback: int = 5) -> Dict[str, float]:
+                                     limit: int = 30, lookback: int = 5,
+                                     timeout: float = 5.0) -> Dict[str, float]:
         """
         Получить OI данные из API и рассчитать метрики
         
@@ -103,17 +105,21 @@ class OpenInterestCalculator:
             period: Period for OI history ('5m', '15m', '30m', '1h', etc.)
             limit: Number of data points to fetch
             lookback: Periods to look back for delta calculation
+            timeout: Максимальное время ожидания в секундах (default=5.0)
         
         Returns:
             Dict с метриками OI
         """
         try:
-            # Получаем историю Open Interest
-            oi_hist = await client.get_open_interest_hist(
-                symbol=symbol,
-                period=period,
-                limit=limit
-            )
+            # АГРЕССИВНЫЙ TIMEOUT: 5 секунд вместо 30
+            # Плохие токены (low-volume) падают быстро без блокировки всего цикла
+            async with asyncio.timeout(timeout):
+                # Получаем историю Open Interest
+                oi_hist = await client.get_open_interest_hist(
+                    symbol=symbol,
+                    period=period,
+                    limit=limit
+                )
             
             if not oi_hist:
                 logger.debug(f"No OI history data for {symbol}")
@@ -135,9 +141,17 @@ class OpenInterestCalculator:
                        f"Delta={metrics['oi_delta']:.0f}, DOI%={metrics['doi_pct']:.2f}%")
             
             return metrics
-            
+        
+        except asyncio.TimeoutError:
+            logger.warning(f"⏱️ OI History timeout for {symbol} (>{timeout}s) - using fallback")
+            return {
+                'oi_delta': 0.0,
+                'doi_pct': 0.0,
+                'current_oi': 0.0,
+                'data_valid': False  # Флаг что данные - fallback
+            }
         except Exception as e:
-            logger.error(f"Error fetching OI for {symbol}: {e}")
+            logger.debug(f"Error fetching OI for {symbol}: {e}")
             return {
                 'oi_delta': 0.0,
                 'doi_pct': 0.0,
