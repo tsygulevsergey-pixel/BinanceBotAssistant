@@ -1,0 +1,51 @@
+2025-10-21 01:48:39 EEST | INFO     | 🔍 Checking 1 active AP signals for exit conditions
+2025-10-21 01:49:18 EEST | ERROR    | trading_bot | Error checking signal 27 (AGTUSDT):
+2025-10-21 01:49:18 EEST | ERROR    | Error checking AP signal 4:
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 725, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\connector.py", line 642, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\connector.py", line 1209, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\connector.py", line 1532, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\connector.py", line 1148, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\action_price\performance_tracker.py", line 91, in _check_signal
+    price_data = await self.binance_client.get_mark_price(symbol_str)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\binance\client.py", line 329, in get_mark_price
+    return await self._request('GET', '/fapi/v1/premiumIndex', params=params, weight=1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\binance\client.py", line 104, in _request
+    return await self.rate_limiter.execute_with_backoff(_do_request, weight=weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\utils\rate_limiter.py", line 100, in execute_with_backoff
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\binance\client.py", line 85, in _do_request
+    async with self.session.request(method, url, params=params, headers=headers) as response:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\client.py", line 622, in _request
+    with timer:
+         ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\aiohttp\helpers.py", line 685, in __exit__
+    raise asyncio.TimeoutError from exc_val
+TimeoutError

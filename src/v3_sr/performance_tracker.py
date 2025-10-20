@@ -112,7 +112,8 @@ class V3SRPerformanceTracker:
                     exit_result['exit_price'],
                     exit_result['reason'],
                     exit_result['reason'],
-                    session
+                    session,
+                    pnl_override=exit_result.get('pnl_override')  # Use saved TP1 PnL if breakeven
                 )
         
         except Exception as e:
@@ -190,29 +191,43 @@ class V3SRPerformanceTracker:
         tp1 = float(signal.take_profit_1) if signal.take_profit_1 else None
         tp2 = float(signal.take_profit_2) if signal.take_profit_2 else None
         
-        # Check TP1 (50% exit)
+        # Check TP1 (50% exit - VIRTUAL partial close)
         if tp1 and not signal.tp1_hit:
             if (direction == 'LONG' and current_price >= tp1) or \
                (direction == 'SHORT' and current_price <= tp1):
-                # TP1 hit - mark it and move SL to BE
+                # TP1 hit - VIRTUAL partial close of 50%
                 signal.tp1_hit = True
                 signal.tp1_hit_at = datetime.now(pytz.UTC)
-                signal.tp1_pnl_percent = ((tp1 - entry) / entry * 100) if direction == 'LONG' else \
-                                        ((entry - tp1) / entry * 100)
+                
+                # Calculate PnL from TP1 for 50% of position
+                tp1_size = 0.50  # 50% exit at TP1 (virtual)
+                if direction == 'LONG':
+                    tp1_pnl_full = (tp1 - entry) / entry * 100
+                else:
+                    tp1_pnl_full = (entry - tp1) / entry * 100
+                
+                # Store PnL for VIRTUAL 50% exit
+                signal.tp1_pnl_percent = tp1_pnl_full * tp1_size
+                signal.tp1_size = tp1_size
                 
                 # Move to BE
                 if self.config.get('sl_tp', {}).get('move_to_be_after_tp1', True):
                     signal.stop_loss = entry
                     signal.moved_to_be = True
                     signal.moved_to_be_at = datetime.now(pytz.UTC)
-                    logger.info(f"✅ V3 SR TP1 Hit: {signal.symbol} {signal.direction} | Moved SL to BE")
                 
-                # Activate trailing
+                # Activate trailing for remaining 50%
                 if self.config.get('sl_tp', {}).get('trail_after_tp1', True):
                     signal.trailing_active = True
                     signal.trailing_high_water_mark = current_price
                 
-                # Don't close yet - continue to TP2
+                logger.info(
+                    f"📈 V3 SR TP1 HIT (50%): {signal.symbol} {signal.direction} "
+                    f"| Virtual partial close at {tp1:.4f} (+{signal.tp1_pnl_percent:.2f}%) "
+                    f"| SL moved to BE {entry:.4f} | Trailing activated for remaining 50%"
+                )
+                
+                # Don't close yet - continue to TP2 with remaining 50%
                 return None
         
         # Check TP2 (remaining 50%)
@@ -261,11 +276,14 @@ class V3SRPerformanceTracker:
         
         # Check Stop Loss
         if direction == 'LONG' and current_price <= sl:
-            # Breakeven exit if TP1 was hit
+            # Breakeven exit if TP1 was hit (return saved TP1 PnL from 50% exit)
             if signal.tp1_hit and abs(sl - entry) < 0.0001:
+                # Use saved PnL from TP1 (50% virtual exit)
+                saved_tp1_pnl = signal.tp1_pnl_percent if signal.tp1_pnl_percent else 0.0
                 return {
                     'exit_price': sl,
-                    'reason': 'BE'
+                    'reason': 'BE',
+                    'pnl_override': saved_tp1_pnl  # Return TP1 profit from 50% that was closed
                 }
             else:
                 return {
@@ -274,11 +292,14 @@ class V3SRPerformanceTracker:
                 }
         
         if direction == 'SHORT' and current_price >= sl:
-            # Breakeven exit if TP1 was hit
+            # Breakeven exit if TP1 was hit (return saved TP1 PnL from 50% exit)
             if signal.tp1_hit and abs(sl - entry) < 0.0001:
+                # Use saved PnL from TP1 (50% virtual exit)
+                saved_tp1_pnl = signal.tp1_pnl_percent if signal.tp1_pnl_percent else 0.0
                 return {
                     'exit_price': sl,
-                    'reason': 'BE'
+                    'reason': 'BE',
+                    'pnl_override': saved_tp1_pnl  # Return TP1 profit from 50% that was closed
                 }
             else:
                 return {
@@ -289,7 +310,8 @@ class V3SRPerformanceTracker:
         return None
     
     async def _close_signal(self, signal: V3SRSignal, exit_price: float,
-                          exit_reason: str, exit_type: str, session):
+                          exit_reason: str, exit_type: str, session,
+                          pnl_override: Optional[float] = None):
         """
         Close signal and log results
         
@@ -299,18 +321,74 @@ class V3SRPerformanceTracker:
             exit_reason: Exit reason
             exit_type: Exit type
             session: DB session
+            pnl_override: Optional PnL override (for breakeven exits with saved TP1 profit)
         """
         # Calculate P&L
         entry = float(signal.entry_price)
         direction = signal.direction.upper() if signal.direction else 'LONG'
+        risk = float(signal.risk_r) if signal.risk_r else abs(entry - float(signal.stop_loss))
         
-        if direction == 'LONG':
-            pnl_percent = ((exit_price - entry) / entry) * 100
+        # Use saved TP1 PnL if provided (breakeven exit after TP1)
+        if pnl_override is not None:
+            pnl_percent = pnl_override
         else:
-            pnl_percent = ((entry - exit_price) / entry) * 100
+            # Calculate full exit PnL
+            if direction == 'LONG':
+                full_exit_pnl = ((exit_price - entry) / entry) * 100
+            else:
+                full_exit_pnl = ((entry - exit_price) / entry) * 100
+            
+            # If TP1 was hit, combine virtual TP1 exit + remaining position exit
+            if signal.tp1_hit:
+                tp1_pnl_saved = signal.tp1_pnl_percent if signal.tp1_pnl_percent else 0.0
+                tp1_size = signal.tp1_size if signal.tp1_size else 0.50
+                remaining_size = 1.0 - tp1_size  # Remaining 50%
+                
+                # Combined PnL: TP1 virtual exit + remaining position
+                pnl_percent = tp1_pnl_saved + (remaining_size * full_exit_pnl)
+            else:
+                # No TP1 hit - use full exit PnL
+                pnl_percent = full_exit_pnl
         
-        # Calculate final R-multiple
-        final_r = calculate_r_multiple(entry, exit_price, float(signal.stop_loss), direction)
+        # Calculate final R-multiple (use original risk_r, not moved BE SL)
+        if signal.tp1_hit:
+            # Calculate R for combined exits using original risk
+            if risk > 0:
+                if direction == 'LONG':
+                    # TP1 R-multiple
+                    tp1 = float(signal.take_profit_1) if signal.take_profit_1 else entry
+                    tp1_r_full = (tp1 - entry) / risk
+                    tp1_r_weighted = tp1_r_full * (signal.tp1_size if signal.tp1_size else 0.50)
+                    
+                    # Exit R-multiple for remaining
+                    exit_r_full = (exit_price - entry) / risk
+                    remaining_size = 1.0 - (signal.tp1_size if signal.tp1_size else 0.50)
+                    exit_r_weighted = exit_r_full * remaining_size
+                    
+                    final_r = tp1_r_weighted + exit_r_weighted
+                else:  # SHORT
+                    # TP1 R-multiple
+                    tp1 = float(signal.take_profit_1) if signal.take_profit_1 else entry
+                    tp1_r_full = (entry - tp1) / risk
+                    tp1_r_weighted = tp1_r_full * (signal.tp1_size if signal.tp1_size else 0.50)
+                    
+                    # Exit R-multiple for remaining
+                    exit_r_full = (entry - exit_price) / risk
+                    remaining_size = 1.0 - (signal.tp1_size if signal.tp1_size else 0.50)
+                    exit_r_weighted = exit_r_full * remaining_size
+                    
+                    final_r = tp1_r_weighted + exit_r_weighted
+            else:
+                final_r = 0.0
+        else:
+            # No TP1 - calculate R using original risk
+            if risk > 0:
+                if direction == 'LONG':
+                    final_r = (exit_price - entry) / risk
+                else:
+                    final_r = (entry - exit_price) / risk
+            else:
+                final_r = 0.0
         
         # Calculate duration
         created_at = signal.created_at if signal.created_at else datetime.now(pytz.UTC)

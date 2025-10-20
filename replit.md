@@ -145,7 +145,8 @@ The system loads configurations, connects to Binance, starts parallel data proce
   - `v3_sr_signal_locks`: Independent symbol blocking (symbol+direction keys)
 
 - **Performance Tracking**:
-  - Partial exits: TP1 (50%) → move SL to BE → TP2 (50%)
+  - **VIRTUAL Partial exits**: TP1 (50% virtual close) → move SL to BE → TP2 (remaining 50%)
+  - Saved TP1 PnL returned on breakeven exits (not 0%)
   - Trailing stop after TP1 (configurable ATR multiplier)
   - MFE/MAE tracking in R-multiples
   - JSONL logging for offline analysis
