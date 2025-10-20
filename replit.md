@@ -4,7 +4,21 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # User Preferences
 
-Preferred communication style: Simple, everyday language.
+## Communication
+- Preferred communication style: Simple, everyday language.
+
+## Development Environment Context
+- **User runs bot locally on Windows PC in Ukraine** (not on Replit cloud)
+- **Log files come from user's local computer** - when user attaches logs, they are from the bot running on their Windows machine
+- **This Replit project contains the complete source code** - all code is here and kept up to date
+- **Workflow setup is for Replit testing only** - user downloads code to run locally with his own API keys
+
+## Important Context for Future Sessions
+When user shares logs or reports errors:
+1. Logs are from their local Windows environment running Python bot
+2. They test/run the bot independently on their computer
+3. This Replit workspace is the source code repository
+4. Any fixes made here need to be downloaded by user to their local machine
 
 # System Architecture
 
