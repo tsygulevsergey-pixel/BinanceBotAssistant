@@ -2053,6 +2053,7 @@ class TradingBot:
                 'stop_loss': v3_signal['stop_loss'],
                 'tp1': v3_signal['take_profit_1'],
                 'tp2': v3_signal['take_profit_2'],
+                'score': v3_signal['confidence'],
                 'confidence': v3_signal['confidence'],
                 'setup_type': v3_signal['setup_type'],
                 'entry_tf': v3_signal['entry_tf'],

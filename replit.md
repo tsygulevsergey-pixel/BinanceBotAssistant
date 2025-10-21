@@ -6,6 +6,7 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 - Fixed tick size precision - now uses REAL tickSize from Binance PRICE_FILTER instead of calculated from pricePrecision. Eliminates rounding errors for low-price coins.
 - V3 S/R: Added post-rounding validation to prevent TP1=SL and SL=Entry edge cases when risk_r is very small. Ensures all signals are technically valid.
 - V3 S/R: Increased sl_buffer_atr from 0.25 to 0.5 for adequate risk_r. SL now properly positioned at zone edge + 0.5 ATR, resulting in ~1.0 ATR risk instead of ~0.5 ATR.
+- V3 S/R: Fixed Telegram notifications - added missing 'score' field to signal_data. V3 signals now properly sent to Telegram.
 
 # User Preferences
 
