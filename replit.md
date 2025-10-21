@@ -4,6 +4,21 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot engineer
 
 ## Recent Changes (October 21, 2025)
 
+### 🔧 CRITICAL BUG FIX: SHORT FlipRetest Zone Selection ✅ FIXED
+**Issue:** SHORT FlipRetest signals had stop-loss BELOW entry price (incorrect protection)
+- Root cause: Used Support zones ('S') instead of Resistance zones ('R')
+- Support zones are below current price → SL calculation `zone['high'] + buffer` resulted in SL < Entry
+- Affected all SHORT FlipRetest signals
+
+**Fix Applied:**
+- Changed SHORT FlipRetest to use Resistance zones ('R') - same as LONG
+- Correct logic: 
+  - LONG: R zone broken UP → retest from below → LONG entry with SL below zone
+  - SHORT: R zone broken DOWN → retest from above → SHORT entry with SL above zone
+- SL now correctly placed ABOVE entry for SHORT positions
+- Added diagnostic logging in V3SRPerformanceTracker for PnL calculation visibility
+- Created check_v3_signals.py diagnostic script for database verification
+
 ### V3 Zone Events & Reaction Tracking System ✅ FULLY IMPLEMENTED
 Complete real-time zone quality management system to prevent zone degradation:
 
