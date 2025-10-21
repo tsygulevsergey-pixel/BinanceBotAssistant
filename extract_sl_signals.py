@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Извлечение всех стоп-лосс сигналов с деталями
+Извлечение всех стоп-лосс сигналов с деталями (БЕЗ дубликатов)
 """
 
 import re
@@ -17,6 +17,7 @@ def parse_logs():
     # Словарь для хранения параметров сигналов
     signal_params = {}
     sl_signals = []
+    seen_keys = set()  # Для дедупликации
     
     # Паттерны
     valid_signal_pattern = re.compile(
@@ -68,6 +69,14 @@ def parse_logs():
                 entry = match.group(4)
                 exit_price = match.group(5)
                 pnl = match.group(6)
+                
+                # Уникальный ключ для дедупликации
+                unique_key = f"{symbol}_{direction}_{entry}_{pnl}"
+                
+                if unique_key in seen_keys:
+                    continue  # Пропустить дубликат
+                
+                seen_keys.add(unique_key)
                 
                 # Попробовать найти параметры
                 key = f"{symbol}_{direction}_{entry}"
@@ -180,7 +189,7 @@ def main():
     
     sl_signals = parse_logs()
     
-    print(f"✅ Найдено {len(sl_signals)} стоп-лосс сигналов")
+    print(f"✅ Найдено {len(sl_signals)} уникальных стоп-лосс сигналов")
     
     # Создать текстовый отчет
     report = create_report(sl_signals)
