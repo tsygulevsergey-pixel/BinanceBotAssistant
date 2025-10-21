@@ -2,6 +2,27 @@
 
 This project is a professional-grade Binance USDT-M Futures Trading Bot engineered for high-performance trading, aiming for an 80%+ Win Rate and a Profit Factor of 1.8-2.5. It integrates advanced strategies, real-time market regime detection, sophisticated risk management, and an "Action Price" system based on Support/Resistance, Anchored VWAP, and price action. The bot operates in both Signals-Only and Live Trading Modes, with a strong focus on precise signal generation, dynamic entry/exit management, and robust performance tracking.
 
+## Recent Changes (October 21, 2025)
+
+### V3 Zone Events & Reaction Tracking System ✅ FULLY IMPLEMENTED
+Complete real-time zone quality management system to prevent zone degradation:
+
+**Zone Events Logging:**
+- **Flip-Retest events**: body_break, flip (R⇄S switch), retest
+- **Sweep-Return events**: sweep (with wick/body ratio), return
+- Logged fields: event_type, touch_price, side, penetration_depth_atr, wick_to_body_ratio, market_regime, atr_value
+- Automatic logging on every candle close for LONG/SHORT setups
+
+**Reaction Tracking (Background Task - every 30 min):**
+- Checks if price actually bounced after zone touches
+- Updates: reaction_occurred, reaction_bars, reaction_magnitude_atr
+- Validates zone effectiveness in real-time
+
+**Auto Zone Strength Updates:**
+- Weighted formula: Success rate (±20pts), Recency (±10pts), Reaction magnitude (+20pts), Touch penalty (-2pts after 5th)
+- Integrated into zone builder: Every rebuild updates strength from events
+- **Result**: Strong zones strengthen, weak zones degrade automatically
+
 # User Preferences
 
 - **Preferred communication style**: Simple, everyday language.
