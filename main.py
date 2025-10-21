@@ -1998,7 +1998,7 @@ class TradingBot:
                 confidence=float(v3_signal['confidence']),
                 market_regime=v3_signal.get('market_regime', 'UNKNOWN'),
                 zone_strength=v3_signal['zone'].get('strength', 0) if v3_signal.get('zone') else 0,
-                zone_timeframe=v3_signal['zone'].get('tf', 'unknown') if v3_signal.get('zone') else 'unknown',
+                zone_tf=v3_signal['zone'].get('tf', 'unknown') if v3_signal.get('zone') else 'unknown',
                 atr_value=float(v3_signal.get('atr', 0)),
                 status='PENDING',
                 created_at=datetime.now(pytz.UTC)
