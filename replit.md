@@ -186,7 +186,7 @@ Base system in `src/utils/sr_zones_v3/`:
 - **Validation**: Reaction strength measurement (≥0.7 ATR retracement)
 - **Scoring**: Multi-factor (Touches + Reactions + Freshness + Confluence - Noise)
 - **Flip Detection**: R⇄S role switching with confirmation
-- **Builder**: Multi-TF orchestrator (D→H4→H1→M15)
+- **Builder**: Multi-TF orchestrator returns Dict[tf, zones] for efficient access by timeframe (October 2025)
 - Adaptive fractal swing detection (k varies by TF)
 - Zone width adapts by volatility (e.g., 15m: 0.35-0.7 ATR)
 - Freshness decay using exponential function

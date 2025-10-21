@@ -1,0 +1,31 @@
+2025-10-21 03:07:33 EEST | INFO     | V3_SR | 🔷 Checking V3 S/R signals for 220 symbols
+2025-10-21 03:07:33 EEST | INFO     | V3_SR | 🔍 Analyzing IPUSDT | Regime: TREND
+2025-10-21 03:07:33 EEST | INFO     | V3_SR | 🔨 Building V3 zones for IPUSDT...
+2025-10-21 03:07:42 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for IPUSDT: 'list' object has no attribute 'items'
+2025-10-21 03:07:42 EEST | INFO     | V3_SR | ⚠️ IPUSDT no zones built
+2025-10-21 03:07:42 EEST | INFO     | V3_SR | 🔍 Analyzing YBUSDT | Regime: TREND
+2025-10-21 03:07:42 EEST | INFO     | V3_SR | 🔨 Building V3 zones for YBUSDT...
+2025-10-21 03:07:44 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for YBUSDT: 'list' object has no attribute 'items'
+2025-10-21 03:07:44 EEST | INFO     | V3_SR | ⚠️ YBUSDT no zones built
+2025-10-21 03:07:44 EEST | INFO     | V3_SR | 🔍 Analyzing JTOUSDT | Regime: TREND
+2025-10-21 03:07:44 EEST | INFO     | V3_SR | 🔨 Building V3 zones for JTOUSDT...
+2025-10-21 03:07:49 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for JTOUSDT: 'list' object has no attribute 'items'
+2025-10-21 03:07:57 EEST | INFO     | V3_SR | ⚠️ JTOUSDT no zones built
+2025-10-21 03:07:57 EEST | INFO     | V3_SR | 🔍 Analyzing XANUSDT | Regime: TREND
+2025-10-21 03:07:57 EEST | INFO     | V3_SR | 🔨 Building V3 zones for XANUSDT...
+2025-10-21 03:08:00 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for XANUSDT: 'list' object has no attribute 'items'
+2025-10-21 03:08:09 EEST | INFO     | V3_SR | ⚠️ XANUSDT no zones built
+2025-10-21 03:08:09 EEST | INFO     | 🔍 Checking 3 active AP signals for exit conditions
+2025-10-21 03:08:10 EEST | INFO     | V3_SR | 🔍 Analyzing EDENUSDT | Regime: TREND
+2025-10-21 03:08:10 EEST | INFO     | V3_SR | 🔨 Building V3 zones for EDENUSDT...
+2025-10-21 03:08:13 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for EDENUSDT: 'list' object has no attribute 'items'
+2025-10-21 03:08:13 EEST | INFO     | V3_SR | ⚠️ EDENUSDT no zones built
+2025-10-21 03:08:13 EEST | INFO     | V3_SR | 🔍 Analyzing STRKUSDT | Regime: TREND
+2025-10-21 03:08:13 EEST | INFO     | V3_SR | 🔨 Building V3 zones for STRKUSDT...
+2025-10-21 03:08:16 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for STRKUSDT: 'list' object has no attribute 'items'
+2025-10-21 03:08:16 EEST | INFO     | V3_SR | ⚠️ STRKUSDT no zones built
+2025-10-21 03:08:16 EEST | INFO     | trading_bot | 📊 Rate limiter sync: local=689+2, binance=1 (diff: -688)
+2025-10-21 03:08:16 EEST | INFO     | trading_bot | 🔄 Binance counter reset: 689→1, cleared pending=2
+2025-10-21 03:08:16 EEST | INFO     | V3_SR | 🔍 Analyzing EIGENUSDT | Regime: TREND
+2025-10-21 03:08:16 EEST | INFO     | V3_SR | 🔨 Building V3 zones for EIGENUSDT...
+2025-10-21 03:08:20 EEST | ERROR    | V3_SR | ❌ Error building V3 zones for EIGENUSDT: 'list' object has no attribute 'items'

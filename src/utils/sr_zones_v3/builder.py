@@ -62,7 +62,7 @@ class SRZonesV3Builder:
                    df_1h: pd.DataFrame,
                    df_15m: pd.DataFrame,
                    current_price: float,
-                   ema200_15m: Optional[pd.Series] = None) -> List[Dict]:
+                   ema200_15m: Optional[pd.Series] = None) -> Dict[str, List[Dict]]:
         """
         Построить зоны для всех таймфреймов
         
@@ -73,20 +73,20 @@ class SRZonesV3Builder:
             ema200_15m: EMA200 на 15m для confluence (optional)
         
         Returns:
-            Список зон в формате из документа:
-            [{
-                'tf': '1h',
-                'kind': 'R',  # или 'S'
-                'low': float, 'high': float, 'mid': float,
-                'width_atr': float,
-                'strength': float (0-100),
-                'class': 'key'|'strong'|'normal'|'weak',
-                'touches': int,
-                'state': 'normal'|'flipped',
-                ...
-            }, ...]
+            Словарь зон по таймфреймам:
+            {
+                '15m': [{zone_dict}, ...],
+                '1h': [{zone_dict}, ...],
+                '4h': [{zone_dict}, ...],
+                '1d': [{zone_dict}, ...],
+            }
         """
-        all_zones = []
+        zones_by_tf = {
+            '15m': [],
+            '1h': [],
+            '4h': [],
+            '1d': []
+        }
         
         # Build zones for each TF
         timeframes = [
@@ -104,17 +104,9 @@ class SRZonesV3Builder:
                 tf, df, current_price, ema200=(ema200_15m if tf == '15m' else None)
             )
             
-            all_zones.extend(zones)
+            zones_by_tf[tf] = zones
         
-        # Multi-TF merge: объединить пересекающиеся зоны
-        merged_zones = self._merge_multi_tf(all_zones)
-        
-        # Filter: keep only top zones per side
-        filtered_zones = self._filter_top_zones(
-            merged_zones, current_price
-        )
-        
-        return filtered_zones
+        return zones_by_tf
     
     def _build_zones_for_tf(self,
                            tf: str,
