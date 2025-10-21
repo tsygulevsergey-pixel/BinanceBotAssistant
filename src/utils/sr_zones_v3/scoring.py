@@ -44,7 +44,11 @@ class ZoneScorer:
                        current_time: datetime,
                        tau_days: float,
                        df: pd.DataFrame = None,
-                       ema200: Optional[pd.Series] = None) -> float:
+                       ema200: Optional[pd.Series] = None,
+                       htf_zones: Optional[Dict] = None,
+                       vwap: Optional[pd.Series] = None,
+                       swing_highs: Optional[List] = None,
+                       swing_lows: Optional[List] = None) -> float:
         """
         Рассчитать общий score зоны (0-100)
         
@@ -55,6 +59,10 @@ class ZoneScorer:
             tau_days: Константа затухания для freshness
             df: DataFrame для анализа noise (optional)
             ema200: Серия EMA200 для confluence (optional)
+            htf_zones: Dict с зонами старших TF для HTF alignment (optional)
+            vwap: Серия VWAP для proximity check (optional)
+            swing_highs: Список swing highs для confluence (optional)
+            swing_lows: Список swing lows для confluence (optional)
         
         Returns:
             Score 0-100
@@ -71,9 +79,9 @@ class ZoneScorer:
             touches, current_time, tau_days
         )
         
-        # 4. Confluence component
+        # 4. Confluence component (расширен с 2 до 7 факторов)
         confluence_score = self._score_confluence(
-            zone, ema200, df
+            zone, ema200, df, htf_zones, vwap, swing_highs, swing_lows
         )
         
         # 5. Noise penalty
@@ -185,41 +193,74 @@ class ZoneScorer:
     def _score_confluence(self,
                          zone: Dict,
                          ema200: Optional[pd.Series],
-                         df: Optional[pd.DataFrame]) -> float:
+                         df: Optional[pd.DataFrame],
+                         htf_zones: Optional[Dict] = None,
+                         vwap: Optional[pd.Series] = None,
+                         swing_highs: Optional[List] = None,
+                         swing_lows: Optional[List] = None) -> float:
         """
-        Оценить confluence факторы:
-        - EMA200 близко к зоне
-        - Round number в зоне
-        - Пересечение с старшей зоной (будет в builder)
-        - VWAP/POC (future)
+        Оценить confluence факторы (расширен с 2 до 7):
+        1. EMA200 proximity (+0.2)
+        2. Round numbers (+0.2)
+        3. HTF zone alignment (+0.5) - САМЫЙ ВАЖНЫЙ!
+        4. VWAP proximity (+0.3)
+        5. Swing high/low (+0.4)
+        6. Fibonacci levels (+0.3) - future
+        7. POC proximity (+0.4) - future
         
         Returns:
-            0.0-1.0 (доля confluence факторов)
+            0.0-1.0 (сумма confluence бонусов, cap на 1.0)
         """
-        factors = []
+        score = 0.0
         
-        # EMA200 proximity
+        # 1. EMA200 proximity (+0.2)
         if ema200 is not None and len(ema200) > 0:
-            ema_val = ema200.iloc[-1]
-            # Проверка: EMA200 в пределах зоны или близко (±10%)
-            zone_range = zone['high'] - zone['low']
-            ema_in_zone = zone['low'] <= ema_val <= zone['high']
-            ema_close = abs(ema_val - zone['mid']) < zone_range * 0.5
-            
-            if ema_in_zone or ema_close:
-                factors.append('ema200')
+            try:
+                ema_val = ema200.iloc[-1]
+                zone_range = zone['high'] - zone['low']
+                ema_in_zone = zone['low'] <= ema_val <= zone['high']
+                ema_close = abs(ema_val - zone['mid']) < zone_range * 0.5
+                
+                if ema_in_zone or ema_close:
+                    score += 0.2
+            except (IndexError, KeyError):
+                pass
         
-        # Round number check
+        # 2. Round numbers (+0.2)
         round_nums = self._find_round_numbers(zone)
         if round_nums:
-            factors.append('round')
+            score += 0.2
         
-        # Confluence score
-        if not factors:
-            return 0.0
+        # 3. HTF Zone Alignment (+0.5) - КРИТИЧНО ВАЖНО!
+        if htf_zones:
+            htf_aligned = self._check_htf_alignment(zone, htf_zones)
+            if htf_aligned:
+                score += 0.5
         
-        # Каждый фактор добавляет 0.5
-        return min(1.0, len(factors) * 0.5)
+        # 4. VWAP proximity (+0.3)
+        if vwap is not None and len(vwap) > 0:
+            try:
+                vwap_val = vwap.iloc[-1]
+                # VWAP в пределах зоны или очень близко
+                vwap_in_zone = zone['low'] <= vwap_val <= zone['high']
+                zone_range = zone['high'] - zone['low']
+                vwap_close = abs(vwap_val - zone['mid']) < zone_range * 0.5
+                
+                if vwap_in_zone or vwap_close:
+                    score += 0.3
+            except (IndexError, KeyError):
+                pass
+        
+        # 5. Swing High/Low confluence (+0.4)
+        if swing_highs or swing_lows:
+            swing_aligned = self._check_swing_alignment(
+                zone, swing_highs, swing_lows
+            )
+            if swing_aligned:
+                score += 0.4
+        
+        # Cap на 1.0
+        return min(1.0, score)
     
     def _find_round_numbers(self, zone: Dict) -> List[float]:
         """
@@ -250,6 +291,75 @@ class ZoneScorer:
             round_nums.append(round_above)
         
         return round_nums
+    
+    def _check_htf_alignment(self, zone: Dict, htf_zones: Dict) -> bool:
+        """
+        Проверить пересекается ли зона с зонами на старших TF
+        
+        Args:
+            zone: Текущая зона
+            htf_zones: Dict с зонами старших TF {'4h': [...], '1d': [...]}
+        
+        Returns:
+            True если есть пересечение с HTF зоной
+        """
+        if not htf_zones:
+            return False
+        
+        zone_low = zone['low']
+        zone_high = zone['high']
+        
+        # Проверяем все HTF (4h, 1d)
+        for tf, zones_list in htf_zones.items():
+            if not zones_list:
+                continue
+            
+            for htf_zone in zones_list:
+                # Проверка пересечения зон
+                htf_low = htf_zone.get('low', htf_zone.get('bottom', 0))
+                htf_high = htf_zone.get('high', htf_zone.get('top', 0))
+                
+                # Зоны пересекаются если хоть немного overlap
+                overlap = not (zone_high < htf_low or zone_low > htf_high)
+                if overlap:
+                    return True
+        
+        return False
+    
+    def _check_swing_alignment(self, 
+                               zone: Dict, 
+                               swing_highs: Optional[List],
+                               swing_lows: Optional[List]) -> bool:
+        """
+        Проверить совпадает ли зона со swing high/low
+        
+        Args:
+            zone: Текущая зона
+            swing_highs: Список swing highs (price levels)
+            swing_lows: Список swing lows (price levels)
+        
+        Returns:
+            True если есть swing в зоне
+        """
+        zone_low = zone['low']
+        zone_high = zone['high']
+        
+        # Проверяем swing highs
+        if swing_highs:
+            for swing in swing_highs:
+                # swing может быть float или dict
+                swing_price = swing if isinstance(swing, (int, float)) else swing.get('price', 0)
+                if zone_low <= swing_price <= zone_high:
+                    return True
+        
+        # Проверяем swing lows
+        if swing_lows:
+            for swing in swing_lows:
+                swing_price = swing if isinstance(swing, (int, float)) else swing.get('price', 0)
+                if zone_low <= swing_price <= zone_high:
+                    return True
+        
+        return False
     
     def _score_noise(self,
                     zone: Dict,
