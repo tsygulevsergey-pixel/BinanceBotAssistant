@@ -1104,6 +1104,11 @@ class TelegramBot:
             for sig in active_signals:
                 # Time since created
                 created_dt = sig.created_at if sig.created_at else datetime.now(pytz.UTC)
+                
+                # Ensure timezone-aware
+                if created_dt.tzinfo is None:
+                    created_dt = pytz.UTC.localize(created_dt)
+                
                 age_minutes = int((datetime.now(pytz.UTC) - created_dt).total_seconds() / 60)
                 
                 # Calculate current R if possible
