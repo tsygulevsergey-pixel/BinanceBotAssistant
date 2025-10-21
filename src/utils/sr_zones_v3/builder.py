@@ -172,9 +172,14 @@ class SRZonesV3Builder:
                 zone['last_touch_ts'] = None
                 zone['last_reaction_atr'] = 0.0
             
-            # Calculate score
+            # Calculate score (с новыми confluence факторами и HTF multiplier)
             score = self.scorer.calculate_score(
-                zone, touches, current_time, tau_days, df, ema200
+                zone, touches, current_time, tau_days, df, ema200,
+                htf_zones=None,  # TODO: передавать HTF зоны для confluence
+                vwap=None,       # TODO: передавать VWAP для confluence
+                swing_highs=swings.get('highs'),  # Swing highs для confluence
+                swing_lows=swings.get('lows'),    # Swing lows для confluence
+                zone_timeframe=tf  # Для HTF multiplier
             )
             zone['strength'] = score
             zone['class'] = self.scorer.classify_strength(score)

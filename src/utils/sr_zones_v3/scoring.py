@@ -48,7 +48,8 @@ class ZoneScorer:
                        htf_zones: Optional[Dict] = None,
                        vwap: Optional[pd.Series] = None,
                        swing_highs: Optional[List] = None,
-                       swing_lows: Optional[List] = None) -> float:
+                       swing_lows: Optional[List] = None,
+                       zone_timeframe: str = '15m') -> float:
         """
         Рассчитать общий score зоны (0-100)
         
@@ -63,9 +64,10 @@ class ZoneScorer:
             vwap: Серия VWAP для proximity check (optional)
             swing_highs: Список swing highs для confluence (optional)
             swing_lows: Список swing lows для confluence (optional)
+            zone_timeframe: Timeframe зоны для HTF multiplier (default: '15m')
         
         Returns:
-            Score 0-100
+            Score 0-100 (с применением HTF multiplier)
         """
         # 1. Touches component
         valid_touches = [t for t in touches if t['valid']]
@@ -88,7 +90,7 @@ class ZoneScorer:
         noise_penalty = self._score_noise(zone, df, touches)
         
         # Комбинировать
-        score = (
+        base_score = (
             self.norm_w1 * touches_score +
             self.norm_w2 * reactions_score +
             self.norm_w3 * freshness_score +
@@ -96,8 +98,11 @@ class ZoneScorer:
             self.norm_w5 * noise_penalty
         ) * 100
         
+        # Применяем HTF multiplier
+        final_score = self._apply_htf_multiplier(base_score, zone_timeframe)
+        
         # Clamp 0-100
-        return max(0.0, min(100.0, score))
+        return max(0.0, min(100.0, final_score))
     
     def _score_touches(self, valid_touches: List[Dict]) -> float:
         """
@@ -419,3 +424,29 @@ class ZoneScorer:
             return 'normal'
         else:
             return 'weak'
+    
+    def _apply_htf_multiplier(self, score: float, zone_timeframe: str) -> float:
+        """
+        Применить HTF multiplier к score зоны
+        
+        Higher timeframe = более надежные зоны = выше multiplier
+        
+        Args:
+            score: Базовый score зоны (0-100)
+            zone_timeframe: Timeframe зоны ('15m', '1h', '4h', '1d')
+        
+        Returns:
+            Score с примененным multiplier
+        """
+        # HTF multipliers на основе industry best practices
+        multipliers = {
+            '1d': 1.2,   # Дневные зоны - самые надежные
+            '4h': 1.1,   # 4-часовые зоны - очень надежные
+            '1h': 1.0,   # Часовые зоны - baseline
+            '15m': 0.95  # 15-минутные зоны - менее надежные
+        }
+        
+        # Получить multiplier для данного TF (default 1.0)
+        multiplier = multipliers.get(zone_timeframe, 1.0)
+        
+        return score * multiplier
