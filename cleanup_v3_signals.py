@@ -81,11 +81,6 @@ def cleanup_v3_data():
         conn.commit()
         
         print()
-        print("🔧 Оптимизация базы данных...")
-        cursor.execute("VACUUM")
-        conn.commit()
-        
-        print()
         print("=" * 80)
         print("✅ ГОТОВО!")
         print("=" * 80)
