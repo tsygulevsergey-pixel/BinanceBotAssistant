@@ -1,0 +1,72 @@
+2025-10-21 04:36:24 EEST | ERROR    | V3_SR | ❌ Error saving V3 signal to DB: (sqlite3.IntegrityError) NOT NULL constraint failed: v3_sr_signals.valid_until_ts
+[SQL: INSERT INTO v3_sr_signals (signal_id, symbol, setup_type, direction, entry_tf, zone_id, zone_tf, zone_kind, zone_low, zone_high, zone_mid, zone_strength, zone_class, zone_state, nearest_support_low, nearest_support_high, nearest_support_strength, nearest_support_type, nearest_resistance_low, nearest_resistance_high, nearest_resistance_strength, nearest_resistance_type, vwap_bias, vwap_value, price_vs_vwap, entry_price, entry_price_raw, stop_loss, stop_loss_raw, take_profit_1, tp1_raw, take_profit_2, tp2_raw, risk_r, tp1_r_multiple, tp2_r_multiple, confidence, market_regime, volatility_regime, atr_value, valid_until_ts, created_at, status, telegram_message_id, tp1_size, tp2_trail_size, tp1_hit, tp1_hit_at, tp1_pnl_percent, tp2_hit, tp2_hit_at, tp2_pnl_percent, moved_to_be, moved_to_be_at, trailing_active, trailing_high_water_mark, exit_price, exit_reason, exit_type, pnl, pnl_percent, final_r_multiple, closed_at, max_favorable_excursion, max_adverse_excursion, bars_to_tp1, bars_to_tp2, bars_to_exit, duration_minutes, zone_reaction_occurred, zone_reaction_atr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('BELUSDT_1761010584', 'BELUSDT', 'SweepReturn', 'LONG', '15m', 'BELUSDT_15m_S_0.2473', '15m', 'S', 0.246665, 0.247935, 0.2473, 60.45665404488625, 'strong', 'normal', None, None, None, None, None, None, None, None, None, None, None, 0.25, None, 0.25, None, 0.25, None, 0.25, None, 0.0, None, None, 90.0, 'TREND', None, 0.002474, None, '2025-10-21 01:36:24.562065', 'PENDING', None, 0.5, 0.5, 0, None, None, 0, None, None, 0, None, 0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: NOT NULL constraint failed: v3_sr_signals.valid_until_ts
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 2024, in _save_v3_sr_signal
+    session.commit()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2032, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4345, in flush
+    self._flush(objects)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4480, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4441, in _flush
+    flush_context.execute()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: v3_sr_signals.valid_until_ts
+[SQL: INSERT INTO v3_sr_signals (signal_id, symbol, setup_type, direction, entry_tf, zone_id, zone_tf, zone_kind, zone_low, zone_high, zone_mid, zone_strength, zone_class, zone_state, nearest_support_low, nearest_support_high, nearest_support_strength, nearest_support_type, nearest_resistance_low, nearest_resistance_high, nearest_resistance_strength, nearest_resistance_type, vwap_bias, vwap_value, price_vs_vwap, entry_price, entry_price_raw, stop_loss, stop_loss_raw, take_profit_1, tp1_raw, take_profit_2, tp2_raw, risk_r, tp1_r_multiple, tp2_r_multiple, confidence, market_regime, volatility_regime, atr_value, valid_until_ts, created_at, status, telegram_message_id, tp1_size, tp2_trail_size, tp1_hit, tp1_hit_at, tp1_pnl_percent, tp2_hit, tp2_hit_at, tp2_pnl_percent, moved_to_be, moved_to_be_at, trailing_active, trailing_high_water_mark, exit_price, exit_reason, exit_type, pnl, pnl_percent, final_r_multiple, closed_at, max_favorable_excursion, max_adverse_excursion, bars_to_tp1, bars_to_tp2, bars_to_exit, duration_minutes, zone_reaction_occurred, zone_reaction_atr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('BELUSDT_1761010584', 'BELUSDT', 'SweepReturn', 'LONG', '15m', 'BELUSDT_15m_S_0.2473', '15m', 'S', 0.246665, 0.247935, 0.2473, 60.45665404488625, 'strong', 'normal', None, None, None, None, None, None, None, None, None, None, None, 0.25, None, 0.25, None, 0.25, None, 0.25, None, 0.0, None, None, 90.0, 'TREND', None, 0.002474, None, '2025-10-21 01:36:24.562065', 'PENDING', None, 0.5, 0.5, 0, None, None, 0, None, None, 0, None, 0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

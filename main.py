@@ -1993,6 +1993,12 @@ class TradingBot:
                 zone_kind = zone.get('kind', 'U')
                 zone_id = f"{v3_signal['symbol']}_{zone_tf}_{zone_kind}_{zone_mid:.4f}"
             
+            entry_tf = v3_signal['entry_tf']
+            timeout_bars = self.v3_sr_strategy.config.get('validity', {}).get('timeout_bars', {}).get(entry_tf, 12)
+            tf_minutes = {'15m': 15, '1h': 60, '4h': 240, '1d': 1440}
+            minutes = tf_minutes.get(entry_tf, 15)
+            valid_until = datetime.now(pytz.UTC) + timedelta(minutes=minutes * timeout_bars)
+            
             signal = V3SRSignal(
                 signal_id=v3_signal.get('signal_id', f"{v3_signal['symbol']}_{int(datetime.now(pytz.UTC).timestamp())}"),
                 symbol=v3_signal['symbol'],
@@ -2016,6 +2022,7 @@ class TradingBot:
                 confidence=float(v3_signal['confidence']),
                 market_regime=v3_signal.get('market_regime', 'UNKNOWN'),
                 atr_value=float(v3_signal.get('atr', 0)),
+                valid_until_ts=valid_until,
                 status='PENDING',
                 created_at=datetime.now(pytz.UTC)
             )
