@@ -2043,24 +2043,23 @@ class TradingBot:
     async def _send_v3_sr_telegram(self, v3_signal: Dict):
         """Send V3 S/R signal to Telegram"""
         try:
-            dir_emoji = "🟢" if v3_signal['direction'] == 'LONG' else "🔴"
-            setup_emoji = "🔄" if v3_signal['setup_type'] == 'FlipRetest' else "⚡"
+            # Convert V3 signal to format expected by TelegramBot.send_signal()
+            signal_data = {
+                'symbol': v3_signal['symbol'],
+                'direction': v3_signal['direction'],
+                'strategy_name': f"V3 S/R {v3_signal['setup_type']}",
+                'entry_type': 'MARKET',
+                'entry_price': v3_signal['entry_price'],
+                'stop_loss': v3_signal['stop_loss'],
+                'tp1': v3_signal['take_profit_1'],
+                'tp2': v3_signal['take_profit_2'],
+                'confidence': v3_signal['confidence'],
+                'setup_type': v3_signal['setup_type'],
+                'entry_tf': v3_signal['entry_tf'],
+                'regime': v3_signal.get('market_regime', 'UNKNOWN')
+            }
             
-            message = (
-                f"{dir_emoji} <b>V3 S/R {v3_signal['setup_type']}</b>\n\n"
-                f"Symbol: {v3_signal['symbol']}\n"
-                f"Direction: {v3_signal['direction']}\n"
-                f"Setup: {setup_emoji} {v3_signal['setup_type']}\n"
-                f"Entry TF: {v3_signal['entry_tf']}\n\n"
-                f"Entry: {v3_signal['entry_price']:.4f}\n"
-                f"SL: {v3_signal['stop_loss']:.4f}\n"
-                f"TP1: {v3_signal['take_profit_1']:.4f} (50%)\n"
-                f"TP2: {v3_signal['take_profit_2']:.4f} (50%)\n\n"
-                f"Confidence: {v3_signal['confidence']:.0f}%\n"
-                f"Regime: {v3_signal.get('market_regime', 'UNKNOWN')}"
-            )
-            
-            await self.telegram_bot.send_signal_alert(message)
+            await self.telegram_bot.send_signal(signal_data)
             
         except Exception as e:
             v3_sr_logger.error(f"Error sending V3 Telegram: {e}", exc_info=True)

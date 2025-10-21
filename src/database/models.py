@@ -336,9 +336,9 @@ class V3SRSignal(Base):
     volatility_regime = Column(String(20))  # "low", "normal", "high"
     atr_value = Column(Float)  # ATR на момент сигнала
     
-    # Validity
-    valid_until_ts = Column(DateTime, nullable=False)  # Timeout для исполнения
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
+    # Validity (timezone-aware для корректного сравнения)
+    valid_until_ts = Column(DateTime(timezone=True), nullable=False)  # Timeout для исполнения
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
     
     # Execution tracking
     status = Column(String(20), nullable=False, default='PENDING', index=True)  # PENDING, ACTIVE, CLOSED, CANCELLED

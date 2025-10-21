@@ -174,7 +174,14 @@ class V3SRPerformanceTracker:
             return False
         
         now = datetime.now(pytz.UTC)
-        return now >= signal.valid_until_ts
+        
+        # Ensure signal.valid_until_ts is timezone-aware
+        if signal.valid_until_ts.tzinfo is None:
+            signal_valid_until = pytz.UTC.localize(signal.valid_until_ts)
+        else:
+            signal_valid_until = signal.valid_until_ts
+        
+        return now >= signal_valid_until
     
     async def _check_exit_conditions(self, signal: V3SRSignal, 
                                      current_price: float) -> Optional[Dict]:

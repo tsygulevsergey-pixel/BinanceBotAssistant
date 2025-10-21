@@ -1,0 +1,136 @@
+2025-10-21 05:05:36 EEST | INFO     | V3_SR | 🔨 Building V3 zones for BANUSDT...
+2025-10-21 05:05:39 EEST | INFO     | V3_SR | ✅ BANUSDT zones built: {'1d': 2, '4h': 13, '1h': 8, '15m': 7}
+2025-10-21 05:05:39 EEST | INFO     | V3_SR |   📊 BANUSDT 15m Flip-Retest check: 5 strong zones (min strength: 60)
+2025-10-21 05:05:39 EEST | INFO     | V3_SR |   🎯 BANUSDT 15m LONG: Building Flip-Retest signal!
+2025-10-21 05:05:39 EEST | INFO     | V3_SR | 🚀 FLIP-RETEST SIGNAL CREATED: BANUSDT LONG 15m | Entry: 0.0714 | SL: 0.0661 | TP1: 0.0768 | TP2: 0.0821 | Conf: 95.0%
+2025-10-21 05:05:39 EEST | INFO     | V3_SR | ✅ V3 signal saved to DB: BANUSDT LONG
+2025-10-21 05:05:39 EEST | ERROR    | V3_SR | Error sending V3 Telegram: 'TelegramBot' object has no attribute 'send_signal_alert'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 2063, in _send_v3_sr_telegram
+    await self.telegram_bot.send_signal_alert(message)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TelegramBot' object has no attribute 'send_signal_alert'
+2025-10-21 05:05:39 EEST | INFO     | V3_SR | 🔷 V3 Signal: BANUSDT LONG FlipRetest @ 0.0714 (Confidence: 95.0%)
+2025-10-21 05:05:39 EEST | INFO     | V3_SR | 🔍 Analyzing SUIUSDT | Regime: TREND
+2025-10-21 05:05:39 EEST | INFO     | V3_SR | 🔨 Building V3 zones for SUIUSDT...
+2025-10-21 05:05:43 EEST | INFO     | V3_SR | ✅ SUIUSDT zones built: {'1d': 2, '4h': 7, '1h': 15, '15m': 19}
+2025-10-21 05:05:43 EEST | INFO     | V3_SR |   📊 SUIUSDT 15m Flip-Retest check: 6 strong zones (min strength: 60)
+2025-10-21 05:05:43 EEST | INFO     | V3_SR |   📊 SUIUSDT 15m Sweep-Return check: 6 strong zones (min strength: 60)
+2025-10-21 05:05:43 EEST | INFO     | V3_SR |   📊 SUIUSDT 1h Flip-Retest check: 8 strong zones (min strength: 60)
+2025-10-21 05:05:43 EEST | INFO     | V3_SR |   📊 SUIUSDT 1h Sweep-Return check: 8 strong zones (min strength: 60)
+2025-10-21 05:05:43 EEST | INFO     | 🔍 Checking 4 active AP signals for exit conditions
+2025-10-21 05:05:43 EEST | INFO     | V3_SR | 🔍 Analyzing FLOWUSDT | Regime: TREND
+2025-10-21 05:05:43 EEST | INFO     | V3_SR | 🔨 Building V3 zones for FLOWUSDT...
+2025-10-21 05:05:46 EEST | INFO     | V3_SR | ✅ FLOWUSDT zones built: {'1d': 2, '4h': 12, '1h': 8, '15m': 8}
+2025-10-21 05:05:46 EEST | INFO     | V3_SR |   📊 FLOWUSDT 15m Flip-Retest check: 5 strong zones (min strength: 60)
+2025-10-21 05:05:46 EEST | INFO     | V3_SR |   📊 FLOWUSDT 15m Sweep-Return check: 5 strong zones (min strength: 60)
+2025-10-21 05:05:46 EEST | INFO     | V3_SR |   📊 FLOWUSDT 1h Flip-Retest check: 3 strong zones (min strength: 60)
+2025-10-21 05:05:46 EEST | INFO     | V3_SR |   📊 FLOWUSDT 1h Sweep-Return check: 3 strong zones (min strength: 60)
+2025-10-21 05:05:46 EEST | INFO     | V3_SR | 🔍 Checking 4 active V3 SR signals for exit conditions
+2025-10-21 05:05:46 EEST | INFO     | V3_SR | 🔍 Analyzing VETUSDT | Regime: TREND
+2025-10-21 05:05:46 EEST | INFO     | V3_SR | 🔨 Building V3 zones for VETUSDT...
+2025-10-21 05:05:49 EEST | INFO     | V3_SR | ✅ VETUSDT zones built: {'1d': 2, '4h': 13, '1h': 14, '15m': 15}
+2025-10-21 05:05:49 EEST | INFO     | V3_SR |   📊 VETUSDT 15m Flip-Retest check: 8 strong zones (min strength: 60)
+2025-10-21 05:05:49 EEST | INFO     | V3_SR |   📊 VETUSDT 15m Sweep-Return check: 8 strong zones (min strength: 60)
+2025-10-21 05:05:49 EEST | INFO     | V3_SR |   📊 VETUSDT 1h Flip-Retest check: 10 strong zones (min strength: 60)
+2025-10-21 05:05:49 EEST | INFO     | V3_SR |   📊 VETUSDT 1h Sweep-Return check: 10 strong zones (min strength: 60)
+2025-10-21 05:05:49 EEST | INFO     | V3_SR | 🔍 Analyzing MYXUSDT | Regime: TREND
+2025-10-21 05:05:49 EEST | INFO     | V3_SR | 🔨 Building V3 zones for MYXUSDT...
+2025-10-21 05:05:53 EEST | INFO     | V3_SR | ✅ MYXUSDT zones built: {'1d': 4, '4h': 15, '1h': 15, '15m': 13}
+2025-10-21 05:05:53 EEST | INFO     | V3_SR |   📊 MYXUSDT 15m Flip-Retest check: 10 strong zones (min strength: 60)
+2025-10-21 05:05:53 EEST | INFO     | V3_SR |   📊 MYXUSDT 15m Sweep-Return check: 10 strong zones (min strength: 60)
+2025-10-21 05:05:53 EEST | INFO     | V3_SR |   📊 MYXUSDT 1h Flip-Retest check: 7 strong zones (min strength: 60)
+2025-10-21 05:05:53 EEST | INFO     | V3_SR |   📊 MYXUSDT 1h Sweep-Return check: 7 strong zones (min strength: 60)
+2025-10-21 05:05:53 EEST | INFO     | trading_bot | 🔄 Binance counter reset: 14→1, cleared pending=2
+2025-10-21 05:05:53 EEST | ERROR    | V3_SR | Error checking V3 SR signal 1: can't compare offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 99, in _check_signal
+    if await self._check_validity_timeout(signal):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 177, in _check_validity_timeout
+    return now >= signal.valid_until_ts
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: can't compare offset-naive and offset-aware datetimes
+2025-10-21 05:05:54 EEST | INFO     | V3_SR | 🔍 Analyzing JTOUSDT | Regime: TREND
+2025-10-21 05:05:54 EEST | INFO     | V3_SR | 🔨 Building V3 zones for JTOUSDT...
+2025-10-21 05:05:58 EEST | INFO     | V3_SR | ✅ JTOUSDT zones built: {'1d': 4, '4h': 15, '1h': 14, '15m': 18}
+2025-10-21 05:05:58 EEST | INFO     | V3_SR |   📊 JTOUSDT 15m Flip-Retest check: 8 strong zones (min strength: 60)
+2025-10-21 05:05:58 EEST | INFO     | V3_SR |   📊 JTOUSDT 15m Sweep-Return check: 8 strong zones (min strength: 60)
+2025-10-21 05:05:58 EEST | INFO     | V3_SR |   📊 JTOUSDT 1h Flip-Retest check: 5 strong zones (min strength: 60)
+2025-10-21 05:05:58 EEST | INFO     | V3_SR |   📊 JTOUSDT 1h Sweep-Return check: 5 strong zones (min strength: 60)
+2025-10-21 05:05:58 EEST | INFO     | 🎯 AP TP1 hit: IOUSDT body_cross at 0.3285593945510308, SL moved to breakeven 0.33161793
+2025-10-21 05:05:58 EEST | ERROR    | V3_SR | Error checking V3 SR signal 4: can't compare offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 99, in _check_signal
+    if await self._check_validity_timeout(signal):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 177, in _check_validity_timeout
+    return now >= signal.valid_until_ts
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: can't compare offset-naive and offset-aware datetimes
+2025-10-21 05:05:58 EEST | INFO     | V3_SR | 🔍 Analyzing B2USDT | Regime: TREND
+2025-10-21 05:05:58 EEST | INFO     | V3_SR | 🔨 Building V3 zones for B2USDT...
+2025-10-21 05:06:00 EEST | INFO     | V3_SR | ✅ B2USDT zones built: {'1d': 2, '4h': 13, '1h': 10, '15m': 4}
+2025-10-21 05:06:00 EEST | INFO     | V3_SR |   📊 B2USDT 15m Flip-Retest check: 5 strong zones (min strength: 60)
+2025-10-21 05:06:00 EEST | INFO     | V3_SR |   📊 B2USDT 15m Sweep-Return check: 5 strong zones (min strength: 60)
+2025-10-21 05:06:00 EEST | INFO     | V3_SR |   📊 B2USDT 1h Flip-Retest check: 8 strong zones (min strength: 60)
+2025-10-21 05:06:00 EEST | INFO     | V3_SR |   📊 B2USDT 1h Sweep-Return check: 8 strong zones (min strength: 60)
+2025-10-21 05:06:00 EEST | ERROR    | V3_SR | Error checking V3 SR signal 2: can't compare offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 99, in _check_signal
+    if await self._check_validity_timeout(signal):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 177, in _check_validity_timeout
+    return now >= signal.valid_until_ts
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: can't compare offset-naive and offset-aware datetimes
+2025-10-21 05:06:00 EEST | INFO     | trading_bot | 🔄 Binance counter reset: 6→5, cleared pending=1
+2025-10-21 05:06:00 EEST | INFO     | V3_SR | 🔍 Analyzing ZKCUSDT | Regime: TREND
+2025-10-21 05:06:00 EEST | INFO     | V3_SR | 🔨 Building V3 zones for ZKCUSDT...
+2025-10-21 05:06:04 EEST | INFO     | V3_SR | ✅ ZKCUSDT zones built: {'1d': 0, '4h': 7, '1h': 19, '15m': 19}
+2025-10-21 05:06:04 EEST | INFO     | V3_SR |   📊 ZKCUSDT 15m Flip-Retest check: 7 strong zones (min strength: 60)
+2025-10-21 05:06:04 EEST | INFO     | V3_SR |   📊 ZKCUSDT 15m Sweep-Return check: 7 strong zones (min strength: 60)
+2025-10-21 05:06:04 EEST | INFO     | V3_SR |   🎯 ZKCUSDT 15m LONG: Building Sweep-Return signal!
+2025-10-21 05:06:04 EEST | INFO     | V3_SR | 🚀 SWEEP-RETURN SIGNAL CREATED: ZKCUSDT LONG 15m | Entry: 0.2447 | SL: 0.2366 | TP1: 0.2528 | TP2: 0.2609 | Conf: 70.0%
+2025-10-21 05:06:04 EEST | INFO     | V3_SR | ✅ V3 signal saved to DB: ZKCUSDT LONG
+2025-10-21 05:06:04 EEST | ERROR    | V3_SR | Error sending V3 Telegram: 'TelegramBot' object has no attribute 'send_signal_alert'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 2063, in _send_v3_sr_telegram
+    await self.telegram_bot.send_signal_alert(message)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TelegramBot' object has no attribute 'send_signal_alert'
+2025-10-21 05:06:04 EEST | INFO     | V3_SR | 🔷 V3 Signal: ZKCUSDT LONG SweepReturn @ 0.2447 (Confidence: 70.0%)
+2025-10-21 05:06:04 EEST | ERROR    | V3_SR | Error checking V3 SR signal 3: can't compare offset-naive and offset-aware datetimes
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 99, in _check_signal
+    if await self._check_validity_timeout(signal):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\performance_tracker.py", line 177, in _check_validity_timeout
+    return now >= signal.valid_until_ts
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: can't compare offset-naive and offset-aware datetimes
+2025-10-21 05:06:04 EEST | INFO     | V3_SR | 🔍 Analyzing HANAUSDT | Regime: TREND
+2025-10-21 05:06:04 EEST | INFO     | V3_SR | 🔨 Building V3 zones for HANAUSDT...
+2025-10-21 05:06:06 EEST | INFO     | V3_SR | ✅ HANAUSDT zones built: {'1d': 0, '4h': 6, '1h': 9, '15m': 4}
+2025-10-21 05:06:06 EEST | INFO     | V3_SR |   📊 HANAUSDT 15m Flip-Retest check: 3 strong zones (min strength: 60)
+2025-10-21 05:06:06 EEST | INFO     | V3_SR |   📊 HANAUSDT 15m Sweep-Return check: 3 strong zones (min strength: 60)
+2025-10-21 05:06:06 EEST | INFO     | V3_SR |   📊 HANAUSDT 1h Flip-Retest check: 6 strong zones (min strength: 60)
+2025-10-21 05:06:06 EEST | INFO     | V3_SR |   📊 HANAUSDT 1h Sweep-Return check: 6 strong zones (min strength: 60)
+2025-10-21 05:06:06 EEST | INFO     | V3_SR |   🎯 HANAUSDT 1h SHORT: Building Sweep-Return signal!
+2025-10-21 05:06:06 EEST | INFO     | V3_SR | 🚀 SWEEP-RETURN SIGNAL CREATED: HANAUSDT SHORT 1h | Entry: 0.0596 | SL: 0.0604 | TP1: 0.0589 | TP2: 0.0581 | Conf: 70.0%
+2025-10-21 05:06:06 EEST | INFO     | V3_SR | ✅ V3 signal saved to DB: HANAUSDT SHORT
+2025-10-21 05:06:06 EEST | ERROR    | V3_SR | Error sending V3 Telegram: 'TelegramBot' object has no attribute 'send_signal_alert'
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 2063, in _send_v3_sr_telegram
+    await self.telegram_bot.send_signal_alert(message)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TelegramBot' object has no attribute 'send_signal_alert'
+2025-10-21 05:06:06 EEST | INFO     | V3_SR | 🔷 V3 Signal: HANAUSDT SHORT SweepReturn @ 0.0596 (Confidence: 70.0%)
+2025-10-21 05:06:06 EEST | INFO     | trading_bot | 🔄 Binance counter reset: 8→1, cleared pending=1
+2025-10-21 05:06:06 EEST | INFO     | V3_SR | 🔍 Analyzing ETHFIUSDT | Regime: TREND
+2025-10-21 05:06:06 EEST | INFO     | V3_SR | 🔨 Building V3 zones for ETHFIUSDT...
+2025-10-21 05:06:09 EEST | INFO     | V3_SR | ✅ ETHFIUSDT zones built: {'1d': 3, '4h': 16, '1h': 13, '15m': 9}
+2025-10-21 05:06:09 EEST | INFO     | V3_SR |   📊 ETHFIUSDT 15m Flip-Retest check: 8 strong zones (min strength: 60)
+2025-10-21 05:06:09 EEST | INFO     | V3_SR |   📊 ETHFIUSDT 15m Sweep-Return check: 8 strong zones (min strength: 60)
+2025-10-21 05:06:09 EEST | INFO     | V3_SR |   📊 ETHFIUSDT 1h Flip-Retest check: 7 strong zones (min strength: 60)
+2025-10-21 05:06:09 EEST | INFO     | V3_SR |   📊 ETHFIUSDT 1h Sweep-Return check: 7 strong zones (min strength: 6
