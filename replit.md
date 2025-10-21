@@ -95,6 +95,7 @@ When user shares logs or reports errors:
 - **Unique Index**: Composite unique index on (symbol, timeframe, open_time) prevents duplicates at database level.
 - **Migration**: Safe migration script removes duplicates and creates index without data loss.
 - **Performance Impact**: 8639 candles now save in ~1 second (previously 3 minutes).
+- **Gap Detection Fix (October 2025)**: Fixed "Saved 0 klines" issue by using current candle start time instead of current_time when creating gaps. Eliminates ~600 empty API requests per restart (~3 min saved).
 
 ### Strategy Execution Optimization
 - **Parallel Strategy Checks**: Regular strategies execute in parallel batches using asyncio.gather.

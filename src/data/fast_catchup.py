@@ -113,6 +113,52 @@ class FastCatchupLoader:
         # Если последняя свеча >= начала текущей свечи, данные свежие
         return last_candle_time >= current_candle_start
     
+    def _get_current_candle_start(self, current_time: datetime, interval: str) -> datetime:
+        """
+        Получить начало текущей (незакрытой) свечи
+        
+        Это время последней ЗАКРЫТОЙ свечи, которую можно запросить у Binance.
+        
+        Args:
+            current_time: Текущее время (UTC)
+            interval: Таймфрейм (15m, 1h, 4h, 1d)
+        
+        Returns:
+            Время начала текущей свечи
+        
+        Example:
+            Сейчас 23:51, interval=1h:
+            - Текущая свеча: 23:00-00:00 (еще не закрылась)
+            - Вернет: 23:00 (последняя доступная для загрузки)
+        """
+        interval_minutes = {
+            '15m': 15,
+            '1h': 60,
+            '4h': 240,
+            '1d': 1440
+        }.get(interval, 15)
+        
+        # Для дневного таймфрейма
+        if interval == '1d':
+            current_day_start = datetime(
+                current_time.year, current_time.month, current_time.day,
+                0, 0, 0, tzinfo=pytz.UTC
+            )
+            # Сегодняшняя свеча еще не закрылась, вернуть вчерашний день
+            return current_day_start - timedelta(days=1)
+        
+        # Для внутридневных таймфреймов
+        minutes_since_midnight = current_time.hour * 60 + current_time.minute
+        candles_since_midnight = minutes_since_midnight // interval_minutes
+        current_candle_start_minutes = candles_since_midnight * interval_minutes
+        
+        return current_time.replace(
+            hour=current_candle_start_minutes // 60,
+            minute=current_candle_start_minutes % 60,
+            second=0,
+            microsecond=0
+        )
+    
     def _calculate_symbol_gaps(self, symbol: str, current_time: datetime) -> Dict[str, Dict]:
         """
         Рассчитать gaps для одного символа
@@ -120,6 +166,7 @@ class FastCatchupLoader:
         ОПТИМИЗАЦИЯ: Проверяет свежесть данных ПЕРЕД определением gap.
         - Если данные свежие → gap не создается (пропуск запроса к Binance)
         - Если устарели → создается gap только для недостающих свечей
+        - Gap end = начало текущей свечи (последняя закрытая), НЕ current_time
         
         Returns:
             Dict[timeframe, {'start': datetime, 'end': datetime, 'candles_needed': int}]
@@ -138,13 +185,17 @@ class FastCatchupLoader:
                 # Данные устарели - создаем gap
                 expected_next = self._get_next_candle_time(last_candle_time, tf)
                 
-                if expected_next < current_time:
-                    # Есть gap
-                    candles_needed = self._estimate_candles_needed(expected_next, current_time, tf)
+                # ✅ FIX: Использовать начало текущей свечи, а не current_time
+                # Текущая свеча еще не закрылась, Binance её не вернет
+                current_candle_start = self._get_current_candle_start(current_time, tf)
+                
+                if expected_next < current_candle_start:
+                    # Есть gap между последней свечой и началом текущей
+                    candles_needed = self._estimate_candles_needed(expected_next, current_candle_start, tf)
                     
                     gaps[tf] = {
                         'start': expected_next,
-                        'end': current_time,
+                        'end': current_candle_start,  # ✅ Начало текущей свечи, НЕ current_time
                         'candles_needed': candles_needed,
                         'last_candle': last_candle_time
                     }
