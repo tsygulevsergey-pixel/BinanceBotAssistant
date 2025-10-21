@@ -7,19 +7,28 @@ import sqlite3
 import json
 import os
 
-# Путь к БД относительно корня проекта
-DB_PATH = os.path.join(os.path.dirname(__file__), "data", "trading_bot.db")
-OUTPUT_FILE = os.path.join(os.path.dirname(__file__), "v3_signals_export.json")
+# Путь к БД - ЯВНО прописываем data/
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(SCRIPT_DIR, "data", "trading_bot.db")
+OUTPUT_FILE = os.path.join(SCRIPT_DIR, "v3_signals_export.json")
 
 def export_to_json():
     """Export all V3 S/R signals to JSON file"""
+    
+    print(f"Script dir: {SCRIPT_DIR}")
+    print(f"БД: {DB_PATH}")
+    print(f"Проверка существования БД: {os.path.exists(DB_PATH)}")
+    print()
+    
+    if not os.path.exists(DB_PATH):
+        print(f"❌ Файл БД не найден: {DB_PATH}")
+        print("Проверьте что БД находится в папке data/")
+        return
     
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        
-        print(f"БД: {DB_PATH}")
         
         cursor.execute("SELECT * FROM v3_sr_signals ORDER BY created_at DESC")
         rows = cursor.fetchall()
@@ -46,6 +55,8 @@ def export_to_json():
         
     except Exception as e:
         print(f"❌ Ошибка: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     export_to_json()
