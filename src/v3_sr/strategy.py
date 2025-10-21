@@ -1028,7 +1028,7 @@ class SRZonesV3Strategy:
         session = self.db.get_session()
         try:
             # Generate unique event ID (convert bar timestamp to datetime)
-            bar_timestamp = pd.Timestamp(bar_data.name, tz='UTC').to_pydatetime()
+            bar_timestamp = pd.Timestamp(bar_data.name, tz='UTC').floor('S').to_pydatetime()
             zone_id = zone.get('id', 'unknown')
             event_id = generate_zone_event_id(zone_id, event_type, bar_timestamp)
             
@@ -1076,7 +1076,7 @@ class SRZonesV3Strategy:
                 zone_high=zone_high,
                 zone_strength=zone.get('strength', 0),
                 event_type=event_type,
-                bar_timestamp=pd.Timestamp(bar_data.name, tz='UTC').to_pydatetime(),
+                bar_timestamp=bar_timestamp,
                 touch_price=touch_price,
                 side=side,
                 penetration_depth_atr=penetration_depth_atr,
