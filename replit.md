@@ -4,6 +4,41 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot engineer
 
 ## Recent Changes (October 21, 2025)
 
+### 🎯 V3 ZONE QUALITY FILTERS: Professional Noise Reduction ✅ IMPLEMENTED
+
+**Advanced Zone Filtering System** (`src/utils/sr_zones_v3/zone_filters.py`):
+Inserted between DBSCAN clustering [step 2] and reaction validation [step 3] to eliminate noisy/weak zones.
+
+**Three-Stage Filter Pipeline:**
+1. **Outlier Removal** (z-score > 3.0):
+   - Removes anomalous price touches from clusters
+   - Recalculates cluster boundaries after outlier removal
+   - Ensures zone represents genuine price action, not spikes
+
+2. **Width Guards** (TF-specific constraints):
+   - **15m**: width ≤ min(0.9×ATR, 0.8%×price, 0.25×rolling_range)
+   - **1H**: width ≤ min(1.2×ATR, 1.2%×price, 0.30×rolling_range)
+   - **4H**: width ≤ min(1.6×ATR, 1.8%×price, 0.35×rolling_range)
+   - **1D**: width ≤ min(2.0×ATR, 2.5%×price, 0.40×rolling_range)
+   - **Shrinking**: If too wide → shrink to Q15-Q85 percentiles
+   - **Splitting**: If still too wide → split by KDE local minimum (gap ≥ 0.6×ATR between peaks)
+
+3. **KDE Prominence Check** (significance threshold ≥ 0.25):
+   - Builds Kernel Density Estimation for cluster prices
+   - Requires peak prominence ≥ 25% of max density
+   - Drops flat/noisy clusters with no clear price concentration
+   - Uses scipy.signal.find_peaks for professional peak detection
+
+**Integration Points:**
+- `SRZonesV3Builder._cluster_to_zones()`: Creates `ZoneQualityFilter`, applies all filters to clusters before zone creation
+- Shared across both V3 S/R Strategy and Break & Retest Strategy (via `V3ZonesProvider`)
+- **Result**: Only high-quality zones with clear price structure proceed to reaction validation
+
+**Impact:**
+- Eliminates "bloated" zones spanning multiple genuine S/R levels
+- Removes noise clusters from choppy/ranging markets
+- Ensures zones represent significant institutional levels, not random swing points
+
 ### 🔗 V3 ZONES INTEGRATION: Break & Retest Strategy ✅ IMPLEMENTED
 
 **Professional S/R Zones for Break & Retest:**

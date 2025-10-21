@@ -4,12 +4,14 @@ Builds multi-timeframe zones using professional methodology
 
 Pipeline:
 1. Find fractal swings (по каждому TF)
-2. Cluster swings → zones (DBSCAN)
-3. Validate reactions
-4. Calculate scores
-5. Detect flips (R⇄S)
-6. Merge multi-TF zones
-7. Filter by strength & proximity
+2. DBSCAN clustering
+3. 🆕 Zone quality filters (outliers, width guards, KDE prominence)
+4. Create zones from filtered clusters
+5. Validate reactions
+6. Calculate scores
+7. Detect flips (R⇄S)
+8. Merge multi-TF zones
+9. Filter by strength & proximity
 """
 
 import pandas as pd
@@ -22,6 +24,7 @@ from .clustering import ZoneClusterer
 from .validation import ReactionValidator
 from .scoring import ZoneScorer
 from .flip import FlipDetector
+from .zone_filters import ZoneQualityFilter
 
 
 class SRZonesV3Builder:
@@ -131,11 +134,13 @@ class SRZonesV3Builder:
         Построить зоны для одного таймфрейма
         
         Pipeline:
-        1. Find swings
-        2. Cluster → zones
-        3. Validate reactions
-        4. Score zones (с HTF confluence и VWAP)
-        5. Detect flips
+        1. Find fractal swings
+        2. DBSCAN clustering
+        3. 🆕 Zone quality filters (outliers, width guards, KDE prominence)
+        4. Create zones from filtered clusters
+        5. Validate reactions
+        6. Score zones (с HTF confluence и VWAP)
+        7. Detect flips
         
         Args:
             tf: Timeframe ('15m', '1h', '4h', '1d')
@@ -158,12 +163,12 @@ class SRZonesV3Builder:
         if not swings['highs'] and not swings['lows']:
             return []
         
-        # 2. Cluster swings
+        # 2. Cluster swings → zones (with quality filters)
         zones_supply = self._cluster_to_zones(
-            swings['highs'], tf, current_atr, current_price, kind='R'
+            swings['highs'], tf, current_atr, current_price, df, kind='R'
         )
         zones_demand = self._cluster_to_zones(
-            swings['lows'], tf, current_atr, current_price, kind='S'
+            swings['lows'], tf, current_atr, current_price, df, kind='S'
         )
         
         all_zones = zones_supply + zones_demand
@@ -275,9 +280,23 @@ class SRZonesV3Builder:
                          tf: str,
                          atr: float,
                          current_price: float,
+                         df: pd.DataFrame,
                          kind: str) -> List[Dict]:
         """
-        Кластеризовать swing точки в зоны
+        Кластеризовать swing точки в зоны с профессиональной фильтрацией
+        
+        Pipeline:
+        1. DBSCAN clustering
+        2. Quality filters (outliers, width guards, KDE prominence) ← NEW
+        3. Create zones from filtered clusters
+        
+        Args:
+            swing_prices: Список цен свингов
+            tf: Таймфрейм
+            atr: ATR для этого TF
+            current_price: Текущая цена
+            df: OHLC DataFrame для расчета rolling range
+            kind: 'R' (resistance) или 'S' (support)
         
         Returns:
             Список зон с полями 'tf', 'kind', 'low', 'high', 'mid', ...
@@ -285,9 +304,21 @@ class SRZonesV3Builder:
         if not swing_prices:
             return []
         
-        # Cluster
+        # [1] DBSCAN Clustering
         clusters = self.clusterer.cluster_swings(swing_prices, atr)
         
+        if not clusters:
+            return []
+        
+        # [2] 🆕 ZONE QUALITY FILTERS (NEW STEP)
+        # Apply professional filtering: outliers → width guards → KDE prominence
+        zone_filter = ZoneQualityFilter(tf, atr, df)
+        clusters_filtered = zone_filter.apply_all_filters(clusters)
+        
+        if not clusters_filtered:
+            return []  # All clusters filtered out
+        
+        # [3] Create zones from filtered clusters
         # Get width parameters for TF
         width_cfg = get_config('zone_width', tf)
         if not width_cfg:
@@ -295,9 +326,8 @@ class SRZonesV3Builder:
         
         min_width_pct = self.config['zone_width']['min_pct']
         
-        # Create zones
         zones = self.clusterer.create_zones_from_clusters(
-            clusters, atr,
+            clusters_filtered, atr,
             width_min=width_cfg['min'],
             width_max=width_cfg['max'],
             min_width_pct=min_width_pct,
