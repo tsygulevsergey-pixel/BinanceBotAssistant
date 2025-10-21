@@ -790,6 +790,22 @@ class SRZonesV3Strategy:
         tp1_price = round_price_to_tick(tp1_price, tick_size)
         tp2_price = round_price_to_tick(tp2_price, tick_size)
         
+        # ✅ FIX: Ensure TP1 != SL after rounding (prevents invalid signals)
+        if tp1_price == sl_price:
+            if direction == 'LONG':
+                tp1_price = sl_price + tick_size
+            else:
+                tp1_price = sl_price - tick_size
+            logger.warning(f"⚠️ {symbol} {direction}: TP1 rounded to SL, adjusted by 1 tick to {tp1_price}")
+        
+        # ✅ FIX: Ensure SL != Entry after rounding (safety check)
+        if entry_price == sl_price:
+            if direction == 'LONG':
+                sl_price = entry_price - tick_size
+            else:
+                sl_price = entry_price + tick_size
+            logger.warning(f"⚠️ {symbol} {direction}: SL rounded to Entry, adjusted by 1 tick to {sl_price}")
+        
         return entry_price, sl_price, tp1_price, tp2_price
     
     def _calculate_confidence(self, zone: dict, direction: str, indicators: dict,
