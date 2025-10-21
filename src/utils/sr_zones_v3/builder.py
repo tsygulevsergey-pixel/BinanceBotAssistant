@@ -57,10 +57,10 @@ class SRZonesV3Builder:
     
     def build_zones(self,
                    symbol: str,
-                   df_1d: pd.DataFrame,
-                   df_4h: pd.DataFrame,
-                   df_1h: pd.DataFrame,
-                   df_15m: pd.DataFrame,
+                   df_1d: Optional[pd.DataFrame],
+                   df_4h: Optional[pd.DataFrame],
+                   df_1h: Optional[pd.DataFrame],
+                   df_15m: Optional[pd.DataFrame],
                    current_price: float,
                    ema200_15m: Optional[pd.Series] = None) -> Dict[str, List[Dict]]:
         """

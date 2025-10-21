@@ -147,7 +147,8 @@ class SRZonesV3Strategy:
         """
         try:
             # Get current price
-            current_price = dfs.get('15m')['close'].iloc[-1] if '15m' in dfs and len(dfs['15m']) > 0 else None
+            df_15m = dfs.get('15m')
+            current_price = df_15m['close'].iloc[-1] if df_15m is not None and len(df_15m) > 0 else None
             if current_price is None:
                 logger.error(f"❌ {symbol}: No 15m data for current price")
                 return {}
@@ -331,7 +332,7 @@ class SRZonesV3Strategy:
                                 # Build signal (pass signal_id for zone event linking later)
                                 signal = await self._build_flip_retest_signal(
                                     symbol, entry_tf, df, zone, 'LONG',
-                                    market_regime, indicators, atr
+                                    market_regime, indicators, atr, zones
                                 )
                                 
                                 return signal
@@ -425,7 +426,7 @@ class SRZonesV3Strategy:
                                 
                                 signal = await self._build_flip_retest_signal(
                                     symbol, entry_tf, df, zone, 'SHORT',
-                                    market_regime, indicators, atr
+                                    market_regime, indicators, atr, zones
                                 )
                                 
                                 return signal
@@ -557,7 +558,7 @@ class SRZonesV3Strategy:
                             # Build signal
                             return await self._build_sweep_return_signal(
                                 symbol, entry_tf, df, zone, 'LONG',
-                                market_regime, indicators, atr, sweep_idx, is_a_grade
+                                market_regime, indicators, atr, sweep_idx, is_a_grade, zones
                             )
             
             # Check for SHORT setup (Resistance sweep)
@@ -619,7 +620,7 @@ class SRZonesV3Strategy:
                             
                             return await self._build_sweep_return_signal(
                                 symbol, entry_tf, df, zone, 'SHORT',
-                                market_regime, indicators, atr, sweep_idx, is_a_grade
+                                market_regime, indicators, atr, sweep_idx, is_a_grade, zones
                             )
         
         return None
@@ -694,11 +695,11 @@ class SRZonesV3Strategy:
     
     async def _build_flip_retest_signal(self, symbol: str, entry_tf: str, df: pd.DataFrame,
                                        zone: dict, direction: str, market_regime: str,
-                                       indicators: dict, atr: float) -> Dict:
+                                       indicators: dict, atr: float, all_zones: Dict[str, List[Dict]]) -> Optional[Dict]:
         """Build Flip-Retest signal"""
         # Calculate entry, SL, TP
         entry_price, sl_price, tp1_price, tp2_price = await self._calculate_levels(
-            symbol, df, zone, direction, atr, 'FlipRetest'
+            symbol, df, zone, direction, atr, 'FlipRetest', all_zones
         )
         
         # Calculate confidence
@@ -712,10 +713,10 @@ class SRZonesV3Strategy:
             logger.debug(f"V3 SR FlipRetest {symbol} confidence {confidence} < {min_conf}")
             return None
         
-        # Find nearest zones for context
+        # Find nearest zones for context using V3ZonesProvider
         current_price = df['close'].iloc[-1]
-        nearest_support = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'below', 'S')
-        nearest_resistance = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'above', 'R')
+        nearest_support = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'below')
+        nearest_resistance = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'above')
         
         # Generate signal
         signal_data = {
@@ -743,11 +744,11 @@ class SRZonesV3Strategy:
     async def _build_sweep_return_signal(self, symbol: str, entry_tf: str, df: pd.DataFrame,
                                         zone: dict, direction: str, market_regime: str,
                                         indicators: dict, atr: float, sweep_idx: int,
-                                        is_a_grade: bool) -> Dict:
+                                        is_a_grade: bool, all_zones: Dict[str, List[Dict]]) -> Optional[Dict]:
         """Build Sweep-Return signal"""
         # Similar to flip-retest but with sweep-specific params
         entry_price, sl_price, tp1_price, tp2_price = await self._calculate_levels(
-            symbol, df, zone, direction, atr, 'SweepReturn', sweep_idx
+            symbol, df, zone, direction, atr, 'SweepReturn', all_zones, sweep_idx
         )
         
         confidence, quality_tags = self._calculate_confidence(
@@ -758,9 +759,10 @@ class SRZonesV3Strategy:
         if confidence < min_conf:
             return None
         
+        # Find nearest zones for context using V3ZonesProvider
         current_price = df['close'].iloc[-1]
-        nearest_support = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'below', 'S')
-        nearest_resistance = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'above', 'R')
+        nearest_support = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'below')
+        nearest_resistance = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'above')
         
         signal_data = {
             'setup_type': 'SweepReturn',
@@ -788,6 +790,7 @@ class SRZonesV3Strategy:
     
     async def _calculate_levels(self, symbol: str, df: pd.DataFrame, zone: dict,
                                 direction: str, atr: float, setup_type: str,
+                                all_zones: Dict[str, List[Dict]],
                                 sweep_idx: Optional[int] = None) -> Tuple[float, float, float, float]:
         """
         Calculate entry, SL, TP1, TP2 levels
@@ -839,15 +842,15 @@ class SRZonesV3Strategy:
             else:
                 tp1_price = entry_price - (risk_r * 1.0)
         else:  # nearest_local_zone
-            # Find nearest zone in direction
+            # Find nearest zone in direction using V3ZonesProvider
             if direction == 'LONG':
-                nearest = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'above')
+                nearest = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'above')
                 if nearest:
                     tp1_price = nearest['low']
                 else:
                     tp1_price = entry_price + (risk_r * 1.0)
             else:
-                nearest = find_nearest_zone(current_price, self.zone_cache.get(symbol, {}).get('all', []), 'below')
+                nearest = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'below')
                 if nearest:
                     tp1_price = nearest['high']
                 else:
