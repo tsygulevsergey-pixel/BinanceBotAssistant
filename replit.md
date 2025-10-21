@@ -87,7 +87,10 @@ Loads configurations, connects to Binance, processes data in parallel, and launc
 - **Architecture**: Dedicated database tables (`v3_sr_signals`, `v3_sr_zone_events`, `v3_sr_signal_locks`), independent performance tracking with virtual partial exits and MFE/MAE tracking, and a comprehensive signal scoring system based on zone quality.
 - **Key Features**: VWAP Bias Filter, A-grade Exception, Zone Context, Market Regime Filtering, Adaptive SL/TP, and multi-timeframe analysis (15m/1H entry, 4H/1D context).
 - **V3 Zones Infrastructure**: Utilizes DBSCAN-based clustering, reaction strength validation, and an optimized scoring system considering touches, reactions, freshness, confluence, and noise penalty. Includes adaptive fractal swing detection and volatility-based zone width.
-- **Zone Quality Filters & Purity Gate**: Two-stage advanced filtering system with `Zone Quality Filters` (Outlier Removal, Width Guards, KDE Prominence Check) and `Purity & Freshness Gate` (Purity Check, Freshness Check) to ensure only high-quality, respected, and recently tested zones are used.
+- **Zone Quality Filters & Purity Gate**: Two-stage advanced filtering system:
+  - **Stage 1 - Zone Quality Filters** (after clustering, before validation): Outlier Removal (z-score), Width Guards (shrink/split), KDE Prominence Check
+  - **Stage 2 - Purity & Freshness Gate** (BEFORE reaction validation): Purity Check (bars inside < 35%), Freshness Check (last touch age)
+  - **CRITICAL FIX**: Purity gate runs BEFORE validation because it may shrink/split zones → validation uses FINAL boundaries → prevents metadata corruption
 - **V3 Zones Integration**: Break & Retest strategy now uses V3 professional S/R zones with a `Shared Zones Provider` for efficient caching, leading to enhanced retest zone detection and score bonuses for high-grade zones.
 
 # External Dependencies

@@ -7,12 +7,14 @@ Pipeline:
 2. DBSCAN clustering
 3. Zone quality filters (outliers, width guards, KDE prominence)
 4. Create zones from filtered clusters
-5. Validate reactions
-6. 🆕 Purity & Freshness gate (bars inside < 35%, last touch age)
-7. Calculate scores
-8. Detect flips (R⇄S)
-9. Merge multi-TF zones
-10. Filter by strength & proximity
+5. Add initial zone IDs
+6. Purity check (bars inside < 35%) - may shrink/split zones
+7. Validate reactions (with FINAL zone boundaries)
+8. Freshness check (last touch age) - requires validation metadata
+9. Calculate scores (with boundary-consistent touches)
+10. Detect flips (R⇄S)
+11. Merge multi-TF zones
+12. Filter by strength & proximity
 """
 
 import pandas as pd
@@ -140,10 +142,12 @@ class SRZonesV3Builder:
         2. DBSCAN clustering
         3. Zone quality filters (outliers, width guards, KDE prominence)
         4. Create zones from filtered clusters
-        5. Validate reactions
-        6. 🆕 Purity & Freshness gate (bars inside, last touch age)
-        7. Score zones (с HTF confluence и VWAP)
-        8. Detect flips
+        5. Add initial zone IDs
+        6. Purity check (may shrink/split zones) - BEFORE validation
+        7. Validate reactions (with FINAL boundaries after purity check)
+        8. Freshness check (requires validation metadata) - AFTER validation
+        9. Score zones (with boundary-consistent touches data)
+        10. Detect flips
         
         Args:
             tf: Timeframe ('15m', '1h', '4h', '1d')
@@ -179,7 +183,24 @@ class SRZonesV3Builder:
         # 3. Calculate VWAP для confluence
         vwap = self._calculate_vwap(df)
         
-        # 4. Validate reactions (FIRST PASS - add touches data)
+        # 4. Add zone IDs and TF metadata (before any filtering)
+        for zone in all_zones:
+            zone['tf'] = tf
+            zone_mid = zone['mid']
+            zone_kind = zone['kind']
+            # Generate initial zone ID (may be regenerated after purity gate)
+            zone['id'] = f"{tf}_{zone_kind}_{int(zone_mid * 100000)}"
+        
+        # 5. 🆕 PURITY CHECK (before reaction validation)
+        # IMPORTANT: This may shrink/split zones, changing boundaries
+        # Note: Only PURITY check here, freshness comes after validation
+        purity_gate = PurityFreshnessGate(tf)
+        all_zones = purity_gate.apply_purity_only(all_zones, df, current_atr)
+        
+        if not all_zones:
+            return []  # All zones filtered out by purity
+        
+        # 6. Validate reactions (AFTER purity check, with final zone boundaries)
         current_time = df.index[-1].to_pydatetime() if isinstance(df.index[-1], pd.Timestamp) else datetime.now()
         bars_window = get_config('reaction.bars_window', tf, default=8)
         validator = ReactionValidator(
@@ -187,18 +208,17 @@ class SRZonesV3Builder:
             bars_window=bars_window
         )
         
-        # Store touches data for each zone
+        # Store touches data for each zone (with FINAL boundaries)
         zone_touches_map = {}
         
         for zone in all_zones:
-            # Generate unique zone ID
+            # Regenerate unique zone ID based on FINAL boundaries
             zone_mid = zone['mid']
             zone_kind = zone['kind']
-            zone_id = f"{tf}_{zone_kind}_{int(zone_mid * 100000)}"  # e.g., "15m_R_123456"
+            zone_id = f"{tf}_{zone_kind}_{int(zone_mid * 100000)}"
             zone['id'] = zone_id
-            zone['tf'] = tf
             
-            # Find touches
+            # Find touches for FINAL zone boundaries
             touches = validator.find_zone_touches(df, zone, atr_series)
             zone['touches'] = len([t for t in touches if t['valid']])
             zone['all_touches'] = len(touches)
@@ -213,15 +233,15 @@ class SRZonesV3Builder:
             # Store for scoring later
             zone_touches_map[zone_id] = touches
         
-        # 5. 🆕 PURITY & FRESHNESS GATE (NEW STEP)
-        # Filter zones by purity (bars inside) and freshness (last touch age)
-        purity_gate = PurityFreshnessGate(tf)
-        all_zones = purity_gate.filter_zones(all_zones, df, current_atr)
+        # 7. 🆕 FRESHNESS CHECK (after validation, with metadata)
+        # Now zones have last_touch_ts and class populated
+        freshness_gate = PurityFreshnessGate(tf)
+        all_zones = freshness_gate.apply_freshness_only(all_zones, df)
         
         if not all_zones:
-            return []  # All zones filtered out
+            return []  # All zones filtered out by freshness
         
-        # 6. Score zones (SECOND PASS - only for zones that passed purity/freshness)
+        # 8. Score zones (with boundary-consistent touches data)
         tau_days = get_config('freshness.tau_days', tf, default=10)
         
         for i, zone in enumerate(all_zones):

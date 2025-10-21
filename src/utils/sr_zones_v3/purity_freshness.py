@@ -35,20 +35,68 @@ class PurityFreshnessGate:
     
     def __init__(self,
                  tf: str,
-                 purity_threshold: float = 0.65,
-                 min_class_for_stale: str = 'normal'):
+                 purity_threshold: float = 0.65):
         """
         Args:
             tf: Timeframe ('15m', '1h', '4h', '1d')
             purity_threshold: Minimum purity ratio (default: 0.65 = 35% bars inside max)
-            min_class_for_stale: Minimum class to keep stale zones (default: 'normal')
         """
         self.tf = tf
         self.purity_threshold = purity_threshold
-        self.min_class_for_stale = min_class_for_stale
         
         # Get freshness threshold for this TF
         self.freshness_threshold = FRESHNESS_THRESHOLDS.get(tf, 200)
+    
+    def apply_purity_only(self,
+                         zones: List[Dict],
+                         df: pd.DataFrame,
+                         atr: float) -> List[Dict]:
+        """
+        Apply ONLY purity filter (before validation)
+        
+        Purity check does not require validation metadata.
+        
+        Args:
+            zones: List of zones WITHOUT validation data
+            df: OHLC DataFrame for purity calculation
+            atr: Current ATR for split operations
+        
+        Returns:
+            Filtered zones (some may be modified, dropped, or split)
+        """
+        if not zones:
+            return []
+        
+        # Apply purity filter (may create new zones via split)
+        zones_purity_filtered = []
+        for zone in zones:
+            filtered = self._apply_purity_check(zone, df, atr)
+            zones_purity_filtered.extend(filtered)  # May return 0, 1, or 2+ zones
+        
+        return zones_purity_filtered
+    
+    def apply_freshness_only(self,
+                            zones: List[Dict],
+                            df: pd.DataFrame) -> List[Dict]:
+        """
+        Apply ONLY freshness filter (after validation)
+        
+        Freshness check requires validation metadata (last_touch_ts, class).
+        
+        Args:
+            zones: List of zones WITH validation data
+            df: OHLC DataFrame for age calculation
+        
+        Returns:
+            Filtered zones (stale zones dropped or deprioritized)
+        """
+        if not zones:
+            return []
+        
+        # Apply freshness filter
+        zones_fresh = self._apply_freshness_check(zones, df)
+        
+        return zones_fresh
     
     def filter_zones(self,
                     zones: List[Dict],
@@ -56,6 +104,9 @@ class PurityFreshnessGate:
                     atr: float) -> List[Dict]:
         """
         Apply purity and freshness filters to zones
+        
+        DEPRECATED: Use apply_purity_only() BEFORE validation and 
+        apply_freshness_only() AFTER validation instead.
         
         Pipeline:
         1. Purity check (shrink/split/drop if too many bars inside)
@@ -319,109 +370,76 @@ class PurityFreshnessGate:
                               zones: List[Dict],
                               df: pd.DataFrame) -> List[Dict]:
         """
-        Check zone freshness and deprioritize or drop stale zones
+        Mark zones as fresh or stale based on last touch age
         
-        Process:
-        1. Calculate bars since last touch
-        2. If > threshold:
-           - If class < normal → drop
-           - Otherwise → deprioritize (mark for score penalty)
+        SIMPLIFIED: Only marks zones, does NOT drop any zones.
+        Scoring will apply penalty, low scores filtered later.
         
         Args:
             zones: List of zones with 'last_touch_ts'
-            df: OHLC DataFrame for age calculation
+            df: OHLC DataFrame for current time
         
         Returns:
-            Filtered zones (stale weak zones removed, others marked)
+            All zones with 'stale' flag set
         """
         if not zones or len(df) == 0:
             return zones
         
         current_time = df.index[-1]
-        filtered_zones = []
         
         for zone in zones:
             last_touch_ts = zone.get('last_touch_ts')
             
             if last_touch_ts is None:
-                # No touches recorded, consider stale
-                zone_class = zone.get('class', 'weak')
-                if self._class_rank(zone_class) < self._class_rank(self.min_class_for_stale):
-                    continue  # Drop weak/untouched zones
-                else:
-                    zone['stale'] = True
-                    filtered_zones.append(zone)
-                continue
-            
-            # Calculate age in bars
-            if isinstance(last_touch_ts, pd.Timestamp):
-                # Convert current_time to Timestamp if needed
-                current_ts = current_time if isinstance(current_time, pd.Timestamp) else pd.Timestamp(current_time)
-                bars_since = self._calculate_bars_since(last_touch_ts, current_ts, df)
-            else:
-                # Fallback: assume stale if no valid timestamp
+                # No touches recorded → mark as stale (will get penalty)
                 zone['stale'] = True
-                filtered_zones.append(zone)
+                zone['bars_since_touch'] = 999  # Very old
                 continue
             
-            # Check freshness
-            if bars_since > self.freshness_threshold:
-                # Zone is stale
-                zone_class = zone.get('class', 'weak')
-                
-                if self._class_rank(zone_class) < self._class_rank(self.min_class_for_stale):
-                    # Drop stale weak zones
-                    continue
-                else:
-                    # Keep but mark as stale (for score penalty)
-                    zone['stale'] = True
-                    zone['bars_since_touch'] = bars_since
+            # Calculate age using simple timestamp delta
+            if isinstance(last_touch_ts, pd.Timestamp) and isinstance(current_time, pd.Timestamp):
+                # Calculate bars based on timestamp difference and timeframe
+                time_delta = current_time - last_touch_ts
+                bars_since = self._estimate_bars_from_timedelta(time_delta)
             else:
-                # Zone is fresh
+                # Fallback: mark as stale
+                zone['stale'] = True
+                zone['bars_since_touch'] = 999
+                continue
+            
+            # Mark freshness (don't drop, just mark)
+            if bars_since > self.freshness_threshold:
+                zone['stale'] = True
+                zone['bars_since_touch'] = bars_since
+            else:
                 zone['stale'] = False
                 zone['bars_since_touch'] = bars_since
-            
-            filtered_zones.append(zone)
         
-        return filtered_zones
+        return zones  # Return ALL zones, just with stale flags
     
-    def _calculate_bars_since(self,
-                             last_touch_ts: pd.Timestamp,
-                             current_time: pd.Timestamp,
-                             df: pd.DataFrame) -> int:
+    def _estimate_bars_from_timedelta(self, time_delta: pd.Timedelta) -> int:
         """
-        Calculate number of bars since last touch
+        Estimate number of bars from time delta based on timeframe
         
         Args:
-            last_touch_ts: Timestamp of last touch
-            current_time: Current timestamp
-            df: DataFrame with timestamp index
+            time_delta: Time difference between last touch and now
         
         Returns:
-            Number of bars since last touch
+            Estimated number of bars
         """
-        try:
-            # Find index of last touch
-            if last_touch_ts in df.index:
-                last_idx = df.index.get_loc(last_touch_ts)
-            else:
-                # Find nearest timestamp
-                last_idx = df.index.get_indexer([last_touch_ts], method='nearest')[0]
-            
-            # Current index
-            current_idx = len(df) - 1
-            
-            # Ensure last_idx is int
-            if isinstance(last_idx, int):
-                bars_since = current_idx - last_idx
-            else:
-                bars_since = current_idx - int(last_idx)
-            
-            return max(0, bars_since)
-            
-        except Exception:
-            # Fallback: assume very old
-            return 999
+        # Timeframe durations in minutes
+        tf_minutes = {
+            '15m': 15,
+            '1h': 60,
+            '4h': 240,
+            '1d': 1440
+        }
+        
+        minutes_per_bar = tf_minutes.get(self.tf, 60)
+        total_minutes = time_delta.total_seconds() / 60
+        bars = int(total_minutes / minutes_per_bar)
+        
+        return max(0, bars)
     
     def _class_rank(self, zone_class: str) -> int:
         """
