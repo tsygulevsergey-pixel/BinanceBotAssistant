@@ -285,6 +285,16 @@ class SRZonesV3Strategy:
                 
                 logger.debug(f"  🔺 {symbol} {entry_tf} LONG: Zone break found at bar {break_idx} (R @ {zone_high:.4f})")
                 
+                # Log body_break event
+                self._log_zone_event(
+                    symbol=symbol,
+                    zone=zone,
+                    event_type='body_break',
+                    bar_data=df.iloc[break_idx],
+                    market_regime=market_regime,
+                    atr=atr
+                )
+                
                 # Check confirmation (closes above zone)
                 confirmed = True
                 for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
@@ -298,6 +308,16 @@ class SRZonesV3Strategy:
                 
                 logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Break confirmed ({confirm_closes} closes)")
                 
+                # Log flip event
+                self._log_zone_event(
+                    symbol=symbol,
+                    zone=zone,
+                    event_type='flip',
+                    bar_data=df.iloc[break_idx + confirm_closes],
+                    market_regime=market_regime,
+                    atr=atr
+                )
+                
                 # Check retest (price returned to zone)
                 retest_found = False
                 for i in range(break_idx + confirm_closes, len(df)):
@@ -305,6 +325,16 @@ class SRZonesV3Strategy:
                     # Price touches zone edge (within delta)
                     if low <= zone_high + (retest_delta_atr * atr):
                         logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Retest found at bar {i}")
+                        
+                        # Log retest event
+                        self._log_zone_event(
+                            symbol=symbol,
+                            zone=zone,
+                            event_type='retest',
+                            bar_data=df.iloc[i],
+                            market_regime=market_regime,
+                            atr=atr
+                        )
                         
                         # Check entry trigger
                         if i < len(df) - 1:
@@ -319,11 +349,13 @@ class SRZonesV3Strategy:
                                 
                                 logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Flip-Retest signal!")
                                 
-                                # Build signal
-                                return await self._build_flip_retest_signal(
+                                # Build signal (pass signal_id for zone event linking later)
+                                signal = await self._build_flip_retest_signal(
                                     symbol, entry_tf, df, zone, 'LONG',
                                     market_regime, indicators, atr
                                 )
+                                
+                                return signal
                 
             # Check for SHORT setup (Support flip)
             elif zone_kind == 'S':
@@ -341,6 +373,16 @@ class SRZonesV3Strategy:
                 
                 logger.debug(f"  🔻 {symbol} {entry_tf} SHORT: Zone break found at bar {break_idx} (S @ {zone_low:.4f})")
                 
+                # Log body_break event
+                self._log_zone_event(
+                    symbol=symbol,
+                    zone=zone,
+                    event_type='body_break',
+                    bar_data=df.iloc[break_idx],
+                    market_regime=market_regime,
+                    atr=atr
+                )
+                
                 # Check confirmation
                 confirmed = True
                 for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
@@ -354,11 +396,31 @@ class SRZonesV3Strategy:
                 
                 logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Break confirmed ({confirm_closes} closes)")
                 
+                # Log flip event
+                self._log_zone_event(
+                    symbol=symbol,
+                    zone=zone,
+                    event_type='flip',
+                    bar_data=df.iloc[break_idx + confirm_closes],
+                    market_regime=market_regime,
+                    atr=atr
+                )
+                
                 # Check retest
                 for i in range(break_idx + confirm_closes, len(df)):
                     high = df['high'].iloc[i]
                     if high >= zone_low - (retest_delta_atr * atr):
                         logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Retest found at bar {i}")
+                        
+                        # Log retest event
+                        self._log_zone_event(
+                            symbol=symbol,
+                            zone=zone,
+                            event_type='retest',
+                            bar_data=df.iloc[i],
+                            market_regime=market_regime,
+                            atr=atr
+                        )
                         
                         if i < len(df) - 1:
                             trigger = self._check_entry_trigger(df, i, i+1, 'SHORT', flip_config)
@@ -371,10 +433,12 @@ class SRZonesV3Strategy:
                                 
                                 logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Flip-Retest signal!")
                                 
-                                return await self._build_flip_retest_signal(
+                                signal = await self._build_flip_retest_signal(
                                     symbol, entry_tf, df, zone, 'SHORT',
                                     market_regime, indicators, atr
                                 )
+                                
+                                return signal
         
         return None
     
@@ -460,6 +524,23 @@ class SRZonesV3Strategy:
                 
                 logger.debug(f"  💧 {symbol} {entry_tf} LONG: Support sweep found at bar {sweep_idx} (S @ {zone_low:.4f})")
                 
+                # Calculate wick/body ratio for event logging
+                sweep_bar = df.iloc[sweep_idx]
+                body_size = abs(sweep_bar['close'] - sweep_bar['open'])
+                lower_wick = min(sweep_bar['open'], sweep_bar['close']) - sweep_bar['low']
+                wick_ratio = lower_wick / body_size if body_size > 0 else 0
+                
+                # Log sweep event
+                self._log_zone_event(
+                    symbol=symbol,
+                    zone=zone,
+                    event_type='sweep',
+                    bar_data=sweep_bar,
+                    market_regime=market_regime,
+                    atr=atr,
+                    wick_to_body_ratio=wick_ratio
+                )
+                
                 # Check return (price back inside/above zone)
                 for i in range(sweep_idx + 1, min(sweep_idx + max_bars + 1, len(df))):
                     bar = df.iloc[i]
@@ -510,6 +591,23 @@ class SRZonesV3Strategy:
                     continue
                 
                 logger.debug(f"  💧 {symbol} {entry_tf} SHORT: Resistance sweep found at bar {sweep_idx} (R @ {zone_high:.4f})")
+                
+                # Calculate wick/body ratio for event logging
+                sweep_bar = df.iloc[sweep_idx]
+                body_size = abs(sweep_bar['close'] - sweep_bar['open'])
+                upper_wick = sweep_bar['high'] - max(sweep_bar['open'], sweep_bar['close'])
+                wick_ratio = upper_wick / body_size if body_size > 0 else 0
+                
+                # Log sweep event
+                self._log_zone_event(
+                    symbol=symbol,
+                    zone=zone,
+                    event_type='sweep',
+                    bar_data=sweep_bar,
+                    market_regime=market_regime,
+                    atr=atr,
+                    wick_to_body_ratio=wick_ratio
+                )
                 
                 for i in range(sweep_idx + 1, min(sweep_idx + max_bars + 1, len(df))):
                     bar = df.iloc[i]
