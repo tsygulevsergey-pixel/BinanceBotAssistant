@@ -125,18 +125,18 @@ class V3ZonesProvider:
         
         # Filter by direction
         if direction == 'above':
-            # Looking for resistance above price
+            # Looking for resistance above price (ENTIRE zone must be above)
             candidates = [z for z in search_zones 
-                         if z['kind'] == 'R' and z['mid'] > price]
+                         if z['kind'] == 'R' and z['low'] > price]
             # Sort by distance (closest first)
-            candidates.sort(key=lambda z: abs(z['mid'] - price))
+            candidates.sort(key=lambda z: abs(z['low'] - price))
         
         elif direction == 'below':
-            # Looking for support below price
+            # Looking for support below price (ENTIRE zone must be below)
             candidates = [z for z in search_zones 
-                         if z['kind'] == 'S' and z['mid'] < price]
+                         if z['kind'] == 'S' and z['high'] < price]
             # Sort by distance (closest first)
-            candidates.sort(key=lambda z: abs(z['mid'] - price))
+            candidates.sort(key=lambda z: abs(z['high'] - price))
         
         else:
             # Any direction - find absolute closest

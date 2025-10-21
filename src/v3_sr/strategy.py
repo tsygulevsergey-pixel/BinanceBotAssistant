@@ -15,7 +15,7 @@ import pandas as pd
 import pytz
 
 from src.database.models import V3SRSignal, V3SRZoneEvent, V3SRSignalLock
-from src.utils.sr_zones_v3.builder import SRZonesV3Builder
+from src.utils.v3_zones_provider import get_v3_zones_provider
 from src.indicators.vwap import VWAPCalculator
 from src.v3_sr.logger import v3_sr_logger as logger
 from src.v3_sr.helpers import (
@@ -49,12 +49,8 @@ class SRZonesV3Strategy:
         self.data_loader = data_loader
         self.binance_client = binance_client
         
-        # V3 Zone Builder (own instance for V3 strategy)
-        zone_config = config.get('sr_zones_v3', {})
-        self.zone_builder = SRZonesV3Builder(zone_config)
-        
-        # Zone cache: {symbol: {'zones': zones_dict, 'timestamp': datetime, 'bar_time': timestamp}}
-        self.zone_cache = {}
+        # V3 Zones Provider (shared singleton for caching)
+        self.v3_zones_provider = get_v3_zones_provider()
         
         # VWAP Calculator
         self.vwap_calc = VWAPCalculator()
@@ -62,7 +58,7 @@ class SRZonesV3Strategy:
         # Strategy enabled flag
         self.enabled = self.config.get('enabled', True)
         
-        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled})")
+        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, shared zones cache)")
     
     async def analyze(self, symbol: str, df_15m: pd.DataFrame, df_1h: pd.DataFrame,
                      df_4h: pd.DataFrame, df_1d: pd.DataFrame,
@@ -140,7 +136,7 @@ class SRZonesV3Strategy:
     
     async def _get_or_build_zones(self, symbol: str, dfs: Dict[str, pd.DataFrame]) -> Dict:
         """
-        Get or build V3 zones (cached per symbol)
+        Get zones using shared V3ZonesProvider (automatically cached)
         
         Args:
             symbol: Trading symbol
@@ -157,26 +153,13 @@ class SRZonesV3Strategy:
                 logger.error(f"❌ {symbol}: No 15m data for current price")
                 return {}
             
-            # Check cache freshness
-            if symbol in self.zone_cache:
-                cached_entry = self.zone_cache[symbol]
-                
-                # Check if 15m bar changed
-                if df_15m is not None and len(df_15m) > 0:
-                    current_bar_time = df_15m.index[-1]
-                    cached_bar_time = cached_entry.get('bar_time')
-                    
-                    if cached_bar_time == current_bar_time:
-                        # Cache is fresh
-                        return cached_entry['zones']
-            
-            # Build fresh zones
-            zones = self.zone_builder.build_zones(
+            # Use shared V3 zones provider (automatically handles caching)
+            zones = self.v3_zones_provider.get_zones(
                 symbol=symbol,
                 df_1d=dfs.get('1d'),
                 df_4h=dfs.get('4h'),
                 df_1h=dfs.get('1h'),
-                df_15m=df_15m,
+                df_15m=dfs.get('15m'),
                 current_price=current_price
             )
             
@@ -197,22 +180,13 @@ class SRZonesV3Strategy:
             if zones_updated > 0:
                 logger.info(f"✨ {symbol}: Updated strength for {zones_updated} zones based on events")
             
-            # Update cache
-            bar_time = df_15m.index[-1] if df_15m is not None and len(df_15m) > 0 else None
-            
-            self.zone_cache[symbol] = {
-                'zones': zones,
-                'timestamp': datetime.now(),
-                'bar_time': bar_time
-            }
-            
             # Count zones by TF
             zone_counts = {tf: len(z) for tf, z in zones.items()}
-            logger.debug(f"📦 {symbol} zones built: {zone_counts}")
+            logger.debug(f"📦 {symbol} zones from shared cache: {zone_counts}")
             
             return zones
         except Exception as e:
-            logger.error(f"❌ Error building V3 zones for {symbol}: {e}")
+            logger.error(f"❌ Error getting V3 zones for {symbol}: {e}")
             return {}
     
     async def _check_flip_retest(self, symbol: str, entry_tf: str, df: pd.DataFrame,
@@ -719,32 +693,6 @@ class SRZonesV3Strategy:
             # Price should be below VWAP (or within epsilon)
             return current_price <= (vwap + epsilon)
     
-    def _find_nearest_zone(self, all_zones: Dict[str, List[Dict]], current_price: float, direction: str) -> Optional[Dict]:
-        """
-        Find nearest zone from all timeframes
-        
-        Args:
-            all_zones: Dict of zones by timeframe
-            current_price: Current price
-            direction: 'above' (resistance) or 'below' (support)
-        
-        Returns:
-            Nearest zone dict or None
-        """
-        # Collect all zones from all TFs
-        all_zones_flat = []
-        tf_priority = ['1d', '4h', '1h', '15m']
-        for tf in tf_priority:
-            if tf in all_zones:
-                all_zones_flat.extend(all_zones[tf])
-        
-        if not all_zones_flat:
-            return None
-        
-        # Use helper function from v3_sr.helpers
-        zone_kind = 'R' if direction == 'above' else 'S'
-        return find_nearest_zone(current_price, all_zones_flat, direction, zone_kind)
-    
     async def _build_flip_retest_signal(self, symbol: str, entry_tf: str, df: pd.DataFrame,
                                        zone: dict, direction: str, market_regime: str,
                                        indicators: dict, atr: float, all_zones: Dict[str, List[Dict]]) -> Optional[Dict]:
@@ -767,8 +715,8 @@ class SRZonesV3Strategy:
         
         # Find nearest zones for context
         current_price = df['close'].iloc[-1]
-        nearest_support = self._find_nearest_zone(all_zones, current_price, 'below')
-        nearest_resistance = self._find_nearest_zone(all_zones, current_price, 'above')
+        nearest_support = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'below')
+        nearest_resistance = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'above')
         
         # Generate signal
         signal_data = {
@@ -813,8 +761,8 @@ class SRZonesV3Strategy:
         
         # Find nearest zones for context
         current_price = df['close'].iloc[-1]
-        nearest_support = self._find_nearest_zone(all_zones, current_price, 'below')
-        nearest_resistance = self._find_nearest_zone(all_zones, current_price, 'above')
+        nearest_support = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'below')
+        nearest_resistance = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'above')
         
         signal_data = {
             'setup_type': 'SweepReturn',
@@ -896,13 +844,13 @@ class SRZonesV3Strategy:
         else:  # nearest_local_zone
             # Find nearest zone in direction
             if direction == 'LONG':
-                nearest = self._find_nearest_zone(all_zones, current_price, 'above')
+                nearest = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'above')
                 if nearest:
                     tp1_price = nearest['low']
                 else:
                     tp1_price = entry_price + (risk_r * 1.0)
             else:
-                nearest = self._find_nearest_zone(all_zones, current_price, 'below')
+                nearest = self.v3_zones_provider.find_nearest_zone(all_zones, current_price, 'below')
                 if nearest:
                     tp1_price = nearest['high']
                 else:
