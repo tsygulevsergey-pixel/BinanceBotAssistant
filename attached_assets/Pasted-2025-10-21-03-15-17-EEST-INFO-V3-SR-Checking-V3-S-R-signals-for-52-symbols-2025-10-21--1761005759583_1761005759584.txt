@@ -1,0 +1,82 @@
+2025-10-21 03:15:17 EEST | INFO     | V3_SR | 🔷 Checking V3 S/R signals for 52 symbols
+2025-10-21 03:15:17 EEST | INFO     | V3_SR | 🔍 Analyzing KNCUSDT | Regime: TREND
+2025-10-21 03:15:17 EEST | INFO     | V3_SR | 🔨 Building V3 zones for KNCUSDT...
+2025-10-21 03:15:21 EEST | INFO     | V3_SR | ✅ KNCUSDT zones built: {'15m': 9, '1h': 7, '4h': 9, '1d': 2}
+2025-10-21 03:15:21 EEST | INFO     | V3_SR |   📊 KNCUSDT 15m Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:21 EEST | INFO     | V3_SR |   📊 KNCUSDT 15m Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:21 EEST | INFO     | V3_SR |   📊 KNCUSDT 1h Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:21 EEST | INFO     | V3_SR |   📊 KNCUSDT 1h Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:21 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - OPUSDT 1h
+2025-10-21 03:15:21 EEST | INFO     | trading_bot | Saved 25 klines for OPUSDT 1h
+2025-10-21 03:15:21 EEST | INFO     | trading_bot | Fixing gap: OPUSDT 1h at 2025-10-18 02:00:00+00:00 (1 candles)
+2025-10-21 03:15:21 EEST | INFO     | trading_bot | Downloading historical klines for OPUSDT 1h from 2025-10-18 02:00:00+00:00 to 2025-10-18 03:00:00+00:00 (1 days)
+2025-10-21 03:15:21 EEST | INFO     | V3_SR | 🔍 Analyzing FILUSDT | Regime: TREND
+2025-10-21 03:15:21 EEST | INFO     | V3_SR | 🔨 Building V3 zones for FILUSDT...
+2025-10-21 03:15:25 EEST | INFO     | V3_SR | ✅ FILUSDT zones built: {'15m': 11, '1h': 15, '4h': 14, '1d': 4}
+2025-10-21 03:15:25 EEST | INFO     | V3_SR |   📊 FILUSDT 15m Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:25 EEST | INFO     | V3_SR |   📊 FILUSDT 15m Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:25 EEST | INFO     | V3_SR |   📊 FILUSDT 1h Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:25 EEST | INFO     | V3_SR |   📊 FILUSDT 1h Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:25 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - OPUSDT 1h
+2025-10-21 03:15:25 EEST | INFO     | trading_bot | Saved 25 klines for OPUSDT 1h
+2025-10-21 03:15:25 EEST | INFO     | trading_bot | Fixing gap: OPUSDT 1h at 2025-10-18 04:00:00+00:00 (1 candles)
+2025-10-21 03:15:25 EEST | INFO     | trading_bot | Downloading historical klines for OPUSDT 1h from 2025-10-18 04:00:00+00:00 to 2025-10-18 05:00:00+00:00 (1 days)
+2025-10-21 03:15:25 EEST | INFO     | trading_bot | 📊 Loading: 56/220 (25.5%) | Queue: 0 ready | Ready: 56 symbols | Failed: 0 | 7 strategies | 0 signals | Rate: 37.9% | Next check in 880s
+2025-10-21 03:15:25 EEST | INFO     | V3_SR | 🔍 Analyzing ALGOUSDT | Regime: TREND
+2025-10-21 03:15:25 EEST | INFO     | V3_SR | 🔨 Building V3 zones for ALGOUSDT...
+2025-10-21 03:15:29 EEST | INFO     | V3_SR | ✅ ALGOUSDT zones built: {'15m': 13, '1h': 13, '4h': 16, '1d': 2}
+2025-10-21 03:15:29 EEST | INFO     | V3_SR |   📊 ALGOUSDT 15m Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:29 EEST | INFO     | V3_SR |   📊 ALGOUSDT 15m Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:29 EEST | INFO     | V3_SR |   📊 ALGOUSDT 1h Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:29 EEST | INFO     | V3_SR |   📊 ALGOUSDT 1h Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:29 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - OPUSDT 1h
+2025-10-21 03:15:29 EEST | INFO     | trading_bot | Saved 25 klines for OPUSDT 1h
+2025-10-21 03:15:29 EEST | INFO     | trading_bot |   [2/4] ✅ OPUSDT 1h: all 3 gaps fixed
+2025-10-21 03:15:29 EEST | INFO     | trading_bot |   [3/4] 🔄 OPUSDT 4h - updating from 2025-10-20 20:01
+2025-10-21 03:15:29 EEST | INFO     | trading_bot | Downloading historical klines for OPUSDT 4h from 2025-10-20 20:01:00+00:00 to 2025-10-21 00:15:16.098903+00:00 (1 days)
+2025-10-21 03:15:29 EEST | INFO     | V3_SR | 🔍 Analyzing ETCUSDT | Regime: TREND
+2025-10-21 03:15:29 EEST | INFO     | V3_SR | 🔨 Building V3 zones for ETCUSDT...
+2025-10-21 03:15:32 EEST | INFO     | V3_SR | ✅ ETCUSDT zones built: {'15m': 14, '1h': 13, '4h': 13, '1d': 3}
+2025-10-21 03:15:32 EEST | INFO     | V3_SR |   📊 ETCUSDT 15m Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:32 EEST | INFO     | V3_SR |   📊 ETCUSDT 15m Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:32 EEST | INFO     | V3_SR |   📊 ETCUSDT 1h Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:32 EEST | INFO     | V3_SR |   📊 ETCUSDT 1h Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:32 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - OPUSDT 4h
+2025-10-21 03:15:32 EEST | INFO     | trading_bot | Saved 0 klines for OPUSDT 4h
+2025-10-21 03:15:32 EEST | INFO     | trading_bot |   [4/4] ✓ OPUSDT 1d up-to-date (fresh)
+2025-10-21 03:15:32 EEST | INFO     | trading_bot | ✓ OPUSDT loaded and ready for analysis
+2025-10-21 03:15:32 EEST | INFO     | trading_bot | ✅ OPUSDT ready for analysis (57 symbols analyzing)
+2025-10-21 03:15:32 EEST | INFO     | V3_SR | 🔍 Analyzing COMPUSDT | Regime: TREND
+2025-10-21 03:15:32 EEST | INFO     | V3_SR | 🔨 Building V3 zones for COMPUSDT...
+2025-10-21 03:15:36 EEST | INFO     | V3_SR | ✅ COMPUSDT zones built: {'15m': 26, '1h': 9, '4h': 10, '1d': 3}
+2025-10-21 03:15:36 EEST | INFO     | V3_SR |   📊 COMPUSDT 15m Flip-Retest check: 1 strong zones (min strength: 60)
+2025-10-21 03:15:36 EEST | INFO     | V3_SR |   📊 COMPUSDT 15m Sweep-Return check: 1 strong zones (min strength: 60)
+2025-10-21 03:15:36 EEST | INFO     | V3_SR |   📊 COMPUSDT 1h Flip-Retest check: 1 strong zones (min strength: 60)
+2025-10-21 03:15:36 EEST | INFO     | V3_SR |   📊 COMPUSDT 1h Sweep-Return check: 1 strong zones (min strength: 60)
+2025-10-21 03:15:36 EEST | INFO     | trading_bot | [58/220] Checking INJUSDT... (26.4%)
+2025-10-21 03:15:36 EEST | INFO     | trading_bot |   [1/4] 🔄 INJUSDT 15m - updating from 2025-10-20 23:46
+2025-10-21 03:15:36 EEST | INFO     | trading_bot | Downloading historical klines for INJUSDT 15m from 2025-10-20 23:46:00+00:00 to 2025-10-21 00:15:36.606797+00:00 (1 days)
+2025-10-21 03:15:36 EEST | INFO     | V3_SR | 🔍 Analyzing GRTUSDT | Regime: TREND
+2025-10-21 03:15:36 EEST | INFO     | V3_SR | 🔨 Building V3 zones for GRTUSDT...
+2025-10-21 03:15:41 EEST | INFO     | V3_SR | ✅ GRTUSDT zones built: {'15m': 11, '1h': 16, '4h': 16, '1d': 3}
+2025-10-21 03:15:41 EEST | INFO     | V3_SR |   📊 GRTUSDT 15m Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:41 EEST | INFO     | V3_SR |   📊 GRTUSDT 15m Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:41 EEST | INFO     | V3_SR |   📊 GRTUSDT 1h Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:41 EEST | INFO     | V3_SR |   📊 GRTUSDT 1h Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:41 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - INJUSDT 15m
+2025-10-21 03:15:41 EEST | INFO     | trading_bot | Saved 1 klines for INJUSDT 15m
+2025-10-21 03:15:41 EEST | INFO     | trading_bot |   [2/4] 🔄 INJUSDT 1h - updating from 2025-10-20 23:01
+2025-10-21 03:15:41 EEST | INFO     | trading_bot | Downloading historical klines for INJUSDT 1h from 2025-10-20 23:01:00+00:00 to 2025-10-21 00:15:36.606797+00:00 (1 days)
+2025-10-21 03:15:41 EEST | INFO     | V3_SR | 🔍 Analyzing BCHUSDT | Regime: TREND
+2025-10-21 03:15:41 EEST | INFO     | V3_SR | 🔨 Building V3 zones for BCHUSDT...
+2025-10-21 03:15:45 EEST | INFO     | V3_SR | ✅ BCHUSDT zones built: {'15m': 19, '1h': 14, '4h': 7, '1d': 2}
+2025-10-21 03:15:45 EEST | INFO     | V3_SR |   📊 BCHUSDT 15m Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:45 EEST | INFO     | V3_SR |   📊 BCHUSDT 15m Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:45 EEST | INFO     | V3_SR |   📊 BCHUSDT 1h Flip-Retest check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:45 EEST | INFO     | V3_SR |   📊 BCHUSDT 1h Sweep-Return check: 0 strong zones (min strength: 60)
+2025-10-21 03:15:45 EEST | INFO     | trading_bot |   Progress: 100.0% (1/1 days) - INJUSDT 1h
+2025-10-21 03:15:45 EEST | INFO     | trading_bot | Saved 0 klines for INJUSDT 1h
+2025-10-21 03:15:45 EEST | WARNING  | trading_bot |   [2/4] ⚠️ INJUSDT 1h: 3 internal gaps detected
+2025-10-21 03:15:45 EEST | INFO     | trading_bot | Fixing gap: INJUSDT 1h at 2025-10-17 00:00:00+00:00 (1 candles)
+2025-10-21 03:15:45 EEST | INFO     | trading_bot | Downloading historical klines for INJUSDT 1h from 2025-10-17 00:00:00+00:00 to 2025-10-17 01:00:00+00:00 (1 days)
+2025-10-21 03:15:45 EEST | INFO     | 🔍 Checking 3
