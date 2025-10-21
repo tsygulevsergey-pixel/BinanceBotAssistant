@@ -873,6 +873,94 @@ class SRZonesV3Strategy:
         finally:
             session.close()
     
+    def _log_zone_event(self, symbol: str, zone: dict, event_type: str,
+                       bar_data: pd.Series, market_regime: str, atr: float,
+                       related_signal_id: str = None, wick_to_body_ratio: float = None):
+        """
+        Log zone touch/reaction event to database
+        
+        Args:
+            symbol: Trading symbol
+            zone: Zone dict with id, tf, kind, low, high, strength
+            event_type: "touch", "body_break", "flip", "sweep", "retest"
+            bar_data: Pandas Series with current bar (open, high, low, close)
+            market_regime: Current market regime
+            atr: ATR value
+            related_signal_id: Signal ID if this event created a signal
+            wick_to_body_ratio: Wick/body ratio for sweeps
+        """
+        session = self.db.get_session()
+        try:
+            # Generate unique event ID
+            event_id = generate_zone_event_id(symbol, zone.get('id'), event_type, bar_data.name)
+            
+            # Determine touch characteristics
+            zone_low = zone.get('low', 0)
+            zone_high = zone.get('high', 0)
+            zone_mid = zone.get('mid', (zone_low + zone_high) / 2)
+            
+            bar_high = bar_data['high']
+            bar_low = bar_data['low']
+            bar_close = bar_data['close']
+            
+            # Determine side (from_below or from_above)
+            if bar_low < zone_mid < bar_high:
+                side = "from_below" if bar_close > zone_mid else "from_above"
+            elif bar_high <= zone_mid:
+                side = "from_below"
+            else:
+                side = "from_above"
+            
+            # Calculate penetration depth
+            if event_type in ['sweep', 'body_break']:
+                if side == "from_below":
+                    penetration = max(0, bar_high - zone_high)
+                else:
+                    penetration = max(0, zone_low - bar_low)
+                penetration_depth_atr = penetration / atr if atr > 0 else 0
+            else:
+                penetration_depth_atr = 0
+            
+            # Touch price (extreme point)
+            if side == "from_below":
+                touch_price = bar_high
+            else:
+                touch_price = bar_low
+            
+            # Create event
+            event = V3SRZoneEvent(
+                event_id=event_id,
+                zone_id=zone.get('id', 'unknown'),
+                symbol=symbol,
+                zone_tf=zone.get('tf', 'unknown'),
+                zone_kind=zone.get('kind', 'U'),
+                zone_low=zone_low,
+                zone_high=zone_high,
+                zone_strength=zone.get('strength', 0),
+                event_type=event_type,
+                bar_timestamp=pd.Timestamp(bar_data.name, tz='UTC').to_pydatetime(),
+                touch_price=touch_price,
+                side=side,
+                penetration_depth_atr=penetration_depth_atr,
+                wick_to_body_ratio=wick_to_body_ratio,
+                market_regime=market_regime,
+                volatility_regime=get_volatility_regime(atr, bar_data.get('atr_sma', atr)),
+                atr_value=atr,
+                related_signal_id=related_signal_id,
+                created_at=datetime.now(pytz.UTC)
+            )
+            
+            session.add(event)
+            session.commit()
+            
+            logger.debug(f"V3 Zone Event logged: {symbol} {zone.get('tf')}-{zone.get('kind')} {event_type} @ {touch_price:.4f}")
+        
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error logging zone event: {e}", exc_info=True)
+        finally:
+            session.close()
+    
     async def block_symbol(self, symbol: str, direction: str, signal_id: str):
         """Block symbol for V3 strategy"""
         session = self.db.get_session()
