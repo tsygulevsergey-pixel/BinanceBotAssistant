@@ -374,9 +374,20 @@ class SRZonesV3Strategy:
                                 
                                 return signal
                 
-            # Check for SHORT setup (Support flip)
-            elif zone_kind == 'S':
-                # Look for break below zone
+            # Check for SHORT setup (Resistance flip - same as LONG, but opposite direction)
+            # ✅ FIX: SHORT FlipRetest also uses 'R' zones (Resistance broken DOWN)
+            # LONG: R zone broken UP → becomes new S → retest from below
+            # SHORT: R zone broken DOWN → becomes new S → retest from above
+            # Both start with Resistance zone!
+            
+            # We already checked R zones for LONG above (lines 289-375)
+            # For SHORT, we need to check the SAME R zones but for downside break
+            # So we check BOTH directions on each R zone
+            
+            # Add SHORT check for R zones (after LONG check)
+            if zone_kind == 'R':
+                # Already checked for LONG above, now check for SHORT
+                # Look for break BELOW zone (R broken down)
                 break_idx = None
                 for i in range(len(df) - retest_timeout, len(df) - confirm_closes):
                     if i < 0:
@@ -388,7 +399,7 @@ class SRZonesV3Strategy:
                 if break_idx is None:
                     continue
                 
-                logger.debug(f"  🔻 {symbol} {entry_tf} SHORT: Zone break found at bar {break_idx} (S @ {zone_low:.4f})")
+                logger.debug(f"  🔻 {symbol} {entry_tf} SHORT: Zone break found at bar {break_idx} (R @ {zone_low:.4f})")
                 
                 # Log body_break event
                 self._log_zone_event(
@@ -400,7 +411,7 @@ class SRZonesV3Strategy:
                     atr=atr
                 )
                 
-                # Check confirmation
+                # Check confirmation (closes BELOW zone)
                 confirmed = True
                 for i in range(break_idx + 1, min(break_idx + confirm_closes + 1, len(df))):
                     if df['close'].iloc[i] >= zone_low:
@@ -423,7 +434,7 @@ class SRZonesV3Strategy:
                     atr=atr
                 )
                 
-                # Check retest
+                # Check retest (price returns to zone from below)
                 for i in range(break_idx + confirm_closes, len(df)):
                     high = df['high'].iloc[i]
                     if high >= zone_low - (retest_delta_atr * atr):
