@@ -402,6 +402,11 @@ class V3SRPerformanceTracker:
         
         # Calculate duration
         created_at = signal.created_at if signal.created_at else datetime.now(pytz.UTC)
+        
+        # Ensure created_at is timezone-aware
+        if created_at.tzinfo is None:
+            created_at = pytz.UTC.localize(created_at)
+        
         closed_at = datetime.now(pytz.UTC)
         duration_minutes = int((closed_at - created_at).total_seconds() / 60)
         

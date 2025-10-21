@@ -102,7 +102,7 @@ class Signal(Base):
     
     tp1_pnl_percent = Column(Float)  # Сохраненный PnL на TP1
     tp2_hit = Column(Boolean, default=False)
-    tp2_closed_at = Column(DateTime)
+    tp2_closed_at = Column(DateTime(timezone=True))
     tp2_pnl_percent = Column(Float)  # Сохраненный PnL на TP2
     
     # Trailing Stop для Runner части
@@ -115,20 +115,20 @@ class Signal(Base):
     # ORIGINAL FIELDS
     # ═══════════════════════════════════════════════════════════
     
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC))
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(pytz.UTC))
     status = Column(String(20), nullable=False, default='ACTIVE')
     
     telegram_message_id = Column(Integer)
     
     tp1_hit = Column(Boolean, default=False)
-    tp1_closed_at = Column(DateTime)
+    tp1_closed_at = Column(DateTime(timezone=True))
     
     exit_price = Column(Float)
     exit_reason = Column(String(50))
     exit_type = Column(String(20))
     pnl = Column(Float)
     pnl_percent = Column(Float)
-    closed_at = Column(DateTime)
+    closed_at = Column(DateTime(timezone=True))
     
     meta_data = Column(JSON)
     
@@ -143,7 +143,7 @@ class Metric(Base):
     __tablename__ = 'metrics'
     
     id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(pytz.UTC))
+    timestamp = Column(DateTime(timezone=True), nullable=False, index=True, default=lambda: datetime.now(pytz.UTC))
     metric_type = Column(String(50), nullable=False, index=True)
     symbol = Column(String(20), index=True)
     strategy_id = Column(Integer, index=True)
@@ -161,7 +161,7 @@ class MarketState(Base):
     
     id = Column(Integer, primary_key=True)
     symbol = Column(String(20), nullable=False, index=True)
-    timestamp = Column(DateTime, nullable=False, index=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
     
     regime = Column(String(20), nullable=False)
     timeframe = Column(String(10), nullable=False)
@@ -232,14 +232,14 @@ class ActionPriceSignal(Base):
     
     market_regime = Column(String(20))
     
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC))
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(pytz.UTC))
     status = Column(String(20), nullable=False, default='PENDING')
     
     telegram_message_id = Column(Integer)
     
-    partial_exit_1_at = Column(DateTime)
+    partial_exit_1_at = Column(DateTime(timezone=True))
     partial_exit_1_price = Column(Float)
-    partial_exit_2_at = Column(DateTime)
+    partial_exit_2_at = Column(DateTime(timezone=True))
     partial_exit_2_price = Column(Float)
     
     # Trailing stop state (персистентность для 30% остатка после TP2)
@@ -249,7 +249,7 @@ class ActionPriceSignal(Base):
     exit_reason = Column(String(50))
     pnl = Column(Float)
     pnl_percent = Column(Float)
-    closed_at = Column(DateTime)
+    closed_at = Column(DateTime(timezone=True))
     
     meta_data = Column(JSON)
     
@@ -349,16 +349,16 @@ class V3SRSignal(Base):
     tp2_trail_size = Column(Float, default=0.50)  # 50% trail to TP2
     
     tp1_hit = Column(Boolean, default=False)
-    tp1_hit_at = Column(DateTime)
+    tp1_hit_at = Column(DateTime(timezone=True))
     tp1_pnl_percent = Column(Float)
     
     tp2_hit = Column(Boolean, default=False)
-    tp2_hit_at = Column(DateTime)
+    tp2_hit_at = Column(DateTime(timezone=True))
     tp2_pnl_percent = Column(Float)
     
     # Breakeven & Trailing
     moved_to_be = Column(Boolean, default=False)  # SL moved to BE after TP1
-    moved_to_be_at = Column(DateTime)
+    moved_to_be_at = Column(DateTime(timezone=True))
     trailing_active = Column(Boolean, default=False)
     trailing_high_water_mark = Column(Float)  # Для LONG / low water mark для SHORT
     
@@ -369,7 +369,7 @@ class V3SRSignal(Base):
     pnl = Column(Float)
     pnl_percent = Column(Float)
     final_r_multiple = Column(Float)  # Итоговый R-multiple
-    closed_at = Column(DateTime)
+    closed_at = Column(DateTime(timezone=True))
     
     # Performance metrics
     max_favorable_excursion = Column(Float)  # MFE в R
@@ -416,7 +416,7 @@ class V3SRZoneEvent(Base):
     
     # Event details
     event_type = Column(String(30), nullable=False, index=True)  # "touch", "body_break", "flip", "sweep", "retest"
-    bar_timestamp = Column(DateTime, nullable=False, index=True)
+    bar_timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
     touch_price = Column(Float, nullable=False)
     
     # Touch characteristics
@@ -428,7 +428,7 @@ class V3SRZoneEvent(Base):
     reaction_occurred = Column(Boolean, default=False)
     reaction_bars = Column(Integer)  # Сколько баров до реакции
     reaction_magnitude_atr = Column(Float)  # Величина реакции в ATR
-    reaction_checked_at = Column(DateTime)  # Когда проверили реакцию
+    reaction_checked_at = Column(DateTime(timezone=True))  # Когда проверили реакцию
     
     # Market context at touch
     market_regime = Column(String(20))
@@ -439,7 +439,7 @@ class V3SRZoneEvent(Base):
     related_signal_id = Column(String(64), index=True)
     
     # Metadata
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
     meta_data = Column(JSON)
     
     __table_args__ = (
@@ -461,7 +461,7 @@ class V3SRSignalLock(Base):
     symbol = Column(String(20), nullable=False, index=True)
     direction = Column(String(10), nullable=False)  # "LONG" or "SHORT"
     signal_id = Column(String(64), nullable=False)  # Reference to V3SRSignal
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(pytz.UTC), index=True)
     
     __table_args__ = (
         Index('idx_v3sr_lock_symbol_dir', 'symbol', 'direction', unique=True),
