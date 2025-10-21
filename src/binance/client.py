@@ -145,9 +145,21 @@ class BinanceClient:
             
             for symbol_info in info.get('symbols', []):
                 symbol = symbol_info['symbol']
+                
+                tick_size = 0.01
+                step_size = 0.001
+                
+                for filter_info in symbol_info.get('filters', []):
+                    if filter_info['filterType'] == 'PRICE_FILTER':
+                        tick_size = float(filter_info['tickSize'])
+                    elif filter_info['filterType'] == 'LOT_SIZE':
+                        step_size = float(filter_info['stepSize'])
+                
                 self.symbols_info[symbol] = {
                     'pricePrecision': symbol_info.get('pricePrecision', 2),
                     'quantityPrecision': symbol_info.get('quantityPrecision', 3),
+                    'tickSize': tick_size,
+                    'stepSize': step_size,
                     'status': symbol_info.get('status'),
                     'contractType': symbol_info.get('contractType')
                 }
@@ -176,23 +188,30 @@ class BinanceClient:
             logger.error(f"Failed to load symbols info: {e}", exc_info=True)
     
     def get_tick_size(self, symbol: str) -> float:
-        """Получить tick size для символа (минимальный шаг цены)"""
+        """Получить РЕАЛЬНЫЙ tick size для символа из PRICE_FILTER (БЕЗ ОКРУГЛЕНИЙ!)"""
         if symbol not in self.symbols_info:
             logger.warning(f"No precision info for {symbol}, using default tick_size=0.01")
             return 0.01
         
-        precision = self.symbols_info[symbol]['pricePrecision']
-        tick_size = 10 ** (-precision)
-        return tick_size
+        return self.symbols_info[symbol].get('tickSize', 0.01)
     
     def format_price(self, symbol: str, price: float) -> str:
-        """Форматировать цену согласно precision символа"""
+        """Форматировать цену согласно tickSize (ТОЧНО как Binance)"""
         if symbol not in self.symbols_info:
-            # Если нет информации, используем разумное форматирование
             return f"{price:.8f}".rstrip('0').rstrip('.')
         
-        precision = self.symbols_info[symbol]['pricePrecision']
-        return f"{price:.{precision}f}"
+        tick_size = self.symbols_info[symbol].get('tickSize', 0.01)
+        
+        if tick_size >= 1:
+            decimals = 0
+        else:
+            tick_str = f"{tick_size:.10f}".rstrip('0')
+            if '.' in tick_str:
+                decimals = len(tick_str.split('.')[1])
+            else:
+                decimals = 0
+        
+        return f"{price:.{decimals}f}"
     
     async def get_futures_pairs(self) -> List[str]:
         info = await self.get_exchange_info()

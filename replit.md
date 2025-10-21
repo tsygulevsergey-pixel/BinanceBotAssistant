@@ -2,6 +2,8 @@
 
 This project is a professional-grade Binance USDT-M Futures Trading Bot designed for high-performance trading with an 80%+ Win Rate and a Profit Factor of 1.8-2.5. It employs advanced strategies, market regime detection, sophisticated risk management, and an "Action Price" system based on Support/Resistance, Anchored VWAP, and price action. The bot supports both Signals-Only and Live Trading Modes.
 
+**Latest Update (October 21, 2025):** Fixed tick size precision - now uses REAL tickSize from Binance PRICE_FILTER instead of calculated from pricePrecision. Eliminates rounding errors for low-price coins.
+
 # User Preferences
 
 ## Communication
