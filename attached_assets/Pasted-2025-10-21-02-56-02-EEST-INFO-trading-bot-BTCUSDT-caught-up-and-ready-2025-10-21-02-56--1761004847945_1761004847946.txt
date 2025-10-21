@@ -1,0 +1,392 @@
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ BTCUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ ETHUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ BCHUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ XRPUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ LTCUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ TRXUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ ETCUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ LINKUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ XLMUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ ADAUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ XMRUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ DASHUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ ZECUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ BNBUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ ATOMUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ BATUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ VETUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ THETAUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ ALGOUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ KNCUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ COMPUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ DOGEUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ KAVAUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ SNXUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ DOTUSDT caught up and ready
+2025-10-21 02:56:02 EEST | INFO     | trading_bot | ⚡ CRVUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ TRBUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ SUSHIUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ SOLUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ UNIUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ AVAXUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ NEARUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ AAVEUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ FILUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ RSRUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ BELUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ AXSUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ ZENUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ GRTUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ SANDUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ CHRUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ MANAUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ ALICEUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ HBARUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ 1000SHIBUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ DYDXUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ GALAUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ CELOUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ ARUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ CTSIUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ✅ BTCUSDT ready for analysis (1 symbols analyzing)
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ ENSUSDT caught up and ready
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ✅ ETHUSDT ready for analysis (2 symbols analyzing)
+2025-10-21 02:56:03 EEST | INFO     | trading_bot | ⚡ PEOPLEUSDT caught up and ready
+2025-10-21 02:56:04 EEST | INFO     | trading_bot | ✅ BCHUSDT ready for analysis (3 symbols analyzing)
+2025-10-21 02:56:04 EEST | INFO     | trading_bot | ⚡ FLOWUSDT caught up and ready
+2025-10-21 02:56:04 EEST | INFO     | trading_bot | ✅ XRPUSDT ready for analysis (4 symbols analyzing)
+2025-10-21 02:56:04 EEST | INFO     | trading_bot | ⚡ IMXUSDT caught up and ready
+2025-10-21 02:56:05 EEST | INFO     | trading_bot | ✅ LTCUSDT ready for analysis (5 symbols analyzing)
+2025-10-21 02:56:05 EEST | INFO     | trading_bot | ⚡ API3USDT caught up and ready
+2025-10-21 02:56:05 EEST | INFO     | trading_bot | ✅ TRXUSDT ready for analysis (6 symbols analyzing)
+2025-10-21 02:56:05 EEST | INFO     | trading_bot | ⚡ APEUSDT caught up and ready
+2025-10-21 02:56:06 EEST | INFO     | trading_bot | ✅ ETCUSDT ready for analysis (7 symbols analyzing)
+2025-10-21 02:56:06 EEST | INFO     | trading_bot | ⚡ OPUSDT caught up and ready
+2025-10-21 02:56:06 EEST | INFO     | trading_bot | ✅ LINKUSDT ready for analysis (8 symbols analyzing)
+2025-10-21 02:56:06 EEST | INFO     | trading_bot | ⚡ INJUSDT caught up and ready
+2025-10-21 02:56:07 EEST | INFO     | trading_bot | ✅ XLMUSDT ready for analysis (9 symbols analyzing)
+2025-10-21 02:56:07 EEST | INFO     | trading_bot | ⚡ LDOUSDT caught up and ready
+2025-10-21 02:56:07 EEST | INFO     | trading_bot | ✅ ADAUSDT ready for analysis (10 symbols analyzing)
+2025-10-21 02:56:07 EEST | INFO     | trading_bot | ⚡ ICPUSDT caught up and ready
+2025-10-21 02:56:08 EEST | INFO     | trading_bot | ✅ XMRUSDT ready for analysis (11 symbols analyzing)
+2025-10-21 02:56:08 EEST | INFO     | trading_bot | ⚡ APTUSDT caught up and ready
+2025-10-21 02:56:08 EEST | INFO     | trading_bot | ✅ DASHUSDT ready for analysis (12 symbols analyzing)
+2025-10-21 02:56:08 EEST | INFO     | trading_bot | ⚡ FETUSDT caught up and ready
+2025-10-21 02:56:09 EEST | INFO     | trading_bot | ✅ ZECUSDT ready for analysis (13 symbols analyzing)
+2025-10-21 02:56:09 EEST | INFO     | trading_bot | ⚡ MAGICUSDT caught up and ready
+2025-10-21 02:56:09 EEST | INFO     | trading_bot | ✅ BNBUSDT ready for analysis (14 symbols analyzing)
+2025-10-21 02:56:09 EEST | INFO     | trading_bot | ⚡ PHBUSDT caught up and ready
+2025-10-21 02:56:10 EEST | INFO     | trading_bot | ✅ ATOMUSDT ready for analysis (15 symbols analyzing)
+2025-10-21 02:56:10 EEST | INFO     | trading_bot | ⚡ CFXUSDT caught up and ready
+2025-10-21 02:56:10 EEST | INFO     | trading_bot | ✅ BATUSDT ready for analysis (16 symbols analyzing)
+2025-10-21 02:56:10 EEST | INFO     | trading_bot | ⚡ STXUSDT caught up and ready
+2025-10-21 02:56:11 EEST | INFO     | trading_bot | ✅ VETUSDT ready for analysis (17 symbols analyzing)
+2025-10-21 02:56:11 EEST | INFO     | trading_bot | ⚡ SSVUSDT caught up and ready
+2025-10-21 02:56:11 EEST | INFO     | trading_bot | ✅ THETAUSDT ready for analysis (18 symbols analyzing)
+2025-10-21 02:56:11 EEST | INFO     | trading_bot | ⚡ TRUUSDT caught up and ready
+2025-10-21 02:56:12 EEST | INFO     | trading_bot | ✅ ALGOUSDT ready for analysis (19 symbols analyzing)
+2025-10-21 02:56:12 EEST | INFO     | trading_bot | ⚡ ARBUSDT caught up and ready
+2025-10-21 02:56:12 EEST | INFO     | trading_bot | ✅ KNCUSDT ready for analysis (20 symbols analyzing)
+2025-10-21 02:56:12 EEST | INFO     | trading_bot | ⚡ EDUUSDT caught up and ready
+2025-10-21 02:56:13 EEST | INFO     | trading_bot | ✅ COMPUSDT ready for analysis (21 symbols analyzing)
+2025-10-21 02:56:13 EEST | INFO     | trading_bot | ⚡ SUIUSDT caught up and ready
+2025-10-21 02:56:13 EEST | INFO     | trading_bot | ✅ DOGEUSDT ready for analysis (22 symbols analyzing)
+2025-10-21 02:56:13 EEST | INFO     | trading_bot | ⚡ 1000PEPEUSDT caught up and ready
+2025-10-21 02:56:14 EEST | INFO     | trading_bot | ✅ KAVAUSDT ready for analysis (23 symbols analyzing)
+2025-10-21 02:56:14 EEST | INFO     | trading_bot | ⚡ 1000FLOKIUSDT caught up and ready
+2025-10-21 02:56:14 EEST | INFO     | trading_bot | ✅ SNXUSDT ready for analysis (24 symbols analyzing)
+2025-10-21 02:56:14 EEST | INFO     | trading_bot | ⚡ UMAUSDT caught up and ready
+2025-10-21 02:56:15 EEST | INFO     | trading_bot | ✅ DOTUSDT ready for analysis (25 symbols analyzing)
+2025-10-21 02:56:15 EEST | INFO     | trading_bot | ⚡ NMRUSDT caught up and ready
+2025-10-21 02:56:15 EEST | INFO     | trading_bot | ✅ CRVUSDT ready for analysis (26 symbols analyzing)
+2025-10-21 02:56:15 EEST | INFO     | trading_bot | ⚡ WLDUSDT caught up and ready
+2025-10-21 02:56:16 EEST | INFO     | trading_bot | ✅ TRBUSDT ready for analysis (27 symbols analyzing)
+2025-10-21 02:56:16 EEST | INFO     | trading_bot | ⚡ PENDLEUSDT caught up and ready
+2025-10-21 02:56:16 EEST | INFO     | trading_bot | ✅ SUSHIUSDT ready for analysis (28 symbols analyzing)
+2025-10-21 02:56:16 EEST | INFO     | trading_bot | ⚡ ARKMUSDT caught up and ready
+2025-10-21 02:56:17 EEST | INFO     | trading_bot | ✅ SOLUSDT ready for analysis (29 symbols analyzing)
+2025-10-21 02:56:17 EEST | INFO     | trading_bot | ⚡ YGGUSDT caught up and ready
+2025-10-21 02:56:18 EEST | INFO     | trading_bot | ✅ UNIUSDT ready for analysis (30 symbols analyzing)
+2025-10-21 02:56:18 EEST | INFO     | trading_bot | ⚡ SEIUSDT caught up and ready
+2025-10-21 02:56:18 EEST | INFO     | trading_bot | ✅ AVAXUSDT ready for analysis (31 symbols analyzing)
+2025-10-21 02:56:18 EEST | INFO     | trading_bot | ⚡ TIAUSDT caught up and ready
+2025-10-21 02:56:19 EEST | INFO     | trading_bot | ✅ NEARUSDT ready for analysis (32 symbols analyzing)
+2025-10-21 02:56:19 EEST | INFO     | trading_bot | ⚡ CAKEUSDT caught up and ready
+2025-10-21 02:56:19 EEST | INFO     | trading_bot | ✅ AAVEUSDT ready for analysis (33 symbols analyzing)
+2025-10-21 02:56:19 EEST | INFO     | trading_bot | ⚡ MEMEUSDT caught up and ready
+2025-10-21 02:56:20 EEST | INFO     | trading_bot | ✅ FILUSDT ready for analysis (34 symbols analyzing)
+2025-10-21 02:56:20 EEST | INFO     | trading_bot | ⚡ TWTUSDT caught up and ready
+2025-10-21 02:56:20 EEST | INFO     | trading_bot | ✅ RSRUSDT ready for analysis (35 symbols analyzing)
+2025-10-21 02:56:20 EEST | INFO     | trading_bot | ⚡ ORDIUSDT caught up and ready
+2025-10-21 02:56:21 EEST | INFO     | trading_bot | ✅ BELUSDT ready for analysis (36 symbols analyzing)
+2025-10-21 02:56:21 EEST | INFO     | trading_bot | ⚡ KASUSDT caught up and ready
+2025-10-21 02:56:21 EEST | INFO     | trading_bot | ✅ AXSUSDT ready for analysis (37 symbols analyzing)
+2025-10-21 02:56:21 EEST | INFO     | trading_bot | ⚡ 1000BONKUSDT caught up and ready
+2025-10-21 02:56:22 EEST | INFO     | trading_bot | ✅ ZENUSDT ready for analysis (38 symbols analyzing)
+2025-10-21 02:56:22 EEST | INFO     | trading_bot | ⚡ PYTHUSDT caught up and ready
+2025-10-21 02:56:22 EEST | INFO     | trading_bot | ✅ GRTUSDT ready for analysis (39 symbols analyzing)
+2025-10-21 02:56:22 EEST | INFO     | trading_bot | ⚡ SUPERUSDT caught up and ready
+2025-10-21 02:56:23 EEST | INFO     | trading_bot | ✅ SANDUSDT ready for analysis (40 symbols analyzing)
+2025-10-21 02:56:23 EEST | INFO     | trading_bot | ⚡ JTOUSDT caught up and ready
+2025-10-21 02:56:23 EEST | INFO     | trading_bot | ✅ CHRUSDT ready for analysis (41 symbols analyzing)
+2025-10-21 02:56:23 EEST | INFO     | trading_bot | ⚡ 1000SATSUSDT caught up and ready
+2025-10-21 02:56:24 EEST | INFO     | trading_bot | ✅ MANAUSDT ready for analysis (42 symbols analyzing)
+2025-10-21 02:56:24 EEST | INFO     | trading_bot | ⚡ AUCTIONUSDT caught up and ready
+2025-10-21 02:56:24 EEST | INFO     | trading_bot | ✅ ALICEUSDT ready for analysis (43 symbols analyzing)
+2025-10-21 02:56:24 EEST | INFO     | trading_bot | ⚡ WIFUSDT caught up and ready
+2025-10-21 02:56:25 EEST | INFO     | trading_bot | ✅ HBARUSDT ready for analysis (44 symbols analyzing)
+2025-10-21 02:56:25 EEST | INFO     | trading_bot | ⚡ ONDOUSDT caught up and ready
+2025-10-21 02:56:25 EEST | INFO     | trading_bot | ✅ 1000SHIBUSDT ready for analysis (45 symbols analyzing)
+2025-10-21 02:56:25 EEST | INFO     | trading_bot | ⚡ JUPUSDT caught up and ready
+2025-10-21 02:56:26 EEST | INFO     | trading_bot | ✅ DYDXUSDT ready for analysis (46 symbols analyzing)
+2025-10-21 02:56:26 EEST | INFO     | trading_bot | ⚡ OMUSDT caught up and ready
+2025-10-21 02:56:26 EEST | INFO     | trading_bot | ✅ GALAUSDT ready for analysis (47 symbols analyzing)
+2025-10-21 02:56:26 EEST | INFO     | trading_bot | ⚡ STRKUSDT caught up and ready
+2025-10-21 02:56:27 EEST | INFO     | trading_bot | ✅ CELOUSDT ready for analysis (48 symbols analyzing)
+2025-10-21 02:56:27 EEST | INFO     | trading_bot | ⚡ TONUSDT caught up and ready
+2025-10-21 02:56:27 EEST | INFO     | trading_bot | ✅ ARUSDT ready for analysis (49 symbols analyzing)
+2025-10-21 02:56:27 EEST | INFO     | trading_bot | ⚡ BOMEUSDT caught up and ready
+2025-10-21 02:56:28 EEST | INFO     | trading_bot | ✅ CTSIUSDT ready for analysis (50 symbols analyzing)
+2025-10-21 02:56:28 EEST | INFO     | trading_bot | ⚡ ETHFIUSDT caught up and ready
+2025-10-21 02:56:28 EEST | INFO     | trading_bot | ✅ ENSUSDT ready for analysis (51 symbols analyzing)
+2025-10-21 02:56:28 EEST | INFO     | trading_bot | ⚡ ENAUSDT caught up and ready
+2025-10-21 02:56:29 EEST | INFO     | trading_bot | ✅ PEOPLEUSDT ready for analysis (52 symbols analyzing)
+2025-10-21 02:56:29 EEST | INFO     | trading_bot | ⚡ WUSDT caught up and ready
+2025-10-21 02:56:29 EEST | INFO     | trading_bot | ✅ FLOWUSDT ready for analysis (53 symbols analyzing)
+2025-10-21 02:56:29 EEST | INFO     | trading_bot | ⚡ TAOUSDT caught up and ready
+2025-10-21 02:56:30 EEST | INFO     | trading_bot | ✅ IMXUSDT ready for analysis (54 symbols analyzing)
+2025-10-21 02:56:30 EEST | INFO     | trading_bot | ⚡ REZUSDT caught up and ready
+2025-10-21 02:56:30 EEST | INFO     | trading_bot | ✅ API3USDT ready for analysis (55 symbols analyzing)
+2025-10-21 02:56:30 EEST | INFO     | trading_bot | ⚡ BBUSDT caught up and ready
+2025-10-21 02:56:31 EEST | INFO     | trading_bot | ✅ APEUSDT ready for analysis (56 symbols analyzing)
+2025-10-21 02:56:31 EEST | INFO     | trading_bot | ⚡ TURBOUSDT caught up and ready
+2025-10-21 02:56:31 EEST | INFO     | trading_bot | ✅ OPUSDT ready for analysis (57 symbols analyzing)
+2025-10-21 02:56:31 EEST | INFO     | trading_bot | ⚡ IOUSDT caught up and ready
+2025-10-21 02:56:32 EEST | INFO     | trading_bot | ✅ INJUSDT ready for analysis (58 symbols analyzing)
+2025-10-21 02:56:32 EEST | INFO     | trading_bot | ⚡ LISTAUSDT caught up and ready
+2025-10-21 02:56:32 EEST | INFO     | trading_bot | ✅ LDOUSDT ready for analysis (59 symbols analyzing)
+2025-10-21 02:56:32 EEST | INFO     | trading_bot | ⚡ ZROUSDT caught up and ready
+2025-10-21 02:56:33 EEST | INFO     | trading_bot | ✅ ICPUSDT ready for analysis (60 symbols analyzing)
+2025-10-21 02:56:33 EEST | INFO     | trading_bot | ⚡ RENDERUSDT caught up and ready
+2025-10-21 02:56:33 EEST | INFO     | trading_bot | ✅ APTUSDT ready for analysis (61 symbols analyzing)
+2025-10-21 02:56:33 EEST | INFO     | trading_bot | ⚡ POPCATUSDT caught up and ready
+2025-10-21 02:56:34 EEST | INFO     | trading_bot | ✅ FETUSDT ready for analysis (62 symbols analyzing)
+2025-10-21 02:56:34 EEST | INFO     | trading_bot | ⚡ POLUSDT caught up and ready
+2025-10-21 02:56:34 EEST | INFO     | trading_bot | ✅ MAGICUSDT ready for analysis (63 symbols analyzing)
+2025-10-21 02:56:34 EEST | INFO     | trading_bot | ⚡ 1MBABYDOGEUSDT caught up and ready
+2025-10-21 02:56:35 EEST | INFO     | trading_bot | ✅ PHBUSDT ready for analysis (64 symbols analyzing)
+2025-10-21 02:56:35 EEST | INFO     | trading_bot | ⚡ NEIROUSDT caught up and ready
+2025-10-21 02:56:35 EEST | INFO     | trading_bot | ✅ CFXUSDT ready for analysis (65 symbols analyzing)
+2025-10-21 02:56:35 EEST | INFO     | trading_bot | ⚡ EIGENUSDT caught up and ready
+2025-10-21 02:56:36 EEST | INFO     | trading_bot | ✅ STXUSDT ready for analysis (66 symbols analyzing)
+2025-10-21 02:56:36 EEST | INFO     | trading_bot | ⚡ MOODENGUSDT caught up and ready
+2025-10-21 02:56:36 EEST | INFO     | trading_bot | ✅ SSVUSDT ready for analysis (67 symbols analyzing)
+2025-10-21 02:56:36 EEST | INFO     | trading_bot | ⚡ PNUTUSDT caught up and ready
+2025-10-21 02:56:37 EEST | INFO     | trading_bot | ✅ TRUUSDT ready for analysis (68 symbols analyzing)
+2025-10-21 02:56:37 EEST | INFO     | trading_bot | ⚡ BANUSDT caught up and ready
+2025-10-21 02:56:37 EEST | INFO     | trading_bot | ✅ ARBUSDT ready for analysis (69 symbols analyzing)
+2025-10-21 02:56:37 EEST | INFO     | trading_bot | ⚡ MORPHOUSDT caught up and ready
+2025-10-21 02:56:38 EEST | INFO     | trading_bot | ✅ EDUUSDT ready for analysis (70 symbols analyzing)
+2025-10-21 02:56:38 EEST | INFO     | trading_bot | ⚡ AEROUSDT caught up and ready
+2025-10-21 02:56:38 EEST | INFO     | trading_bot | ✅ SUIUSDT ready for analysis (71 symbols analyzing)
+2025-10-21 02:56:38 EEST | INFO     | trading_bot | ⚡ RAYSOLUSDT caught up and ready
+2025-10-21 02:56:39 EEST | INFO     | trading_bot | ✅ 1000PEPEUSDT ready for analysis (72 symbols analyzing)
+2025-10-21 02:56:39 EEST | INFO     | trading_bot | ⚡ VIRTUALUSDT caught up and ready
+2025-10-21 02:56:39 EEST | INFO     | trading_bot | ✅ 1000FLOKIUSDT ready for analysis (73 symbols analyzing)
+2025-10-21 02:56:39 EEST | INFO     | trading_bot | ⚡ SPXUSDT caught up and ready
+2025-10-21 02:56:40 EEST | INFO     | trading_bot | ✅ UMAUSDT ready for analysis (74 symbols analyzing)
+2025-10-21 02:56:40 EEST | INFO     | trading_bot | ⚡ DEGOUSDT caught up and ready
+2025-10-21 02:56:40 EEST | INFO     | trading_bot | ✅ NMRUSDT ready for analysis (75 symbols analyzing)
+2025-10-21 02:56:40 EEST | INFO     | trading_bot | ⚡ PENGUUSDT caught up and ready
+2025-10-21 02:56:41 EEST | INFO     | trading_bot | ✅ WLDUSDT ready for analysis (76 symbols analyzing)
+2025-10-21 02:56:41 EEST | INFO     | trading_bot | ⚡ AIXBTUSDT caught up and ready
+2025-10-21 02:56:42 EEST | INFO     | trading_bot | ✅ PENDLEUSDT ready for analysis (77 symbols analyzing)
+2025-10-21 02:56:42 EEST | INFO     | trading_bot | ⚡ FARTCOINUSDT caught up and ready
+2025-10-21 02:56:42 EEST | INFO     | trading_bot | ✅ ARKMUSDT ready for analysis (78 symbols analyzing)
+2025-10-21 02:56:42 EEST | INFO     | trading_bot | ⚡ AI16ZUSDT caught up and ready
+2025-10-21 02:56:43 EEST | INFO     | trading_bot | ✅ YGGUSDT ready for analysis (79 symbols analyzing)
+2025-10-21 02:56:43 EEST | INFO     | trading_bot | ⚡ ZEREBROUSDT caught up and ready
+2025-10-21 02:56:43 EEST | INFO     | trading_bot | ✅ SEIUSDT ready for analysis (80 symbols analyzing)
+2025-10-21 02:56:43 EEST | INFO     | trading_bot | ⚡ BIOUSDT caught up and ready
+2025-10-21 02:56:44 EEST | INFO     | trading_bot | ✅ TIAUSDT ready for analysis (81 symbols analyzing)
+2025-10-21 02:56:44 EEST | INFO     | trading_bot | ⚡ SUSDT caught up and ready
+2025-10-21 02:56:44 EEST | INFO     | trading_bot | ✅ CAKEUSDT ready for analysis (82 symbols analyzing)
+2025-10-21 02:56:44 EEST | INFO     | trading_bot | ⚡ TRUMPUSDT caught up and ready
+2025-10-21 02:56:45 EEST | INFO     | trading_bot | ✅ MEMEUSDT ready for analysis (83 symbols analyzing)
+2025-10-21 02:56:45 EEST | INFO     | trading_bot | ⚡ PIPPINUSDT caught up and ready
+2025-10-21 02:56:45 EEST | INFO     | trading_bot | ✅ TWTUSDT ready for analysis (84 symbols analyzing)
+2025-10-21 02:56:45 EEST | INFO     | trading_bot | ⚡ BERAUSDT caught up and ready
+2025-10-21 02:56:46 EEST | INFO     | trading_bot | ✅ ORDIUSDT ready for analysis (85 symbols analyzing)
+2025-10-21 02:56:46 EEST | INFO     | trading_bot | ⚡ IPUSDT caught up and ready
+2025-10-21 02:56:46 EEST | INFO     | trading_bot | ✅ KASUSDT ready for analysis (86 symbols analyzing)
+2025-10-21 02:56:46 EEST | INFO     | trading_bot | ⚡ KAITOUSDT caught up and ready
+2025-10-21 02:56:47 EEST | INFO     | trading_bot | ✅ 1000BONKUSDT ready for analysis (87 symbols analyzing)
+2025-10-21 02:56:47 EEST | INFO     | trading_bot | ⚡ FORMUSDT caught up and ready
+2025-10-21 02:56:47 EEST | INFO     | trading_bot | ✅ PYTHUSDT ready for analysis (88 symbols analyzing)
+2025-10-21 02:56:47 EEST | INFO     | trading_bot | ⚡ PLUMEUSDT caught up and ready
+2025-10-21 02:56:48 EEST | INFO     | trading_bot | ✅ SUPERUSDT ready for analysis (89 symbols analyzing)
+2025-10-21 02:56:48 EEST | INFO     | trading_bot | ⚡ NILUSDT caught up and ready
+2025-10-21 02:56:48 EEST | INFO     | trading_bot | ✅ JTOUSDT ready for analysis (90 symbols analyzing)
+2025-10-21 02:56:48 EEST | INFO     | trading_bot | ⚡ PAXGUSDT caught up and ready
+2025-10-21 02:56:49 EEST | INFO     | trading_bot | ✅ 1000SATSUSDT ready for analysis (91 symbols analyzing)
+2025-10-21 02:56:49 EEST | INFO     | trading_bot | ⚡ WALUSDT caught up and ready
+2025-10-21 02:56:49 EEST | INFO     | trading_bot | ✅ AUCTIONUSDT ready for analysis (92 symbols analyzing)
+2025-10-21 02:56:49 EEST | INFO     | trading_bot | ⚡ MLNUSDT caught up and ready
+2025-10-21 02:56:50 EEST | INFO     | trading_bot | ✅ WIFUSDT ready for analysis (93 symbols analyzing)
+2025-10-21 02:56:50 EEST | INFO     | trading_bot | ⚡ ATHUSDT caught up and ready
+2025-10-21 02:56:50 EEST | INFO     | trading_bot | ✅ ONDOUSDT ready for analysis (94 symbols analyzing)
+2025-10-21 02:56:50 EEST | INFO     | trading_bot | ⚡ STOUSDT caught up and ready
+2025-10-21 02:56:51 EEST | INFO     | trading_bot | ✅ JUPUSDT ready for analysis (95 symbols analyzing)
+2025-10-21 02:56:51 EEST | INFO     | trading_bot | ⚡ BANKUSDT caught up and ready
+2025-10-21 02:56:51 EEST | INFO     | trading_bot | ✅ OMUSDT ready for analysis (96 symbols analyzing)
+2025-10-21 02:56:51 EEST | INFO     | trading_bot | ⚡ PUNDIXUSDT caught up and ready
+2025-10-21 02:56:52 EEST | INFO     | trading_bot | ✅ STRKUSDT ready for analysis (97 symbols analyzing)
+2025-10-21 02:56:52 EEST | INFO     | trading_bot | ⚡ B2USDT caught up and ready
+2025-10-21 02:56:52 EEST | INFO     | trading_bot | ✅ TONUSDT ready for analysis (98 symbols analyzing)
+2025-10-21 02:56:52 EEST | INFO     | trading_bot | ⚡ SYRUPUSDT caught up and ready
+2025-10-21 02:56:53 EEST | INFO     | trading_bot | ✅ BOMEUSDT ready for analysis (99 symbols analyzing)
+2025-10-21 02:56:53 EEST | INFO     | trading_bot | ⚡ DOODUSDT caught up and ready
+2025-10-21 02:56:53 EEST | INFO     | trading_bot | ✅ ETHFIUSDT ready for analysis (100 symbols analyzing)
+2025-10-21 02:56:53 EEST | INFO     | trading_bot | ⚡ OGUSDT caught up and ready
+2025-10-21 02:56:54 EEST | INFO     | trading_bot | ✅ ENAUSDT ready for analysis (101 symbols analyzing)
+2025-10-21 02:56:54 EEST | INFO     | trading_bot | ⚡ NXPCUSDT caught up and ready
+2025-10-21 02:56:54 EEST | INFO     | trading_bot | ✅ WUSDT ready for analysis (102 symbols analyzing)
+2025-10-21 02:56:54 EEST | INFO     | trading_bot | ⚡ AGTUSDT caught up and ready
+2025-10-21 02:56:55 EEST | INFO     | trading_bot | ✅ TAOUSDT ready for analysis (103 symbols analyzing)
+2025-10-21 02:56:55 EEST | INFO     | trading_bot | ⚡ SOONUSDT caught up and ready
+2025-10-21 02:56:55 EEST | INFO     | trading_bot | ✅ REZUSDT ready for analysis (104 symbols analyzing)
+2025-10-21 02:56:55 EEST | INFO     | trading_bot | ⚡ HUMAUSDT caught up and ready
+2025-10-21 02:56:56 EEST | INFO     | trading_bot | ✅ BBUSDT ready for analysis (105 symbols analyzing)
+2025-10-21 02:56:56 EEST | INFO     | trading_bot | ⚡ MERLUSDT caught up and ready
+2025-10-21 02:56:56 EEST | INFO     | trading_bot | ✅ TURBOUSDT ready for analysis (106 symbols analyzing)
+2025-10-21 02:56:56 EEST | INFO     | trading_bot | ⚡ HYPEUSDT caught up and ready
+2025-10-21 02:56:57 EEST | INFO     | trading_bot | ✅ IOUSDT ready for analysis (107 symbols analyzing)
+2025-10-21 02:56:57 EEST | INFO     | trading_bot | ⚡ BDXNUSDT caught up and ready
+2025-10-21 02:56:57 EEST | INFO     | trading_bot | ✅ LISTAUSDT ready for analysis (108 symbols analyzing)
+2025-10-21 02:56:57 EEST | INFO     | trading_bot | ⚡ LAUSDT caught up and ready
+2025-10-21 02:56:58 EEST | INFO     | trading_bot | ✅ ZROUSDT ready for analysis (109 symbols analyzing)
+2025-10-21 02:56:58 EEST | INFO     | trading_bot | ⚡ MYXUSDT caught up and ready
+2025-10-21 02:56:58 EEST | INFO     | trading_bot | ✅ RENDERUSDT ready for analysis (110 symbols analyzing)
+2025-10-21 02:56:58 EEST | INFO     | trading_bot | ⚡ HUSDT caught up and ready
+2025-10-21 02:56:59 EEST | INFO     | trading_bot | ✅ POPCATUSDT ready for analysis (111 symbols analyzing)
+2025-10-21 02:56:59 EEST | INFO     | trading_bot | ⚡ MUSDT caught up and ready
+2025-10-21 02:56:59 EEST | INFO     | trading_bot | ✅ POLUSDT ready for analysis (112 symbols analyzing)
+2025-10-21 02:56:59 EEST | INFO     | trading_bot | ⚡ PUMPUSDT caught up and ready
+2025-10-21 02:57:00 EEST | INFO     | trading_bot | ✅ 1MBABYDOGEUSDT ready for analysis (113 symbols analyzing)
+2025-10-21 02:57:00 EEST | INFO     | trading_bot | ⚡ CROSSUSDT caught up and ready
+2025-10-21 02:57:00 EEST | INFO     | trading_bot | ✅ NEIROUSDT ready for analysis (114 symbols analyzing)
+2025-10-21 02:57:00 EEST | INFO     | trading_bot | ⚡ CUSDT caught up and ready
+2025-10-21 02:57:01 EEST | INFO     | trading_bot | ✅ EIGENUSDT ready for analysis (115 symbols analyzing)
+2025-10-21 02:57:01 EEST | INFO     | trading_bot | ⚡ TAUSDT caught up and ready
+2025-10-21 02:57:01 EEST | INFO     | trading_bot | ✅ MOODENGUSDT ready for analysis (116 symbols analyzing)
+2025-10-21 02:57:01 EEST | INFO     | trading_bot | ⚡ ZORAUSDT caught up and ready
+2025-10-21 02:57:02 EEST | INFO     | trading_bot | ✅ PNUTUSDT ready for analysis (117 symbols analyzing)
+2025-10-21 02:57:02 EEST | INFO     | trading_bot | ⚡ TREEUSDT caught up and ready
+2025-10-21 02:57:02 EEST | INFO     | trading_bot | ✅ BANUSDT ready for analysis (118 symbols analyzing)
+2025-10-21 02:57:02 EEST | INFO     | trading_bot | ⚡ TOWNSUSDT caught up and ready
+2025-10-21 02:57:03 EEST | INFO     | trading_bot | ✅ MORPHOUSDT ready for analysis (119 symbols analyzing)
+2025-10-21 02:57:03 EEST | INFO     | trading_bot | ⚡ PROVEUSDT caught up and ready
+2025-10-21 02:57:03 EEST | INFO     | trading_bot | ✅ AEROUSDT ready for analysis (120 symbols analyzing)
+2025-10-21 02:57:03 EEST | INFO     | trading_bot | ⚡ INUSDT caught up and ready
+2025-10-21 02:57:04 EEST | INFO     | trading_bot | ✅ RAYSOLUSDT ready for analysis (121 symbols analyzing)
+2025-10-21 02:57:04 EEST | INFO     | trading_bot | ⚡ USELESSUSDT caught up and ready
+2025-10-21 02:57:05 EEST | INFO     | trading_bot | ✅ VIRTUALUSDT ready for analysis (122 symbols analyzing)
+2025-10-21 02:57:05 EEST | INFO     | trading_bot | ⚡ XPLUSDT caught up and ready
+2025-10-21 02:57:05 EEST | INFO     | trading_bot | ✅ SPXUSDT ready for analysis (123 symbols analyzing)
+2025-10-21 02:57:05 EEST | INFO     | trading_bot | ⚡ WLFIUSDT caught up and ready
+2025-10-21 02:57:06 EEST | INFO     | trading_bot | ✅ DEGOUSDT ready for analysis (124 symbols analyzing)
+2025-10-21 02:57:06 EEST | INFO     | trading_bot | ⚡ SOMIUSDT caught up and ready
+2025-10-21 02:57:06 EEST | INFO     | trading_bot | ✅ PENGUUSDT ready for analysis (125 symbols analyzing)
+2025-10-21 02:57:06 EEST | INFO     | trading_bot | ⚡ BASUSDT caught up and ready
+2025-10-21 02:57:07 EEST | INFO     | trading_bot | ✅ AIXBTUSDT ready for analysis (126 symbols analyzing)
+2025-10-21 02:57:07 EEST | INFO     | trading_bot | ⚡ BTRUSDT caught up and ready
+2025-10-21 02:57:07 EEST | INFO     | trading_bot | ✅ FARTCOINUSDT ready for analysis (127 symbols analyzing)
+2025-10-21 02:57:07 EEST | INFO     | trading_bot | ⚡ MITOUSDT caught up and ready
+2025-10-21 02:57:08 EEST | INFO     | trading_bot | ✅ AI16ZUSDT ready for analysis (128 symbols analyzing)
+2025-10-21 02:57:08 EEST | INFO     | trading_bot | ⚡ HEMIUSDT caught up and ready
+2025-10-21 02:57:08 EEST | INFO     | trading_bot | ✅ ZEREBROUSDT ready for analysis (129 symbols analyzing)
+2025-10-21 02:57:08 EEST | INFO     | trading_bot | ⚡ LINEAUSDT caught up and ready
+2025-10-21 02:57:09 EEST | INFO     | trading_bot | ✅ BIOUSDT ready for analysis (130 symbols analyzing)
+2025-10-21 02:57:09 EEST | INFO     | trading_bot | ⚡ QUSDT caught up and ready
+2025-10-21 02:57:09 EEST | INFO     | trading_bot | ✅ SUSDT ready for analysis (131 symbols analyzing)
+2025-10-21 02:57:09 EEST | INFO     | trading_bot | ⚡ PTBUSDT caught up and ready
+2025-10-21 02:57:10 EEST | INFO     | trading_bot | ✅ TRUMPUSDT ready for analysis (132 symbols analyzing)
+2025-10-21 02:57:10 EEST | INFO     | trading_bot | ⚡ OPENUSDT caught up and ready
+2025-10-21 02:57:10 EEST | INFO     | trading_bot | ✅ PIPPINUSDT ready for analysis (133 symbols analyzing)
+2025-10-21 02:57:10 EEST | INFO     | trading_bot | ⚡ AVNTUSDT caught up and ready
+2025-10-21 02:57:11 EEST | INFO     | trading_bot | ✅ BERAUSDT ready for analysis (134 symbols analyzing)
+2025-10-21 02:57:11 EEST | INFO     | trading_bot | ⚡ HOLOUSDT caught up and ready
+2025-10-21 02:57:11 EEST | INFO     | trading_bot | ✅ IPUSDT ready for analysis (135 symbols analyzing)
+2025-10-21 02:57:11 EEST | INFO     | trading_bot | ⚡ XPINUSDT caught up and ready
+2025-10-21 02:57:12 EEST | INFO     | trading_bot | ✅ KAITOUSDT ready for analysis (136 symbols analyzing)
+2025-10-21 02:57:12 EEST | INFO     | trading_bot | ⚡ UBUSDT caught up and ready
+2025-10-21 02:57:12 EEST | INFO     | trading_bot | ✅ FORMUSDT ready for analysis (137 symbols analyzing)
+2025-10-21 02:57:12 EEST | INFO     | trading_bot | ⚡ ZKCUSDT caught up and ready
+2025-10-21 02:57:13 EEST | INFO     | trading_bot | ✅ PLUMEUSDT ready for analysis (138 symbols analyzing)
+2025-10-21 02:57:13 EEST | INFO     | trading_bot | ⚡ STBLUSDT caught up and ready
+2025-10-21 02:57:13 EEST | INFO     | trading_bot | ✅ NILUSDT ready for analysis (139 symbols analyzing)
+2025-10-21 02:57:13 EEST | INFO     | trading_bot | ⚡ 0GUSDT caught up and ready
+2025-10-21 02:57:14 EEST | INFO     | trading_bot | ✅ PAXGUSDT ready for analysis (140 symbols analyzing)
+2025-10-21 02:57:14 EEST | INFO     | trading_bot | ⚡ AIAUSDT caught up and ready
+2025-10-21 02:57:14 EEST | INFO     | trading_bot | ✅ WALUSDT ready for analysis (141 symbols analyzing)
+2025-10-21 02:57:14 EEST | INFO     | trading_bot | ⚡ BARDUSDT caught up and ready
+2025-10-21 02:57:15 EEST | INFO     | trading_bot | ✅ MLNUSDT ready for analysis (142 symbols analyzing)
+2025-10-21 02:57:15 EEST | INFO     | trading_bot | ⚡ ASTERUSDT caught up and ready
+2025-10-21 02:57:15 EEST | INFO     | trading_bot | ✅ ATHUSDT ready for analysis (143 symbols analyzing)
+2025-10-21 02:57:15 EEST | INFO     | trading_bot | ⚡ BLESSUSDT caught up and ready
+2025-10-21 02:57:16 EEST | INFO     | trading_bot | ✅ STOUSDT ready for analysis (144 symbols analyzing)
+2025-10-21 02:57:16 EEST | INFO     | trading_bot | ⚡ COAIUSDT caught up and ready
+2025-10-21 02:57:16 EEST | INFO     | trading_bot | ✅ BANKUSDT ready for analysis (145 symbols analyzing)
+2025-10-21 02:57:16 EEST | INFO     | trading_bot | ⚡ HANAUSDT caught up and ready
+2025-10-21 02:57:17 EEST | INFO     | trading_bot | ✅ PUNDIXUSDT ready for analysis (146 symbols analyzing)
+2025-10-21 02:57:17 EEST | INFO     | trading_bot | ⚡ MIRAUSDT caught up and ready
+2025-10-21 02:57:17 EEST | INFO     | trading_bot | ✅ B2USDT ready for analysis (147 symbols analyzing)
+2025-10-21 02:57:17 EEST | INFO     | trading_bot | ⚡ LIGHTUSDT caught up and ready
+2025-10-21 02:57:18 EEST | INFO     | trading_bot | ✅ SYRUPUSDT ready for analysis (148 symbols analyzing)
+2025-10-21 02:57:18 EEST | INFO     | trading_bot | ⚡ XANUSDT caught up and ready
+2025-10-21 02:57:18 EEST | INFO     | trading_bot | ✅ DOODUSDT ready for analysis (149 symbols analyzing)
+2025-10-21 02:57:18 EEST | INFO     | trading_bot | ⚡ FFUSDT caught up and ready
+2025-10-21 02:57:19 EEST | INFO     | trading_bot | ✅ OGUSDT ready for analysis (150 symbols analyzing)
+2025-10-21 02:57:19 EEST | INFO     | trading_bot | ⚡ VFYUSDT caught up and ready
+2025-10-21 02:57:19 EEST | INFO     | trading_bot | ✅ NXPCUSDT ready for analysis (151 symbols analyzing)
+2025-10-21 02:57:19 EEST | INFO     | trading_bot | ⚡ EDENUSDT caught up and ready
+2025-10-21 02:57:20 EEST | INFO     | trading_bot | ✅ AGTUSDT ready for analysis (152 symbols analyzing)
+2025-10-21 02:57:20 EEST | INFO     | trading_bot | ⚡ NOMUSDT caught up and ready
+2025-10-21 02:57:20 EEST | INFO     | trading_bot | ✅ SOONUSDT ready for analysis (153 symbols analyzing)
+2025-10-21 02:57:20 EEST | INFO     | trading_bot | ⚡ TRUTHUSDT caught up and ready
+2025-10-21 02:57:21 EEST | INFO     | trading_bot | ✅ HUMAUSDT ready for analysis (154 symbols analyzing)
+2025-10-21 02:57:21 EEST | INFO     | trading_bot | ⚡ 2ZUSDT caught up and ready
+2025-10-21 02:57:21 EEST | INFO     | trading_bot | ✅ MERLUSDT ready for analysis (155 symbols analyzing)
+2025-10-21 02:57:21 EEST | INFO     | trading_bot | ⚡ EVAAUSDT caught up and ready
+2025-10-21 02:57:22 EEST | INFO     | trading_bot | ✅ HYPEUSDT ready for analysis (156 symbols analyzing)
+2025-10-21 02:57:22 EEST | INFO     | trading_bot | ⚡ LYNUSDT caught up and ready
+2025-10-21 02:57:22 EEST | INFO     | trading_bot | ✅ BDXNUSDT ready for analysis (157 symbols analyzing)
+2025-10-21 02:57:22 EEST | INFO     | trading_bot | ⚡ KGENUSDT caught up and ready
+2025-10-21 02:57:23 EEST | INFO     | trading_bot | ✅ LAUSDT ready for analysis (158 symbols analyzing)
+2025-10-21 02:57:23 EEST | INFO     | trading_bot | ⚡ 4USDT caught up and ready
+2025-10-21 02:57:23 EEST | INFO     | trading_bot | ✅ MYXUSDT ready for analysis (159 symbols analyzing)
+2025-10-21 02:57:23 EEST | INFO     | trading_bot | ⚡ GIGGLEUSDT caught up and ready
+2025-10-21 02:57:24 EEST | INFO     | trading_bot | ✅ HUSDT ready for analysis (160 symbols analyzing)
+2025-10-21 02:57:24 EEST | INFO     | trading_bot | ⚡ YBUSDT caught up and ready
+2025-10-21 02:57:24 EEST | INFO     | trading_bot | ✅ MUSDT ready for analysis (161 symbols analyzing)
+2025-10-21 02:57:24 EEST | INFO     | trading_bot | ⚡ METUSDT caught up and ready
+2025-10-21 02:57:25 EEST | INFO     | trading_bot | ✅ PUMPUSDT ready for analysis (162 symbols analyzing)
+2025-10-21 02:57:25 EEST | INFO     | trading_bot | ⚡ EULUSDT caught up and ready
+2025-10-21 02:57:25 EEST | INFO     | trading_bot | ✅ CROSSUSDT ready for analysis (163 symbols analyzing)
+2025-10-21 02:57:25 EEST | INFO     | trading_bot | ⚡ ENSOUSDT caught up and ready
+2025-10-21 02:57:26 EEST | INFO     | trading_bot | ✅ CUSDT ready for analysis (164 symbols analyzing)
+2025-10-21 02:57:26 EEST | INFO     | trading_bot | ⚡ CLOUSDT caught up and ready
+2025-10-21 02:57:26 EEST | INFO     | trading_bot | ✅ TAUSDT ready for analysis (165 symbols analyzing)
+2025-10-21 02:57:26 EEST | INFO     | trading_bot | ⚡ RECALLUSDT caught up and ready
+2025-10-21 02:57:27 EEST | INFO     | trading_bot | ✅ ZORAUSDT ready for analysis (166 symbols analyzing)
+2025-10-21 02:57:27 EEST | INFO     | trading_bot | ⚡ ZBTUSDT caught up and ready
+2025-10-21 02:57:28 EEST | INFO     | trading_bot | ✅ TREEUSDT ready for analysis (167 symbols analyzing)
+2025-10-21 02:57:28 EEST | INFO     | trading_bot | ⚡ LABUSDT caught up and ready
+2025-10-21 02:57:28 EEST | INFO     | trading_bot | ✅ TOWNSUSDT ready for analysis (168 symbols analyzing)
+2025-10-21 02:57:28 EEST | INFO     | trading_bot | ⚡ RIVERUSDT caught up and ready
+2025-10-21 02:57:29 EEST | INFO     | trading_bot | ✅ PROVEUSDT ready for analysis (169 symbols analyzing)
+2025-10-21 02:57:29 EEST | INFO     | trading_bot | ⚡ RVVUSDT caught up and ready
+2025-10-21 02:57:29 EEST | INFO     | trading_bot | ✅ INUSDT ready for analysis (170 symbols analyzing)
+2025-10-21 02:57:29 EEST | INFO     | trading_bot | ⚡ 币安人生USDT caught up and ready
+2025-10-21 02:57:29 EEST | INFO     | trading_bot | ⚡ BURST CATCHUP finished: 220 success, 0 failed
+📊 0 new symbols will be loaded by normal loader
