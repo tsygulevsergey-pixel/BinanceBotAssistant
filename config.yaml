@@ -856,7 +856,7 @@ sr_zones_v3_strategy:
   # SL/TP Calculation
   sl_tp:
     # Stop Loss
-    sl_buffer_atr: 0.25  # Добавка к противоположной границе зоны
+    sl_buffer_atr: 0.5  # Добавка к противоположной границе зоны (увеличено с 0.25 для адекватного risk_r)
     
     # Take Profit 1
     tp1_target: "nearest_local_zone"  # "nearest_local_zone" или "1R"
