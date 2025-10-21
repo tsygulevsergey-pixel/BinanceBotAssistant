@@ -59,7 +59,9 @@ class SRZonesV3Builder:
             body_break_atr=self.config['flip']['body_break_atr'],
             confirmation_bars=self.config['flip']['confirmation_bars'],
             retest_reaction_atr=self.config['flip']['retest_reaction_atr'],
-            weight_multiplier=self.config['flip']['weight_multiplier']
+            weight_multiplier=self.config['flip']['weight_multiplier'],
+            retest_lookforward_bars=self.config['flip']['retest_lookforward_bars'],
+            retest_accept_delta_atr=self.config['flip']['retest_accept_delta_atr']
         )
     
     def build_zones(self,

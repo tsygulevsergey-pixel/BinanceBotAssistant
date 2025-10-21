@@ -40,10 +40,14 @@ V3_DEFAULT_CONFIG = {
     
     # Flip (breakout) detection
     'flip': {
-        'body_break_atr': 0.3,  # b1 = 0.3 * ATR
-        'confirmation_bars': 2,  # N = 2 bars
-        'retest_reaction_atr': 0.4,  # r2 = 0.4 ATR for retest validation
+        'body_break_atr': 0.3,  # b1 = 0.3 * ATR - минимальный пробой телом
+        'confirmation_bars': 2,  # N = 2 bars - баров подряд для подтверждения
+        'retest_reaction_atr': 0.4,  # r2 = 0.4 ATR - минимальная реакция при ретесте
         'weight_multiplier': 0.6,  # Old score × 0.6 after flip
+        
+        # Альтернативное подтверждение: 1 закрытие + ретест
+        'retest_lookforward_bars': 12,  # N = 12 баров для поиска ретеста
+        'retest_accept_delta_atr': 0.25,  # Допуск для ретеста (0.25 × ATR от края зоны)
     },
     
     # Freshness decay (exponential) by timeframe

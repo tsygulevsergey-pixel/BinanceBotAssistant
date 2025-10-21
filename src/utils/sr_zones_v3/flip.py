@@ -4,7 +4,11 @@ Flip Mechanism - R⇄S zone role switching
 
 Требования для flip:
 1. Пробой телом (close за границей зоны > b1*ATR)
-2. Закрепление: N баров подряд или ретест с реакцией
+2. Закрепление (два варианта):
+   - Базовый: N баров подряд закрыто за зоной
+   - Альтернативный: 1 закрытие + ретест в ≤N баров с реакцией ≥r2*ATR
+     - Ретест должен быть в пределах delta*ATR от края зоны
+     - После ретеста реакция в сторону флипа ≥r2*ATR
 """
 
 import pandas as pd
@@ -22,18 +26,24 @@ class FlipDetector:
                  body_break_atr: float = 0.3,
                  confirmation_bars: int = 2,
                  retest_reaction_atr: float = 0.4,
-                 weight_multiplier: float = 0.6):
+                 weight_multiplier: float = 0.6,
+                 retest_lookforward_bars: int = 12,
+                 retest_accept_delta_atr: float = 0.25):
         """
         Args:
             body_break_atr: b1 - минимальный пробой телом (в ATR)
-            confirmation_bars: N - баров для закрепления
+            confirmation_bars: N - баров для закрепления (базовый метод)
             retest_reaction_atr: r2 - минимальная реакция при ретесте
             weight_multiplier: Множитель для старого score после flip
+            retest_lookforward_bars: Баров для поиска ретеста (альтернативный метод)
+            retest_accept_delta_atr: Допуск для ретеста от края зоны
         """
         self.body_break_atr = body_break_atr
         self.confirmation_bars = confirmation_bars
         self.retest_reaction_atr = retest_reaction_atr
         self.weight_multiplier = weight_multiplier
+        self.retest_lookforward_bars = retest_lookforward_bars
+        self.retest_accept_delta_atr = retest_accept_delta_atr
     
     def check_flip(self,
                   zone: Dict,
@@ -161,12 +171,14 @@ class FlipDetector:
                                  zone_high: float,
                                  atr_series: pd.Series) -> Dict:
         """
-        Проверить закрепление выше уровня
+        Проверить закрепление выше уровня (пробой R→S)
         
-        Вариант 1: N баров подряд закрываются выше
-        Вариант 2: Ретест с обратной стороны + реакция вверх
+        Вариант 1 (базовый): N баров подряд закрываются выше zone_high
+        Вариант 2 (альтернативный): 1 закрытие + ретест в ≤N баров
+            - Ретест = low заходит в [zone_high, zone_high + delta_atr × ATR]
+            - Реакция вверх ≥ r2_atr × ATR после ретеста
         """
-        # Вариант 1: Consecutive bars
+        # Вариант 1: N баров подряд закрыты выше
         if break_idx + self.confirmation_bars < len(df):
             next_bars = df.iloc[break_idx+1:break_idx+1+self.confirmation_bars]
             all_above = (next_bars['close'] > zone_high).all()
@@ -174,22 +186,34 @@ class FlipDetector:
             if all_above:
                 return {'confirmed': True, 'type': 'bars'}
         
-        # Вариант 2: Retest (в следующих барах цена return к зоне сверху)
-        if break_idx + 10 < len(df):  # Lookforward для ретеста
-            future_bars = df.iloc[break_idx+1:break_idx+11]
+        # Вариант 2: Альтернативное подтверждение через ретест
+        # У нас уже есть 1 закрытие выше (это break_idx бар)
+        # Ищем ретест в следующих retest_lookforward_bars барах
+        lookforward = min(self.retest_lookforward_bars, len(df) - break_idx - 1)
+        
+        if lookforward > 0:
+            future_bars = df.iloc[break_idx+1:break_idx+1+lookforward]
             
             for j in range(len(future_bars)):
                 candle = future_bars.iloc[j]
+                atr_at_retest = atr_series.iloc[break_idx + 1 + j]
                 
-                # Ретест: low касается зоны сверху
-                if candle['low'] <= zone_high * 1.01:  # ±1% tolerance
-                    # Проверить реакцию вверх
-                    if j + 3 < len(future_bars):
-                        reaction_bars = future_bars.iloc[j:j+4]
+                # Ретест: low заходит в acceptance зону
+                # [zone_high, zone_high + delta_atr × ATR]
+                retest_upper = zone_high + self.retest_accept_delta_atr * atr_at_retest
+                
+                if zone_high <= candle['low'] <= retest_upper:
+                    # Ретест обнаружен, проверяем реакцию вверх ПОСЛЕ ретеста
+                    # Реакция = max(high) в следующих барах - zone_high
+                    remaining_bars = len(future_bars) - j - 1  # Баров после j
+                    
+                    if remaining_bars > 0:
+                        reaction_window = min(4, remaining_bars)
+                        # CRITICAL: Начинаем с j+1 (следующий бар ПОСЛЕ ретеста)
+                        reaction_bars = future_bars.iloc[j+1:j+1+reaction_window]
                         max_price = reaction_bars['high'].max()
                         reaction_dist = max_price - zone_high
                         
-                        atr_at_retest = atr_series.iloc[break_idx + 1 + j]
                         if reaction_dist >= self.retest_reaction_atr * atr_at_retest:
                             return {'confirmed': True, 'type': 'retest'}
         
@@ -201,11 +225,14 @@ class FlipDetector:
                                  zone_low: float,
                                  atr_series: pd.Series) -> Dict:
         """
-        Проверить закрепление ниже уровня
+        Проверить закрепление ниже уровня (пробой S→R)
         
-        Аналогично _check_confirmation_above, но в обратную сторону
+        Вариант 1 (базовый): N баров подряд закрываются ниже zone_low
+        Вариант 2 (альтернативный): 1 закрытие + ретест в ≤N баров
+            - Ретест = high заходит в [zone_low - delta_atr × ATR, zone_low]
+            - Реакция вниз ≥ r2_atr × ATR после ретеста
         """
-        # Вариант 1: Consecutive bars
+        # Вариант 1: N баров подряд закрыты ниже
         if break_idx + self.confirmation_bars < len(df):
             next_bars = df.iloc[break_idx+1:break_idx+1+self.confirmation_bars]
             all_below = (next_bars['close'] < zone_low).all()
@@ -213,22 +240,34 @@ class FlipDetector:
             if all_below:
                 return {'confirmed': True, 'type': 'bars'}
         
-        # Вариант 2: Retest
-        if break_idx + 10 < len(df):
-            future_bars = df.iloc[break_idx+1:break_idx+11]
+        # Вариант 2: Альтернативное подтверждение через ретест
+        # У нас уже есть 1 закрытие ниже (это break_idx бар)
+        # Ищем ретест в следующих retest_lookforward_bars барах
+        lookforward = min(self.retest_lookforward_bars, len(df) - break_idx - 1)
+        
+        if lookforward > 0:
+            future_bars = df.iloc[break_idx+1:break_idx+1+lookforward]
             
             for j in range(len(future_bars)):
                 candle = future_bars.iloc[j]
+                atr_at_retest = atr_series.iloc[break_idx + 1 + j]
                 
-                # Ретест: high касается зоны снизу
-                if candle['high'] >= zone_low * 0.99:  # ±1% tolerance
-                    # Проверить реакцию вниз
-                    if j + 3 < len(future_bars):
-                        reaction_bars = future_bars.iloc[j:j+4]
+                # Ретест: high заходит в acceptance зону
+                # [zone_low - delta_atr × ATR, zone_low]
+                retest_lower = zone_low - self.retest_accept_delta_atr * atr_at_retest
+                
+                if retest_lower <= candle['high'] <= zone_low:
+                    # Ретест обнаружен, проверяем реакцию вниз ПОСЛЕ ретеста
+                    # Реакция = zone_low - min(low) в следующих барах
+                    remaining_bars = len(future_bars) - j - 1  # Баров после j
+                    
+                    if remaining_bars > 0:
+                        reaction_window = min(4, remaining_bars)
+                        # CRITICAL: Начинаем с j+1 (следующий бар ПОСЛЕ ретеста)
+                        reaction_bars = future_bars.iloc[j+1:j+1+reaction_window]
                         min_price = reaction_bars['low'].min()
                         reaction_dist = zone_low - min_price
                         
-                        atr_at_retest = atr_series.iloc[break_idx + 1 + j]
                         if reaction_dist >= self.retest_reaction_atr * atr_at_retest:
                             return {'confirmed': True, 'type': 'retest'}
         
