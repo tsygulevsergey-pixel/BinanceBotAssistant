@@ -862,6 +862,32 @@ class TelegramBot:
             f"🛑 Стоп: <code>{stop_loss}</code>\n"
             f"🎯 TP1: <code>{tp1}</code>\n"
             f"🎯 TP2: <code>{tp2}</code>\n\n"
+        )
+        
+        # Добавить ближайшие зоны для V3 сигналов
+        nearest_support = signal_data.get('nearest_support')
+        nearest_resistance = signal_data.get('nearest_resistance')
+        
+        if nearest_support or nearest_resistance:
+            message += "📍 <b>Ближайшие зоны:</b>\n"
+            
+            if nearest_support:
+                support_low = format_price(nearest_support.get('low', 0))
+                support_high = format_price(nearest_support.get('high', 0))
+                support_tf = nearest_support.get('tf', '?')
+                support_strength = nearest_support.get('strength', 0)
+                message += f"🟢 Support ({support_tf}): <code>{support_low}-{support_high}</code> [{support_strength:.0f}]\n"
+            
+            if nearest_resistance:
+                resist_low = format_price(nearest_resistance.get('low', 0))
+                resist_high = format_price(nearest_resistance.get('high', 0))
+                resist_tf = nearest_resistance.get('tf', '?')
+                resist_strength = nearest_resistance.get('strength', 0)
+                message += f"🔴 Resistance ({resist_tf}): <code>{resist_low}-{resist_high}</code> [{resist_strength:.0f}]\n"
+            
+            message += "\n"
+        
+        message += (
             f"⭐️ Скор: <code>{signal_data['score']:.1f}</code>\n"
             f"🔄 Режим: <code>{signal_data['regime']}</code>\n"
         )

@@ -2089,7 +2089,9 @@ class TradingBot:
                 'confidence': v3_signal['confidence'],
                 'setup_type': v3_signal['setup_type'],
                 'entry_tf': v3_signal['entry_tf'],
-                'regime': v3_signal.get('market_regime', 'UNKNOWN')
+                'regime': v3_signal.get('market_regime', 'UNKNOWN'),
+                'nearest_support': v3_signal.get('nearest_support'),
+                'nearest_resistance': v3_signal.get('nearest_resistance')
             }
             
             await self.telegram_bot.send_signal(signal_data)
