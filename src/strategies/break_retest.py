@@ -6,6 +6,7 @@ from src.utils.config import config
 from src.utils.strategy_logger import strategy_logger
 from src.indicators.technical import calculate_atr, calculate_adx
 from src.utils.sr_zones_15m import create_sr_zones, find_nearest_zone, calculate_stop_loss_from_zone
+from src.utils.v3_zones_provider import get_v3_zones_provider
 
 
 class BreakRetestStrategy(BaseStrategy):
@@ -14,10 +15,12 @@ class BreakRetestStrategy(BaseStrategy):
     
     Логика по мануалу:
     - Пробой с close ≥0.25 ATR и объёмом >1.5–2×
-    - Зона ретеста = экстремум±0.2–0.3 ATR ∩ AVWAP(бар пробоя)
+    - Зона ретеста = V3 S/R зона (если use_v3_zones=True) или экстремум±0.2–0.3 ATR
     - Триггер: 50% лимитом в зоне, 50% — по подтверждению
     - Стоп: за свинг-реакцией +0.2–0.3 ATR
     - Подтверждения: CVD flip, imbalance flip/refill, OI не падает
+    
+    УЛУЧШЕНИЕ: Интеграция с V3 S/R зонами для более точного определения уровней ретеста
     """
     
     def __init__(self):
@@ -49,6 +52,16 @@ class BreakRetestStrategy(BaseStrategy):
         # ФАЗА 1: Фильтры подтверждения
         self.require_pin_bar_or_engulfing = strategy_config.get('require_pin_bar_or_engulfing', False)
         self.htf_ema200_check = strategy_config.get('htf_ema200_check', True)
+        
+        # V3 ZONES INTEGRATION
+        self.use_v3_zones = strategy_config.get('use_v3_zones', True)  # По умолчанию включено
+        self.v3_zone_strength_threshold = strategy_config.get('v3_zone_strength_threshold', 50)  # Мин. качество зоны
+        self.v3_zones_provider = get_v3_zones_provider() if self.use_v3_zones else None
+        
+        if self.use_v3_zones:
+            strategy_logger.info(f"✅ {self.name}: V3 зоны включены (strength >= {self.v3_zone_strength_threshold})")
+        else:
+            strategy_logger.info(f"⚠️ {self.name}: V3 зоны отключены, используется классический метод (swing ± ATR)")
     
     def get_timeframe(self) -> str:
         return self.timeframe
@@ -236,6 +249,66 @@ class BreakRetestStrategy(BaseStrategy):
         
         return False
     
+    def _get_v3_retest_zone(self, symbol: str, breakout_level: float, direction: str,
+                           df_15m: pd.DataFrame, df_1h: pd.DataFrame,
+                           df_4h: pd.DataFrame, df_1d: pd.DataFrame,
+                           current_price: float, ema200: Optional[pd.Series] = None) -> Optional[Dict]:
+        """
+        Получить V3 зону для ретеста (если включено use_v3_zones)
+        
+        Args:
+            symbol: Trading symbol
+            breakout_level: Уровень пробоя
+            direction: 'LONG' или 'SHORT'
+            df_15m, df_1h, df_4h, df_1d: DataFrames для всех TF
+            current_price: Текущая цена
+            ema200: EMA200 на 15m
+        
+        Returns:
+            V3 zone dict или None
+        """
+        if not self.use_v3_zones or self.v3_zones_provider is None:
+            return None
+        
+        try:
+            # Получить V3 зоны для всех TF
+            zones_by_tf = self.v3_zones_provider.get_zones(
+                symbol=symbol,
+                df_1d=df_1d,
+                df_4h=df_4h,
+                df_1h=df_1h,
+                df_15m=df_15m,
+                current_price=current_price,
+                ema200_15m=ema200
+            )
+            
+            # Найти зону на уровне пробоя (с допуском)
+            retest_zone = self.v3_zones_provider.get_zone_at_level(
+                zones_by_tf=zones_by_tf,
+                level=breakout_level,
+                tolerance_pct=2.0  # 2% допуск
+            )
+            
+            # Фильтр по качеству зоны
+            if retest_zone and retest_zone.get('strength', 0) >= self.v3_zone_strength_threshold:
+                strategy_logger.debug(
+                    f"    ✅ V3 зона найдена: {retest_zone['tf']} {retest_zone['kind']} "
+                    f"[{retest_zone['low']:.4f}-{retest_zone['high']:.4f}] "
+                    f"strength={retest_zone['strength']:.1f}"
+                )
+                return retest_zone
+            elif retest_zone:
+                strategy_logger.debug(
+                    f"    ⚠️ V3 зона слабая (strength={retest_zone.get('strength', 0):.1f} "
+                    f"< {self.v3_zone_strength_threshold}), пропуск"
+                )
+            
+            return None
+            
+        except Exception as e:
+            strategy_logger.error(f"    ❌ Ошибка получения V3 зон: {e}")
+            return None
+    
     def _check_retest_quality(self, breakout: Dict, retest_bars: list, breakout_level: float) -> float:
         """
         ФАЗА 1+2: Проверка качества ретеста (УЛУЧШЕНО)
@@ -310,11 +383,40 @@ class BreakRetestStrategy(BaseStrategy):
                                    bias: str, retest_quality: float, 
                                    bb_good: bool, htf_confirmed: bool, htf_has_data: bool,
                                    rsi_confirmed: bool = True,
-                                   market_structure_good: bool = True) -> float:
+                                   market_structure_good: bool = True,
+                                   v3_zone: Optional[Dict] = None) -> float:
         """
-        ФАЗА 2+3: Улучшенная score система
+        ФАЗА 2+3: Улучшенная score система (с учетом V3 зон)
+        
+        Args:
+            v3_zone: V3 зона (если использована для ретеста)
         """
         score = base_score
+        
+        # V3 ZONE BONUS: Большой бонус за профессиональные зоны
+        if v3_zone is not None:
+            zone_strength = v3_zone.get('strength', 0)
+            zone_tf = v3_zone.get('tf', '15m')
+            
+            # Базовый бонус за качество зоны
+            if zone_strength >= 80:
+                score += 2.0  # Отличная зона (A-grade)
+            elif zone_strength >= 70:
+                score += 1.5  # Очень хорошая зона (B-grade)
+            elif zone_strength >= 60:
+                score += 1.0  # Хорошая зона (C-grade)
+            elif zone_strength >= 50:
+                score += 0.5  # Средняя зона (D-grade)
+            
+            # Дополнительный бонус за старший TF
+            if zone_tf == '1d':
+                score += 1.0  # Дневная зона
+            elif zone_tf == '4h':
+                score += 0.5  # 4-часовая зона
+            
+            strategy_logger.debug(
+                f"    🎯 V3 Zone Bonus: strength={zone_strength:.1f} (TF={zone_tf}) → бонус к score"
+            )
         
         # ФАЗА 2: Бонусы в зависимости от режима
         if regime == 'TREND':
@@ -538,18 +640,53 @@ class BreakRetestStrategy(BaseStrategy):
         current_high = df['high'].iloc[-1]
         current_low = df['low'].iloc[-1]
         
-        # Зона ретеста = экстремум ± 0.2-0.3 ATR (используем ATR с момента пробоя!)
+        # Зона ретеста - УЛУЧШЕНО: используем V3 зоны если включено
         breakout_level = breakout['level']
         breakout_atr = breakout['atr']
         breakout_vwap = breakout.get('vwap')
         
-        retest_zone_upper = breakout_level + self.zone_atr[1] * breakout_atr
-        retest_zone_lower = breakout_level - self.zone_atr[1] * breakout_atr
+        # Попытка получить V3 зону для ретеста
+        v3_zone = None
+        if self.use_v3_zones:
+            df_1h = indicators.get('1h')
+            df_4h = indicators.get('4h')
+            df_1d = indicators.get('1d')
+            ema200 = indicators.get('ema200_15m')
+            
+            v3_zone = self._get_v3_retest_zone(
+                symbol=symbol,
+                breakout_level=breakout_level,
+                direction=breakout['direction'],
+                df_15m=df,
+                df_1h=df_1h,
+                df_4h=df_4h,
+                df_1d=df_1d,
+                current_price=current_close,
+                ema200=ema200
+            )
         
-        # Если есть VWAP, учитываем пересечение (по мануалу)
-        if breakout_vwap is not None:
-            retest_zone_upper = min(retest_zone_upper, breakout_vwap + 0.1 * breakout_atr)
-            retest_zone_lower = max(retest_zone_lower, breakout_vwap - 0.1 * breakout_atr)
+        # Определить границы зоны ретеста
+        if v3_zone is not None:
+            # Используем V3 зону (профессиональный подход)
+            retest_zone_upper = v3_zone['high']
+            retest_zone_lower = v3_zone['low']
+            strategy_logger.debug(
+                f"    ✅ Используем V3 зону [{retest_zone_lower:.4f}, {retest_zone_upper:.4f}] "
+                f"strength={v3_zone['strength']:.1f} TF={v3_zone['tf']}"
+            )
+        else:
+            # Fallback к классическому методу (swing ± ATR)
+            retest_zone_upper = breakout_level + self.zone_atr[1] * breakout_atr
+            retest_zone_lower = breakout_level - self.zone_atr[1] * breakout_atr
+            
+            # Если есть VWAP, учитываем пересечение (по мануалу)
+            if breakout_vwap is not None:
+                retest_zone_upper = min(retest_zone_upper, breakout_vwap + 0.1 * breakout_atr)
+                retest_zone_lower = max(retest_zone_lower, breakout_vwap - 0.1 * breakout_atr)
+            
+            strategy_logger.debug(
+                f"    ⚠️ V3 зона не найдена, используем классический метод (swing ± {self.zone_atr[1]}×ATR)"
+            )
         
         # Логирование для debug
         strategy_logger.debug(f"    📊 Пробой найден: {breakout['direction']} на уровне {breakout_level:.4f}, ATR={breakout_atr:.4f}")
@@ -658,11 +795,12 @@ class BreakRetestStrategy(BaseStrategy):
                         tp2 = entry + atr_distance * 2.0  # 2R
                         strategy_logger.debug(f"    📊 SR-based TP/SL: SL из S/R зоны, TP1=1R, TP2=2R")
                     
-                    # ФАЗА 2+3: Улучшенная score система
+                    # ФАЗА 2+3: Улучшенная score система (с учетом V3 зоны)
                     base_score = 2.5
                     improved_score = self._calculate_improved_score(
                         base_score, breakout, regime, bias, retest_quality,
-                        bb_good, htf_confirmed, htf_has_data, rsi_confirmed, market_structure_good
+                        bb_good, htf_confirmed, htf_has_data, rsi_confirmed, market_structure_good,
+                        v3_zone=v3_zone
                     )
                     
                     strategy_logger.debug(f"    💯 Score: {base_score:.1f} → {improved_score:.1f} (режим {regime})")
@@ -804,11 +942,12 @@ class BreakRetestStrategy(BaseStrategy):
                         tp2 = entry - atr_distance * 2.0  # 2R
                         strategy_logger.debug(f"    📊 SR-based TP/SL: SL из S/R зоны, TP1=1R, TP2=2R")
                     
-                    # ФАЗА 2+3: Улучшенная score система
+                    # ФАЗА 2+3: Улучшенная score система (с учетом V3 зоны)
                     base_score = 2.5
                     improved_score = self._calculate_improved_score(
                         base_score, breakout, regime, bias, retest_quality,
-                        bb_good, htf_confirmed, htf_has_data, rsi_confirmed, market_structure_good
+                        bb_good, htf_confirmed, htf_has_data, rsi_confirmed, market_structure_good,
+                        v3_zone=v3_zone
                     )
                     
                     strategy_logger.debug(f"    💯 Score: {base_score:.1f} → {improved_score:.1f} (режим {regime})")

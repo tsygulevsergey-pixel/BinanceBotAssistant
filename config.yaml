@@ -239,6 +239,10 @@ strategies:
     # Фильтры для проверки подтверждения (ФАЗА 1)
     require_pin_bar_or_engulfing: false  # Требовать Pin Bar или Engulfing на ретесте (строже)
     htf_ema200_check: true  # Проверять тренд на 1H/4H EMA200 (уже работает)
+    
+    # V3 ZONES INTEGRATION - Профессиональные S/R зоны
+    use_v3_zones: true  # true = использовать V3 зоны, false = классический метод (swing ± ATR)
+    v3_zone_strength_threshold: 50  # Минимальное качество зоны (0-100, D-grade = 50)
   
   # #9 Volume Profile ⭐ CORE - Институциональные уровни
   volume_profile:

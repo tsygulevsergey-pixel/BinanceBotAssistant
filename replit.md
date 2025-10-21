@@ -4,6 +4,29 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot engineer
 
 ## Recent Changes (October 21, 2025)
 
+### 🔗 V3 ZONES INTEGRATION: Break & Retest Strategy ✅ IMPLEMENTED
+
+**Professional S/R Zones for Break & Retest:**
+- **New Feature**: Break & Retest strategy now uses V3 professional S/R zones instead of primitive swing ± ATR method
+- **Shared Zones Provider** (`src/utils/v3_zones_provider.py`):
+  - Singleton pattern for efficient zone caching across strategies
+  - Prevents duplicate zone calculations
+  - Shared access to V3 zones between Break & Retest and V3 S/R strategies
+- **Enhanced Retest Zone Detection**:
+  - **V3 Mode** (`use_v3_zones: true`): Uses DBSCAN-clustered zones with reaction validation and multi-TF confluence
+  - **Classic Mode** (`use_v3_zones: false`): Fallback to original swing ± 0.3 ATR method
+  - Automatic zone quality filtering (minimum strength threshold configurable)
+- **Score Bonuses for V3 Zones**:
+  - **A-grade zones** (strength ≥80): +2.0 score bonus
+  - **B-grade zones** (strength ≥70): +1.5 score bonus
+  - **C-grade zones** (strength ≥60): +1.0 score bonus
+  - **D-grade zones** (strength ≥50): +0.5 score bonus
+  - **HTF zones bonus**: +1.0 (1D), +0.5 (4H) for higher timeframe zones
+- **Config Options** (`config.yaml` → `strategies.retest`):
+  - `use_v3_zones`: true/false (default: true)
+  - `v3_zone_strength_threshold`: 0-100 (default: 50, D-grade minimum)
+- **Impact**: Significantly more accurate zone identification, filtering weak swing levels that caused false signals
+
 ### 🔧 CRITICAL BUG FIXES: V3 S/R Strategy ✅ FIXED
 
 **Issue 1: SHORT FlipRetest Zone Selection**
