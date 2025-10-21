@@ -15,7 +15,7 @@ import pandas as pd
 import pytz
 
 from src.database.models import V3SRSignal, V3SRZoneEvent, V3SRSignalLock
-from src.utils.sr_zones_v3.builder import SRZonesV3Builder
+from src.utils.v3_zones_provider import get_v3_zones_provider
 from src.indicators.vwap import VWAPCalculator
 from src.v3_sr.logger import v3_sr_logger as logger
 from src.v3_sr.helpers import (
@@ -49,9 +49,8 @@ class SRZonesV3Strategy:
         self.data_loader = data_loader
         self.binance_client = binance_client
         
-        # V3 Zone Builder
-        zone_config = config.get('sr_zones_v3', {})
-        self.zone_builder = SRZonesV3Builder(zone_config)
+        # V3 Zones Provider (shared singleton for caching)
+        self.v3_zones_provider = get_v3_zones_provider()
         
         # VWAP Calculator
         self.vwap_calc = VWAPCalculator()
@@ -59,11 +58,7 @@ class SRZonesV3Strategy:
         # Strategy enabled flag
         self.enabled = self.config.get('enabled', True)
         
-        # Cache for zones (to avoid recalculating every bar)
-        self.zone_cache = {}  # {symbol: {tf: zones}}
-        self.zone_cache_meta = {}  # {symbol: {'last_bar_time': timestamp, 'build_time': timestamp}}
-        
-        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled})")
+        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, shared zones cache)")
     
     async def analyze(self, symbol: str, df_15m: pd.DataFrame, df_1h: pd.DataFrame,
                      df_4h: pd.DataFrame, df_1d: pd.DataFrame,
@@ -141,7 +136,7 @@ class SRZonesV3Strategy:
     
     async def _get_or_build_zones(self, symbol: str, dfs: Dict[str, pd.DataFrame]) -> Dict:
         """
-        Get zones from cache or build new
+        Get zones using shared V3ZonesProvider (automatically cached)
         
         Args:
             symbol: Trading symbol
@@ -150,41 +145,15 @@ class SRZonesV3Strategy:
         Returns:
             Dict of zones by timeframe
         """
-        # ✅ FIX: Check cache freshness - rebuild if 15m data changed
-        should_rebuild = False
-        
-        if symbol in self.zone_cache:
-            # Check if 15m data is newer than cached zones
-            df_15m = dfs.get('15m')
-            if df_15m is not None and len(df_15m) > 0:
-                current_bar_time = df_15m.index[-1]
-                cached_entry = self.zone_cache_meta.get(symbol, {})
-                last_bar_time = cached_entry.get('last_bar_time')
-                
-                if last_bar_time is None or current_bar_time != last_bar_time:
-                    logger.debug(f"🔄 {symbol} zones stale (bar changed), rebuilding...")
-                    should_rebuild = True
-                else:
-                    logger.debug(f"📦 {symbol} zones loaded from cache (fresh)")
-                    return self.zone_cache[symbol]
-            else:
-                # No 15m data - use cache if exists
-                return self.zone_cache.get(symbol, {})
-        else:
-            should_rebuild = True
-        
-        # Build zones using V3 Builder
         try:
-            logger.info(f"🔨 Building V3 zones for {symbol}...")
-            
             # Get current price
             current_price = dfs.get('15m')['close'].iloc[-1] if '15m' in dfs and len(dfs['15m']) > 0 else None
             if current_price is None:
                 logger.error(f"❌ {symbol}: No 15m data for current price")
                 return {}
             
-            # Build zones with correct signature
-            zones = self.zone_builder.build_zones(
+            # Use shared V3 zones provider (automatically handles caching)
+            zones = self.v3_zones_provider.get_zones(
                 symbol=symbol,
                 df_1d=dfs.get('1d'),
                 df_4h=dfs.get('4h'),
@@ -212,18 +181,11 @@ class SRZonesV3Strategy:
             
             # Count zones by TF
             zone_counts = {tf: len(z) for tf, z in zones.items()}
-            logger.info(f"✅ {symbol} zones built: {zone_counts}")
-            
-            # ✅ FIX: Store cache with metadata
-            self.zone_cache[symbol] = zones
-            self.zone_cache_meta[symbol] = {
-                'last_bar_time': dfs.get('15m').index[-1] if '15m' in dfs and len(dfs['15m']) > 0 else None,
-                'build_time': datetime.now(pytz.UTC)
-            }
+            logger.debug(f"📦 {symbol} zones from shared cache: {zone_counts}")
             
             return zones
         except Exception as e:
-            logger.error(f"❌ Error building V3 zones for {symbol}: {e}")
+            logger.error(f"❌ Error getting V3 zones for {symbol}: {e}")
             return {}
     
     async def _check_flip_retest(self, symbol: str, entry_tf: str, df: pd.DataFrame,

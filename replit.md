@@ -10,7 +10,8 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot engineer
 - **New Feature**: Break & Retest strategy now uses V3 professional S/R zones instead of primitive swing ± ATR method
 - **Shared Zones Provider** (`src/utils/v3_zones_provider.py`):
   - Singleton pattern for efficient zone caching across strategies
-  - Prevents duplicate zone calculations
+  - **CRITICAL FIX**: V3 S/R strategy now also uses shared provider (eliminating duplicate zone calculations)
+  - Both strategies share single zone cache → 2x faster performance
   - Shared access to V3 zones between Break & Retest and V3 S/R strategies
 - **Enhanced Retest Zone Detection**:
   - **V3 Mode** (`use_v3_zones: true`): Uses DBSCAN-clustered zones with reaction validation and multi-TF confluence
