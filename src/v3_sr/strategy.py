@@ -973,7 +973,7 @@ class SRZonesV3Strategy:
     
     def _log_zone_event(self, symbol: str, zone: dict, event_type: str,
                        bar_data: pd.Series, market_regime: str, atr: float,
-                       related_signal_id: str = None, wick_to_body_ratio: float = None):
+                       related_signal_id: Optional[str] = None, wick_to_body_ratio: Optional[float] = None):
         """
         Log zone touch/reaction event to database
         
@@ -989,8 +989,10 @@ class SRZonesV3Strategy:
         """
         session = self.db.get_session()
         try:
-            # Generate unique event ID
-            event_id = generate_zone_event_id(symbol, zone.get('id'), event_type, bar_data.name)
+            # Generate unique event ID (convert bar timestamp to datetime)
+            bar_timestamp = pd.Timestamp(bar_data.name, tz='UTC').to_pydatetime()
+            zone_id = zone.get('id', 'unknown')
+            event_id = generate_zone_event_id(zone_id, event_type, bar_timestamp)
             
             # Determine touch characteristics
             zone_low = zone.get('low', 0)
@@ -1042,7 +1044,7 @@ class SRZonesV3Strategy:
                 penetration_depth_atr=penetration_depth_atr,
                 wick_to_body_ratio=wick_to_body_ratio,
                 market_regime=market_regime,
-                volatility_regime=get_volatility_regime(atr, bar_data.get('atr_sma', atr)),
+                volatility_regime='normal',  # Simplified for now
                 atr_value=atr,
                 related_signal_id=related_signal_id,
                 created_at=datetime.now(pytz.UTC)
