@@ -338,15 +338,24 @@ class V3SRPerformanceTracker:
         direction = signal.direction.upper() if signal.direction else 'LONG'
         risk = float(signal.risk_r) if signal.risk_r else abs(entry - float(signal.stop_loss))
         
+        # DEBUG LOGGING
+        logger.info(f"🔍 CLOSING V3 SIGNAL: {signal.symbol} {direction}")
+        logger.info(f"  Entry: {entry:.4f} | Exit: {exit_price:.4f} | SL: {signal.stop_loss:.4f}")
+        logger.info(f"  Exit Reason: {exit_reason} | TP1 Hit: {signal.tp1_hit} | Moved to BE: {signal.moved_to_be}")
+        logger.info(f"  PnL Override: {pnl_override}")
+        
         # Use saved TP1 PnL if provided (breakeven exit after TP1)
         if pnl_override is not None:
             pnl_percent = pnl_override
+            logger.info(f"  Using PnL override: {pnl_percent:.2f}%")
         else:
             # Calculate full exit PnL
             if direction == 'LONG':
                 full_exit_pnl = ((exit_price - entry) / entry) * 100
             else:
                 full_exit_pnl = ((entry - exit_price) / entry) * 100
+            
+            logger.info(f"  Full exit PnL calculation: {full_exit_pnl:.2f}%")
             
             # If TP1 was hit, combine virtual TP1 exit + remaining position exit
             if signal.tp1_hit:
@@ -356,9 +365,11 @@ class V3SRPerformanceTracker:
                 
                 # Combined PnL: TP1 virtual exit + remaining position
                 pnl_percent = tp1_pnl_saved + (remaining_size * full_exit_pnl)
+                logger.info(f"  Combined PnL: TP1 saved {tp1_pnl_saved:.2f}% + remaining {remaining_size*100:.0f}% * {full_exit_pnl:.2f}% = {pnl_percent:.2f}%")
             else:
                 # No TP1 hit - use full exit PnL
                 pnl_percent = full_exit_pnl
+                logger.info(f"  No TP1 hit, using full exit PnL: {pnl_percent:.2f}%")
         
         # Calculate final R-multiple (use original risk_r, not moved BE SL)
         if signal.tp1_hit:
