@@ -286,8 +286,8 @@ class V3SRPerformanceTracker:
         
         # Check Stop Loss
         if direction == 'LONG' and current_price <= sl:
-            # Breakeven exit if TP1 was hit (return saved TP1 PnL from 50% exit)
-            if signal.tp1_hit and abs(sl - entry) < 0.0001:
+            # Breakeven exit if SL was moved to BE after TP1
+            if signal.moved_to_be:
                 # Use saved PnL from TP1 (50% virtual exit)
                 saved_tp1_pnl = signal.tp1_pnl_percent if signal.tp1_pnl_percent else 0.0
                 return {
@@ -302,8 +302,8 @@ class V3SRPerformanceTracker:
                 }
         
         if direction == 'SHORT' and current_price >= sl:
-            # Breakeven exit if TP1 was hit (return saved TP1 PnL from 50% exit)
-            if signal.tp1_hit and abs(sl - entry) < 0.0001:
+            # Breakeven exit if SL was moved to BE after TP1
+            if signal.moved_to_be:
                 # Use saved PnL from TP1 (50% virtual exit)
                 saved_tp1_pnl = signal.tp1_pnl_percent if signal.tp1_pnl_percent else 0.0
                 return {
