@@ -8,7 +8,7 @@ import json
 import os
 
 # Путь к БД относительно корня проекта
-DB_PATH = os.path.join(os.path.dirname(__file__), "trading_bot.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "data", "trading_bot.db")
 OUTPUT_FILE = os.path.join(os.path.dirname(__file__), "v3_signals_export.json")
 
 def export_to_json():
