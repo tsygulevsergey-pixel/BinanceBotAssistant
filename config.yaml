@@ -214,7 +214,7 @@ strategies:
   
   # #4 MA/VWAP Pullback ⭐ CORE - Тренд-следование
   pullback:
-    enabled: true
+    enabled: false
     ma_periods: [20, 50]
     fib_levels: [0.382, 0.618]
     retest_atr: 0.3
@@ -222,7 +222,7 @@ strategies:
   
   # #5 Break & Retest ⭐ CORE - Структурная торговля
   retest:
-    enabled: true
+    enabled: false
     breakout_atr: 0.25
     zone_atr: [0.2, 0.3]
     volume_threshold: 1.5  # Базовый (не используется больше)
@@ -246,14 +246,14 @@ strategies:
   
   # #9 Volume Profile ⭐ CORE - Институциональные уровни
   volume_profile:
-    enabled: true
+    enabled: false
     bin_size_percent: 0.1
     acceptance_close_atr: 0.25
     acceptance_closes: 2
   
   # #11 Liquidity Sweep ⭐ CORE - Основное преимущество в крипте
   liquidity_sweep:
-    enabled: true
+    enabled: false
     sweep_min_atr: 0.1
     sweep_max_atr: 0.3
     volume_threshold: 1.5
@@ -262,7 +262,7 @@ strategies:
   
   # #12 Order Flow ⭐ CORE - Smart money tracking
   order_flow:
-    enabled: true
+    enabled: false
     imbalance_threshold: 0.6
     oi_delta_threshold: 5.0
     volume_threshold: 1.5
@@ -299,7 +299,7 @@ strategies:
   
   # #6 ATR Momentum ⭐ АКТИВИРОВАНО - Explosive impulse breakouts (УЛУЧШЕНО 2025)
   momentum:
-    enabled: true
+    enabled: false
     impulse_atr: 1.4
     close_percentile: 20  # top 20%
     min_distance_resistance: 2.0  # Было 1.5 → строже (гарантируем runway)
