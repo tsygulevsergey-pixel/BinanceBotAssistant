@@ -321,8 +321,9 @@ class TradingBot:
         loader_task = asyncio.create_task(self._symbol_loader_task())
         update_symbols_task = asyncio.create_task(self._update_symbols_task())
         periodic_gap_refill_task = asyncio.create_task(self._periodic_gap_refill_task())
+        zone_reaction_check_task = asyncio.create_task(self._periodic_zone_reaction_check_task())
         
-        logger.info("Background tasks started (loader + analyzer + symbol updater + periodic gap refill running in parallel)")
+        logger.info("Background tasks started (loader + analyzer + symbol updater + periodic gap refill + zone reaction check running in parallel)")
         logger.info("Bot will start analyzing symbols as soon as their data is loaded")
         
         # Запуск системы трекинга производительности
@@ -1518,6 +1519,37 @@ class TradingBot:
                 logger.error(f"Error in periodic gap refill: {e}", exc_info=True)
         
         logger.info("Periodic gap refill task stopped")
+    
+    async def _periodic_zone_reaction_check_task(self):
+        """Background task to periodically check zone reactions every 30 minutes"""
+        if not self.v3_enabled or self.v3_sr_strategy is None:
+            logger.info("V3 Zone reaction check disabled (V3 strategy not enabled)")
+            return
+        
+        # Ждем перед первым запуском (пусть бот загрузится и накопит события)
+        await asyncio.sleep(300)  # 5 минут
+        
+        logger.info("🔍 Periodic V3 zone reaction check started (interval: 30 minutes)")
+        
+        while self.running:
+            # Ждать 30 минут до следующей проверки
+            await asyncio.sleep(30 * 60)  # 30 минут
+            
+            if not self.running:
+                break
+            
+            try:
+                # Проверить реакции за последние 24 часа
+                await self.v3_sr_strategy.check_zone_reactions(
+                    lookback_hours=24,
+                    min_bars_wait=3,
+                    reaction_threshold_atr=0.5
+                )
+                
+            except Exception as e:
+                logger.error(f"Error in periodic zone reaction check: {e}", exc_info=True)
+        
+        logger.info("Periodic zone reaction check task stopped")
     
     def _save_signal_to_db(self, signal, final_score: float, regime: str, telegram_msg_id: Optional[int] = None, status: str = 'ACTIVE') -> bool:
         """
