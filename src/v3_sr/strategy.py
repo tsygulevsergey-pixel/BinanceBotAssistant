@@ -193,6 +193,23 @@ class SRZonesV3Strategy:
                 current_price=current_price
             )
             
+            # Update zone strength from accumulated events (real-time quality tracking)
+            zones_updated = 0
+            for tf, tf_zones in zones.items():
+                for zone in tf_zones:
+                    zone_id = zone.get('id')
+                    if zone_id:
+                        updated_strength = await self.update_zone_strength_from_events(symbol, zone_id)
+                        if updated_strength is not None:
+                            # Update zone strength in place
+                            old_strength = zone.get('strength', 0)
+                            zone['strength'] = updated_strength
+                            zones_updated += 1
+                            logger.debug(f"🔄 {symbol} zone {tf}-{zone.get('kind')} strength: {old_strength:.1f} → {updated_strength:.1f}")
+            
+            if zones_updated > 0:
+                logger.info(f"✨ {symbol}: Updated strength for {zones_updated} zones based on events")
+            
             # Count zones by TF
             zone_counts = {tf: len(z) for tf, z in zones.items()}
             logger.info(f"✅ {symbol} zones built: {zone_counts}")
