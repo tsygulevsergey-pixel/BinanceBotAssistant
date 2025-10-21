@@ -4,20 +4,31 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot engineer
 
 ## Recent Changes (October 21, 2025)
 
-### 🔧 CRITICAL BUG FIX: SHORT FlipRetest Zone Selection ✅ FIXED
-**Issue:** SHORT FlipRetest signals had stop-loss BELOW entry price (incorrect protection)
-- Root cause: Used Support zones ('S') instead of Resistance zones ('R')
-- Support zones are below current price → SL calculation `zone['high'] + buffer` resulted in SL < Entry
-- Affected all SHORT FlipRetest signals
+### 🔧 CRITICAL BUG FIXES: V3 S/R Strategy ✅ FIXED
 
-**Fix Applied:**
-- Changed SHORT FlipRetest to use Resistance zones ('R') - same as LONG
-- Correct logic: 
-  - LONG: R zone broken UP → retest from below → LONG entry with SL below zone
-  - SHORT: R zone broken DOWN → retest from above → SHORT entry with SL above zone
-- SL now correctly placed ABOVE entry for SHORT positions
-- Added diagnostic logging in V3SRPerformanceTracker for PnL calculation visibility
-- Created check_v3_signals.py diagnostic script for database verification
+**Issue 1: SHORT FlipRetest Zone Selection**
+- **Problem**: SHORT signals had SL BELOW entry (wrong protection)
+- **Root cause**: Used Support zones ('S') instead of Resistance zones ('R')
+- **Fix**: Both LONG and SHORT now use Resistance zones correctly:
+  - LONG: R zone broken UP → retest from below → SL below zone
+  - SHORT: R zone broken DOWN → retest from above → SL above zone
+
+**Issue 2: Confidence Score Calculation**
+- **Problem**: 
+  - Zone strength not used (read but ignored)
+  - Double HTF bonuses (class + timeframe)
+  - Fake VWAP bonus without actual check
+- **Fix**: Complete rewrite of confidence formula:
+  - **Base (0-50)**: zone_strength × 0.5 (main quality factor)
+  - **HTF bonus**: +20 (1D) / +15 (4H) / +10 (1H) - NO double counting
+  - **Setup**: +10 (FlipRetest) / +5 (SweepReturn)
+  - **A-grade**: +20 (high-quality sweeps)
+  - **VWAP**: +5 (only if price actually aligned with bias)
+
+**Additional improvements:**
+- Added nearest zones display in Telegram signals
+- Diagnostic logging for PnL tracking
+- Created check_v3_signals.py for database verification
 
 ### V3 Zone Events & Reaction Tracking System ✅ FULLY IMPLEMENTED
 Complete real-time zone quality management system to prevent zone degradation:

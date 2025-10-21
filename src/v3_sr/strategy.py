@@ -937,49 +937,59 @@ class SRZonesV3Strategy:
     def _calculate_confidence(self, zone: dict, direction: str, indicators: dict,
                              setup_type: str, is_a_grade: bool = False) -> Tuple[float, List[str]]:
         """
-        Calculate signal confidence score
+        Calculate signal confidence score based on zone quality and setup
         
         Returns:
             (confidence, quality_tags)
         """
         quality_config = self.config.get('quality', {})
         
-        confidence = 50.0  # Base
+        # Base confidence from zone strength (0-100 scale)
+        zone_strength = zone.get('strength', 50)
+        confidence = zone_strength * 0.5  # Convert zone strength to base (0-50)
         tags = []
         
-        # Zone strength bonus
-        zone_strength = zone.get('strength', 0)
+        # Zone class bonus (ONLY if not already counted in HTF)
         zone_class = zone.get('class', 'normal')
-        
-        if zone_class == 'key':
-            confidence += quality_config.get('htf_d_zone_bonus', 20)
-            tags.append('key_zone')
-        elif zone_class == 'strong':
-            confidence += quality_config.get('htf_h4_zone_bonus', 15)
-            tags.append('strong_zone')
-        
-        # HTF confluence
         zone_tf = zone.get('tf', '15m')
-        if zone_tf in ['4h', '1d']:
+        
+        # HTF zone bonus (based on timeframe, not class to avoid double counting)
+        if zone_tf == '1d':
+            confidence += quality_config.get('htf_d_zone_bonus', 20)
+            tags.append('htf_1d')
+        elif zone_tf == '4h':
             confidence += quality_config.get('htf_h4_zone_bonus', 15)
-            tags.append('htf_zone')
+            tags.append('htf_4h')
+        elif zone_tf == '1h':
+            confidence += 10
+            tags.append('htf_1h')
         
         # Setup-specific bonuses
         if setup_type == 'FlipRetest':
-            tags.append('flip_confirmed')
             confidence += 10
-        
+            tags.append('flip_retest')
         elif setup_type == 'SweepReturn':
+            confidence += 5
             tags.append('sweep_return')
             if is_a_grade:
                 a_bonus = self.config.get('sweep_return', {}).get('a_grade_bonus', 20)
                 confidence += a_bonus
                 tags.append('a_grade_sweep')
         
-        # VWAP alignment
-        # (simplified - should check actual VWAP bias)
-        tags.append('vwap_ok')
-        confidence += 5
+        # VWAP bias check (actual verification)
+        vwap = indicators.get('vwap', {}).get('value')
+        if vwap:
+            current_price = indicators.get('current_price', 0)
+            if current_price > 0:
+                vwap_aligned = False
+                if direction == 'LONG' and current_price >= vwap:
+                    vwap_aligned = True
+                elif direction == 'SHORT' and current_price <= vwap:
+                    vwap_aligned = True
+                
+                if vwap_aligned:
+                    confidence += 5
+                    tags.append('vwap_aligned')
         
         # Cap at 100
         confidence = min(100.0, confidence)
