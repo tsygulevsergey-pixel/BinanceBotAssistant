@@ -175,6 +175,16 @@ class BinanceClient:
         except Exception as e:
             logger.error(f"Failed to load symbols info: {e}", exc_info=True)
     
+    def get_tick_size(self, symbol: str) -> float:
+        """Получить tick size для символа (минимальный шаг цены)"""
+        if symbol not in self.symbols_info:
+            logger.warning(f"No precision info for {symbol}, using default tick_size=0.01")
+            return 0.01
+        
+        precision = self.symbols_info[symbol]['pricePrecision']
+        tick_size = 10 ** (-precision)
+        return tick_size
+    
     def format_price(self, symbol: str, price: float) -> str:
         """Форматировать цену согласно precision символа"""
         if symbol not in self.symbols_info:

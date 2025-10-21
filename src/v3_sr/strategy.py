@@ -781,8 +781,10 @@ class SRZonesV3Strategy:
         else:
             tp2_price = entry_price - (risk_r * tp2_min_r)
         
+        # Get proper tick size from Binance exchange info
+        tick_size = self.binance_client.get_tick_size(symbol)
+        
         # Round prices to tick size
-        tick_size = 0.01  # Default, should get from exchange info
         entry_price = round_price_to_tick(entry_price, tick_size)
         sl_price = round_price_to_tick(sl_price, tick_size)
         tp1_price = round_price_to_tick(tp1_price, tick_size)
