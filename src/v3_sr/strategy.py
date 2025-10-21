@@ -1061,6 +1061,172 @@ class SRZonesV3Strategy:
         finally:
             session.close()
     
+    async def check_zone_reactions(self, lookback_hours: int = 24, min_bars_wait: int = 3, 
+                                   reaction_threshold_atr: float = 0.5):
+        """
+        Check for price reactions after zone touch events
+        
+        Args:
+            lookback_hours: How far back to check events (default: 24 hours)
+            min_bars_wait: Minimum bars to wait before checking reaction
+            reaction_threshold_atr: Minimum reaction magnitude to count (in ATR)
+        """
+        session = self.db.get_session()
+        try:
+            cutoff_time = datetime.now(pytz.UTC) - timedelta(hours=lookback_hours)
+            
+            # Get unchecked events from the last N hours
+            events = session.query(V3SRZoneEvent).filter(
+                V3SRZoneEvent.reaction_checked_at.is_(None),
+                V3SRZoneEvent.created_at >= cutoff_time,
+                V3SRZoneEvent.event_type.in_(['touch', 'sweep'])  # Only check touches and sweeps
+            ).all()
+            
+            if not events:
+                return
+            
+            logger.info(f"Checking reactions for {len(events)} zone events...")
+            
+            for event in events:
+                try:
+                    # Determine timeframe from zone_tf
+                    tf = event.zone_tf
+                    
+                    # Load bars after the event
+                    df = self.data_loader.get_data(event.symbol, tf)
+                    if df is None or df.empty:
+                        continue
+                    
+                    # Find the event bar
+                    event_time = event.bar_timestamp
+                    df_after = df[df.index > event_time].head(10)  # Check next 10 bars max
+                    
+                    if len(df_after) < min_bars_wait:
+                        # Not enough bars yet, skip
+                        continue
+                    
+                    # Check for reaction
+                    reaction_occurred = False
+                    reaction_bars = None
+                    reaction_magnitude = 0.0
+                    
+                    zone_low = event.zone_low
+                    zone_high = event.zone_high
+                    zone_mid = (zone_low + zone_high) / 2
+                    atr = event.atr_value
+                    
+                    # Expected direction based on zone kind and side
+                    if event.zone_kind == 'S':  # Support zone
+                        # Expect bounce UP
+                        for i, (idx, bar) in enumerate(df_after.iterrows(), 1):
+                            # Price moved away from zone upward
+                            if bar['close'] > zone_high + (reaction_threshold_atr * atr):
+                                reaction_occurred = True
+                                reaction_bars = i
+                                reaction_magnitude = (bar['high'] - zone_high) / atr
+                                break
+                    
+                    elif event.zone_kind == 'R':  # Resistance zone
+                        # Expect bounce DOWN
+                        for i, (idx, bar) in enumerate(df_after.iterrows(), 1):
+                            # Price moved away from zone downward
+                            if bar['close'] < zone_low - (reaction_threshold_atr * atr):
+                                reaction_occurred = True
+                                reaction_bars = i
+                                reaction_magnitude = (zone_low - bar['low']) / atr
+                                break
+                    
+                    # Update event in database
+                    event.reaction_occurred = reaction_occurred
+                    event.reaction_bars = reaction_bars
+                    event.reaction_magnitude_atr = reaction_magnitude if reaction_occurred else None
+                    event.reaction_checked_at = datetime.now(pytz.UTC)
+                    
+                    session.commit()
+                    
+                    if reaction_occurred:
+                        logger.debug(f"✅ Reaction detected: {event.symbol} {event.zone_tf}-{event.zone_kind} "
+                                   f"(+{reaction_magnitude:.2f}R in {reaction_bars} bars)")
+                
+                except Exception as e:
+                    logger.error(f"Error checking reaction for event {event.event_id}: {e}")
+                    continue
+            
+            logger.info(f"Reaction check completed for {len(events)} events")
+        
+        except Exception as e:
+            logger.error(f"Error in check_zone_reactions: {e}", exc_info=True)
+        finally:
+            session.close()
+    
+    async def update_zone_strength_from_events(self, symbol: str, zone_id: str) -> Optional[float]:
+        """
+        Calculate updated zone strength based on accumulated events
+        
+        Args:
+            symbol: Trading symbol
+            zone_id: Zone ID
+            
+        Returns:
+            Updated strength score (0-100) or None if no events
+        """
+        session = self.db.get_session()
+        try:
+            # Get all events for this zone
+            events = session.query(V3SRZoneEvent).filter(
+                V3SRZoneEvent.zone_id == zone_id,
+                V3SRZoneEvent.symbol == symbol,
+                V3SRZoneEvent.reaction_checked_at.isnot(None)  # Only checked events
+            ).all()
+            
+            if not events:
+                return None
+            
+            # Calculate success metrics
+            total_touches = len(events)
+            successful_reactions = sum(1 for e in events if e.reaction_occurred)
+            
+            if total_touches == 0:
+                return None
+            
+            # Success rate
+            success_rate = successful_reactions / total_touches
+            
+            # Average reaction magnitude for successful reactions
+            successful_magnitudes = [e.reaction_magnitude_atr for e in events 
+                                   if e.reaction_occurred and e.reaction_magnitude_atr]
+            avg_reaction = sum(successful_magnitudes) / len(successful_magnitudes) if successful_magnitudes else 0
+            
+            # Recency factor (newer events matter more)
+            now = datetime.now(pytz.UTC)
+            recent_events = [e for e in events if (now - e.created_at).days <= 7]
+            recent_success_rate = (sum(1 for e in recent_events if e.reaction_occurred) / len(recent_events)) if recent_events else success_rate
+            
+            # Calculate new strength (weighted formula)
+            base_strength = events[0].zone_strength if events else 50.0
+            
+            # Modifiers
+            success_modifier = (success_rate - 0.5) * 40  # ±20 points for 0-100% success
+            recency_modifier = (recent_success_rate - 0.5) * 20  # ±10 points for recent performance
+            magnitude_modifier = min(avg_reaction * 10, 20)  # Up to +20 for strong reactions
+            
+            # Degradation factor (too many touches = zone weakening)
+            touch_penalty = max(0, (total_touches - 5) * 2)  # -2 per touch after 5th
+            
+            new_strength = base_strength + success_modifier + recency_modifier + magnitude_modifier - touch_penalty
+            new_strength = max(0, min(100, new_strength))  # Clamp 0-100
+            
+            logger.debug(f"Zone {zone_id} strength update: {base_strength:.1f} → {new_strength:.1f} "
+                       f"(success: {success_rate:.1%}, touches: {total_touches}, avg_reaction: {avg_reaction:.2f}R)")
+            
+            return new_strength
+        
+        except Exception as e:
+            logger.error(f"Error updating zone strength: {e}", exc_info=True)
+            return None
+        finally:
+            session.close()
+    
     async def block_symbol(self, symbol: str, direction: str, signal_id: str):
         """Block symbol for V3 strategy"""
         session = self.db.get_session()
