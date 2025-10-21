@@ -84,6 +84,47 @@ V3_DEFAULT_CONFIG = {
         # <40 = "weak"
     },
     
+    # Zone lifecycle (Candidate → Active → Key)
+    'lifecycle': {
+        # Candidate → Active requirements
+        'active': {
+            'min_touches': 2,        # Минимум 2 валидных касания
+            'min_purity': 0.65,      # Purity ≥ 0.65
+            'require_fresh': True,   # Freshness соблюдена (stale=False)
+        },
+        # Active → Key requirements
+        'key': {
+            'min_score': 80,          # Score ≥ 80
+            'require_htf_or_reactions': True,  # HTF overlap ИЛИ ≥3 реакций
+            'min_reactions_alt': 3,   # Альтернатива HTF: ≥3 валидных реакций
+        },
+        # Hysteresis (антимигание)
+        'hysteresis': {
+            'demote_to_normal_score': 50,   # Снизить в normal если score < 50
+            'demote_to_normal_purity': 0.60,  # Или если purity < 0.60
+        },
+    },
+    
+    # Auto-pruning (удаление старых зон)
+    'pruning': {
+        # Drop zones если нет касаний дольше чем X дней
+        'drop_if_no_touch_days': {
+            '15m': 3,
+            '1h': 7,
+            '4h': 14,
+            '1d': 30,
+        },
+        # Recreate cooldown (баров) - не создавать зону в той же области
+        'recreate_cooldown_bars': {
+            '15m': 30,
+            '1h': 24,
+            '4h': 18,
+            '1d': 12,
+        },
+        # Decay rate для strength (экспоненциальный если нет касаний)
+        'strength_decay_per_day': 0.05,  # -5% strength per day без касаний
+    },
+    
     # Zone expiry (no touches in T days)
     'expiry_days': {
         '1d': 60,

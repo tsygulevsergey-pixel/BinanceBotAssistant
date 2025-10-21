@@ -2,8 +2,8 @@
 S/R Zones V3 Builder - Main orchestrator
 Builds multi-timeframe zones using professional methodology
 
-Pipeline:
-1. Find fractal swings (по каждому TF)
+Pipeline (per TF):
+1. Find fractal swings
 2. DBSCAN clustering
 3. Zone quality filters (outliers, width guards, KDE prominence)
 4. Create zones from filtered clusters
@@ -12,9 +12,14 @@ Pipeline:
 7. Validate reactions (with FINAL zone boundaries)
 8. Freshness check (last touch age) - requires validation metadata
 9. Calculate scores (with boundary-consistent touches)
-10. Detect flips (R⇄S)
-11. Merge multi-TF zones
-12. Filter by strength & proximity
+10. Detect flips (R⇄S with alternative retest confirmation)
+
+Pipeline (multi-TF):
+11. Merge multi-TF zones (HTF zones dominate)
+12. Lifecycle management (Candidate → Active → Key)
+    - Auto-pruning of stale zones (no touch > X days)
+    - Strength decay for inactive zones
+    - Hysteresis anti-flapping
 """
 
 import pandas as pd
@@ -29,6 +34,7 @@ from .scoring import ZoneScorer
 from .flip import FlipDetector
 from .zone_filters import ZoneQualityFilter
 from .purity_freshness import PurityFreshnessGate
+from .zone_lifecycle import ZoneLifecycleManager
 
 
 class SRZonesV3Builder:
@@ -63,6 +69,8 @@ class SRZonesV3Builder:
             retest_lookforward_bars=self.config['flip']['retest_lookforward_bars'],
             retest_accept_delta_atr=self.config['flip']['retest_accept_delta_atr']
         )
+        
+        self.lifecycle_manager = ZoneLifecycleManager(config=self.config)
     
     def build_zones(self,
                    symbol: str,
@@ -127,6 +135,27 @@ class SRZonesV3Builder:
             )
             
             zones_by_tf[tf] = zones
+        
+        # ✅ STEP 11: Multi-TF Merge (combine overlapping zones across TFs)
+        # Flatten all zones into single list for merge
+        all_zones_flat = []
+        for tf in ['1d', '4h', '1h', '15m']:
+            if tf in zones_by_tf:
+                all_zones_flat.extend(zones_by_tf[tf])
+        
+        if all_zones_flat:
+            # Apply multi-TF merge (HTF zones dominate)
+            merged_zones = self._merge_multi_tf(all_zones_flat)
+            
+            # ✅ STEP 12: Lifecycle Management (Candidate → Active → Key)
+            # Apply lifecycle transitions, hysteresis, and auto-pruning
+            current_time = datetime.now()
+            lifecycle_zones = self.lifecycle_manager.apply_lifecycle(
+                merged_zones, current_time
+            )
+            
+            # Split back into TF buckets for return
+            zones_by_tf = self._split_zones_by_tf(lifecycle_zones)
         
         return zones_by_tf
     
@@ -513,10 +542,26 @@ class SRZonesV3Builder:
         size2 = zone2['high'] - zone2['low']
         smaller_size = min(size1, size2)
         
-        if smaller_size <= 0:
-            return 0.0
+        return overlap_size / smaller_size if smaller_size > 0 else 0.0
+    
+    def _split_zones_by_tf(self, zones: List[Dict]) -> Dict[str, List[Dict]]:
+        """
+        Split flat zones list back into TF buckets
         
-        return overlap_size / smaller_size
+        Args:
+            zones: Flat list of zones with 'tf' field
+        
+        Returns:
+            Dict of zones by timeframe
+        """
+        zones_by_tf = {'15m': [], '1h': [], '4h': [], '1d': []}
+        
+        for zone in zones:
+            tf = zone.get('tf', '1h')
+            if tf in zones_by_tf:
+                zones_by_tf[tf].append(zone)
+        
+        return zones_by_tf
     
     def _filter_top_zones(self,
                          zones: List[Dict],
