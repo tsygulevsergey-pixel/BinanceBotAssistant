@@ -101,29 +101,34 @@ class ZoneScorer:
     
     def _score_touches(self, valid_touches: List[Dict]) -> float:
         """
-        Оценить количество валидных касаний
+        Оценить количество валидных касаний (смягчено для лучшего баланса)
         
-        Логика: 
+        Логика (обновлено на основе industry best practices): 
         - 0 touches = 0.0
-        - 1-2 touches = 0.3-0.5
-        - 3-4 touches = 0.6-0.8
-        - 5+ touches = 0.9-1.0
+        - 1 touch = 0.4 (было 0.3) - одно качественное касание достаточно
+        - 2 touches = 0.65 (было 0.5) - оптимальное количество
+        - 3 touches = 0.85 (было 0.7) - сильная зона
+        - 4 touches = 0.95 (было 0.85)
+        - 5-6 touches = 1.0 - максимум силы
+        - 7+ touches = 0.9 - diminishing returns (зона истощается)
         """
         count = len(valid_touches)
         
         if count == 0:
             return 0.0
         elif count == 1:
-            return 0.3
+            return 0.4
         elif count == 2:
-            return 0.5
+            return 0.65
         elif count == 3:
-            return 0.7
-        elif count == 4:
             return 0.85
+        elif count == 4:
+            return 0.95
+        elif count <= 6:
+            return 1.0
         else:
-            # Diminishing returns после 5+
-            return min(1.0, 0.9 + (count - 5) * 0.02)
+            # 7+ касаний - зона истощается (diminishing returns)
+            return 0.9
     
     def _score_reactions(self, valid_touches: List[Dict]) -> float:
         """
