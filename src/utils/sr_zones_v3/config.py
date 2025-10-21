@@ -47,12 +47,13 @@ V3_DEFAULT_CONFIG = {
     },
     
     # Freshness decay (exponential) by timeframe
+    # ✅ OPTIMIZED (October 2025): Смягчены для сохранения качественных старых зон
     'freshness': {
         'tau_days': {
-            '1d': 20,
-            '4h': 10,
-            '1h': 5,
-            '15m': 2,
+            '1d': 40,
+            '4h': 25,
+            '1h': 15,
+            '15m': 7,
         }
     },
     
@@ -62,12 +63,13 @@ V3_DEFAULT_CONFIG = {
     },
     
     # Scoring weights (w1..w5)
+    # ✅ OPTIMIZED (October 2025): Оптимизированы на основе industry best practices
     'scoring': {
-        'w1_touches': 24,
-        'w2_reactions': 28,
-        'w3_freshness': 18,
-        'w4_confluence': 22,
-        'w5_noise': 12,
+        'w1_touches': 22,      # 20% (было 24%) - снижен, 2-3 касания достаточно
+        'w2_reactions': 32,    # 30% (было 28%) - увеличен, самый важный фактор!
+        'w3_freshness': 16,    # 15% (было 18%) - снижен, старые зоны не так плохи
+        'w4_confluence': 24,   # 22% (было 22%) - увеличен, теперь реально работает
+        'w5_noise': 14,        # 13% (было 12%) - увеличен penalty за шум
     },
     
     # Strength classification thresholds

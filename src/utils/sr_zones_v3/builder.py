@@ -64,7 +64,7 @@ class SRZonesV3Builder:
                    current_price: float,
                    ema200_15m: Optional[pd.Series] = None) -> Dict[str, List[Dict]]:
         """
-        Построить зоны для всех таймфреймов
+        Построить зоны для всех таймфреймов (top-down для HTF confluence)
         
         Args:
             symbol: Символ (для логов)
@@ -81,27 +81,40 @@ class SRZonesV3Builder:
                 '1d': [{zone_dict}, ...],
             }
         """
-        zones_by_tf = {
-            '15m': [],
-            '1h': [],
-            '4h': [],
-            '1d': []
-        }
+        zones_by_tf = {}
         
-        # Build zones for each TF
+        # Build zones TOP-DOWN (1d → 4h → 1h → 15m) чтобы передавать HTF zones
         timeframes = [
-            ('1d', df_1d),
-            ('4h', df_4h),
-            ('1h', df_1h),
-            ('15m', df_15m),
+            ('1d', df_1d, None),
+            ('4h', df_4h, None),
+            ('1h', df_1h, None),
+            ('15m', df_15m, ema200_15m),
         ]
         
-        for tf, df in timeframes:
+        for tf, df, ema200 in timeframes:
             if df is None or len(df) < 50:
+                zones_by_tf[tf] = []
                 continue
             
+            # Собрать HTF zones для confluence (только старшие TF)
+            htf_zones = {}
+            if tf == '4h' and '1d' in zones_by_tf:
+                htf_zones['1d'] = zones_by_tf['1d']
+            elif tf == '1h' and ('4h' in zones_by_tf or '1d' in zones_by_tf):
+                if '1d' in zones_by_tf:
+                    htf_zones['1d'] = zones_by_tf['1d']
+                if '4h' in zones_by_tf:
+                    htf_zones['4h'] = zones_by_tf['4h']
+            elif tf == '15m':
+                if '1d' in zones_by_tf:
+                    htf_zones['1d'] = zones_by_tf['1d']
+                if '4h' in zones_by_tf:
+                    htf_zones['4h'] = zones_by_tf['4h']
+                if '1h' in zones_by_tf:
+                    htf_zones['1h'] = zones_by_tf['1h']
+            
             zones = self._build_zones_for_tf(
-                tf, df, current_price, ema200=(ema200_15m if tf == '15m' else None)
+                tf, df, current_price, ema200=ema200, htf_zones=htf_zones
             )
             
             zones_by_tf[tf] = zones
@@ -112,7 +125,8 @@ class SRZonesV3Builder:
                            tf: str,
                            df: pd.DataFrame,
                            current_price: float,
-                           ema200: Optional[pd.Series] = None) -> List[Dict]:
+                           ema200: Optional[pd.Series] = None,
+                           htf_zones: Optional[Dict] = None) -> List[Dict]:
         """
         Построить зоны для одного таймфрейма
         
@@ -120,8 +134,15 @@ class SRZonesV3Builder:
         1. Find swings
         2. Cluster → zones
         3. Validate reactions
-        4. Score zones
+        4. Score zones (с HTF confluence и VWAP)
         5. Detect flips
+        
+        Args:
+            tf: Timeframe ('15m', '1h', '4h', '1d')
+            df: OHLC DataFrame
+            current_price: Текущая цена
+            ema200: EMA200 для confluence (optional)
+            htf_zones: Dict с зонами старших TF для HTF alignment confluence (optional)
         """
         # ATR для этого TF
         atr_series = self._calculate_atr(df, period=14)
@@ -147,7 +168,10 @@ class SRZonesV3Builder:
         
         all_zones = zones_supply + zones_demand
         
-        # 3. Validate reactions & calculate scores
+        # 3. Calculate VWAP для confluence
+        vwap = self._calculate_vwap(df)
+        
+        # 4. Validate reactions & calculate scores
         current_time = df.index[-1].to_pydatetime() if isinstance(df.index[-1], pd.Timestamp) else datetime.now()
         tau_days = get_config('freshness.tau_days', tf, default=10)
         
@@ -175,11 +199,11 @@ class SRZonesV3Builder:
             # Calculate score (с новыми confluence факторами и HTF multiplier)
             score = self.scorer.calculate_score(
                 zone, touches, current_time, tau_days, df, ema200,
-                htf_zones=None,  # TODO: передавать HTF зоны для confluence
-                vwap=None,       # TODO: передавать VWAP для confluence
-                swing_highs=swings.get('highs'),  # Swing highs для confluence
-                swing_lows=swings.get('lows'),    # Swing lows для confluence
-                zone_timeframe=tf  # Для HTF multiplier
+                htf_zones=htf_zones,              # ✅ HTF зоны для confluence (+0.5)
+                vwap=vwap,                        # ✅ VWAP для confluence (+0.3)
+                swing_highs=swings.get('highs'),  # Swing highs для confluence (+0.4)
+                swing_lows=swings.get('lows'),    # Swing lows для confluence (+0.4)
+                zone_timeframe=tf                 # Для HTF multiplier (×0.95-1.2)
             )
             zone['strength'] = score
             zone['class'] = self.scorer.classify_strength(score)
@@ -294,6 +318,34 @@ class SRZonesV3Builder:
         atr = tr.rolling(window=period).mean()
         
         return atr.fillna(0)
+    
+    def _calculate_vwap(self, df: pd.DataFrame) -> pd.Series:
+        """
+        Рассчитать VWAP (Volume Weighted Average Price)
+        
+        Args:
+            df: DataFrame с OHLC и volume
+        
+        Returns:
+            VWAP series
+        """
+        # Проверить наличие volume column
+        if 'volume' not in df.columns:
+            # Если нет volume, вернуть close price как fallback
+            return df['close'].copy()
+        
+        # Типичная цена (HL2 или HLC3)
+        typical_price = (df['high'] + df['low'] + df['close']) / 3
+        
+        # VWAP = cumsum(typical_price × volume) / cumsum(volume)
+        pv = typical_price * df['volume']
+        cumulative_pv = pv.cumsum()
+        cumulative_volume = df['volume'].cumsum()
+        
+        # Избежать деления на 0
+        vwap = cumulative_pv / cumulative_volume.replace(0, 1)
+        
+        return vwap.fillna(df['close'])
     
     def _merge_multi_tf(self, zones: List[Dict]) -> List[Dict]:
         """

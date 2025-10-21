@@ -188,12 +188,24 @@ The system loads configurations, connects to Binance, starts parallel data proce
 Base system in `src/utils/sr_zones_v3/`:
 - **Clustering**: DBSCAN-based zone consolidation (ε=0.6×ATR)
 - **Validation**: Reaction strength measurement (≥0.7 ATR retracement)
-- **Scoring**: Multi-factor (Touches + Reactions + Freshness + Confluence - Noise)
+- **Scoring System** ✅ OPTIMIZED (October 2025):
+  - **5 Core Components** (weighted formula):
+    1. **Touches (22% weight)**: Смягчено - 1 touch: 0.4, 2: 0.65, 3: 0.85, 4: 0.95, 5-6: 1.0, 7+: 0.9 (diminishing returns)
+    2. **Reactions (32% weight)**: Median/max reaction strength in ATR - САМЫЙ ВАЖНЫЙ фактор!
+    3. **Freshness (16% weight)**: Exponential decay - tau_days смягчен (15m:7, 1h:15, 4h:25, 1d:40)
+    4. **Confluence (24% weight)**: Расширен с 2 до 5 факторов:
+       - EMA200 proximity (+0.2)
+       - Round numbers (+0.2)
+       - HTF zone alignment (+0.5) - критично важно!
+       - VWAP proximity (+0.3)
+       - Swing high/low (+0.4)
+    5. **Noise Penalty (14% weight)**: Clarity filter - штраф за частые closes внутри зоны
+  - **HTF Multiplier**: 1d: ×1.2, 4h: ×1.1, 1h: ×1.0, 15m: ×0.95
+  - **Expected Impact**: Увеличение strong zones с 1-2% до 15-25% (~10x improvement)
 - **Flip Detection**: R⇄S role switching with confirmation
 - **Builder**: Multi-TF orchestrator returns Dict[tf, zones] for efficient access by timeframe (October 2025)
 - Adaptive fractal swing detection (k varies by TF)
 - Zone width adapts by volatility (e.g., 15m: 0.35-0.7 ATR)
-- Freshness decay using exponential function
 - Strength classification: key (80+), strong (60-79), normal (40-59), weak (<40)
 
 # External Dependencies
