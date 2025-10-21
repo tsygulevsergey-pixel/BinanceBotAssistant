@@ -1984,12 +1984,30 @@ class TradingBot:
         """Save V3 S/R signal to database"""
         session = db.get_session()
         try:
+            zone = v3_signal.get('zone', {})
+            
+            zone_id = zone.get('id')
+            if not zone_id:
+                zone_mid = zone.get('mid', 0)
+                zone_tf = zone.get('tf', 'unknown')
+                zone_kind = zone.get('kind', 'U')
+                zone_id = f"{v3_signal['symbol']}_{zone_tf}_{zone_kind}_{zone_mid:.4f}"
+            
             signal = V3SRSignal(
                 signal_id=v3_signal.get('signal_id', f"{v3_signal['symbol']}_{int(datetime.now(pytz.UTC).timestamp())}"),
                 symbol=v3_signal['symbol'],
                 setup_type=v3_signal['setup_type'],
                 direction=v3_signal['direction'],
                 entry_tf=v3_signal['entry_tf'],
+                zone_id=zone_id,
+                zone_tf=zone.get('tf', 'unknown'),
+                zone_kind=zone.get('kind', 'U'),
+                zone_low=float(zone.get('low', 0)),
+                zone_high=float(zone.get('high', 0)),
+                zone_mid=float(zone.get('mid', 0)),
+                zone_strength=float(zone.get('strength', 0)),
+                zone_class=zone.get('class', 'unknown'),
+                zone_state=zone.get('state', 'normal'),
                 entry_price=float(v3_signal['entry_price']),
                 stop_loss=float(v3_signal['stop_loss']),
                 take_profit_1=float(v3_signal['take_profit_1']),
@@ -1997,8 +2015,6 @@ class TradingBot:
                 risk_r=float(v3_signal.get('risk_r', abs(v3_signal['entry_price'] - v3_signal['stop_loss']))),
                 confidence=float(v3_signal['confidence']),
                 market_regime=v3_signal.get('market_regime', 'UNKNOWN'),
-                zone_strength=v3_signal['zone'].get('strength', 0) if v3_signal.get('zone') else 0,
-                zone_tf=v3_signal['zone'].get('tf', 'unknown') if v3_signal.get('zone') else 'unknown',
                 atr_value=float(v3_signal.get('atr', 0)),
                 status='PENDING',
                 created_at=datetime.now(pytz.UTC)
