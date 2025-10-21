@@ -177,6 +177,13 @@ class SRZonesV3Builder:
         
         # ✅ FIX: Use enumerate to properly update zones in list
         for i, zone in enumerate(all_zones):
+            # Generate unique zone ID
+            zone_mid = zone['mid']
+            zone_kind = zone['kind']
+            zone_id = f"{tf}_{zone_kind}_{int(zone_mid * 100000)}"  # e.g., "15m_R_123456"
+            zone['id'] = zone_id
+            zone['tf'] = tf
+            
             # Create validator for this TF
             bars_window = get_config('reaction.bars_window', tf, default=8)
             validator = ReactionValidator(

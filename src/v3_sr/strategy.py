@@ -1028,9 +1028,29 @@ class SRZonesV3Strategy:
         session = self.db.get_session()
         try:
             # Generate unique event ID (convert bar timestamp to datetime)
-            bar_timestamp = pd.Timestamp(bar_data.name, tz='UTC').floor('S').to_pydatetime()
+            # Safe timestamp conversion with fallback
+            try:
+                if isinstance(bar_data.name, pd.Timestamp):
+                    bar_timestamp = bar_data.name.floor('S').to_pydatetime()
+                elif isinstance(bar_data.name, datetime):
+                    bar_timestamp = bar_data.name.replace(microsecond=0)
+                else:
+                    # Fallback: use current time
+                    bar_timestamp = datetime.now(pytz.UTC).replace(microsecond=0)
+            except Exception:
+                bar_timestamp = datetime.now(pytz.UTC).replace(microsecond=0)
+            
             zone_id = zone.get('id', 'unknown')
             event_id = generate_zone_event_id(zone_id, event_type, bar_timestamp)
+            
+            # Check if event already exists (prevent duplicates)
+            existing = session.query(V3SRZoneEvent).filter(
+                V3SRZoneEvent.event_id == event_id
+            ).first()
+            
+            if existing:
+                logger.debug(f"V3 Zone Event already exists: {event_id}, skipping")
+                return
             
             # Determine touch characteristics
             zone_low = zone.get('low', 0)

@@ -25,6 +25,17 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot engineer
   - **A-grade**: +20 (high-quality sweeps)
   - **VWAP**: +5 (only if price actually aligned with bias)
 
+**Issue 3: Zone Event Logging Errors**
+- **Problem**:
+  - Zones missing 'id' field → zone_id='unknown'
+  - Invalid timestamp conversion → bar_timestamp='1970-01-01'
+  - UNIQUE constraint violations in v3_sr_zone_events table
+- **Fix**:
+  - Added unique ID generation for all zones (format: "tf_kind_price")
+  - Safe timestamp conversion with type checking and fallback
+  - Duplicate event detection before database insert
+  - Removed nanoseconds warning with .floor('S')
+
 **Additional improvements:**
 - Added nearest zones display in Telegram signals
 - Diagnostic logging for PnL tracking

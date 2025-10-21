@@ -1,0 +1,221 @@
+2025-10-21 19:33:56 EEST | INFO     | V3_SR |   📊 AIXBTUSDT 15m Flip-Retest check: 5 strong zones (min strength: 60)
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\strategy.py:1031: UserWarning: Discarding nonzero nanoseconds in conversion.
+  bar_timestamp = pd.Timestamp(bar_data.name, tz='UTC').to_pydatetime()
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\strategy.py:1079: UserWarning: Discarding nonzero nanoseconds in conversion.
+  bar_timestamp=pd.Timestamp(bar_data.name, tz='UTC').to_pydatetime(),
+2025-10-21 19:33:56 EEST | ERROR    | V3_SR | Error logging zone event: (sqlite3.IntegrityError) UNIQUE constraint failed: v3_sr_zone_events.event_id
+[SQL: INSERT INTO v3_sr_zone_events (event_id, zone_id, symbol, zone_tf, zone_kind, zone_low, zone_high, zone_strength, event_type, bar_timestamp, touch_price, side, penetration_depth_atr, wick_to_body_ratio, reaction_occurred, reaction_bars, reaction_magnitude_atr, reaction_checked_at, market_regime, volatility_regime, atr_value, related_signal_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('233d915bc661dc12', 'unknown', 'AIXBTUSDT', '4h', 'R', 0.061014, 0.062285999999999994, 67.86765008745215, 'body_break', '1970-01-01 00:00:00.000000', 0.06206, 'from_above', 0.0, None, 0, None, None, None, 'TREND', 'normal', 0.0006270000000000001, None, '2025-10-21 16:33:56.132162')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: UNIQUE constraint failed: v3_sr_zone_events.event_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\strategy.py", line 1092, in _log_zone_event
+    session.commit()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2032, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4345, in flush
+    self._flush(objects)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4480, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4441, in _flush
+    flush_context.execute()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: v3_sr_zone_events.event_id
+[SQL: INSERT INTO v3_sr_zone_events (event_id, zone_id, symbol, zone_tf, zone_kind, zone_low, zone_high, zone_strength, event_type, bar_timestamp, touch_price, side, penetration_depth_atr, wick_to_body_ratio, reaction_occurred, reaction_bars, reaction_magnitude_atr, reaction_checked_at, market_regime, volatility_regime, atr_value, related_signal_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('233d915bc661dc12', 'unknown', 'AIXBTUSDT', '4h', 'R', 0.061014, 0.062285999999999994, 67.86765008745215, 'body_break', '1970-01-01 00:00:00.000000', 0.06206, 'from_above', 0.0, None, 0, None, None, None, 'TREND', 'normal', 0.0006270000000000001, None, '2025-10-21 16:33:56.132162')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-10-21 19:33:56 EEST | ERROR    | V3_SR | Error logging zone event: (sqlite3.IntegrityError) UNIQUE constraint failed: v3_sr_zone_events.event_id
+[SQL: INSERT INTO v3_sr_zone_events (event_id, zone_id, symbol, zone_tf, zone_kind, zone_low, zone_high, zone_strength, event_type, bar_timestamp, touch_price, side, penetration_depth_atr, wick_to_body_ratio, reaction_occurred, reaction_bars, reaction_magnitude_atr, reaction_checked_at, market_regime, volatility_regime, atr_value, related_signal_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('286a2c2f28018f41', 'unknown', 'AIXBTUSDT', '4h', 'R', 0.061014, 0.062285999999999994, 67.86765008745215, 'flip', '1970-01-01 00:00:00.000000', 0.06217, 'from_above', 0.0, None, 0, None, None, None, 'TREND', 'normal', 0.0006270000000000001, None, '2025-10-21 16:33:56.140160')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: UNIQUE constraint failed: v3_sr_zone_events.event_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\strategy.py", line 1092, in _log_zone_event
+    session.commit()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2032, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4345, in flush
+    self._flush(objects)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4480, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4441, in _flush
+    flush_context.execute()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: v3_sr_zone_events.event_id
+[SQL: INSERT INTO v3_sr_zone_events (event_id, zone_id, symbol, zone_tf, zone_kind, zone_low, zone_high, zone_strength, event_type, bar_timestamp, touch_price, side, penetration_depth_atr, wick_to_body_ratio, reaction_occurred, reaction_bars, reaction_magnitude_atr, reaction_checked_at, market_regime, volatility_regime, atr_value, related_signal_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('286a2c2f28018f41', 'unknown', 'AIXBTUSDT', '4h', 'R', 0.061014, 0.062285999999999994, 67.86765008745215, 'flip', '1970-01-01 00:00:00.000000', 0.06217, 'from_above', 0.0, None, 0, None, None, None, 'TREND', 'normal', 0.0006270000000000001, None, '2025-10-21 16:33:56.140160')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-10-21 19:33:56 EEST | ERROR    | V3_SR | Error logging zone event: (sqlite3.IntegrityError) UNIQUE constraint failed: v3_sr_zone_events.event_id
+[SQL: INSERT INTO v3_sr_zone_events (event_id, zone_id, symbol, zone_tf, zone_kind, zone_low, zone_high, zone_strength, event_type, bar_timestamp, touch_price, side, penetration_depth_atr, wick_to_body_ratio, reaction_occurred, reaction_bars, reaction_magnitude_atr, reaction_checked_at, market_regime, volatility_regime, atr_value, related_signal_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('1d855e68bd432527', 'unknown', 'AIXBTUSDT', '4h', 'R', 0.061014, 0.062285999999999994, 67.86765008745215, 'retest', '1970-01-01 00:00:00.000000', 0.06217, 'from_above', 0.0, None, 0, None, None, None, 'TREND', 'normal', 0.0006270000000000001, None, '2025-10-21 16:33:56.147161')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: UNIQUE constraint failed: v3_sr_zone_events.event_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\v3_sr\strategy.py", line 1092, in _log_zone_event
+    session.commit()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2032, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4345, in flush
+    self._flush(objects)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4480, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4441, in _flush
+    flush_context.execute()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: v3_sr_zone_events.event_id
+[SQL: INSERT INTO v3_sr_zone_events (event_id, zone_id, symbol, zone_tf, zone_kind, zone_low, zone_high, zone_strength, event_type, bar_timestamp, touch_price, side, penetration_depth_atr, wick_to_body_ratio, reaction_occurred, reaction_bars, reaction_magnitude_atr, reaction_checked_at, market_regime, volatility_regime, atr_value, related_signal_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('1d855e68bd432527', 'unknown', 'AIXBTUSDT', '4h', 'R', 0.061014, 0.062285999999999994, 67.86765008745215, 'retest', '1970-01-01 00:00:00.000000', 0.06217, 'from_above', 0.0, None, 0, None, None, None, 'TREND', 'normal', 0.0006270000000000001, None, '2025-10-21 16:33:56.147161')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
