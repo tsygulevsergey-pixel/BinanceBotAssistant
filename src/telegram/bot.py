@@ -1192,6 +1192,11 @@ class TelegramBot:
             tp2_hit = len([s for s in closed_signals if s.tp2_hit])
             be_exits = len([s for s in closed_signals if s.exit_reason == 'BE'])
             
+            # Exit reasons breakdown
+            trail_exits = len([s for s in closed_signals if s.exit_reason == 'TRAIL'])
+            sl_exits = len([s for s in closed_signals if s.exit_reason == 'SL'])
+            timeout_exits = len([s for s in closed_signals if s.exit_reason == 'TIMEOUT'])
+            
             # Setups breakdown
             flip_signals = [s for s in closed_signals if s.setup_type == 'FlipRetest']
             sweep_signals = [s for s in closed_signals if s.setup_type == 'SweepReturn']
@@ -1214,7 +1219,10 @@ class TelegramBot:
                 f"📊 Win Rate: <b>{win_rate:.1f}%</b>\n\n"
                 f"🎯 TP1 Hit: {tp1_hit} ({tp1_hit/closed*100:.0f}%)\n"
                 f"🎯 TP2 Hit: {tp2_hit} ({tp2_hit/closed*100:.0f}%)\n"
-                f"⚖️ Breakeven: {be_exits}\n\n"
+                f"⚖️ Breakeven: {be_exits}\n"
+                f"📉 Trailing: {trail_exits}\n"
+                f"🛑 Stop Loss: {sl_exits}\n"
+                f"⏱️ Timeout: {timeout_exits}\n\n"
                 f"💰 Средний PnL: <b>{avg_pnl:+.2f}%</b>\n"
                 f"💵 Общий PnL: <b>{total_pnl:+.2f}%</b>\n\n"
                 f"🟢 Средняя победа: {avg_win:+.2f}%\n"
