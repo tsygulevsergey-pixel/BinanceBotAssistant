@@ -5,13 +5,14 @@ Builds multi-timeframe zones using professional methodology
 Pipeline:
 1. Find fractal swings (по каждому TF)
 2. DBSCAN clustering
-3. 🆕 Zone quality filters (outliers, width guards, KDE prominence)
+3. Zone quality filters (outliers, width guards, KDE prominence)
 4. Create zones from filtered clusters
 5. Validate reactions
-6. Calculate scores
-7. Detect flips (R⇄S)
-8. Merge multi-TF zones
-9. Filter by strength & proximity
+6. 🆕 Purity & Freshness gate (bars inside < 35%, last touch age)
+7. Calculate scores
+8. Detect flips (R⇄S)
+9. Merge multi-TF zones
+10. Filter by strength & proximity
 """
 
 import pandas as pd
@@ -25,6 +26,7 @@ from .validation import ReactionValidator
 from .scoring import ZoneScorer
 from .flip import FlipDetector
 from .zone_filters import ZoneQualityFilter
+from .purity_freshness import PurityFreshnessGate
 
 
 class SRZonesV3Builder:
@@ -136,11 +138,12 @@ class SRZonesV3Builder:
         Pipeline:
         1. Find fractal swings
         2. DBSCAN clustering
-        3. 🆕 Zone quality filters (outliers, width guards, KDE prominence)
+        3. Zone quality filters (outliers, width guards, KDE prominence)
         4. Create zones from filtered clusters
         5. Validate reactions
-        6. Score zones (с HTF confluence и VWAP)
-        7. Detect flips
+        6. 🆕 Purity & Freshness gate (bars inside, last touch age)
+        7. Score zones (с HTF confluence и VWAP)
+        8. Detect flips
         
         Args:
             tf: Timeframe ('15m', '1h', '4h', '1d')
@@ -176,25 +179,24 @@ class SRZonesV3Builder:
         # 3. Calculate VWAP для confluence
         vwap = self._calculate_vwap(df)
         
-        # 4. Validate reactions & calculate scores
+        # 4. Validate reactions (FIRST PASS - add touches data)
         current_time = df.index[-1].to_pydatetime() if isinstance(df.index[-1], pd.Timestamp) else datetime.now()
-        tau_days = get_config('freshness.tau_days', tf, default=10)
+        bars_window = get_config('reaction.bars_window', tf, default=8)
+        validator = ReactionValidator(
+            atr_mult=self.config['reaction']['atr_mult'],
+            bars_window=bars_window
+        )
         
-        # ✅ FIX: Use enumerate to properly update zones in list
-        for i, zone in enumerate(all_zones):
+        # Store touches data for each zone
+        zone_touches_map = {}
+        
+        for zone in all_zones:
             # Generate unique zone ID
             zone_mid = zone['mid']
             zone_kind = zone['kind']
             zone_id = f"{tf}_{zone_kind}_{int(zone_mid * 100000)}"  # e.g., "15m_R_123456"
             zone['id'] = zone_id
             zone['tf'] = tf
-            
-            # Create validator for this TF
-            bars_window = get_config('reaction.bars_window', tf, default=8)
-            validator = ReactionValidator(
-                atr_mult=self.config['reaction']['atr_mult'],
-                bars_window=bars_window
-            )
             
             # Find touches
             touches = validator.find_zone_touches(df, zone, atr_series)
@@ -208,6 +210,24 @@ class SRZonesV3Builder:
                 zone['last_touch_ts'] = None
                 zone['last_reaction_atr'] = 0.0
             
+            # Store for scoring later
+            zone_touches_map[zone_id] = touches
+        
+        # 5. 🆕 PURITY & FRESHNESS GATE (NEW STEP)
+        # Filter zones by purity (bars inside) and freshness (last touch age)
+        purity_gate = PurityFreshnessGate(tf)
+        all_zones = purity_gate.filter_zones(all_zones, df, current_atr)
+        
+        if not all_zones:
+            return []  # All zones filtered out
+        
+        # 6. Score zones (SECOND PASS - only for zones that passed purity/freshness)
+        tau_days = get_config('freshness.tau_days', tf, default=10)
+        
+        for i, zone in enumerate(all_zones):
+            zone_id = zone['id']
+            touches = zone_touches_map.get(zone_id, [])
+            
             # Calculate score (с новыми confluence факторами и HTF multiplier)
             score = self.scorer.calculate_score(
                 zone, touches, current_time, tau_days, df, ema200,
@@ -217,10 +237,15 @@ class SRZonesV3Builder:
                 swing_lows=swings.get('lows'),    # Swing lows для confluence (+0.4)
                 zone_timeframe=tf                 # Для HTF multiplier (×0.95-1.2)
             )
+            
+            # Apply stale penalty if zone is stale
+            if zone.get('stale', False):
+                score = max(0, score - 15)  # -15 penalty for stale zones
+            
             zone['strength'] = score
             zone['class'] = self.scorer.classify_strength(score)
             
-            # Check flip
+            # 7. Check flip
             flip_result = self.flip_detector.check_flip(
                 zone, df, atr_series, lookback_bars=20
             )
