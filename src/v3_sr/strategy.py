@@ -61,6 +61,7 @@ class SRZonesV3Strategy:
         
         # Cache for zones (to avoid recalculating every bar)
         self.zone_cache = {}  # {symbol: {tf: zones}}
+        self.zone_cache_meta = {}  # {symbol: {'last_bar_time': timestamp, 'build_time': timestamp}}
         
         logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled})")
     
@@ -149,10 +150,28 @@ class SRZonesV3Strategy:
         Returns:
             Dict of zones by timeframe
         """
-        # Simple cache check (можно улучшить с TTL)
+        # ✅ FIX: Check cache freshness - rebuild if 15m data changed
+        should_rebuild = False
+        
         if symbol in self.zone_cache:
-            logger.debug(f"📦 {symbol} zones loaded from cache")
-            return self.zone_cache[symbol]
+            # Check if 15m data is newer than cached zones
+            df_15m = dfs.get('15m')
+            if df_15m is not None and len(df_15m) > 0:
+                current_bar_time = df_15m.index[-1]
+                cached_entry = self.zone_cache_meta.get(symbol, {})
+                last_bar_time = cached_entry.get('last_bar_time')
+                
+                if last_bar_time is None or current_bar_time != last_bar_time:
+                    logger.debug(f"🔄 {symbol} zones stale (bar changed), rebuilding...")
+                    should_rebuild = True
+                else:
+                    logger.debug(f"📦 {symbol} zones loaded from cache (fresh)")
+                    return self.zone_cache[symbol]
+            else:
+                # No 15m data - use cache if exists
+                return self.zone_cache.get(symbol, {})
+        else:
+            should_rebuild = True
         
         # Build zones using V3 Builder
         try:
@@ -178,7 +197,13 @@ class SRZonesV3Strategy:
             zone_counts = {tf: len(z) for tf, z in zones.items()}
             logger.info(f"✅ {symbol} zones built: {zone_counts}")
             
+            # ✅ FIX: Store cache with metadata
             self.zone_cache[symbol] = zones
+            self.zone_cache_meta[symbol] = {
+                'last_bar_time': dfs.get('15m').index[-1] if '15m' in dfs and len(dfs['15m']) > 0 else None,
+                'build_time': datetime.now(pytz.UTC)
+            }
+            
             return zones
         except Exception as e:
             logger.error(f"❌ Error building V3 zones for {symbol}: {e}")

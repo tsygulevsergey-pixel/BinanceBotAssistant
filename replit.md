@@ -130,6 +130,10 @@ The system loads configurations, connects to Binance, starts parallel data proce
 - **Status**: PRODUCTION READY - Fully integrated and running parallel to existing 6 strategies + Action Price
 - **Implementation**: Complete independent trading strategy using V3 zones
 - **Location**: `src/v3_sr/` (strategy.py, performance_tracker.py, helpers.py, signal_logger.py, logger.py)
+- **Critical Fixes (October 2025)**:
+  - Zone cache invalidation: Zones rebuild when 15m bar changes (prevents stale zones)
+  - Flip state preservation: Flipped zones properly saved in list (R⇄S switching works)
+  - Return structure fix: Builder returns Dict[tf, zones] instead of List (fixes .items() error)
 
 #### Two Core Setups
 1. **Flip-Retest Setup**:

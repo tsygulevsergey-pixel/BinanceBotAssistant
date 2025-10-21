@@ -151,7 +151,8 @@ class SRZonesV3Builder:
         current_time = df.index[-1].to_pydatetime() if isinstance(df.index[-1], pd.Timestamp) else datetime.now()
         tau_days = get_config('freshness.tau_days', tf, default=10)
         
-        for zone in all_zones:
+        # ✅ FIX: Use enumerate to properly update zones in list
+        for i, zone in enumerate(all_zones):
             # Create validator for this TF
             bars_window = get_config('reaction.bars_window', tf, default=8)
             validator = ReactionValidator(
@@ -183,8 +184,9 @@ class SRZonesV3Builder:
                 zone, df, atr_series, lookback_bars=20
             )
             
+            # ✅ FIX: Update zone in list if flipped
             if flip_result['flipped']:
-                zone = self.flip_detector.apply_flip(zone, flip_result)
+                all_zones[i] = self.flip_detector.apply_flip(zone, flip_result)
             else:
                 zone['state'] = 'normal'
                 zone['flip_side'] = None
