@@ -636,22 +636,54 @@ action_price:
     separate_stats: true  # Отдельная статистика от основных стратегий
 
 # =============================================================================
-# S/R ZONES V3 - Professional Implementation (2025 Best Practices)
-# =============================================================================
-# Основано на институциональной методологии:
-# - DBSCAN кластеризация для консолидации зон
-# - Валидация реакций (откат ≥0.7 ATR в m баров)
-# - Multi-factor scoring: Touches + Reactions + Freshness + Confluence - Noise
-# - R⇄S flip mechanism с подтверждением закрепления
-# - Multi-timeframe анализ: D → H4 → H1 → M15
-#
-# ВАЖНО: V3 система создана НО НЕ ИНТЕГРИРОВАНА в бота!
-# Текущий бот использует старую систему (src/utils/sr_zones_15m.py)
-# V3 находится в src/utils/sr_zones_v3/ и не влияет на работу бота
+# S/R ZONES V3 STRATEGY - Production Ready (2025)
 # =============================================================================
 
+sr_zones_v3_strategy:
+  enabled: true  # ✅ V3 стратегия активна
+  
+  general:
+    entry_timeframes: ['15m', '1h']
+    zone_min_strength: 60
+    allowed_regimes: ['TREND', 'RANGE']
+  
+  flip_retest:
+    enabled: true
+    break_body_buffer_atr: 0.3
+    confirm_closes: 2
+    retest_timeout_bars: 12
+    retest_accept_delta_atr: 0.25
+  
+  sweep_return:
+    enabled: true
+    wick_body_ratio: 1.2
+    a_grade_ratio: 2.0
+    a_grade_bonus: 20
+    fast_return_bars: 3
+    a_grade_fast_return: 2
+  
+  sl_tp:
+    sl_zone_buffer_atr: 0.2
+    sl_fallback_atr: 1.5
+    tp1_min_r: 1.0
+    tp1_max_r: 2.0
+    tp2_min_r: 2.0
+    tp2_max_r: 4.0
+  
+  quality:
+    htf_d_zone_bonus: 20
+    htf_h4_zone_bonus: 15
+  
+  validity:
+    timeout_bars:
+      15m: 12
+      1h: 8
+      4h: 6
+      1d: 4
+
+# V3 Zone Builder Configuration
 sr_zones_v3:
-  enabled: false  # V3 система не активна (требуется интеграция в стратегии)
+  enabled: true  # V3 зоны активны
   
   # Fractal swing detection (k = кол-во баров вокруг для проверки)
   fractal_k:
