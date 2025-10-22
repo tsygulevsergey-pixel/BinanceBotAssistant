@@ -732,6 +732,8 @@ sr_zones_v3:
     confirmation_bars: 2  # N = 2 бара для закрепления
     retest_reaction_atr: 0.4  # r2 = 0.4 ATR для валидации ретеста
     weight_multiplier: 0.6  # Старый score × 0.6 после flip
+    retest_lookforward_bars: 12  # N баров для поиска ретеста (альтернативный метод)
+    retest_accept_delta_atr: 0.25  # Допуск для ретеста (0.25 × ATR от края зоны)
   
   # Freshness decay (exponential)
   # Смягчены для сохранения качественных старых зон
