@@ -146,8 +146,31 @@ V3_DEFAULT_CONFIG = {
             '1d': 0.7,   # 0.7 × ATR
         },
         
-        # KDE prominence threshold (final filter if over limit)
-        'kde_prominence_threshold': 0.25,
+        # KDE prominence (настоящий KDE)
+        'kde_prominence': {
+            'enabled': True,
+            'threshold': 0.25,  # Minimum prominence to pass
+            
+            # Bandwidth calculation: h = clamp(k_bw * ATR, h_min, h_max)
+            'bandwidth_atr': {
+                '15m': 0.15,
+                '1h': 0.20,
+                '4h': 0.25,
+                '1d': 0.30,
+            },
+            'h_min_ticks': 3,      # h_min = 3 * tick_size
+            'h_max_atr': 3.0,      # h_max = 3.0 * ATR
+            
+            # Grid parameters
+            'grid_step_div': 8,    # step = max(tick, h/8)
+            
+            # Fallback to heuristic if insufficient data
+            'min_points': 6,
+            'min_unique_prices': 3,
+            
+            # Weighting (for future)
+            'use_equal_weights': True,  # If False → reaction/recency weights
+        },
     },
     
     # Zone expiry (no touches in T days)

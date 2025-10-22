@@ -40,8 +40,9 @@ class ZoneSelector:
         # Min spacing multipliers
         self.min_spacing_mult = self.config['selector']['min_spacing_mult']
         
-        # KDE prominence for final filter
-        self.kde_prominence_threshold = self.config['selector']['kde_prominence_threshold']
+        # KDE prominence config (updated path)
+        kde_config = self.config['selector'].get('kde_prominence', {})
+        self.kde_prominence_threshold = kde_config.get('threshold', 0.25)
     
     def select_zones(self,
                     zones: List[Dict],
@@ -300,7 +301,45 @@ class ZoneSelector:
     
     def _calculate_zone_prominence(self, zone: Dict) -> float:
         """
-        Calculate prominence score for a zone
+        Calculate prominence score for a zone (with True KDE)
+        
+        Uses KDE if sufficient cluster points available, otherwise falls back to heuristic
+        
+        Args:
+            zone: Zone dict (must have 'cluster_prices' for KDE method)
+        
+        Returns:
+            Prominence score (0.0-1.0)
+        """
+        # Try KDE prominence if enabled and data available
+        kde_config = self.config['selector']['kde_prominence']
+        
+        if kde_config.get('enabled', True):
+            cluster_prices = zone.get('cluster_prices', [])
+            min_points = kde_config.get('min_points', 6)
+            min_unique = kde_config.get('min_unique_prices', 3)
+            
+            # Check if enough data for KDE
+            unique_prices = len(set(cluster_prices)) if cluster_prices else 0
+            
+            if len(cluster_prices) >= min_points and unique_prices >= min_unique:
+                # Use True KDE prominence
+                tf = zone.get('tf', '15m')
+                atr = zone.get('width_atr', 1.0) * 1.0  # Approximate ATR from zone width
+                
+                kde_result = self._calculate_kde_prominence_real(
+                    zone, cluster_prices, tf, atr
+                )
+                
+                if kde_result and kde_result.get('prominence') is not None:
+                    return kde_result['prominence']
+        
+        # Fallback to heuristic prominence
+        return self._calculate_heuristic_prominence(zone)
+    
+    def _calculate_heuristic_prominence(self, zone: Dict) -> float:
+        """
+        Heuristic prominence (fallback for zones with insufficient data)
         
         Combines multiple quality metrics:
         - Touches (validated reactions)
@@ -340,3 +379,148 @@ class ZoneSelector:
         
         # Ensure in 0-1 range
         return min(1.0, max(0.0, prominence))
+    
+    def _calculate_kde_prominence_real(self,
+                                      zone: Dict,
+                                      cluster_prices: List[float],
+                                      tf: str,
+                                      atr: float) -> Optional[Dict]:
+        """
+        Calculate TRUE KDE prominence using Gaussian kernel density estimation
+        
+        According to professional specification:
+        1. Preprocess points (remove outliers via z-score)
+        2. Calculate bandwidth: h = clamp(k_bw * ATR, h_min, h_max)
+        3. Create price grid
+        4. Calculate KDE with Gaussian kernel
+        5. Normalize density to [0,1]
+        6. Find peak inside zone
+        7. Calculate prominence = peak - base (local minima)
+        
+        Args:
+            zone: Zone dict with boundaries
+            cluster_prices: List of prices that formed this zone
+            tf: Timeframe ('15m', '1h', '4h', '1d')
+            atr: Current ATR for this timeframe
+        
+        Returns:
+            Dict with prominence and metadata, or None if failed
+        """
+        try:
+            kde_config = self.config['selector']['kde_prominence']
+            
+            # [1] Preprocess: remove outliers via z-score
+            prices_arr = np.array(cluster_prices)
+            mean_p = np.mean(prices_arr)
+            std_p = np.std(prices_arr)
+            
+            if std_p > 0:
+                z_scores = np.abs((prices_arr - mean_p) / std_p)
+                prices_clean = prices_arr[z_scores <= 3.0]
+            else:
+                prices_clean = prices_arr
+            
+            if len(prices_clean) < 3:
+                return None  # Too few points after filtering
+            
+            # [2] Calculate bandwidth
+            # h = clamp(k_bw * ATR, h_min, h_max)
+            k_bw = kde_config['bandwidth_atr'].get(tf, 0.20)
+            h_min_ticks = kde_config.get('h_min_ticks', 3)
+            h_max_atr = kde_config.get('h_max_atr', 3.0)
+            
+            # Assume tick_size ≈ 0.01 for crypto (BTCUSDT, ETHUSDT etc)
+            tick_size = 0.01
+            h_min = h_min_ticks * tick_size
+            h_max = h_max_atr * atr
+            
+            h = max(h_min, min(k_bw * atr, h_max))
+            
+            # [3] Create price grid
+            # grid_low = zone.low - 1.0*h, grid_high = zone.high + 1.0*h
+            grid_low = zone['low'] - 1.0 * h
+            grid_high = zone['high'] + 1.0 * h
+            
+            grid_step_div = kde_config.get('grid_step_div', 8)
+            step = max(tick_size, h / grid_step_div)
+            
+            # Create grid
+            n_points_grid = int((grid_high - grid_low) / step) + 1
+            if n_points_grid > 10000:  # Safety: prevent huge grids
+                step = (grid_high - grid_low) / 1000
+                n_points_grid = 1000
+            
+            grid = np.linspace(grid_low, grid_high, n_points_grid)
+            
+            # [4] Calculate KDE with Gaussian kernel
+            # Use bandwidth h directly (Scott's rule disabled)
+            bw_method = h / np.std(prices_clean) if np.std(prices_clean) > 0 else 0.1
+            
+            kde = gaussian_kde(prices_clean, bw_method=bw_method)
+            density = kde(grid)
+            
+            # [5] Normalize to [0, 1]
+            if density.max() > 0:
+                f_norm = density / density.max()
+            else:
+                return None
+            
+            # [6] Find peak inside zone [zone.low, zone.high]
+            zone_mask = (grid >= zone['low']) & (grid <= zone['high'])
+            
+            if not np.any(zone_mask):
+                return None  # No grid points inside zone
+            
+            f_in_zone = f_norm[zone_mask]
+            grid_in_zone = grid[zone_mask]
+            
+            if len(f_in_zone) == 0:
+                return None
+            
+            peak_idx_local = np.argmax(f_in_zone)
+            peak_price = grid_in_zone[peak_idx_local]
+            peak_value = f_in_zone[peak_idx_local]
+            
+            # [7] Calculate prominence (peak - base)
+            # Base = max(left_min, right_min)
+            # Find local minima on either side of peak
+            
+            peak_idx_global = np.where(zone_mask)[0][peak_idx_local]
+            
+            # Search left for minimum
+            base_left = peak_value
+            for i in range(peak_idx_global - 1, -1, -1):
+                if f_norm[i] < base_left:
+                    base_left = f_norm[i]
+                elif f_norm[i] > f_norm[i+1]:  # Stop at local minimum
+                    break
+            
+            # Search right for minimum
+            base_right = peak_value
+            for i in range(peak_idx_global + 1, len(f_norm)):
+                if f_norm[i] < base_right:
+                    base_right = f_norm[i]
+                elif f_norm[i] > f_norm[i-1]:  # Stop at local minimum
+                    break
+            
+            base = max(base_left, base_right)
+            prominence = peak_value - base
+            
+            # Ensure in [0, 1] range
+            prominence = max(0.0, min(1.0, prominence))
+            
+            return {
+                'prominence': prominence,
+                'peak_price': float(peak_price),
+                'peak_value': float(peak_value),
+                'base_value': float(base),
+                'h': float(h),
+                'step': float(step),
+                'n_points': len(prices_clean),
+                'method': 'kde',
+                'fallback_used': False,
+            }
+            
+        except Exception as e:
+            # Fallback to heuristic on any error
+            return None

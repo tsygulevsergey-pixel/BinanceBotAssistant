@@ -1,0 +1,181 @@
+Спецификация KDE-проминентности
+Вход
+
+zone: {low, high, mid, tf, symbol, ...}
+
+touch_prices: массив цен касаний/свингов, относящихся к этой зоне (используй те же точки, что формировали кластер; можно включить High/Low/Close событий касаний).
+
+tick_size, ATR_tf, price_mid = zone.mid
+
+(опц.) веса для точек w_i (см. ниже)
+
+1) Предобработка точек
+
+Убрать выбросы: z-score по цене в контексте этой же зоны, |z| > 3.0 → дроп.
+
+(Опционально) веса: по умолчанию равные. Если хочешь «умно»:
+
+w_react = clamp(reaction_atr / 1.0, 0, 1) (0..1)
+
+w_recency = exp(-Δbars / τ); возьми τ=200 (M15/H1), 150 (H4), 120 (D)
+
+w_i = 0.5*w_react + 0.5*w_recency; нормируй ∑w_i = 1
+
+Если len(touch_prices) < 6 или уникальных цен < 3 → фолбэк к твоей старой эвристике (см. §7).
+
+2) Выбор полосы сглаживания (bandwidth, h)
+
+Предлагаю ATR-скейлинг с безопасными пределами:
+
+h = clamp(k_bw(tf) * ATR_tf, h_min, h_max)
+k_bw: M15=0.15, H1=0.20, H4=0.25, D=0.30
+h_min = 3 * tick_size
+h_max = 3 * ATR_tf
+
+
+(Альтернатива: Silverman/Scott на ценах, но ATR-скейлинг ведет себя стабильнее на крипто.)
+
+3) Ценовая сетка
+
+Диапазон грида: grid_low = zone.low - 1.0*h, grid_high = zone.high + 1.0*h
+
+Шаг: step = max(tick_size, h/8)
+
+Построй равномерный вектор P = {p_j}
+
+4) Ядро и KDE
+
+Ядро: гаусс K(u) = (1/√(2π)) * exp(-0.5 u^2)
+
+KDE:
+f(p_j) = (1 / (h * ∑w)) * ∑_i w_i * K( (p_j - x_i) / h )
+
+Нормируй f на [0,1]: f_norm = f / max(f)
+
+5) Поиск пиков/впадин и проминентности
+
+Найди локальные максимумы peaks внутри самой зоны [zone.low, zone.high] (по дискретной сетке).
+
+Для основного пика p* (максимальный f_norm в зоне):
+
+найди ближайшие минимумы слева/справа (minL, minR) до уровня, где убывание останавливается (классическая «prominence» как в signal processing).
+
+base = max(minL, minR);
+
+prominence_kde = f_norm(p) − base` ∈ [0,1]*
+
+Доп. «глубина седла» (для сплитов): если внутри зоны найдено ≥2 пика p1, p2 и min_between(p1,p2) ≤ min(f_norm(p1), f_norm(p2)) − depth_thr, при расстоянии между пиками ≥ k_split_gap_atr * ATR_tf (k_split_gap_atr=0.6) → кандидат на split.
+
+6) Порог и решение
+
+Порог принятия зоны по проминентности:
+prominence_kde ≥ 0.25 → ОК; иначе зона считается «плоской» (на этапе 2.5 — drop; на этапе 7.0 — при переполнении лимитов зона отфильтровывается первой).
+
+Для селектора 7.0, если лимиты переполнены: сортируй кандидатов по prominence_kde убыв., затем применяй min-spacing/пер-bucket-cap.
+
+7) Фолбэк (мало точек)
+
+Если N<6 или unique_prices<3:
+
+Используй текущую эвристику как fallback:
+
+touches_score  = min(1.0, touches / 5.0)
+reaction_score = min(1.0, reactions / 2.0)
+strength_score = strength / 100.0
+prominence_heur = 0.35*touches_score + 0.30*reaction_score + 0.35*strength_score
+
+
+А в выходе явно помечай method: "heuristic_fallback" (для контроля в логах/дашборде).
+
+Где именно это использовать в пайплайне
+
+[2.5] ZoneWidthGuards & KDE Prominence
+После shrink/split/outlier-чистки посчитай prominence_kde на точках текущего кластера.
+
+Если < 0.25 — drop cluster (слишком плоский).
+
+Если найден «двойной пик» с достаточной седловиной → split.
+
+[7.0] Selector (финальный)
+Когда переполнены cap’ы (hard cap / per-range cap), для ранжирования используй prominence_kde (а не старую смесь).
+Порядок: сначала классы (key/strong), затем по prominence_kde, с учётом min-spacing.
+
+Перформанс (чтобы не словить «бутылку»)
+
+Биннинг + свёртка: вместо суммирования по всем точкам для каждого p_j, заранее посчитай «гистограмму» по сетке (counts/weights на узлах) и свёртывай с дискретной гауссианой (можно FFT). Сложность ~ O(M log M), где M — число узлов грида (обычно 100–300 на зону).
+
+Кэш полосы/ядра: для каждого tf и дискретного h храни предсчитанную дискретную «гауссиану» на ±3σ (≈ ±3h) — это экономит CPU.
+
+Реюз грида: можно держать шаг сетки как max(tick, h/8) и округлять границы зон до сетки, чтобы увеличивать шанс реюза.
+
+Ранний выход: если после нормировки максимум f_norm внутри зоны < prominence_floor (например, 0.05) — зона явно слабая → early drop.
+
+Что сохранять в зоне (для дебага и селектора)
+
+Добавь поля:
+
+kde: { h, step, method: "gaussian", norm_max, peak: {price, value}, base: {left, right, base}, prominence: value, n_points, weight_scheme: "equal|react_recency", fallback_used: bool }
+
+Так ты сможешь в BI/логах увидеть, что реально делает селектор и где нужно подкрутить k_bw/порог.
+
+Значения «по умолчанию» (готово к конфигу)
+kde_prominence:
+  enabled: true
+  bandwidth_atr:
+    m15: 0.15
+    h1:  0.20
+    h4:  0.25
+    d:   0.30
+  h_min_ticks: 3
+  h_max_atr: 3.0
+  grid_step_div: 8           # step = max(tick, h/8)
+  min_points: 6              # <6 → fallback
+  min_unique_prices: 3
+  prominence_threshold: 0.25
+  split:
+    enabled: true
+    k_split_gap_atr: 0.6
+    min_saddle_depth: 0.35   # в долях от min(peak1, peak2) после нормализации
+  weights:
+    use_equal: true          # если false → включать реакцию/свежесть
+    reaction_atr_norm: 1.0
+    recency_tau_bars:
+      m15: 200
+      h1:  200
+      h4:  150
+      d:   120
+
+API/Функция (сигнатура и контракт)
+# zone_selector.py
+def _calculate_zone_prominence(zone, touch_prices, tf, atr_tf, tick_size, weights=None) -> dict:
+    """
+    Returns:
+      {
+        "prominence": float in [0,1],
+        "peak_price": float,
+        "peak_value": float in [0,1],
+        "base_value": float in [0,1],
+        "h": float,
+        "step": float,
+        "n_points": int,
+        "fallback_used": bool,
+        "method": "kde"|"heuristic_fallback"
+      }
+    """
+
+
+На этапе 2.5: если prominence < 0.25 → drop/split; иначе записать в zone.meta.kde_prominence.
+
+На этапе 7.0: при ранжировании использовать zone.meta.kde_prominence.
+
+Короткий ответ на твой вопрос
+
+Да, имеет смысл переделать на KDE. Это даст:
+
+объективную «выпуклость» кластера по цене,
+
+честные расколы «двойных» зон,
+
+лучшее ранжирование при переполнении лимитов.
+
+При этом оставь фолбэк-эвристику для случаев «мало данных», чтобы пайплайн не разваливался на редких рынках/новых монетах.

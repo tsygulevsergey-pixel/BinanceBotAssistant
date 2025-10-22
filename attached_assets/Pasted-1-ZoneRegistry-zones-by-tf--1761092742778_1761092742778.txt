@@ -1,0 +1,186 @@
+1) Два движка сигналов + единый реестр зон
+
+ZoneRegistry (общий): хранит итог zones_by_tf из твоего билдера (только Active/Key) с полями: zone_id, tf, kind, low/high, strength, class, htf_overlap, updated_ts.
+
+SignalEngine_M15: читает только tf="15m", считает ATR/VWAP 15m, генерит M15-сигналы.
+
+SignalEngine_H1: читает только tf="1h", считает ATR/VWAP 1h, генерит H1-сигналы.
+
+Контекст HTF: оба движка дополнительно подтягивают ближайшие H4/D зоны (influence bands) только для фильтров.
+
+Важно: никаких «склеек» зон между M15 и H1 на этапе торговли — только через общие HTF-фильтры. Это исключает путаницу.
+
+2) Неймспейсы и ID, чтобы не путать
+
+zone_id = hash(symbol, tf, low, high, version) — уникально на ТФ.
+
+signal_id = hash(symbol, tf_entry, zone_id, setup_type, bar_ts) — разные для M15 и H1 даже на одной цене.
+
+Логи/таблицы имеют поле tf_entry и свои локи по TF (см. §5).
+
+3) Правила генерации сигналов на каждом TF
+
+Оба движка используют твои два плейбука (Flip-Retest и Sweep-Return) и VWAP-bias, но с разными параметрами:
+
+M15 (скальп)
+
+Reactions: ≥0.6 ATR(15m) за 12 баров (как в билдере).
+
+SL/TP: SL = за M15-зоной + 0.25 ATR(15m); TP1 = ближайшая M15-зона или 1R; TP2 = ближайшая H1-зона (snap к краю, если ближе, чем плановый TP2).
+
+Timeouts: signal_valid_bars=12, cooldown_after_close_bars=4.
+
+VWAP-bias: обязателен (лонги над VWAP, шорты под VWAP). Контртренд только для Sweep-A (быстрый возврат ≤2 баров, wick/body ≥1.5).
+
+Min-clearance до H4/D «стены»: ≥1.2×ATR(15m) — иначе отклонить.
+
+H1 (среднесрок внутри дня)
+
+Reactions: ≥0.7 ATR(1h) за 8 баров.
+
+SL/TP: SL = за H1-зоной + 0.3 ATR(1h); TP1 = ближайшая H1-зона или 1R; TP2 = ближайшая H4/D-зона.
+
+Timeouts: signal_valid_bars=8, cooldown_after_close_bars=2.
+
+VWAP-bias: предпочтителен, но допускается исключение, если есть HTF-конфлюэнс (H4/D overlap + flip подтверждён ретестом).
+
+Min-clearance до H4/D «стены»: ≥1.0×ATR(1h) — иначе снижать confidence или отклонить.
+
+4) Арбитраж M15 vs H1 (без конфликтов)
+
+Вводим простые и детерминированные правила:
+
+4.1. Встречные сигналы
+
+Если активен H1-сигнал/позиция по направлению X, то:
+
+M15-сигнал против X → BLOCK (не выпускать).
+
+M15-сигнал в сторону X → ALLOW как «пиф-ин» (см. риск §6).
+
+4.2. Одновременные сигналы в одну сторону
+
+Разрешены оба. Приоритет публикации — H1 (чтобы логика «идеи» шла сверху).
+
+M15 получает флаг piggyback_on=h1_signal_id.
+
+4.3. Перекрывающиеся зоны
+
+Если M15-зона лежит внутри influence-band H1-зоны того же типа, M15-сигналы получают +confidence.
+
+Если M15-зона внутри противоположной H1-зоны — M15 сигналу требуется усиленное подтверждение (Flip: +1 close, Sweep: возврат ≤2 баров).
+
+4.4. Дедупликатор на одной свече
+
+Если в одну и ту же минуту/час формально выполняются оба сетапа, выпускать один агрегированный алерт:
+
+primary=H1, secondary=M15, в объекте указать обе цены/SL/TP и политику рисков отдельно (см. §6).
+(Это про «оповещение», не про логи: в БД сигналы фиксируются раздельно.)
+
+5) Локи/гистерезис отдельно по TF
+
+Per-TF signal_lock: после выпуска сигнала по tf_entry + direction в конкретной зоне — не выпускать новый того же типа, пока не истёк signal_valid_bars или пока не случился cancel.
+
+Per-TF position_lock (в live): если открыта позиция данным TF, новые сигналы по этому TF блокируются до закрытия, кроме «partial add» в сторону с distance_from_entry ≥ 0.8×R (опционально).
+
+Cross-TF policy: block_m15_against_h1=true (см. 4.1).
+
+6) Разделение риска
+
+Бюджеты риска разные:
+
+risk.per_trade.m15 = 0.5% от эквити (или множитель 0.5 от базового)
+
+risk.per_trade.h1 = 1.0%
+
+Stacking:
+
+allow_cross_tf_same_direction=true — можно держать M15 и H1 в одну сторону; суммарный дневной лимит daily_cap.total = 3%.
+
+allow_cross_tf_opposite=false — запрещены встречные позиции разных TF.
+
+Piggyback правило (M15 на активный H1):
+
+M15 рискует не более 0.5 × risk.per_trade.h1.
+
+Если H1 переведён в BE/TP1 — M15 может добрать (ещё 0.25–0.5%). Всё это конфигом.
+
+7) Синхронизация времени/данных (чтобы «не путал»)
+
+Бар-алигнмент: M15 движок работает на закрытии M15-бара; H1 движок — на закрытии H1-бара. Для контекста HTF берём последний закрытый бар HTF.
+
+Snap-шина данных: оба движка читают один и тот же snapshot ZoneRegistry (as_of_ts) — без межкадровых гонок.
+
+ATR/VWAP — rolling, обновление O(1) на каждом TF отдельно.
+
+8) Конфиг — готовые ключи
+signal_engines:
+  m15:
+    enabled: true
+    vwap_bias: { required: true, allow_counter_sweep_A: true, sweep_max_bars_near_htf: 2, wick_body_min: 1.5 }
+    min_clearance_to_htf_atr: 1.2
+    sl_buffer_atr: 0.25
+    tp1: nearest_m15_zone   # or 1R
+    tp2: next_h1_zone
+    timeouts: { signal_valid_bars: 12, cooldown_after_close_bars: 4 }
+    risk: { per_trade: 0.005, piggyback_max: 0.005 }
+    locks: { per_tf: true }
+  h1:
+    enabled: true
+    vwap_bias: { required: false, allow_if_htf_overlap: true }
+    min_clearance_to_htf_atr: 1.0
+    sl_buffer_atr: 0.30
+    tp1: nearest_h1_zone    # or 1R
+    tp2: next_htf_zone      # H4/D
+    timeouts: { signal_valid_bars: 8, cooldown_after_close_bars: 2 }
+    risk: { per_trade: 0.010 }
+    locks: { per_tf: true }
+
+cross_tf_policy:
+  block_m15_against_h1: true
+  allow_same_direction_stack: true
+  daily_cap_total: 0.03
+
+9) Поля в сигнале (чтобы было очевидно «где что»)
+
+Добавьте в signals:
+
+tf_entry: "M15"|"H1"
+
+zone_ref: {zone_id, tf_zone} (TF зоны!)
+
+context: { htf_summary, vwap_bias_side, distance_to_htf_edge_atr }
+
+relations: { piggyback_on: h1_signal_id|null }
+
+risk_policy: { per_trade, piggyback_limits }
+
+10) Мини-машина состояний на TF
+
+created → active → (executed|expired|cancelled) → closed (только live)
+
+Отмена (cancelled) у M15, если:
+
+появился встречный H1-сигнал/позиция,
+
+или нарушен min_clearance_to_htf_atr (подошли вплотную к стене).
+
+11) Мониторинг (чтобы видеть конфликтность)
+
+M15 blocked by H1 (count/d%) — сколько М15 сигналов блокируется арбитражем.
+
+Aligned signals (оба TF, одна сторона) — их win-rate vs одиночные.
+
+Conflicting attempts — попытки М15 против H1 (должны быть ≈0).
+
+Per-TF hit-rate, avg-R, TP1/TP2 rate — отдельно M15 и H1.
+
+Резюмируя
+
+Разделили зоны и сигналы по TF, общими остались только HTF-фильтры (H4/D).
+
+Ввели чёткую арбитражную политику: М15 не спорит с H1; в сторону H1 — можно «добирать».
+
+Разный риск/цели/тайминги → разные роли: М15 — скальп, H1 — «идея».
+
+Неймспейсы и локи по TF + единый снапшот данных → никаких путаниц.

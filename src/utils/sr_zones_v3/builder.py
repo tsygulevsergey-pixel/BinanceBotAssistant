@@ -447,9 +447,13 @@ class SRZonesV3Builder:
         )
         
         # Add TF and kind
-        for zone in zones:
+        # Also save cluster prices for KDE prominence calculation in Selector
+        for i, zone in enumerate(zones):
             zone['tf'] = tf
             zone['kind'] = kind
+            # Save cluster prices for later KDE analysis
+            if i < len(clusters_filtered):
+                zone['cluster_prices'] = clusters_filtered[i].get('prices', [])
         
         return zones
     
