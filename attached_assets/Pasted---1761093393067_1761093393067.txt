@@ -1,0 +1,120 @@
+Да, ты всё понял правильно. Архитектура и план — ок. Ниже я лишь добавлю пару точных штрихов, чтобы это заработало «из коробки» без серых зон.
+
+Что утвердить (без правок)
+
+Два независимых движка: SignalEngine_M15 и SignalEngine_H1.
+
+ZoneRegistry хранит только Active/Key зоны из билдера.
+
+Арбитраж: M15 не спорит с H1; в ту же сторону — piggyback; внутри противоположной H1-зоны — усиленное подтверждение.
+
+Риск и локи — раздельно по TF: M15=0.5%, H1=1.0%, daily cap=3%; per-TF signal_lock и position_lock.
+
+HTF фильтры: H4/D как «стены» (clearance и influence-band).
+
+Точные дополнения (чтобы не споткнуться)
+1) Интерфейсы компонентов
+
+ZoneRegistry (src/v3_sr/zone_registry.py)
+
+update(as_of_ts) -> None
+
+get_zones(tf: str) -> list[Zone] # только Active/Key
+
+get_htf_zones() -> dict[str, list[Zone]] # {'4h': [...], '1d': [...]}
+
+get_nearest_htf_bands(price, symbol) -> HtfBands # для clearance
+
+Объект Zone (минимум):
+
+{ "zone_id": "hash", "symbol": "BTCUSDT", "tf": "15m|1h|4h|1d",
+  "kind": "S|R", "low": 64200.0, "high": 64650.0, "mid": 64425.0,
+  "strength": 0-100, "class": "key|strong|normal",
+  "meta": { "purity": 0.72, "kde_prominence": 0.41, "htf_overlap": ["H4"] },
+  "updated_ts": 1699999999 }
+
+
+BaseSignalEngine (src/v3_sr/signal_engine_base.py)
+
+tick(as_of_ts) -> list[Signal] # на закрытии бара TF входа
+
+защищённые хелперы: _detect_flip_retest(), _detect_sweep_return(), _vwap_bias_ok(), _htf_clearance_ok(), _calc_sl_tp()
+
+CrossTFArbitrator (src/v3_sr/cross_tf_arbitrator.py)
+
+filter(signals_m15: list[Signal], signals_h1: list[Signal]) -> (list[Signal], list[Signal])
+
+применяет правила: block-against, allow-piggyback, усиленное подтверждение, пер-TF-локи
+
+2) Параметры по умолчанию (в конфиг)
+signal_engines:
+  m15:
+    reaction: { r_atr: 0.6, bars: 12 }
+    sl_buffer_atr: 0.25
+    tp1: nearest_m15_zone    # или 1R
+    tp2: next_h1_zone
+    vwap_bias: { required: true, countertrend_sweep_A: { enabled: true, max_bars: 2, wick_body_min: 1.5 } }
+    min_clearance_to_htf_atr: 1.2
+    timeouts: { signal_valid_bars: 12, cooldown_bars: 4 }
+    risk: { per_trade: 0.005 }
+  h1:
+    reaction: { r_atr: 0.7, bars: 8 }
+    sl_buffer_atr: 0.30
+    tp1: nearest_h1_zone     # или 1R
+    tp2: next_htf_zone       # H4/D
+    vwap_bias: { required: false, allow_if_htf_overlap: true }
+    min_clearance_to_htf_atr: 1.0
+    timeouts: { signal_valid_bars: 8, cooldown_bars: 2 }
+    risk: { per_trade: 0.010 }
+
+cross_tf_policy:
+  block_m15_against_h1: true
+  allow_same_direction_stack: true
+  daily_cap_total: 0.03
+locks:
+  per_tf_signal_lock: true
+  per_tf_position_lock: true
+
+3) Условия «усиленного подтверждения» для M15 в противоположной H1-зоне
+
+Flip-Retest (M15): вместо «2 закрытия» требовать 2 закрытия + ретест или «1 закрытие + ретест + реакция ≥0.5 ATR(15m)».
+
+Sweep-Return (M15): «быстрый возврат ≤2 баров» и wick/body ≥1.8 и VWAP-удержание в сторону входа.
+
+Если не выполнено — BLOCK.
+
+4) Порядок исполнения в стратегии (src/v3_sr/strategy.py)
+
+ZoneRegistry.update(as_of_ts)
+
+signals_h1 = SignalEngine_H1.tick(as_of_ts)
+
+signals_m15 = SignalEngine_M15.tick(as_of_ts)
+
+(signals_m15, signals_h1) = CrossTFArbitrator.filter(signals_m15, signals_h1)
+
+Логи/БД/Telegram — публикуем; выставляем пер-TF логику локов.
+
+5) Формат сигнала (важные поля для разборчивости)
+{
+  "signal_id": "hash",
+  "symbol": "BTCUSDT",
+  "tf_entry": "15m|1h",
+  "setup_type": "FlipRetest|SweepReturn",
+  "direction": "LONG|SHORT",
+  "zone_ref": { "zone_id": "hash", "tf_zone": "15m|1h", "kind": "S|R", "low": 0, "high": 0, "strength": 0 },
+  "context": { "vwap_bias": "BULL|BEAR|NEUTRAL", "htf_summary": ["H4:StrongR"], "distance_to_htf_edge_atr": 1.6 },
+  "levels": { "entry": 0, "sl": 0, "tp1": 0, "tp2": 0 },
+  "risk": { "per_trade": 0.005|0.010, "stacking": "none|piggyback" },
+  "valid_until_ts": 0,
+  "locks": { "signal_lock_scope": "per-tf", "position_lock_scope": "per-tf" },
+  "relations": { "piggyback_on": "h1_signal_id|null" },
+  "confidence": 0-100,
+  "reasons": ["flip_confirmed","vwap_ok","htf_clearance_ok"]
+}
+
+6) Два быстрых edge-case правила
+
+Front-run защита (оба TF): если до ближайшей «стены» H4/D по направлению сделки < min_clearance_to_htf_atr × ATR(entryTF) → отклонить (для H1 можно понизить confidence вместо hard-block, но лучше отклонять на М15).
+
+Дедуп на одной свече: если M15 и H1 сформировали сигнал в одну сторону в пределах одного «тик-окна» — отсылай один агрегированный алерт (primary=H1, secondary=M15), но в БД сохраняй оба сигнала раздельно.
