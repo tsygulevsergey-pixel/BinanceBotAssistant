@@ -27,8 +27,12 @@ def setup_logger(name: str = 'trading_bot', level: Optional[str] = None) -> logg
     logger = logging.getLogger(name)
     logger.setLevel(getattr(logging, level.upper()))
     
-    if logger.handlers:
-        return logger
+    # ✅ FIX: ВСЕГДА удаляем старые handlers и создаём новые
+    # Закрыть ТОЛЬКО FileHandlers (не StreamHandlers - они используют stdout!)
+    for handler in logger.handlers[:]:
+        if isinstance(handler, logging.FileHandler):
+            handler.close()  # Закрыть файл
+        logger.removeHandler(handler)
     
     log_format = '%(asctime)s | %(levelname)-8s | %(name)s | %(message)s'
     formatter = KyivFormatter(log_format)
@@ -51,6 +55,8 @@ def setup_logger(name: str = 'trading_bot', level: Optional[str] = None) -> logg
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
+    
+    logger.info(f"📍 Main Bot Logger initialized - log file: {log_file}")
     
     return logger
 

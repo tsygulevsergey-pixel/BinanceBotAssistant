@@ -22,8 +22,11 @@ def setup_action_price_logger():
     logger.setLevel(logging.INFO)
     logger.propagate = False  # Не передавать в root logger
     
-    # Удалить существующие handlers
-    logger.handlers = []
+    # ✅ FIX: Закрыть ТОЛЬКО FileHandlers (не StreamHandlers!)
+    for handler in logger.handlers[:]:
+        if isinstance(handler, logging.FileHandler):
+            handler.close()  # Закрыть файл
+        logger.removeHandler(handler)
     
     # Формат логов с таймзоной
     class KyivFormatter(logging.Formatter):
