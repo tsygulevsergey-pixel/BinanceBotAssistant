@@ -1,0 +1,56 @@
+============================================================
+  Trading Bot - Auto Start
+============================================================
+
+[OK] Python is installed
+
+[INFO] Activating virtual environment...
+[INFO] Checking dependencies...
+[OK] Dependencies already installed
+
+============================================================
+  Starting bot...
+============================================================
+
+2025-10-22 04:13:11 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-22 04:13:14 EEST | INFO     | 🎯 Action Price Logger initialized - log file: logs/action_price_2025-10-22_04-13-14.log
+2025-10-22 04:13:14 EEST | INFO     | V3_SR | 📍 V3 S/R Logger initialized - log file: logs/v3_2025-10-22_04-13-14.log
+2025-10-22 04:13:14 EEST | INFO     | trading_bot | 🎯 Multi-Factor Confirmation System initialized: min_factors=3, volume_mult=1.5x
+2025-10-22 04:13:14 EEST | INFO     | trading_bot | 📊 Regime Strategy Weights initialized: min_threshold=0.5
+2025-10-22 04:13:14 EEST | INFO     | trading_bot |   min_threshold: 0.5
+2025-10-22 04:13:14 EEST | INFO     | trading_bot |   TREND: {'Break & Retest': 1.5, 'MA/VWAP Pullback': 1.3, 'Volume Profile': 0.8, 'Liquidity Sweep': 0.9, 'Order Flow': 1.0}
+2025-10-22 04:13:14 EEST | INFO     | trading_bot |   RANGE: {'Break & Retest': 0.8, 'MA/VWAP Pullback': 0.9, 'Volume Profile': 1.5, 'Liquidity Sweep': 1.3, 'Order Flow': 1.0}
+2025-10-22 04:13:14 EEST | INFO     | trading_bot |   SQUEEZE: {'Break & Retest': 1.2, 'MA/VWAP Pullback': 0.9, 'Volume Profile': 1.0, 'Liquidity Sweep': 1.0, 'Order Flow': 1.5}
+2025-10-22 04:13:14 EEST | INFO     | trading_bot | Database initialized at data/trading_bot.db
+2025-10-22 04:13:39 EEST | WARNING  | trading_bot | Redis unavailable (Timeout connecting to server), using SQLite fallback for signal locks
+Traceback (most recent call last):
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 2155, in <module>
+    main()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 2136, in main
+    bot = TradingBot()
+          ^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 112, in __init__
+    self._register_strategies()
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\main.py", line 443, in _register_strategies
+    BreakRetestStrategy(),               # Стратегия #5
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\strategies\break_retest.py", line 59, in __init__
+    self.v3_zones_provider = get_v3_zones_provider() if self.use_v3_zones else None
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\utils\v3_zones_provider.py", line 214, in get_v3_zones_provider
+    _v3_zones_provider = V3ZonesProvider()
+                         ^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\utils\v3_zones_provider.py", line 26, in __init__
+    self.zone_builder = SRZonesV3Builder(zone_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\utils\sr_zones_v3\builder.py", line 74, in __init__
+    self.lifecycle_manager = ZoneLifecycleManager(config=self.config)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant\src\utils\sr_zones_v3\zone_lifecycle.py", line 35, in __init__
+    self.active_min_touches = self.config['lifecycle']['active']['min_touches']
+                              ~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'lifecycle'
+
+[ERROR] Bot terminated with error
+Check logs above for details
+Для продолжения нажмите любую клавишу . . .
