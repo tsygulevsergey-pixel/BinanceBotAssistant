@@ -105,15 +105,20 @@ class BaseSignalEngine(ABC):
         if not zone.get('meta', {}).get('flipped', False):
             return None
         
+        # ✅ FIX: Use flip_side (ORIGINAL type BEFORE flip) to determine direction
+        # zone['flip_side'] = original type BEFORE flip
+        # zone['kind'] = NEW type AFTER flip
+        flip_side_original = zone.get('flip_side', zone_kind)  # Fallback to current if no flip_side
+        
         # Determine expected direction after flip
         # If was Support, now acts as Resistance → expect SHORT
         # If was Resistance, now acts as Support → expect LONG
-        if zone_kind == 'S':
-            # Flipped Support → now Resistance → SHORT signals
+        if flip_side_original == 'S':
+            # Was Support, flipped to Resistance → SHORT signals
             expected_direction = 'SHORT'
             flip_side = 'below'
         else:
-            # Flipped Resistance → now Support → LONG signals
+            # Was Resistance, flipped to Support → LONG signals
             expected_direction = 'LONG'
             flip_side = 'above'
         
