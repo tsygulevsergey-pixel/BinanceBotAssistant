@@ -4,6 +4,28 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Updates
 
+## October 22, 2025 - V3 S/R Signal Generation Bugfixes (CRITICAL)
+**Critical Bugs Fixed**: Two blocking bugs prevented V3 strategy from generating ANY signals.
+
+**BUG #1: Flip-Retest Detection Broken**
+- **Problem**: `flip.py` wrote `zone['state'] = 'flipped'` but `signal_engine_base.py` checked `zone['meta']['flipped']`
+- **Impact**: Flip-Retest setups NEVER detected → 0 signals
+- **Fix**: Added `updated_zone['meta']['flipped'] = True` in `flip.py` apply_flip() method
+- **Files**: `src/utils/sr_zones_v3/flip.py` (lines 300-303)
+
+**BUG #2: Sweep-Return Condition Too Strict**
+- **Problem**: Required close BEYOND zone (`> zone_high` for LONG, `< zone_low` for SHORT)
+- **Reality**: Valid sweeps can return INSIDE zone
+- **Impact**: Most Sweep-Return setups missed
+- **Fix**: Changed to `close >= zone_low` (LONG) and `close <= zone_high` (SHORT)
+- **Files**: `src/v3_sr/signal_engine_base.py` (lines 253, 286)
+
+**Expected Outcome**:
+- Flip-Retest signals will now generate when zones flip
+- Sweep-Return signals will detect broader range of valid setups
+- V3 strategy should start producing signals in live testing
+- **Architect Review**: PASS ✅
+
 ## October 22, 2025 - V3 Zone Building Performance Optimization (ProcessPool + DBSCAN)
 **Major Performance Upgrade**: Implemented parallel zone building with ProcessPoolExecutor and optimized DBSCAN clustering.
 
