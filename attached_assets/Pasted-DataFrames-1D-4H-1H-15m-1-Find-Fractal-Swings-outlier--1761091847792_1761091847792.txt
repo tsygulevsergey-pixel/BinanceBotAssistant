@@ -1,0 +1,54 @@
+DataFrames (1D, 4H, 1H, 15m)
+  ↓
+[1] Find Fractal Swings (адаптивные фракталы + outlier-фильтр)
+      - k: D=4, H4=3, H1=3, M15=2; +1 при высокой волатильности
+      - z-score фильтр пивотов: |z| > 3.0 → убрать
+  ↓
+[2] DBSCAN Clustering (по оси «цена»)
+      - eps = 0.6 × ATR_TF, min_samples=2
+  ↓
+★[2.5] ZoneWidthGuards & KDE Prominence
+      - width ≤ min(k_atr_max*ATR, k_pct_max*price, k_range_max*RangeN)
+      - shrink по квантилям Q15–Q85; если всё ещё широко → split по KDE-минимуму
+      - prominence (KDE) ≥ 0.25, запрет chain-merge-зародышей внутри кластера
+      - outliers внутри кластера: |z| > 3.0 → убрать и пересчитать
+  ↓
+[3] Validate Reactions (TF-зависимо)
+      - M15: ≥0.6 ATR за 12 баров; H1: ≥0.7 ATR/8; H4: ≥0.75 ATR/6; D: ≥1.0 ATR/4
+  ↓
+★[3.5] Purity & Freshness Gate
+      - purity = 1 − bars_inside_ratio ≥ 0.65 (иначе shrink/split/drop)
+      - freshness: последнее касание ≤ {M15:200, H1:200, H4:150, D:120} баров
+  ↓
+[4] Score Zones (0–100)
+      - Weights: Touches 24 / Reactions 28 / Freshness 18 / Confluence 22 / Noise −12
+      - Доп. штраф за bars_inside_ratio > 0.35
+      - Классы: weak<40, normal≥60, strong≥80, key≥90
+  ↓
+[5] Detect Flips (пробой телом + подтверждение)
+      - База: 0.3 ATR + 2 закрытия за зоной
+  ↓
+★[5.5] Flip Alt-Confirmation
+      - Альтернатива: 1 закрытие + ретест ≤12 баров + реакция ≥0.4 ATR
+      - ретест в пределах 0.25 ATR от края зоны
+  ↓
+[6] Multi-TF Merge (с правилами)
+      - Перекрытие для merge ≥ 40% меньшей зоны
+      - Запрет chain-merge (A–B, B–C ок; A–C нет → не склеивать всё)
+      - Итоговая ширина ≥ ширины старшей, но подчиняется guards из [2.5]
+      - entry_vs_htf_width_ratio_max = 0.6 (младшая не шире 60% ближайшей HTF)
+  ↓
+★[6.5] Lifecycle: Candidate → Active → Key
+      - Active: ≥2 валидных касаний, purity≥0.65, freshness ок
+      - Key: score≥80 и HTF-overlap или ≥3 реакции
+      - Гистерезис: понижение при score<50 или purity<0.60
+  ↓
+★[7.0] Selector (вместо простого Top-N)
+      - hard caps: M15≤15, H1≤15, H4≤12, D≤10
+      - class-quota: сначала key/strong, затем добор normal до лимита
+      - per-range cap: ≤2 зоны на каждую «корзину» 1×ATR_TF по цене
+      - min-spacing: M15 0.4×ATR, H1 0.5×ATR, H4 0.6×ATR, D 0.7×ATR
+      - финальная проверка KDE-prominence (если переполнено)
+  ↓
+РЕЗУЛЬТАТ: zones_by_tf = {'15m': Active/Key, '1h': Active/Key, '4h': Active/Key, '1d': Active/Key}
+        + метаданные: {purity, freshness, width_norm, htf_overlap, class, score, history…}
