@@ -2,6 +2,18 @@
 
 This project is a professional-grade Binance USDT-M Futures Trading Bot designed for high-performance trading, targeting an 80%+ Win Rate and a Profit Factor of 1.8-2.5. It integrates advanced trading strategies, real-time market regime detection, sophisticated risk management, and an "Action Price" system based on Support/Resistance, Anchored VWAP, and price action. The bot supports both Signals-Only and Live Trading Modes, emphasizing precise signal generation, dynamic entry/exit management, and robust performance tracking.
 
+# Recent Updates
+
+## October 22, 2025 - V3 S/R Cache Fix
+**Critical Bug Fixed**: V3 zone caching system was using numeric DataFrame index instead of timestamp for cache freshness checks. This prevented zones from rebuilding when new 15m bars closed, causing stale zone data.
+
+**Fix**: Changed cache comparison from `df_15m.index[-1]` (always 499 with limit=500) to `df_15m['open_time'].iloc[-1]` (actual timestamp).
+
+**Impact**: 
+- Zones now correctly rebuild every 15 minutes when new bars close
+- Cache still works within same bar (instant performance)
+- First run: ~11 min, new bar: ~11 min rebuild, same bar: ~37 sec cache ✅
+
 # User Preferences
 
 - **Preferred communication style**: Simple, everyday language.

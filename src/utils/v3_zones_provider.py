@@ -59,7 +59,7 @@ class V3ZonesProvider:
             
             # Check if 15m bar changed (most recent data)
             if df_15m is not None and len(df_15m) > 0:
-                current_bar_time = df_15m.index[-1]
+                current_bar_time = df_15m['open_time'].iloc[-1]
                 cached_bar_time = cached_entry.get('bar_time')
                 
                 if cached_bar_time == current_bar_time:
@@ -78,7 +78,7 @@ class V3ZonesProvider:
         )
         
         # Update cache
-        bar_time = df_15m.index[-1] if df_15m is not None and len(df_15m) > 0 else None
+        bar_time = df_15m['open_time'].iloc[-1] if df_15m is not None and len(df_15m) > 0 else None
         
         self.cache[symbol] = {
             'zones': zones,
