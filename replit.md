@@ -4,6 +4,35 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Updates
 
+## October 22, 2025 - Logger Files Fix (CRITICAL)
+**Critical Bug Fixed**: All 3 loggers created NEW files on restart but wrote to OLD files.
+
+**BUG #4: Loggers Writing to Old Files**
+- **Problem**: Main logger checked `if logger.handlers: return logger` → returned OLD logger with OLD file handlers
+- **Impact**: New log files created but empty, all writes went to old files
+- **Fix**: Always close OLD FileHandlers and remove ALL handlers before creating new ones
+- **Files**: `src/utils/logger.py`, `src/v3_sr/logger.py`, `src/action_price/logger.py`
+
+**How it works now:**
+```python
+# Close ONLY FileHandlers (not StreamHandlers - they use stdout!)
+for handler in logger.handlers[:]:
+    if isinstance(handler, logging.FileHandler):
+        handler.close()  # Close old file
+    logger.removeHandler(handler)  # Remove handler
+```
+
+**Expected Outcome**:
+- Each bot restart creates NEW log files with timestamp
+- All writes go to NEW files (not old ones)
+- File structure:
+  ```
+  logs/bot_2025-10-22_14-30-15.log
+  logs/v3_2025-10-22_14-30-15.log
+  logs/action_price_2025-10-22_14-30-15.log
+  ```
+- **Architect Review**: PASS ✅
+
 ## October 22, 2025 - V3 S/R Signal Generation Bugfixes (CRITICAL)
 **Critical Bugs Fixed**: Three blocking bugs prevented V3 strategy from generating ANY signals.
 
