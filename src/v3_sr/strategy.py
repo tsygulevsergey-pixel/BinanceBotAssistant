@@ -25,6 +25,11 @@ from src.v3_sr.helpers import (
     format_zone_type
 )
 
+from src.v3_sr.zone_registry import ZoneRegistry
+from src.v3_sr.signal_engine_m15 import SignalEngine_M15
+from src.v3_sr.signal_engine_h1 import SignalEngine_H1
+from src.v3_sr.cross_tf_arbitrator import CrossTFArbitrator
+
 
 class SRZonesV3Strategy:
     """
@@ -58,13 +63,40 @@ class SRZonesV3Strategy:
         # Strategy enabled flag
         self.enabled = self.config.get('enabled', True)
         
-        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, shared zones cache)")
+        # NEW: Dual-Timeframe Signal Generation System
+        # Zone Registry (central zone storage)
+        self.zone_registry = ZoneRegistry()
+        
+        # Signal Engines (M15 scalp + H1 swing)
+        engines_config = config.get('signal_engines', {})
+        self.engine_m15 = SignalEngine_M15(
+            registry=self.zone_registry,
+            config=engines_config.get('m15', {})
+        )
+        self.engine_h1 = SignalEngine_H1(
+            registry=self.zone_registry,
+            config=engines_config.get('h1', {})
+        )
+        
+        # Cross-TF Arbitrator (M15 vs H1 conflict resolution)
+        arbitrator_config = config.get('cross_tf_policy', {})
+        self.arbitrator = CrossTFArbitrator(config=arbitrator_config)
+        
+        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, dual-engine pipeline: M15+H1)")
     
     async def analyze(self, symbol: str, df_15m: pd.DataFrame, df_1h: pd.DataFrame,
                      df_4h: pd.DataFrame, df_1d: pd.DataFrame,
                      market_regime: str, indicators: dict) -> Optional[Dict]:
         """
-        Analyze symbol for V3 S/R signals
+        Analyze symbol for V3 S/R signals using Dual-Engine Pipeline
+        
+        New Architecture:
+        1. Build/update zones via V3 provider
+        2. Update ZoneRegistry with fresh zones
+        3. Generate M15 signals via engine_m15.tick()
+        4. Generate H1 signals via engine_h1.tick()
+        5. Apply Cross-TF arbitration
+        6. Return best signal
         
         Args:
             symbol: Trading symbol
@@ -81,7 +113,7 @@ class SRZonesV3Strategy:
         if not self.enabled:
             return None
         
-        logger.info(f"🔍 Analyzing {symbol} | Regime: {market_regime}")
+        logger.info(f"🔍 Analyzing {symbol} | Regime: {market_regime} | Dual-Engine Pipeline")
         
         # Check if symbol is blocked for V3
         if await self._is_symbol_blocked(symbol):
@@ -94,45 +126,89 @@ class SRZonesV3Strategy:
             logger.info(f"❌ {symbol} regime {market_regime} not in allowed list {allowed_regimes}")
             return None
         
-        # Build/update zones for all timeframes
-        zones = await self._get_or_build_zones(symbol, {
+        # [1] Build/update zones for all timeframes
+        zones_by_tf = await self._get_or_build_zones(symbol, {
             '15m': df_15m,
             '1h': df_1h,
             '4h': df_4h,
             '1d': df_1d
         })
         
-        if not zones:
+        if not zones_by_tf:
             logger.info(f"⚠️ {symbol} no zones built")
             return None
         
-        # Try entry timeframes (15m, 1h)
-        entry_tfs = self.config.get('general', {}).get('entry_timeframes', ['15m', '1h'])
+        # [2] Update ZoneRegistry with fresh zones
+        current_ts = int(datetime.now(pytz.UTC).timestamp())
+        self.zone_registry.update(zones_by_tf, as_of_ts=current_ts)
         
-        for entry_tf in entry_tfs:
-            # Get DataFrame for entry TF
-            df_entry = df_15m if entry_tf == '15m' else df_1h
-            
-            if df_entry is None or len(df_entry) < 50:
-                continue
-            
-            # Check Flip-Retest setup
-            if self.config.get('flip_retest', {}).get('enabled', True):
-                signal = await self._check_flip_retest(
-                    symbol, entry_tf, df_entry, zones, market_regime, indicators
-                )
-                if signal:
-                    return signal
-            
-            # Check Sweep-Return setup
-            if self.config.get('sweep_return', {}).get('enabled', True):
-                signal = await self._check_sweep_return(
-                    symbol, entry_tf, df_entry, zones, market_regime, indicators
-                )
-                if signal:
-                    return signal
+        zone_counts = {tf: len(zones) for tf, zones in zones_by_tf.items()}
+        logger.info(f"📦 {symbol} zones updated in registry: {zone_counts}")
         
-        return None
+        # [3] Get current price and ATR for each TF
+        current_price_15m = df_15m['close'].iloc[-1] if len(df_15m) > 0 else None
+        current_price_1h = df_1h['close'].iloc[-1] if len(df_1h) > 0 else None
+        
+        atr_15m = indicators.get('15m', {}).get('atr', current_price_15m * 0.01 if current_price_15m else 0)
+        atr_1h = indicators.get('1h', {}).get('atr', current_price_1h * 0.01 if current_price_1h else 0)
+        
+        # [4] Calculate VWAP for each TF
+        vwap_15m = self.vwap_calc.calculate_daily_vwap(df_15m) if len(df_15m) > 0 else pd.Series([current_price_15m])
+        vwap_1h = self.vwap_calc.calculate_daily_vwap(df_1h) if len(df_1h) > 0 else pd.Series([current_price_1h])
+        
+        # [5] Generate M15 signals
+        signals_m15 = []
+        if current_price_15m and len(df_15m) >= 50:
+            try:
+                signals_m15 = self.engine_m15.tick(
+                    symbol=symbol,
+                    df=df_15m,
+                    current_price=current_price_15m,
+                    atr=atr_15m,
+                    vwap=vwap_15m,
+                    as_of_ts=current_ts
+                )
+                logger.info(f"🔧 M15 engine: {len(signals_m15)} raw signals")
+            except Exception as e:
+                logger.error(f"❌ M15 engine error: {e}")
+                signals_m15 = []
+        
+        # [6] Generate H1 signals
+        signals_h1 = []
+        if current_price_1h and len(df_1h) >= 50:
+            try:
+                signals_h1 = self.engine_h1.tick(
+                    symbol=symbol,
+                    df=df_1h,
+                    current_price=current_price_1h,
+                    atr=atr_1h,
+                    vwap=vwap_1h,
+                    as_of_ts=current_ts
+                )
+                logger.info(f"🔧 H1 engine: {len(signals_h1)} raw signals")
+            except Exception as e:
+                logger.error(f"❌ H1 engine error: {e}")
+                signals_h1 = []
+        
+        # [7] Apply Cross-TF Arbitration
+        filtered_m15, filtered_h1 = self.arbitrator.filter(signals_m15, signals_h1)
+        
+        logger.info(f"⚖️ Arbitrator: M15 {len(signals_m15)}→{len(filtered_m15)}, H1 {len(signals_h1)}→{len(filtered_h1)}")
+        
+        # [8] Collect all passed signals
+        all_signals = filtered_h1 + filtered_m15  # H1 priority
+        
+        if not all_signals:
+            logger.info(f"✅ {symbol} no signals after dual-engine + arbitration")
+            return None
+        
+        # [9] Select best signal (highest confidence)
+        best_signal = max(all_signals, key=lambda s: s.get('confidence', 0))
+        
+        logger.info(f"🎯 {symbol} best signal: {best_signal['tf_entry']} {best_signal['setup_type']} "
+                   f"{best_signal['direction']} conf={best_signal['confidence']}")
+        
+        return best_signal
     
     async def _get_or_build_zones(self, symbol: str, dfs: Dict[str, pd.DataFrame]) -> Dict:
         """
