@@ -92,6 +92,13 @@ Loads configurations, connects to Binance, processes data in parallel, and launc
   - **Stage 2 - Purity & Freshness Gate** (BEFORE reaction validation): Purity Check (bars inside < 35%), Freshness Check (last touch age)
   - **CRITICAL FIX**: Purity gate runs BEFORE validation because it may shrink/split zones → validation uses FINAL boundaries → prevents metadata corruption
 - **V3 Zones Integration**: Break & Retest strategy now uses V3 professional S/R zones with a `Shared Zones Provider` for efficient caching, leading to enhanced retest zone detection and score bonuses for high-grade zones.
+- **Dual-Timeframe Signal Generation System** (NEW - Oct 2025):
+  - **ZoneRegistry**: Shared zone state updated once per tick, accessible by both engines
+  - **BaseSignalEngine**: Common detection logic for Flip-Retest and Sweep-Return setups
+  - **SignalEngine_M15**: Scalp conveyor with 0.5% risk, 0.6 ATR/12 bars, SL +0.25 ATR, strict VWAP bias required, enhanced confirmation in opposite H1 zones
+  - **SignalEngine_H1**: Swing conveyor with 1.0% risk, 0.7 ATR/8 bars, SL +0.3 ATR, optional VWAP bias with HTF confluence
+  - **CrossTFArbitrator**: Blocks M15 signals against opposite H1 direction, allows piggyback (same direction), per-TF locks, front-run protection
+  - **Legacy Format Conversion**: `_convert_to_legacy_format()` ensures new engine format → legacy DB format for compatibility with existing tracking/statistics infrastructure
 
 # External Dependencies
 
