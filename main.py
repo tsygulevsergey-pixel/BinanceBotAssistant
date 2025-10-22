@@ -1919,54 +1919,8 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Error unblocking symbol {symbol} for V3: {e}", exc_info=True)
     
-    async def _analyze_v3_symbol_async(self, symbol: str) -> Optional[Dict]:
-        """Analyze single symbol for V3 S/R signals (async helper for parallel processing)
-        
-        Args:
-            symbol: Symbol to analyze
-            
-        Returns:
-            V3 signal dict if found, None otherwise
-        """
-        try:
-            # Load multi-timeframe data
-            timeframe_data = {}
-            for tf in ['15m', '1h', '4h', '1d']:
-                limits = {'15m': 500, '1h': 500, '4h': 500, '1d': 200}
-                df = self.data_loader.get_candles(symbol, tf, limit=limits.get(tf, 200))
-                if df is not None and len(df) > 0:
-                    timeframe_data[tf] = df
-            
-            # Require minimum 15m, 1h data
-            if not all(tf in timeframe_data for tf in ['15m', '1h']):
-                return None
-            
-            # Calculate indicators
-            indicators = {}
-            indicators['atr'] = timeframe_data['15m']['atr'].iloc[-1] if 'atr' in timeframe_data['15m'].columns else 0.0
-            
-            # Detect market regime (simplified)
-            regime = 'TREND'  # Simplified - should use MarketRegimeDetector
-            
-            # Analyze with V3 strategy
-            v3_signal = await self.v3_sr_strategy.analyze(
-                symbol=symbol,
-                df_15m=timeframe_data.get('15m'),
-                df_1h=timeframe_data.get('1h'),
-                df_4h=timeframe_data.get('4h'),
-                df_1d=timeframe_data.get('1d'),
-                market_regime=regime,
-                indicators=indicators
-            )
-            
-            return v3_signal
-            
-        except Exception as e:
-            v3_sr_logger.error(f"Error checking V3 for {symbol}: {e}", exc_info=True)
-            return None
-    
     async def _check_v3_sr_signals(self, current_time: datetime, symbols_with_updated_candles: list = None):
-        """Проверить V3 S/R сигналы с параллельной обработкой
+        """Проверить V3 S/R сигналы (последовательная обработка)
         
         Args:
             current_time: Текущее время
@@ -1984,68 +1938,74 @@ class TradingBot:
         if not symbols_to_check:
             return
         
-        # Filter blocked symbols
-        symbols_to_analyze = [
-            s for s in symbols_to_check 
-            if f"{s}_LONG" not in self.symbols_blocked_v3 and f"{s}_SHORT" not in self.symbols_blocked_v3
-        ]
+        v3_sr_logger.info(f"🔷 Checking V3 S/R signals for {len(symbols_to_check)} symbols")
         
-        if not symbols_to_analyze:
-            v3_sr_logger.info(f"🔷 All {len(symbols_to_check)} symbols blocked for V3")
-            return
-        
-        v3_sr_logger.info(f"🔷 Checking V3 S/R signals for {len(symbols_to_analyze)} symbols (parallel processing)")
-        
-        # Parallel processing with batch control (20 symbols at a time)
-        batch_size = 20
         signals_found = 0
         symbols_analyzed = 0
         
-        for i in range(0, len(symbols_to_analyze), batch_size):
-            batch = symbols_to_analyze[i:i+batch_size]
+        for symbol in symbols_to_check:
+            # Check if blocked for V3 (any direction)
+            if f"{symbol}_LONG" in self.symbols_blocked_v3 or f"{symbol}_SHORT" in self.symbols_blocked_v3:
+                continue
             
-            # Process batch in parallel
-            tasks = [self._analyze_v3_symbol_async(symbol) for symbol in batch]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+            symbols_analyzed += 1
             
-            # Process results
-            for symbol, result in zip(batch, results):
-                symbols_analyzed += 1
+            try:
+                # Load multi-timeframe data
+                timeframe_data = {}
+                for tf in ['15m', '1h', '4h', '1d']:
+                    limits = {'15m': 500, '1h': 500, '4h': 500, '1d': 200}
+                    df = self.data_loader.get_candles(symbol, tf, limit=limits.get(tf, 200))
+                    if df is not None and len(df) > 0:
+                        timeframe_data[tf] = df
                 
-                # Skip exceptions
-                if isinstance(result, Exception):
-                    v3_sr_logger.error(f"Exception analyzing {symbol}: {result}")
+                # Require minimum 15m, 1h data
+                if not all(tf in timeframe_data for tf in ['15m', '1h']):
                     continue
                 
-                # Skip None (no signal)
-                if result is None:
-                    continue
+                # Calculate indicators
+                indicators = {}
+                indicators['atr'] = timeframe_data['15m']['atr'].iloc[-1] if 'atr' in timeframe_data['15m'].columns else 0.0
+                
+                # Detect market regime (simplified)
+                regime = 'TREND'  # Simplified - should use MarketRegimeDetector
+                
+                # Analyze with V3 strategy
+                v3_signal = await self.v3_sr_strategy.analyze(
+                    symbol=symbol,
+                    df_15m=timeframe_data.get('15m'),
+                    df_1h=timeframe_data.get('1h'),
+                    df_4h=timeframe_data.get('4h'),
+                    df_1d=timeframe_data.get('1d'),
+                    market_regime=regime,
+                    indicators=indicators
+                )
                 
                 # Process signal
-                v3_signal = result
-                
-                # Save to DB
-                save_success = self._save_v3_sr_signal(v3_signal)
-                
-                if save_success:
-                    signals_found += 1
+                if v3_signal:
+                    # Save to DB
+                    save_success = self._save_v3_sr_signal(v3_signal)
                     
-                    # Block symbol+direction
-                    key = f"{symbol}_{v3_signal['direction']}"
-                    self.symbols_blocked_v3.add(key)
-                    
-                    # Send to Telegram
-                    await self._send_v3_sr_telegram(v3_signal)
-                    
-                    v3_sr_logger.info(
-                        f"🔷 V3 Signal: {symbol} {v3_signal['direction']} "
-                        f"{v3_signal['setup_type']} @ {v3_signal.get('entry_price', 0):.4f} "
-                        f"(Confidence: {v3_signal.get('confidence', 0):.1f}%)"
-                    )
+                    if save_success:
+                        signals_found += 1
+                        
+                        # Block symbol+direction
+                        key = f"{symbol}_{v3_signal['direction']}"
+                        self.symbols_blocked_v3.add(key)
+                        
+                        # Send to Telegram
+                        await self._send_v3_sr_telegram(v3_signal)
+                        
+                        v3_sr_logger.info(
+                            f"🔷 V3 Signal: {symbol} {v3_signal['direction']} "
+                            f"{v3_signal['setup_type']} @ {v3_signal.get('entry_price', 0):.4f} "
+                            f"(Confidence: {v3_signal.get('confidence', 0):.1f}%)"
+                        )
             
-            # Small delay between batches
-            if i + batch_size < len(symbols_to_analyze):
-                await asyncio.sleep(0.1)
+            except Exception as e:
+                v3_sr_logger.error(f"Error checking V3 for {symbol}: {e}", exc_info=True)
+            
+            await asyncio.sleep(0.05)
         
         v3_sr_logger.info(
             f"🔷 V3 S/R analysis complete: "

@@ -2,8 +2,6 @@
 
 This project is a professional-grade Binance USDT-M Futures Trading Bot designed for high-performance trading, targeting an 80%+ Win Rate and a Profit Factor of 1.8-2.5. It integrates advanced trading strategies, real-time market regime detection, sophisticated risk management, and an "Action Price" system based on Support/Resistance, Anchored VWAP, and price action. The bot supports both Signals-Only and Live Trading Modes, emphasizing precise signal generation, dynamic entry/exit management, and robust performance tracking.
 
-**Performance Optimizations:** V3 S/R strategy uses parallel processing (20 symbols per batch) with asyncio.gather() for 5-10x faster analysis on first run.
-
 # User Preferences
 
 - **Preferred communication style**: Simple, everyday language.
