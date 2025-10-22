@@ -246,7 +246,8 @@ class BaseSignalEngine(ABC):
                     if wick_body_ratio >= 1.5:
                         # Check for return within max_bars
                         future_bars = recent_bars.iloc[i+1:i+1+sweep_max_bars]
-                        if len(future_bars) > 0 and future_bars.iloc[-1]['close'] > zone_high:
+                        # ✅ FIX: Allow return INSIDE zone (close >= zone_low), not just ABOVE
+                        if len(future_bars) > 0 and future_bars.iloc[-1]['close'] >= zone_low:
                             # Sweep-Return confirmed
                             return {
                                 'setup_type': 'SweepReturn',
@@ -278,7 +279,8 @@ class BaseSignalEngine(ABC):
                     
                     if wick_body_ratio >= 1.5:
                         future_bars = recent_bars.iloc[i+1:i+1+sweep_max_bars]
-                        if len(future_bars) > 0 and future_bars.iloc[-1]['close'] < zone_low:
+                        # ✅ FIX: Allow return INSIDE zone (close <= zone_high), not just BELOW
+                        if len(future_bars) > 0 and future_bars.iloc[-1]['close'] <= zone_high:
                             return {
                                 'setup_type': 'SweepReturn',
                                 'direction': 'SHORT',

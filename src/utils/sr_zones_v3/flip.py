@@ -294,6 +294,11 @@ class FlipDetector:
         updated_zone['state'] = 'flipped'
         updated_zone['flip_side'] = zone.get('kind', 'R')
         
+        # ✅ FIX: Set meta['flipped'] flag for signal engine detection
+        if 'meta' not in updated_zone:
+            updated_zone['meta'] = {}
+        updated_zone['meta']['flipped'] = True
+        
         # Снизить score
         if 'strength' in updated_zone:
             updated_zone['strength'] *= self.weight_multiplier
