@@ -35,6 +35,7 @@ from .flip import FlipDetector
 from .zone_filters import ZoneQualityFilter
 from .purity_freshness import PurityFreshnessGate
 from .zone_lifecycle import ZoneLifecycleManager
+from .zone_selector import ZoneSelector
 
 
 class SRZonesV3Builder:
@@ -71,6 +72,8 @@ class SRZonesV3Builder:
         )
         
         self.lifecycle_manager = ZoneLifecycleManager(config=self.config)
+        
+        self.zone_selector = ZoneSelector(config=self.config)
     
     def build_zones(self,
                    symbol: str,
@@ -154,8 +157,41 @@ class SRZonesV3Builder:
                 merged_zones, current_time
             )
             
-            # Split back into TF buckets for return
-            zones_by_tf = self._split_zones_by_tf(lifecycle_zones)
+            # Split back into TF buckets for selector
+            zones_by_tf_temp = self._split_zones_by_tf(lifecycle_zones)
+            
+            # ✅ STEP 13: Zone Selector (professional multi-stage filtering)
+            # Apply hard caps, class-quota, per-range cap, min-spacing, KDE prominence
+            zones_by_tf = {}
+            
+            for tf in ['15m', '1h', '4h', '1d']:
+                if tf not in zones_by_tf_temp:
+                    zones_by_tf[tf] = []
+                    continue
+                
+                # Get ATR for this TF
+                tf_df_map = {
+                    '15m': df_15m,
+                    '1h': df_1h,
+                    '4h': df_4h,
+                    '1d': df_1d
+                }
+                tf_df = tf_df_map.get(tf)
+                
+                if tf_df is None or len(tf_df) == 0:
+                    zones_by_tf[tf] = zones_by_tf_temp[tf]
+                    continue
+                
+                # Calculate ATR
+                atr_series = self._calculate_atr(tf_df, period=14)
+                current_atr = atr_series.iloc[-1] if len(atr_series) > 0 else 1.0
+                
+                # Apply selector
+                selected_zones = self.zone_selector.select_zones(
+                    zones_by_tf_temp[tf], tf, current_atr
+                )
+                
+                zones_by_tf[tf] = selected_zones
         
         return zones_by_tf
     
@@ -563,46 +599,3 @@ class SRZonesV3Builder:
         
         return zones_by_tf
     
-    def _filter_top_zones(self,
-                         zones: List[Dict],
-                         current_price: float) -> List[Dict]:
-        """
-        Фильтровать топ зоны:
-        - В окне K×ATR от цены
-        - Топ 3-5 per side по score
-        """
-        if not zones:
-            return []
-        
-        # Разделить на Supply (R) и Demand (S)
-        supply_zones = [z for z in zones if z['kind'] == 'R']
-        demand_zones = [z for z in zones if z['kind'] == 'S']
-        
-        # Фильтровать по proximity и score
-        top_supply = self._filter_side(supply_zones, current_price, side='above')
-        top_demand = self._filter_side(demand_zones, current_price, side='below')
-        
-        return top_supply + top_demand
-    
-    def _filter_side(self,
-                    zones: List[Dict],
-                    current_price: float,
-                    side: str) -> List[Dict]:
-        """
-        Фильтровать зоны одной стороны (supply или demand)
-        
-        Args:
-            side: 'above' (resistance) или 'below' (support)
-        """
-        if not zones:
-            return []
-        
-        # Фильтр по proximity (например, в пределах 10 ATR)
-        # TODO: можно использовать zones_distance_k_atr из config
-        
-        # Сортировать по score (сильнейшие первыми)
-        sorted_zones = sorted(zones, key=lambda z: z.get('strength', 0), reverse=True)
-        
-        # Взять топ N
-        top_n = 5  # Можно сделать configurable
-        return sorted_zones[:top_n]

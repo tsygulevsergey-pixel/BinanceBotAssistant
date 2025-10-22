@@ -125,6 +125,31 @@ V3_DEFAULT_CONFIG = {
         'strength_decay_per_day': 0.05,  # -5% strength per day без касаний
     },
     
+    # Zone Selector (вместо простого Top-N)
+    'selector': {
+        # Hard caps per TF
+        'hard_caps': {
+            '15m': 15,
+            '1h': 15,
+            '4h': 12,
+            '1d': 10,
+        },
+        # Per-range cap (zones per ATR bucket)
+        'per_range_cap': 2,          # Макс 2 зоны на корзину
+        'atr_bucket_size': 1.0,      # Корзина = 1.0 × ATR
+        
+        # Min spacing multipliers (by TF)
+        'min_spacing_mult': {
+            '15m': 0.4,  # 0.4 × ATR
+            '1h': 0.5,   # 0.5 × ATR
+            '4h': 0.6,   # 0.6 × ATR
+            '1d': 0.7,   # 0.7 × ATR
+        },
+        
+        # KDE prominence threshold (final filter if over limit)
+        'kde_prominence_threshold': 0.25,
+    },
+    
     # Zone expiry (no touches in T days)
     'expiry_days': {
         '1d': 60,
@@ -162,7 +187,7 @@ def get_config(key_path: str, tf: str = None, default=None):
             return default
     
     # Если параметр TF-зависимый
-    if isinstance(value, dict) and tf in value:
+    if isinstance(value, dict) and tf and tf in value:
         return value[tf]
     
     return value if value is not None else default
