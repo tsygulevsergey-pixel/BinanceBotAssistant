@@ -208,7 +208,172 @@ class SRZonesV3Strategy:
         logger.info(f"🎯 {symbol} best signal: {best_signal['tf_entry']} {best_signal['setup_type']} "
                    f"{best_signal['direction']} conf={best_signal['confidence']}")
         
-        return best_signal
+        # [10] Convert to legacy format for compatibility with main.py._save_v3_sr_signal()
+        legacy_signal = self._convert_to_legacy_format(
+            signal=best_signal,
+            symbol=symbol,
+            market_regime=market_regime,
+            atr_15m=atr_15m,
+            atr_1h=atr_1h,
+            current_price_15m=current_price_15m,
+            current_price_1h=current_price_1h,
+            zones_by_tf=zones_by_tf
+        )
+        
+        return legacy_signal
+    
+    def _convert_to_legacy_format(self, signal: Dict, symbol: str, market_regime: str,
+                                  atr_15m: float, atr_1h: float,
+                                  current_price_15m: float, current_price_1h: float,
+                                  zones_by_tf: Dict) -> Dict:
+        """
+        Convert new signal engine format to legacy format for main.py compatibility
+        
+        Args:
+            signal: Signal from engine (new format)
+            symbol: Trading symbol
+            market_regime: Market regime
+            atr_15m: 15m ATR
+            atr_1h: 1h ATR
+            current_price_15m: Current 15m price
+            current_price_1h: Current 1h price
+            zones_by_tf: All zones by timeframe
+            
+        Returns:
+            Signal in legacy format compatible with main.py._save_v3_sr_signal()
+        """
+        # Extract zone reference
+        zone_ref = signal.get('zone_ref', {})
+        
+        # Build legacy zone dict
+        zone_low = zone_ref.get('low', 0)
+        zone_high = zone_ref.get('high', 0)
+        zone_mid = (zone_low + zone_high) / 2.0
+        zone_strength = zone_ref.get('strength', 0)
+        
+        # Determine zone class from strength
+        if zone_strength >= 80:
+            zone_class = 'key'
+        elif zone_strength >= 60:
+            zone_class = 'strong'
+        elif zone_strength >= 40:
+            zone_class = 'normal'
+        else:
+            zone_class = 'weak'
+        
+        legacy_zone = {
+            'id': zone_ref.get('zone_id', f"{symbol}_{zone_mid:.4f}"),
+            'tf': zone_ref.get('tf_zone', signal.get('tf_entry', '15m')),
+            'kind': zone_ref.get('kind', 'S'),
+            'low': zone_low,
+            'high': zone_high,
+            'mid': zone_mid,
+            'strength': zone_strength,
+            'class': zone_class,
+            'state': 'normal'
+        }
+        
+        # Extract levels
+        levels = signal.get('levels', {})
+        entry_price = levels.get('entry', 0)
+        stop_loss = levels.get('sl', 0)
+        tp1 = levels.get('tp1', 0)
+        tp2 = levels.get('tp2', 0)
+        
+        # Calculate risk_r
+        risk_r = abs(entry_price - stop_loss)
+        
+        # Get ATR based on entry TF
+        entry_tf = signal.get('tf_entry', '15m')
+        atr = atr_15m if entry_tf == '15m' else atr_1h
+        
+        # Get current price based on entry TF
+        current_price = current_price_15m if entry_tf == '15m' else current_price_1h
+        
+        # Find nearest support/resistance for context
+        all_zones = []
+        for tf, tf_zones in zones_by_tf.items():
+            all_zones.extend(tf_zones)
+        
+        nearest_support = self._find_nearest_zone_legacy(all_zones, current_price, 'below')
+        nearest_resistance = self._find_nearest_zone_legacy(all_zones, current_price, 'above')
+        
+        # Build legacy signal
+        legacy_signal = {
+            'signal_id': signal.get('signal_id', f"{symbol}_{int(datetime.now(pytz.UTC).timestamp())}"),
+            'symbol': symbol,
+            'entry_tf': entry_tf,
+            'setup_type': signal.get('setup_type', 'FlipRetest'),
+            'direction': signal.get('direction', 'LONG'),
+            'zone': legacy_zone,
+            'entry_price': entry_price,
+            'stop_loss': stop_loss,
+            'take_profit_1': tp1,
+            'take_profit_2': tp2,
+            'confidence': signal.get('confidence', 70),
+            'market_regime': market_regime,
+            'atr': atr,
+            'risk_r': risk_r,
+            'quality_tags': signal.get('reasons', []),
+            'nearest_support': nearest_support,
+            'nearest_resistance': nearest_resistance
+        }
+        
+        logger.debug(f"✅ Converted signal to legacy format: {symbol} {entry_tf} {legacy_signal['setup_type']}")
+        
+        return legacy_signal
+    
+    def _find_nearest_zone_legacy(self, all_zones: List[Dict], current_price: float, 
+                                  direction: str) -> Optional[Dict]:
+        """
+        Find nearest zone in legacy format for context
+        
+        Args:
+            all_zones: All zones from all TFs
+            current_price: Current price
+            direction: 'above' or 'below'
+            
+        Returns:
+            Zone dict in legacy format or None
+        """
+        if direction == 'above':
+            # Find nearest resistance above price
+            candidates = [z for z in all_zones if z.get('kind') == 'R' and z.get('low', 0) > current_price]
+            if not candidates:
+                return None
+            
+            nearest = min(candidates, key=lambda z: z.get('low', 999999) - current_price)
+        else:
+            # Find nearest support below price
+            candidates = [z for z in all_zones if z.get('kind') == 'S' and z.get('high', 0) < current_price]
+            if not candidates:
+                return None
+            
+            nearest = max(candidates, key=lambda z: current_price - z.get('high', 0))
+        
+        # Convert to legacy format
+        zone_low = nearest.get('low', 0)
+        zone_high = nearest.get('high', 0)
+        zone_mid = (zone_low + zone_high) / 2.0
+        zone_strength = nearest.get('strength', 0)
+        
+        if zone_strength >= 80:
+            zone_class = 'key'
+        elif zone_strength >= 60:
+            zone_class = 'strong'
+        else:
+            zone_class = 'normal'
+        
+        return {
+            'id': nearest.get('id', f"zone_{zone_mid:.4f}"),
+            'tf': nearest.get('tf', '1h'),
+            'kind': nearest.get('kind', 'S'),
+            'low': zone_low,
+            'high': zone_high,
+            'mid': zone_mid,
+            'strength': zone_strength,
+            'class': zone_class
+        }
     
     async def _get_or_build_zones(self, symbol: str, dfs: Dict[str, pd.DataFrame]) -> Dict:
         """
