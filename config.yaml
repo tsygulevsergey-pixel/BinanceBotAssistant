@@ -969,3 +969,98 @@ sr_zones_v3_strategy:
     include_htf_context: true  # Показывать старшие таймфреймы
     include_confidence_breakdown: true  # Показывать детали confidence
     include_r_multiples: true  # Показывать R-кратность
+
+# =============================================================================
+# SIGNAL ENGINES - Dual-Timeframe Signal Generation (M15 + H1)
+# =============================================================================
+# M15 = scalp engine (tight params, VWAP required)
+# H1 = swing engine (wider params, VWAP optional with HTF overlap)
+# CrossTF Arbitrator manages conflicts and piggyback logic
+
+signal_engines:
+  
+  # M15 Signal Engine - Scalp Conveyor
+  m15:
+    enabled: true
+    
+    # Reaction parameters (stricter than H1)
+    reaction:
+      r_atr: 0.6  # Minimum reaction strength (0.6 × ATR)
+      bars: 12  # Reaction window (12 bars = 3 hours)
+    
+    # Stop Loss buffer
+    sl_buffer_atr: 0.25  # SL = zone edge + 0.25 ATR
+    
+    # HTF clearance requirement
+    min_clearance_to_htf_atr: 1.2  # Need ≥1.2 ATR clearance to HTF "wall"
+    
+    # VWAP bias (REQUIRED for M15, except Sweep-A)
+    vwap_bias:
+      required: true  # VWAP alignment mandatory
+      countertrend_sweep_A:
+        enabled: true  # Allow A-grade sweeps against VWAP
+        min_wick_ratio: 1.8  # Require wick/body ≥1.8 for exception
+    
+    # Risk management
+    risk:
+      per_trade: 0.005  # 0.5% risk per M15 signal
+    
+    # Timeouts
+    timeouts:
+      signal_valid_bars: 12  # Signal valid for 12 bars (3 hours)
+      cooldown_bars: 4  # Cooldown after signal expiry
+  
+  # H1 Signal Engine - Swing Conveyor
+  h1:
+    enabled: true
+    
+    # Reaction parameters (more lenient than M15)
+    reaction:
+      r_atr: 0.7  # Minimum reaction strength (0.7 × ATR)
+      bars: 8  # Reaction window (8 bars = 8 hours)
+    
+    # Stop Loss buffer
+    sl_buffer_atr: 0.30  # SL = zone edge + 0.30 ATR
+    
+    # HTF clearance requirement
+    min_clearance_to_htf_atr: 1.0  # Need ≥1.0 ATR clearance to HTF "wall"
+    
+    # VWAP bias (OPTIONAL for H1 if HTF overlap)
+    vwap_bias:
+      required: false  # VWAP alignment optional
+      allow_if_htf_overlap: true  # Allow without VWAP if zone has HTF overlap
+    
+    # Risk management
+    risk:
+      per_trade: 0.01  # 1.0% risk per H1 signal
+    
+    # Timeouts
+    timeouts:
+      signal_valid_bars: 8  # Signal valid for 8 bars (8 hours)
+      cooldown_bars: 3  # Cooldown after signal expiry
+
+# =============================================================================
+# CROSS-TF ARBITRATION POLICY
+# =============================================================================
+# Rules for managing conflicts between M15 and H1 signals
+
+cross_tf_policy:
+  
+  # Core rule: M15 does NOT argue with H1
+  block_m15_against_h1: true  # Block M15 if opposes active H1 signal/position
+  
+  # Allow piggyback (M15 + H1 same direction)
+  allow_same_direction_stack: true  # M15 can piggyback on H1
+  
+  # Daily risk cap (total across all TFs)
+  daily_cap_total: 0.03  # 3% max daily risk
+  
+  # Per-TF locks (independent signal/position locks)
+  per_tf_locks:
+    enabled: true  # Each TF has independent locks
+    scope: "per-tf"  # "per-tf" or "global"
+  
+  # Front-run protection
+  frontrun_protection:
+    enabled: true  # Prevent signals too close to HTF "walls"
+    min_distance_atr: 1.2  # Minimum distance to HTF edge
