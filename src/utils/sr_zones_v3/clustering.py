@@ -39,7 +39,12 @@ class ZoneClusterer:
         
         # DBSCAN с динамическим ε
         eps = self.epsilon_atr_mult * atr
-        dbscan = DBSCAN(eps=eps, min_samples=self.min_samples)
+        dbscan = DBSCAN(
+            eps=eps, 
+            min_samples=self.min_samples,
+            n_jobs=-1,        # Use all CPU cores for parallelization
+            algorithm='auto'  # Automatically select optimal algorithm
+        )
         labels = dbscan.fit_predict(X)
         
         # Собрать кластеры

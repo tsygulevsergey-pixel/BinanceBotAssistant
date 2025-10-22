@@ -29,6 +29,8 @@ from src.v3_sr.zone_registry import ZoneRegistry
 from src.v3_sr.signal_engine_m15 import SignalEngine_M15
 from src.v3_sr.signal_engine_h1 import SignalEngine_H1
 from src.v3_sr.cross_tf_arbitrator import CrossTFArbitrator
+from src.v3_sr.zone_builder_worker import build_zones_for_symbol
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
 class SRZonesV3Strategy:
@@ -83,6 +85,154 @@ class SRZonesV3Strategy:
         self.arbitrator = CrossTFArbitrator(config=arbitrator_config)
         
         logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, dual-engine pipeline: M15+H1)")
+    
+    def batch_build_zones_parallel(self, symbols_data: List[Tuple[str, Dict[str, pd.DataFrame]]]) -> Dict[str, Dict]:
+        """
+        Build V3 zones for multiple symbols in parallel using ProcessPoolExecutor
+        
+        This method significantly speeds up zone building by processing multiple symbols
+        concurrently in separate processes. Results are cached in v3_zones_provider.
+        
+        Args:
+            symbols_data: List of tuples (symbol, dfs_dict) where dfs_dict contains:
+                          {'15m': df_15m, '1h': df_1h, '4h': df_4h, '1d': df_1d}
+        
+        Returns:
+            Dict mapping symbol -> zones_by_tf
+        """
+        if not symbols_data:
+            return {}
+        
+        # Get parallelization config
+        parallel_config = self.config.get('parallel_processing', {})
+        enabled = parallel_config.get('enabled', True)
+        max_workers = parallel_config.get('max_workers', 4)
+        
+        if not enabled:
+            logger.info("⏸️ Parallel zone building disabled, using sequential processing")
+            return self._batch_build_zones_sequential(symbols_data)
+        
+        logger.info(f"🚀 Starting parallel zone building for {len(symbols_data)} symbols (workers={max_workers})")
+        
+        results = {}
+        tasks = []
+        
+        # Prepare tasks for ProcessPoolExecutor
+        for symbol, dfs in symbols_data:
+            # Get current price from 15m data
+            df_15m = dfs.get('15m')
+            if df_15m is None or len(df_15m) == 0:
+                logger.warning(f"⚠️ {symbol}: No 15m data, skipping")
+                continue
+            
+            current_price = df_15m['close'].iloc[-1]
+            
+            # Prepare EMA200 if available
+            ema200_15m = df_15m.get('ema_200') if df_15m is not None else None
+            
+            tasks.append({
+                'symbol': symbol,
+                'df_15m': dfs.get('15m'),
+                'df_1h': dfs.get('1h'),
+                'df_4h': dfs.get('4h'),
+                'df_1d': dfs.get('1d'),
+                'current_price': current_price,
+                'ema200_15m': ema200_15m
+            })
+        
+        if not tasks:
+            logger.warning("⚠️ No valid tasks for parallel zone building")
+            return {}
+        
+        # Execute in parallel
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_symbol = {}
+            for task in tasks:
+                future = executor.submit(
+                    build_zones_for_symbol,
+                    symbol=task['symbol'],
+                    df_15m=task['df_15m'],
+                    df_1h=task['df_1h'],
+                    df_4h=task['df_4h'],
+                    df_1d=task['df_1d'],
+                    current_price=task['current_price'],
+                    ema200_15m=task['ema200_15m']
+                )
+                future_to_symbol[future] = task['symbol']
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_symbol):
+                symbol = future_to_symbol[future]
+                try:
+                    result = future.result()
+                    
+                    if result['success']:
+                        zones = result['zones']
+                        results[symbol] = zones
+                        
+                        # Update cache in v3_zones_provider
+                        # Find the corresponding DataFrame for bar_time
+                        for task in tasks:
+                            if task['symbol'] == symbol:
+                                df_15m = task['df_15m']
+                                bar_time = df_15m['open_time'].iloc[-1] if df_15m is not None and len(df_15m) > 0 else None
+                                
+                                self.v3_zones_provider.cache[symbol] = {
+                                    'zones': zones,
+                                    'timestamp': datetime.now(),
+                                    'bar_time': bar_time
+                                }
+                                break
+                        
+                        logger.info(f"✅ {symbol}: Zones built successfully (parallel worker)")
+                    else:
+                        logger.error(f"❌ {symbol}: Zone building failed: {result['error']}")
+                
+                except Exception as e:
+                    logger.error(f"❌ {symbol}: Worker exception: {e}", exc_info=True)
+        
+        logger.info(f"🎉 Parallel zone building complete: {len(results)}/{len(symbols_data)} symbols successful")
+        return results
+    
+    def _batch_build_zones_sequential(self, symbols_data: List[Tuple[str, Dict[str, pd.DataFrame]]]) -> Dict[str, Dict]:
+        """
+        Fallback: Build zones sequentially (used when parallel processing is disabled)
+        
+        Args:
+            symbols_data: List of tuples (symbol, dfs_dict)
+        
+        Returns:
+            Dict mapping symbol -> zones_by_tf
+        """
+        results = {}
+        
+        for symbol, dfs in symbols_data:
+            try:
+                df_15m = dfs.get('15m')
+                if df_15m is None or len(df_15m) == 0:
+                    continue
+                
+                current_price = df_15m['close'].iloc[-1]
+                ema200_15m = df_15m.get('ema_200') if df_15m is not None else None
+                
+                zones = self.v3_zones_provider.get_zones(
+                    symbol=symbol,
+                    df_1d=dfs.get('1d'),
+                    df_4h=dfs.get('4h'),
+                    df_1h=dfs.get('1h'),
+                    df_15m=df_15m,
+                    current_price=current_price,
+                    ema200_15m=ema200_15m
+                )
+                
+                results[symbol] = zones
+                logger.info(f"✅ {symbol}: Zones built (sequential)")
+            
+            except Exception as e:
+                logger.error(f"❌ {symbol}: Sequential zone building failed: {e}", exc_info=True)
+        
+        return results
     
     async def analyze(self, symbol: str, df_15m: pd.DataFrame, df_1h: pd.DataFrame,
                      df_4h: pd.DataFrame, df_1d: pd.DataFrame,

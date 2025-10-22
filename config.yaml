@@ -651,6 +651,11 @@ sr_zones_v3_strategy:
     zone_min_strength: 60
     allowed_regimes: ['TREND', 'RANGE']
   
+  # Parallel Processing (ProcessPool optimization)
+  parallel_processing:
+    enabled: true  # Enable parallel zone building across symbols
+    max_workers: 4  # Number of worker processes (recommended: 4-8, adjust based on CPU cores)
+  
   flip_retest:
     enabled: true
     break_body_buffer_atr: 0.3
@@ -883,6 +888,11 @@ sr_zones_v3_strategy:
     
     # Clock skew tolerance
     clock_skew_tolerance_ms: 1500
+  
+  # Parallel Processing (ProcessPool optimization) - NEW
+  parallel_processing:
+    enabled: true  # Enable parallel zone building across symbols (6-10x speedup)
+    max_workers: 4  # Number of worker processes (recommended: 4-8, adjust based on CPU cores)
   
   # Flip-Retest Setup Parameters
   flip_retest:

@@ -1920,7 +1920,7 @@ class TradingBot:
             logger.error(f"Error unblocking symbol {symbol} for V3: {e}", exc_info=True)
     
     async def _check_v3_sr_signals(self, current_time: datetime, symbols_with_updated_candles: list = None):
-        """Проверить V3 S/R сигналы (последовательная обработка)
+        """Проверить V3 S/R сигналы (параллельное построение зон + последовательный анализ)
         
         Args:
             current_time: Текущее время
@@ -1940,15 +1940,12 @@ class TradingBot:
         
         v3_sr_logger.info(f"🔷 Checking V3 S/R signals for {len(symbols_to_check)} symbols")
         
-        signals_found = 0
-        symbols_analyzed = 0
-        
+        # STEP 1: Load data for all symbols (sequential, cached in DataLoader)
+        symbols_data = []
         for symbol in symbols_to_check:
             # Check if blocked for V3 (any direction)
             if f"{symbol}_LONG" in self.symbols_blocked_v3 or f"{symbol}_SHORT" in self.symbols_blocked_v3:
                 continue
-            
-            symbols_analyzed += 1
             
             try:
                 # Load multi-timeframe data
@@ -1963,6 +1960,35 @@ class TradingBot:
                 if not all(tf in timeframe_data for tf in ['15m', '1h']):
                     continue
                 
+                symbols_data.append((symbol, timeframe_data))
+            
+            except Exception as e:
+                v3_sr_logger.error(f"Error loading data for {symbol}: {e}", exc_info=True)
+        
+        if not symbols_data:
+            v3_sr_logger.info("⚠️ No symbols with valid data to analyze")
+            return
+        
+        v3_sr_logger.info(f"📊 Loaded data for {len(symbols_data)} symbols")
+        
+        # STEP 2: Build zones in PARALLEL for all symbols (ProcessPoolExecutor)
+        v3_sr_logger.info(f"🚀 Building zones in parallel for {len(symbols_data)} symbols...")
+        batch_zones = self.v3_sr_strategy.batch_build_zones_parallel(symbols_data)
+        v3_sr_logger.info(f"✅ Parallel zone building complete: {len(batch_zones)} symbols")
+        
+        # STEP 3: Analyze each symbol sequentially (zones already cached)
+        signals_found = 0
+        symbols_analyzed = 0
+        
+        for symbol, timeframe_data in symbols_data:
+            # Skip if zones weren't built successfully
+            if symbol not in batch_zones:
+                v3_sr_logger.warning(f"⚠️ {symbol}: Zones not available, skipping analysis")
+                continue
+            
+            symbols_analyzed += 1
+            
+            try:
                 # Calculate indicators
                 indicators = {}
                 indicators['atr'] = timeframe_data['15m']['atr'].iloc[-1] if 'atr' in timeframe_data['15m'].columns else 0.0
@@ -1970,7 +1996,7 @@ class TradingBot:
                 # Detect market regime (simplified)
                 regime = 'TREND'  # Simplified - should use MarketRegimeDetector
                 
-                # Analyze with V3 strategy
+                # Analyze with V3 strategy (zones already cached, fast!)
                 v3_signal = await self.v3_sr_strategy.analyze(
                     symbol=symbol,
                     df_15m=timeframe_data.get('15m'),
