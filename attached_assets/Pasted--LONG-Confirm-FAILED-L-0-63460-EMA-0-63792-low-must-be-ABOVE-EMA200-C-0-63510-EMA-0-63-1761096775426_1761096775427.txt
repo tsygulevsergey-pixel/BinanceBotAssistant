@@ -1,0 +1,83 @@
+❌ LONG Confirm FAILED | L:0.63460 <= EMA:0.63792 (low must be ABOVE EMA200!) | C:0.63510 <= EMA:0.63792
+2025-10-22 04:31:13 EEST | INFO     | trading_bot | 📊 Loading: 249/249 (100.0%) | Queue: 0 ready | Ready: 249 symbols | Failed: 0 | 1 strategies | 0 signals | Rate: 34.6% | Next check in 833s
+❌ SHORT Confirm FAILED | H:2.91100 >= EMA:2.90414 (high must be BELOW EMA200!) | C:2.89000 < EMA:2.90414
+❌ SHORT Confirm FAILED | H:0.11364 >= EMA:0.11306 (high must be BELOW EMA200!) | C:0.11245 < EMA:0.11306
+2025-10-22 04:31:40 EEST | INFO     | 🎯 Action Price analysis complete:
+  📊 Total symbols: 249
+  🔍 Analyzed: 249
+  🚫 Blocked: 0
+  ✅ Signals found: 0
+2025-10-22 04:31:40 EEST | INFO     | V3_SR | 🔷 Checking V3 S/R signals for 249 symbols
+2025-10-22 04:31:40 EEST | INFO     | V3_SR | 🔍 Analyzing ARKMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:31:46 EEST | INFO     | V3_SR | 📦 ARKMUSDT zones updated in registry: {'15m': 2, '1h': 3, '4h': 8, '1d': 1}
+2025-10-22 04:31:46 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:31:46 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:31:46 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:31:46 EEST | INFO     | V3_SR | ✅ ARKMUSDT no signals after dual-engine + arbitration
+2025-10-22 04:31:46 EEST | INFO     | V3_SR | 🔍 Analyzing CAKEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:31:49 EEST | INFO     | V3_SR | 📦 CAKEUSDT zones updated in registry: {'15m': 5, '1h': 9, '4h': 4, '1d': 2}
+2025-10-22 04:31:49 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:31:49 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:31:49 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:31:49 EEST | INFO     | V3_SR | ✅ CAKEUSDT no signals after dual-engine + arbitration
+2025-10-22 04:31:49 EEST | INFO     | V3_SR | 🔍 Analyzing NEOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:31:52 EEST | INFO     | V3_SR | 📦 NEOUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 9, '1d': 0}
+2025-10-22 04:31:52 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:31:52 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:31:52 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:31:52 EEST | INFO     | V3_SR | ✅ NEOUSDT no signals after dual-engine + arbitration
+2025-10-22 04:31:52 EEST | INFO     | V3_SR | 🔍 Analyzing WUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:31:54 EEST | INFO     | V3_SR | 📦 WUSDT zones updated in registry: {'15m': 2, '1h': 3, '4h': 6, '1d': 2}
+2025-10-22 04:31:54 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:31:54 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:31:54 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:31:54 EEST | INFO     | V3_SR | ✅ WUSDT no signals after dual-engine + arbitration
+2025-10-22 04:31:54 EEST | INFO     | V3_SR | 🔍 Analyzing SOONUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:31:57 EEST | INFO     | V3_SR | 📦 SOONUSDT zones updated in registry: {'15m': 2, '1h': 3, '4h': 5, '1d': 2}
+2025-10-22 04:31:57 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:31:57 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:31:58 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:31:58 EEST | INFO     | V3_SR | ✅ SOONUSDT no signals after dual-engine + arbitration
+2025-10-22 04:31:58 EEST | INFO     | V3_SR | 🔍 Analyzing SUSHIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:00 EEST | INFO     | V3_SR | 📦 SUSHIUSDT zones updated in registry: {'15m': 3, '1h': 2, '4h': 7, '1d': 2}
+2025-10-22 04:32:00 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:00 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:00 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:00 EEST | INFO     | V3_SR | ✅ SUSHIUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:01 EEST | INFO     | V3_SR | 🔍 Analyzing KNCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:03 EEST | INFO     | V3_SR | 📦 KNCUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 4, '1d': 1}
+2025-10-22 04:32:03 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:03 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:03 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:03 EEST | INFO     | V3_SR | ✅ KNCUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:03 EEST | INFO     | V3_SR | 🔍 Analyzing ATHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:06 EEST | INFO     | V3_SR | 📦 ATHUSDT zones updated in registry: {'15m': 1, '1h': 4, '4h': 12, '1d': 3}
+2025-10-22 04:32:06 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:06 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:06 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:06 EEST | INFO     | V3_SR | ✅ ATHUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:06 EEST | INFO     | V3_SR | 🔍 Analyzing AGTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:10 EEST | INFO     | V3_SR | 📦 AGTUSDT zones updated in registry: {'15m': 4, '1h': 8, '4h': 5, '1d': 0}
+2025-10-22 04:32:10 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:10 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:10 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:10 EEST | INFO     | V3_SR | ✅ AGTUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:10 EEST | INFO     | V3_SR | 🔍 Analyzing SOLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:12 EEST | INFO     | V3_SR | 📦 SOLUSDT zones updated in registry: {'15m': 0, '1h': 2, '4h': 8, '1d': 4}
+2025-10-22 04:32:12 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:12 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:12 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:12 EEST | INFO     | V3_SR | ✅ SOLUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:13 EEST | INFO     | V3_SR | 🔍 Analyzing IMXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:16 EEST | INFO     | V3_SR | 📦 IMXUSDT zones updated in registry: {'15m': 3, '1h': 9, '4h': 5, '1d': 2}
+2025-10-22 04:32:16 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:16 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:16 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:16 EEST | INFO     | V3_SR | ✅ IMXUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:16 EEST | INFO     | V3_SR | 🔍 Analyzing HYPEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-22 04:32:19 EEST | INFO     | V3_SR | 📦 HYPEUSDT zones updated in registry: {'15m': 3, '1h': 2, '4h': 4, '1d': 3}
+2025-10-22 04:32:19 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+2025-10-22 04:32:19 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+2025-10-22 04:32:19 EEST | INFO     | V3_SR | ⚖️ Arbitrator: M15 0→0, H1 0→0
+2025-10-22 04:32:19 EEST | INFO     | V3_SR | ✅ HYPEUSDT no signals after dual-engine + arbitration
+2025-10-22 04:32:19 EEST | INFO     | V3_SR | 🔍 Analyzing BCHUSDT | Regime: TREND | Dual-Engine Pipeline
