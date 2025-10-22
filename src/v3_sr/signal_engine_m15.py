@@ -157,6 +157,7 @@ class SignalEngine_M15(BaseSignalEngine):
         direction = setup['direction']
         reasons = []
         confidence = 70  # Base
+        vwap_bias = 'N/A'  # Default value
         
         # [1] VWAP Bias Check (REQUIRED for M15, except Sweep-A)
         is_sweep_a = (setup['setup_type'] == 'SweepReturn' and 

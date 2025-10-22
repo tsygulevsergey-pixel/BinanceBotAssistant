@@ -5,7 +5,7 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 # Recent Updates
 
 ## October 22, 2025 - V3 S/R Signal Generation Bugfixes (CRITICAL)
-**Critical Bugs Fixed**: Two blocking bugs prevented V3 strategy from generating ANY signals.
+**Critical Bugs Fixed**: Three blocking bugs prevented V3 strategy from generating ANY signals.
 
 **BUG #1: Flip-Retest Detection Broken**
 - **Problem**: `flip.py` wrote `zone['state'] = 'flipped'` but `signal_engine_base.py` checked `zone['meta']['flipped']`
@@ -20,8 +20,14 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 - **Fix**: Changed to `close >= zone_low` (LONG) and `close <= zone_high` (SHORT)
 - **Files**: `src/v3_sr/signal_engine_base.py` (lines 253, 286)
 
+**BUG #3: Flip-Retest Wrong Direction**
+- **Problem**: Used `zone['kind']` (NEW type after flip) instead of `zone['flip_side']` (ORIGINAL type before flip)
+- **Impact**: Flip-Retest signals had OPPOSITE direction (Support flip → LONG instead of SHORT)
+- **Fix**: Now uses `flip_side_original = zone.get('flip_side')` to determine correct signal direction
+- **Files**: `src/v3_sr/signal_engine_base.py` (lines 111-126)
+
 **Expected Outcome**:
-- Flip-Retest signals will now generate when zones flip
+- Flip-Retest signals will now generate with CORRECT direction when zones flip
 - Sweep-Return signals will detect broader range of valid setups
 - V3 strategy should start producing signals in live testing
 - **Architect Review**: PASS ✅

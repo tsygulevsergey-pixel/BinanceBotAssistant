@@ -374,7 +374,7 @@ class SRZonesV3Strategy:
     
     def _convert_to_legacy_format(self, signal: Dict, symbol: str, market_regime: str,
                                   atr_15m: float, atr_1h: float,
-                                  current_price_15m: float, current_price_1h: float,
+                                  current_price_15m: Optional[float], current_price_1h: Optional[float],
                                   zones_by_tf: Dict) -> Dict:
         """
         Convert new signal engine format to legacy format for main.py compatibility
@@ -437,8 +437,10 @@ class SRZonesV3Strategy:
         entry_tf = signal.get('tf_entry', '15m')
         atr = atr_15m if entry_tf == '15m' else atr_1h
         
-        # Get current price based on entry TF
+        # Get current price based on entry TF (with fallback)
         current_price = current_price_15m if entry_tf == '15m' else current_price_1h
+        if current_price is None:
+            current_price = entry_price  # Fallback to entry price
         
         # Find nearest support/resistance for context
         all_zones = []
