@@ -1,0 +1,6 @@
+{
+  "timestamp": "2025-10-23T05:43:54.870505",
+  "database": "data/trading_bot.db",
+  "analysis": {},
+  "error": "no such table: sr_zones_v3"
+}

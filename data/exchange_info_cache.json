@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-21T07:26:44.200466+00:00",
+  "timestamp": "2025-10-23T08:10:17.304402+00:00",
   "symbols_info": {
     "BTCUSDT": {
       "pricePrecision": 2,
@@ -31,14 +31,6 @@
       "tickSize": 0.0001,
       "stepSize": 0.1,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "EOSUSDT": {
-      "pricePrecision": 3,
-      "quantityPrecision": 1,
-      "tickSize": 0.001,
-      "stepSize": 0.1,
-      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "LTCUSDT": {
@@ -86,6 +78,14 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "XMRUSDT": {
+      "pricePrecision": 2,
+      "quantityPrecision": 3,
+      "tickSize": 0.01,
+      "stepSize": 0.001,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -238,7 +238,7 @@
       "quantityPrecision": 1,
       "tickSize": 0.0001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "DOGEUSDT": {
@@ -318,7 +318,7 @@
       "quantityPrecision": 3,
       "tickSize": 0.1,
       "stepSize": 0.001,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "YFIUSDT": {
@@ -334,7 +334,7 @@
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "CRVUSDT": {
@@ -379,9 +379,9 @@
     },
     "SOLUSDT": {
       "pricePrecision": 4,
-      "quantityPrecision": 0,
+      "quantityPrecision": 2,
       "tickSize": 0.01,
-      "stepSize": 1.0,
+      "stepSize": 0.01,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -399,6 +399,14 @@
       "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "BLZUSDT": {
+      "pricePrecision": 5,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "UNIUSDT": {
@@ -439,14 +447,6 @@
       "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "TOMOUSDT": {
-      "pricePrecision": 4,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "RENUSDT": {
@@ -521,16 +521,8 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "CTKUSDT": {
-      "pricePrecision": 5,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "SETTLING",
-      "contractType": "PERPETUAL"
-    },
     "AXSUSDT": {
-      "pricePrecision": 4,
+      "pricePrecision": 5,
       "quantityPrecision": 0,
       "tickSize": 0.001,
       "stepSize": 1.0,
@@ -542,7 +534,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "ZENUSDT": {
@@ -569,28 +561,12 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BNTUSDT": {
-      "pricePrecision": 4,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "1INCHUSDT": {
       "pricePrecision": 4,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "UNFIUSDT": {
-      "pricePrecision": 3,
-      "quantityPrecision": 1,
-      "tickSize": 0.001,
-      "stepSize": 0.1,
-      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "CHZUSDT": {
@@ -622,7 +598,15 @@
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
+      "contractType": "PERPETUAL"
+    },
+    "UNFIUSDT": {
+      "pricePrecision": 3,
+      "quantityPrecision": 1,
+      "tickSize": 0.001,
+      "stepSize": 0.1,
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "REEFUSDT": {
@@ -654,7 +638,7 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "BTCSTUSDT": {
@@ -714,11 +698,11 @@
       "contractType": "PERPETUAL"
     },
     "LINAUSDT": {
-      "pricePrecision": 5,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 1e-06,
+      "stepSize": 0.1,
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "STMXUSDT": {
@@ -726,7 +710,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "DENTUSDT": {
@@ -777,6 +761,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "SCUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
+      "stepSize": 1.0,
+      "status": "SETTLING",
+      "contractType": "PERPETUAL"
+    },
     "DGBUSDT": {
       "pricePrecision": 5,
       "quantityPrecision": 0,
@@ -798,7 +790,7 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "GTCUSDT": {
@@ -817,14 +809,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "MASKUSDT": {
-      "pricePrecision": 4,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "IOTXUSDT": {
       "pricePrecision": 5,
       "quantityPrecision": 0,
@@ -833,15 +817,23 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "AUDIOUSDT": {
-      "pricePrecision": 4,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
+    "RAYUSDT": {
+      "pricePrecision": 3,
+      "quantityPrecision": 1,
+      "tickSize": 0.001,
+      "stepSize": 0.1,
       "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "C98USDT": {
+      "pricePrecision": 4,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "MASKUSDT": {
       "pricePrecision": 4,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
@@ -858,7 +850,7 @@
       "contractType": "PERPETUAL"
     },
     "DYDXUSDT": {
-      "pricePrecision": 6,
+      "pricePrecision": 3,
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
@@ -945,14 +937,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ANTUSDT": {
-      "pricePrecision": 3,
-      "quantityPrecision": 1,
-      "tickSize": 0.001,
-      "stepSize": 0.1,
-      "status": "SETTLING",
-      "contractType": "PERPETUAL"
-    },
     "ROSEUSDT": {
       "pricePrecision": 5,
       "quantityPrecision": 0,
@@ -1017,6 +1001,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "FTTUSDT": {
+      "pricePrecision": 4,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "SETTLING",
+      "contractType": "PERPETUAL"
+    },
     "JASMYUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 0,
@@ -1041,16 +1033,8 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "XMRUSDT": {
-      "pricePrecision": 3,
-      "quantityPrecision": 3,
-      "tickSize": 0.01,
-      "stepSize": 0.001,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "INJUSDT": {
-      "pricePrecision": 7,
+      "pricePrecision": 6,
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
@@ -1097,20 +1081,12 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "CVXUSDT": {
+    "ICPUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 0,
       "tickSize": 0.001,
       "stepSize": 1.0,
-      "status": "SETTLING",
-      "contractType": "PERPETUAL"
-    },
-    "FOOTBALLUSDT": {
-      "pricePrecision": 5,
-      "quantityPrecision": 2,
-      "tickSize": 0.01,
-      "stepSize": 0.01,
-      "status": "SETTLING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "APTUSDT": {
@@ -1129,12 +1105,12 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BLUEBIRDUSDT": {
-      "pricePrecision": 5,
-      "quantityPrecision": 1,
-      "tickSize": 0.001,
-      "stepSize": 0.1,
-      "status": "SETTLING",
+    "FETUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "FXSUSDT": {
@@ -1193,14 +1169,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "PHBUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "AGIXUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -1209,7 +1177,7 @@
       "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
-    "FETUSDT": {
+    "PHBUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
@@ -1239,6 +1207,14 @@
       "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "BNXUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "ACHUSDT": {
@@ -1273,6 +1249,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "TRUUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "LQTYUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
@@ -1289,14 +1273,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ARBUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "IDUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -1305,10 +1281,26 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "ARBUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "JOEUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "TLMUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -1329,27 +1321,11 @@
       "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
-    "TRUUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "RDNTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "ETHBTC": {
-      "pricePrecision": 6,
-      "quantityPrecision": 2,
-      "tickSize": 1e-06,
-      "stepSize": 0.01,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -1366,6 +1342,14 @@
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "ETHBTC": {
+      "pricePrecision": 6,
+      "quantityPrecision": 2,
+      "tickSize": 1e-06,
+      "stepSize": 0.01,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -1393,6 +1377,14 @@
       "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
+    "SUIUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "1000PEPEUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -1409,20 +1401,20 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "RADUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "SETTLING",
-      "contractType": "PERPETUAL"
-    },
     "UMAUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 0,
       "tickSize": 0.001,
       "stepSize": 1.0,
       "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "RADUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "KEYUSDT": {
@@ -1438,15 +1430,7 @@
       "quantityPrecision": 1,
       "tickSize": 0.0001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "SUIUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "NMRUSDT": {
@@ -1476,7 +1460,7 @@
     "XVGUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-07,
+      "tickSize": 1e-06,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -1529,6 +1513,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "BNTUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "OXTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -1558,7 +1550,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "ARKUSDT": {
@@ -1598,7 +1590,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "BIGTIMEUSDT": {
@@ -1614,7 +1606,7 @@
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "ORBSUSDT": {
@@ -1622,7 +1614,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-06,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "STPTUSDT": {
@@ -1713,6 +1705,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "TWTUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "TOKENUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -1759,14 +1759,6 @@
       "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "MBLUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "KASUSDT": {
@@ -1826,7 +1818,7 @@
       "contractType": "PERPETUAL"
     },
     "ETHWUSDT": {
-      "pricePrecision": 7,
+      "pricePrecision": 6,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
@@ -1866,10 +1858,10 @@
       "contractType": "PERPETUAL"
     },
     "ACEUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
+      "pricePrecision": 6,
+      "quantityPrecision": 2,
       "tickSize": 0.0001,
-      "stepSize": 1.0,
+      "stepSize": 0.01,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -1878,14 +1870,6 @@
       "quantityPrecision": 2,
       "tickSize": 0.001,
       "stepSize": 0.01,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "TWTUSDT": {
-      "pricePrecision": 5,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -1921,19 +1905,19 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "XRPUSDC": {
-      "pricePrecision": 4,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "SOLUSDC": {
       "pricePrecision": 4,
       "quantityPrecision": 2,
       "tickSize": 0.01,
       "stepSize": 0.01,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "XRPUSDC": {
+      "pricePrecision": 4,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -1981,7 +1965,7 @@
       "pricePrecision": 7,
       "quantityPrecision": 1,
       "tickSize": 0.0001,
-      "stepSize": 1.0,
+      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2025,15 +2009,15 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "SUIUSDC": {
+    "DYMUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "DYMUSDT": {
+    "SUIUSDC": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
       "tickSize": 0.0001,
@@ -2065,14 +2049,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ORDIUSDC": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "STRKUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 1,
@@ -2081,12 +2057,12 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "MAVIAUSDT": {
-      "pricePrecision": 7,
+    "ORDIUSDC": {
+      "pricePrecision": 6,
       "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "SETTLING",
+      "tickSize": 0.001,
+      "stepSize": 0.1,
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "GLMUSDT": {
@@ -2156,7 +2132,7 @@
     "WLDUSDC": {
       "pricePrecision": 7,
       "quantityPrecision": 1,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -2177,6 +2153,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "ETHFIUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "AVAXUSDC": {
       "pricePrecision": 6,
       "quantityPrecision": 2,
@@ -2193,14 +2177,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ETHFIUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "ENAUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -2209,11 +2185,11 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BCHUSDC": {
-      "pricePrecision": 2,
-      "quantityPrecision": 3,
-      "tickSize": 0.01,
-      "stepSize": 0.001,
+    "WUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 1,
+      "tickSize": 1e-05,
+      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2225,11 +2201,11 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "WUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 1,
-      "tickSize": 1e-05,
-      "stepSize": 0.1,
+    "BCHUSDC": {
+      "pricePrecision": 2,
+      "quantityPrecision": 3,
+      "tickSize": 0.01,
+      "stepSize": 0.001,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2249,19 +2225,19 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "NEARUSDC": {
-      "pricePrecision": 4,
-      "quantityPrecision": 0,
-      "tickSize": 0.001,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "LTCUSDC": {
       "pricePrecision": 2,
       "quantityPrecision": 3,
       "tickSize": 0.01,
       "stepSize": 0.001,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "NEARUSDC": {
+      "pricePrecision": 4,
+      "quantityPrecision": 0,
+      "tickSize": 0.001,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2271,6 +2247,14 @@
       "tickSize": 0.01,
       "stepSize": 0.001,
       "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "OMNIUSDT": {
+      "pricePrecision": 4,
+      "quantityPrecision": 2,
+      "tickSize": 0.001,
+      "stepSize": 0.01,
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "ARBUSDC": {
@@ -2283,9 +2267,9 @@
     },
     "NEOUSDC": {
       "pricePrecision": 3,
-      "quantityPrecision": 2,
+      "quantityPrecision": 3,
       "tickSize": 0.001,
-      "stepSize": 0.01,
+      "stepSize": 0.001,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2297,11 +2281,11 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "OMNIUSDT": {
-      "pricePrecision": 5,
-      "quantityPrecision": 2,
-      "tickSize": 0.001,
-      "stepSize": 0.01,
+    "TIAUSDC": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2309,14 +2293,6 @@
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "TIAUSDC": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -2329,19 +2305,19 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ETHFIUSDC": {
-      "pricePrecision": 7,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "ENAUSDC": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "ETHFIUSDC": {
+      "pricePrecision": 7,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -2494,7 +2470,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "POPCATUSDT": {
@@ -2518,7 +2494,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "NULSUSDT": {
@@ -2526,7 +2502,7 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "DOGSUSDT": {
@@ -2566,7 +2542,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "QUICKUSDT": {
@@ -2582,7 +2558,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "RPLUSDT": {
@@ -2591,14 +2567,6 @@
       "tickSize": 0.001,
       "stepSize": 0.1,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "AERGOUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "POLUSDT": {
@@ -2614,19 +2582,19 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
-    "NEIROUSDT": {
-      "pricePrecision": 8,
+    "1MBABYDOGEUSDT": {
+      "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-07,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "1MBABYDOGEUSDT": {
-      "pricePrecision": 7,
+    "NEIROUSDT": {
+      "pricePrecision": 8,
       "quantityPrecision": 0,
       "tickSize": 1e-07,
       "stepSize": 1.0,
@@ -2774,18 +2742,10 @@
       "quantityPrecision": 0,
       "tickSize": 1e-06,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "PONKEUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "CETUSUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -2797,6 +2757,14 @@
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "CETUSUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -2833,7 +2801,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "PNUTUSDT": {
+    "ACTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -2841,7 +2809,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ACTUSDT": {
+    "PNUTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -2894,7 +2862,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "TRADING",
+      "status": "SETTLING",
       "contractType": "PERPETUAL"
     },
     "SCRTUSDT": {
@@ -2905,7 +2873,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "1000WHYUSDT": {
+    "1000CHEEMSUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-07,
@@ -2913,7 +2881,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "1000CHEEMSUSDT": {
+    "1000WHYUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-07,
@@ -2993,6 +2961,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "KOMAUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "VIRTUALUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 1,
@@ -3009,28 +2985,12 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "KOMAUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "MEUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 1,
       "tickSize": 0.0001,
       "stepSize": 0.1,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "ABCCCUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
       "contractType": "PERPETUAL"
     },
     "AVAUSDT": {
@@ -3097,22 +3057,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "KMNOUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "CGPTUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "AIXBTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -3129,6 +3073,22 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "KMNOUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "CGPTUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "HIVEUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -3137,14 +3097,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ETHUSDT_250627": {
-      "pricePrecision": 2,
-      "quantityPrecision": 3,
-      "tickSize": 0.01,
-      "stepSize": 0.001,
-      "status": "DELIVERING",
-      "contractType": "CURRENT_QUARTER DELIVERING"
-    },
     "DEXEUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 2,
@@ -3152,14 +3104,6 @@
       "stepSize": 0.01,
       "status": "TRADING",
       "contractType": "PERPETUAL"
-    },
-    "BTCUSDT_250627": {
-      "pricePrecision": 1,
-      "quantityPrecision": 3,
-      "tickSize": 0.1,
-      "stepSize": 0.001,
-      "status": "DELIVERING",
-      "contractType": "CURRENT_QUARTER DELIVERING"
     },
     "PHAUSDT": {
       "pricePrecision": 7,
@@ -3267,7 +3211,7 @@
     },
     "SOLVUSDT": {
       "pricePrecision": 7,
-      "quantityPrecision": 1,
+      "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
@@ -3321,7 +3265,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "PIPPINUSDT": {
+    "VINEUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -3329,7 +3273,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "VINEUSDT": {
+    "PIPPINUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -3388,7 +3332,7 @@
     "IPUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
-      "tickSize": 0.0001,
+      "tickSize": 0.001,
       "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3425,26 +3369,10 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "HBARUSDC": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "PNUTUSDC": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "ADAUSDC": {
+    "IPUSDC": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
-      "tickSize": 0.0001,
+      "tickSize": 0.001,
       "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3457,7 +3385,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "IPUSDC": {
+    "ADAUSDC": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
       "tickSize": 0.0001,
@@ -3469,6 +3397,22 @@
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "PNUTUSDC": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "HBARUSDC": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3513,19 +3457,19 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "TUTUSDT": {
+    "BIDUSDT": {
       "pricePrecision": 7,
-      "quantityPrecision": 1,
+      "quantityPrecision": 0,
       "tickSize": 1e-05,
-      "stepSize": 0.1,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BIDUSDT": {
+    "TUTUSDT": {
       "pricePrecision": 7,
-      "quantityPrecision": 1,
+      "quantityPrecision": 0,
       "tickSize": 1e-05,
-      "stepSize": 0.1,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -3545,14 +3489,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BANANAS31USDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "SIRENUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -3561,29 +3497,13 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BTCUSDT_250926": {
-      "pricePrecision": 1,
-      "quantityPrecision": 3,
-      "tickSize": 0.1,
-      "stepSize": 0.001,
-      "status": "DELIVERING",
-      "contractType": "CURRENT_QUARTER DELIVERING"
-    },
-    "BNXUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+    "BANANAS31USDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
+      "stepSize": 1.0,
+      "status": "TRADING",
       "contractType": "PERPETUAL"
-    },
-    "ETHUSDT_250926": {
-      "pricePrecision": 2,
-      "quantityPrecision": 3,
-      "tickSize": 0.01,
-      "stepSize": 0.001,
-      "status": "DELIVERING",
-      "contractType": "CURRENT_QUARTER DELIVERING"
     },
     "BRUSDT": {
       "pricePrecision": 7,
@@ -3601,10 +3521,34 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "NILUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "PARTIUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "JELLYJELLYUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "MAVIAUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3638,6 +3582,14 @@
       "quantityPrecision": 2,
       "tickSize": 0.001,
       "stepSize": 0.01,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "GUNUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -3681,14 +3633,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "PUMPUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "SETTLING",
-      "contractType": "PERPETUAL"
-    },
     "STOUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -3713,6 +3657,14 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "WCTUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "INITUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -3721,10 +3673,18 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "AERGOUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "BANKUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-06,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3785,39 +3745,15 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "WCTUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "GUNUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "PARTIUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "NILUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "PUNDIXUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "CTKUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
@@ -3836,7 +3772,7 @@
     "DOLOUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-06,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3844,7 +3780,7 @@
     "HAEDALUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-06,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3857,18 +3793,18 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ALPINEUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "ASRUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
       "tickSize": 0.001,
+      "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "ALPINEUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
       "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3899,25 +3835,25 @@
     },
     "OBOLUSDT": {
       "pricePrecision": 7,
-      "quantityPrecision": 1,
+      "quantityPrecision": 0,
       "tickSize": 1e-05,
-      "stepSize": 0.1,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "DOODUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-07,
+      "tickSize": 1e-06,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "OGUSDT": {
       "pricePrecision": 6,
-      "quantityPrecision": 2,
+      "quantityPrecision": 1,
       "tickSize": 0.001,
-      "stepSize": 0.01,
+      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -3940,6 +3876,14 @@
     "NXPCUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "CVCUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
@@ -3953,7 +3897,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BUSDT": {
+    "AWEUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -3961,10 +3905,34 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "BUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "SOONUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "HUMAUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "AUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -3990,6 +3958,70 @@
       "quantityPrecision": 2,
       "tickSize": 0.001,
       "stepSize": 0.01,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "BDXNUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "PUFFERUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "PORT3USDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "1000000BOBUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "LAUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.0001,
+      "stepSize": 0.1,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "SKATEUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "HOMEUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "RESOLVUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -4033,10 +4065,18 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "SPKUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "MYXUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 0.0001,
+      "tickSize": 0.001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4065,22 +4105,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "ETHUSDT_251226": {
-      "pricePrecision": 2,
-      "quantityPrecision": 3,
-      "tickSize": 0.01,
-      "stepSize": 0.001,
-      "status": "TRADING",
-      "contractType": "CURRENT_QUARTER"
-    },
-    "BTCUSDT_251226": {
-      "pricePrecision": 1,
-      "quantityPrecision": 3,
-      "tickSize": 0.1,
-      "stepSize": 0.001,
-      "status": "TRADING",
-      "contractType": "CURRENT_QUARTER"
-    },
     "HUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -4105,20 +4129,28 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "BTCUSDT_251226": {
+      "pricePrecision": 1,
+      "quantityPrecision": 3,
+      "tickSize": 0.1,
+      "stepSize": 0.001,
+      "status": "TRADING",
+      "contractType": "CURRENT_QUARTER"
+    },
+    "ETHUSDT_251226": {
+      "pricePrecision": 2,
+      "quantityPrecision": 3,
+      "tickSize": 0.01,
+      "stepSize": 0.001,
+      "status": "TRADING",
+      "contractType": "CURRENT_QUARTER"
+    },
     "ICNTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "IDOL": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
       "contractType": "PERPETUAL"
     },
     "BULLAUSDT": {
@@ -4149,6 +4181,14 @@
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "PUMPUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4214,6 +4254,14 @@
       "quantityPrecision": 0,
       "tickSize": 1e-06,
       "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "CVXUSDT": {
+      "pricePrecision": 6,
+      "quantityPrecision": 1,
+      "tickSize": 0.001,
+      "stepSize": 0.1,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -4369,14 +4417,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "SAPIENUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "CUDISUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -4385,47 +4425,7 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "AWEUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "SOONUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "HUMAUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "LAUSDT": {
-      "pricePrecision": 6,
-      "quantityPrecision": 1,
-      "tickSize": 0.0001,
-      "stepSize": 0.1,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "RESOLVUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "SPKUSDT": {
+    "SAPIENUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
@@ -4454,29 +4454,29 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "SOMIUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 0.001,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "SETTLING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "BASUSDT": {
       "pricePrecision": 7,
-      "quantityPrecision": 1,
-      "tickSize": 1e-06,
-      "stepSize": 0.1,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "BTRUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 0.0001,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4492,7 +4492,7 @@
     "HEMIUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-06,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4513,14 +4513,6 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "PTBUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "ARIAUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
@@ -4537,63 +4529,23 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "BDXNUSDT": {
-      "pricePrecision": 5,
+    "PTBUSDT": {
+      "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
-    "OPENUSDT": {
-      "pricePrecision": 0,
-      "quantityPrecision": 7,
-      "tickSize": 0.0,
-      "stepSize": 1e-07,
-      "status": "PENDING_TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "PUFFERUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "PORT3USDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "1000000BOBUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "SKATEUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "HOMEUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-06,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
-    },
     "WLFIUSDC": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "OPENUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 0.0001,
@@ -4654,7 +4606,7 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "TOSHIUSDT": {
@@ -4684,7 +4636,7 @@
     "AIAUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4716,7 +4668,7 @@
     "BLESSUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-06,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4729,12 +4681,20 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "COAIUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.001,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "BTCUSDT_260327": {
       "pricePrecision": 1,
       "quantityPrecision": 3,
       "tickSize": 0.1,
       "stepSize": 0.001,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "NEXT_QUARTER"
     },
     "ETHUSDT_260327": {
@@ -4744,14 +4704,6 @@
       "stepSize": 0.001,
       "status": "TRADING",
       "contractType": "NEXT_QUARTER"
-    },
-    "COAIUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "TRADING",
-      "contractType": "PERPETUAL"
     },
     "HANAUSDT": {
       "pricePrecision": 7,
@@ -4788,7 +4740,7 @@
     "LIGHTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4806,15 +4758,15 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "VFYUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 0.0001,
+      "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "EDENUSDT": {
@@ -4822,15 +4774,7 @@
       "quantityPrecision": 0,
       "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "TRUTHUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "NOMUSDT": {
@@ -4838,7 +4782,15 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "TRUTHUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
+      "stepSize": 1.0,
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "2ZUSDT": {
@@ -4846,23 +4798,23 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "LYNUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 0.0001,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "EVAAUSDT": {
       "pricePrecision": 6,
       "quantityPrecision": 1,
-      "tickSize": 0.001,
+      "tickSize": 0.0001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "LYNUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "KGENUSDT": {
@@ -4870,7 +4822,7 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "4USDT": {
@@ -4926,21 +4878,13 @@
       "quantityPrecision": 1,
       "tickSize": 0.001,
       "stepSize": 0.1,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "CLOUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-05,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "\u6d4b\u8bd5\u6d4b\u8bd5USDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
@@ -4950,30 +4894,22 @@
       "quantityPrecision": 0,
       "tickSize": 1e-05,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "ZBTUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
-      "tickSize": 1e-05,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
-      "status": "PENDING_TRADING",
-      "contractType": "PERPETUAL"
-    },
-    "RVVUSDT": {
-      "pricePrecision": 7,
-      "quantityPrecision": 0,
-      "tickSize": 1e-07,
-      "stepSize": 1.0,
-      "status": "PENDING_TRADING",
+      "status": "TRADING",
       "contractType": "PERPETUAL"
     },
     "LABUSDT": {
       "pricePrecision": 7,
-      "quantityPrecision": 1,
+      "quantityPrecision": 0,
       "tickSize": 1e-05,
-      "stepSize": 0.1,
+      "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
@@ -4985,10 +4921,34 @@
       "status": "TRADING",
       "contractType": "PERPETUAL"
     },
+    "RVVUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-06,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
     "\u5e01\u5b89\u4eba\u751fUSDT": {
       "pricePrecision": 7,
       "quantityPrecision": 0,
       "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "BLUAIUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 1e-05,
+      "stepSize": 1.0,
+      "status": "TRADING",
+      "contractType": "PERPETUAL"
+    },
+    "TURTLEUSDT": {
+      "pricePrecision": 7,
+      "quantityPrecision": 0,
+      "tickSize": 0.0001,
       "stepSize": 1.0,
       "status": "TRADING",
       "contractType": "PERPETUAL"

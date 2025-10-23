@@ -11,8 +11,8 @@ database:
 
 # Binance API
 binance:
-  use_testnet: true  # true = Binance Testnet (для работы на Replit)
-  signals_only_mode: true  # true = только сигналы без торговли
+  use_testnet: false  # true = Binance Testnet (для работы на Replit)
+  signals_only_mode: false  # true = только сигналы без торговли
   rest_weight_limit: 2400  # FUTURES API limit = 2400/min (было 1100 для SPOT), safety 90% = 2160
   startup_delay_seconds: 30  # Задержка при первом запуске если нет кеша (защита от rate limit)
   ws_reconnect_delay: 5
@@ -40,7 +40,7 @@ periodic_gap_refill:
 
 # Data Refresh - Обновление последних данных свечей при старте
 data_refresh:
-  enabled: true  # Обновлять последние данные свечей из БД при старте бота
+  enabled: false  # Обновлять последние данные свечей из БД при старте бота
   days: 10  # Обновить данные за последние N дней (исправляет незакрытые свечи)
   # ВАЖНО: Обновляет существующие свечи в БД актуальными данными с Binance
   # Решает проблему: незакрытые свечи, скачанные в 09:59, перезаписываются правильными после 10:00
