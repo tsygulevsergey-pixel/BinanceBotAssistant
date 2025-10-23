@@ -6,13 +6,77 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 import pytz
+import os
 
 DB_PATH = "data/trading_bot.db"
 
 def check_renderusdt_data():
+    # Проверить существование БД
+    if not os.path.exists(DB_PATH):
+        print(f"❌ Database not found at: {DB_PATH}")
+        print(f"   Current directory: {os.getcwd()}")
+        print(f"   Please check if bot is running from correct directory!")
+        return
+    
+    print(f"✅ Database found: {DB_PATH}")
+    print(f"   Size: {os.path.getsize(DB_PATH) / (1024*1024):.1f} MB")
+    print()
+    
     conn = sqlite3.connect(DB_PATH)
     
-    # Получить свечи RENDERUSDT 15m за 24 Oct 00:00 - 02:00
+    # Сначала проверить есть ли ВООБЩЕ данные по RENDERUSDT
+    check_query = """
+    SELECT 
+        timeframe,
+        COUNT(*) as count,
+        MIN(open_time) as first_candle,
+        MAX(open_time) as last_candle
+    FROM candles
+    WHERE symbol = 'RENDERUSDT'
+    GROUP BY timeframe
+    ORDER BY timeframe
+    """
+    
+    check_df = pd.read_sql_query(check_query, conn)
+    
+    if check_df.empty:
+        print("❌ No RENDERUSDT data found in database at all!")
+        conn.close()
+        return
+    
+    print("📊 RENDERUSDT data summary:")
+    print(check_df.to_string(index=False))
+    print()
+    
+    # Получить последние 20 свечей 15m
+    query_recent = """
+    SELECT 
+        open_time,
+        open,
+        high,
+        low,
+        close,
+        volume
+    FROM candles
+    WHERE symbol = 'RENDERUSDT'
+    AND timeframe = '15m'
+    ORDER BY open_time DESC
+    LIMIT 20
+    """
+    
+    df_recent = pd.read_sql_query(query_recent, conn)
+    
+    if df_recent.empty:
+        print("❌ No 15m data found for RENDERUSDT!")
+        conn.close()
+        return
+    
+    print("📊 Last 20 candles (15m):")
+    for idx, row in df_recent.iterrows():
+        print(f"   {row['open_time']} | O:{row['open']:.3f} H:{row['high']:.3f} L:{row['low']:.3f} C:{row['close']:.3f}")
+    print()
+    
+    # Теперь получить свечи за 24 Oct 00:00 - 02:00 (2025 год!)
     query = """
     SELECT 
         open_time,
@@ -24,16 +88,40 @@ def check_renderusdt_data():
     FROM candles
     WHERE symbol = 'RENDERUSDT'
     AND timeframe = '15m'
-    AND open_time >= '2024-10-24 00:00:00'
-    AND open_time <= '2024-10-24 02:00:00'
+    AND open_time >= '2025-10-24 00:00:00'
+    AND open_time <= '2025-10-24 02:00:00'
     ORDER BY open_time
     """
     
     df = pd.read_sql_query(query, conn)
-    conn.close()
     
     if df.empty:
-        print("❌ No data found for RENDERUSDT 15m!")
+        print("❌ No data found for RENDERUSDT 15m on 2025-10-24 00:00-02:00!")
+        print("   Trying to find data around that date...")
+        
+        # Попробовать найти данные рядом
+        query_around = """
+        SELECT 
+            open_time,
+            open,
+            high,
+            low,
+            close
+        FROM candles
+        WHERE symbol = 'RENDERUSDT'
+        AND timeframe = '15m'
+        AND open_time >= '2025-10-23 00:00:00'
+        AND open_time <= '2025-10-25 00:00:00'
+        ORDER BY open_time
+        """
+        df_around = pd.read_sql_query(query_around, conn)
+        
+        if not df_around.empty:
+            print(f"\n✅ Found {len(df_around)} candles around Oct 23-25:")
+            for idx, row in df_around.head(10).iterrows():
+                print(f"   {row['open_time']} | C:{row['close']:.3f}")
+        
+        conn.close()
         return
     
     # Рассчитать EMA200 (нужно загрузить больше данных для точного расчета)
