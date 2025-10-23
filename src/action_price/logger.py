@@ -68,5 +68,19 @@ def setup_action_price_logger():
     return logger
 
 
-# Singleton instance
-ap_logger = setup_action_price_logger()
+# ✅ FIX БАГ #5: Lazy initialization вместо module-level call
+# Это предотвращает инициализацию логгера в каждом ProcessPool worker'е
+_ap_logger_instance = None
+
+def get_action_price_logger():
+    """
+    Получить singleton instance Action Price logger.
+    Создаёт logger только при первом вызове (lazy initialization).
+    
+    ProcessPool-safe: каждый worker вызовет setup только ОДИН раз при первом использовании,
+    а не при импорте модуля.
+    """
+    global _ap_logger_instance
+    if _ap_logger_instance is None:
+        _ap_logger_instance = setup_action_price_logger()
+    return _ap_logger_instance

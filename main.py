@@ -53,14 +53,14 @@ import pytz
 # Action Price imports
 from src.action_price.engine import ActionPriceEngine
 from src.action_price.performance_tracker import ActionPricePerformanceTracker
-from src.action_price.logger import ap_logger
+from src.action_price.logger import get_action_price_logger
 from src.action_price.signal_logger import ActionPriceSignalLogger
 from src.database.models import ActionPriceSignal
 
 # V3 S/R Strategy imports
 from src.v3_sr.strategy import SRZonesV3Strategy
 from src.v3_sr.performance_tracker import V3SRPerformanceTracker
-from src.v3_sr.logger import v3_sr_logger
+from src.v3_sr.logger import get_v3_sr_logger
 from src.v3_sr.signal_logger import V3SRSignalLogger
 from src.database.models import V3SRSignal
 
@@ -361,8 +361,8 @@ class TradingBot:
                 self.ap_signal_logger  # JSONL logger
             )
             asyncio.create_task(self.ap_performance_tracker.start())
-            ap_logger.info("🎯 Action Price Engine initialized (Production mode)")
-            ap_logger.info(f"🎯 Execution timeframes: {ap_config.get('execution_timeframes', ['15m', '1h'])}")
+            get_action_price_logger().info("🎯 Action Price Engine initialized (Production mode)")
+            get_action_price_logger().info(f"🎯 Execution timeframes: {ap_config.get('execution_timeframes', ['15m', '1h'])}")
         else:
             reason = "testnet mode" if use_testnet else "disabled in config"
             logger.info(f"⏸️  Action Price disabled ({reason})")
@@ -412,8 +412,8 @@ class TradingBot:
                 v3_config.get('sr_zones_v3_strategy', {})
             )
             asyncio.create_task(self.v3_performance_tracker.start())
-            v3_sr_logger.info("🔷 V3 S/R Strategy initialized")
-            v3_sr_logger.info(f"🔷 Entry timeframes: {v3_config.get('sr_zones_v3_strategy', {}).get('general', {}).get('entry_timeframes', ['15m', '1h'])}")
+            get_v3_sr_logger().info("🔷 V3 S/R Strategy initialized")
+            get_v3_sr_logger().info(f"🔷 Entry timeframes: {v3_config.get('sr_zones_v3_strategy', {}).get('general', {}).get('entry_timeframes', ['15m', '1h'])}")
         else:
             logger.info("⏸️  V3 S/R Strategy disabled in config")
         
@@ -1205,7 +1205,7 @@ class TradingBot:
         tf_1h_close = TimeframeSync.should_update_timeframe('1h', consumer_id='action_price_check')
         current_tf = '1h' if tf_1h_close else '15m'
         
-        ap_logger.info(
+        get_action_price_logger().info(
             f"🎯 Checking Action Price signals on {current_tf} close (force_recalc={force_zone_recalc})\n"
             f"  📊 Symbols with updated candles: {len(symbols_to_check)}"
         )
@@ -1218,7 +1218,7 @@ class TradingBot:
             # Пропускаем символы с активными сигналами ACTION PRICE
             if symbol in self.symbols_blocked_action_price:
                 symbols_blocked += 1
-                ap_logger.debug(f"{symbol} - Blocked (active AP signal)")
+                get_action_price_logger().debug(f"{symbol} - Blocked (active AP signal)")
                 continue
             
             symbols_analyzed += 1
@@ -1241,7 +1241,7 @@ class TradingBot:
                         missing.append('15m')
                     if '1h' not in timeframe_data:
                         missing.append('1h')
-                    ap_logger.debug(f"{symbol} - Missing required timeframes: {', '.join(missing)}")
+                    get_action_price_logger().debug(f"{symbol} - Missing required timeframes: {', '.join(missing)}")
                     continue
                 
                 # Анализ паттернов - новый EMA200 Body Cross engine
@@ -1267,21 +1267,21 @@ class TradingBot:
                         # Отправить в Telegram
                         await self._send_action_price_telegram(ap_signal)
                         
-                        ap_logger.info(
+                        get_action_price_logger().info(
                             f"🎯 AP Signal: {ap_signal['symbol']} {ap_signal['direction']} "
                             f"{ap_signal['pattern_type']} @ {ap_signal.get('entry_price', 0):.4f} "
                             f"(Score: {ap_signal.get('confidence_score', 0):.1f})"
                         )
                     else:
-                        ap_logger.warning(f"⚠️ Skipping {symbol} - failed to save signal to DB")
+                        get_action_price_logger().warning(f"⚠️ Skipping {symbol} - failed to save signal to DB")
             
             except Exception as e:
-                ap_logger.error(f"Error checking AP for {symbol}: {e}", exc_info=True)
+                get_action_price_logger().error(f"Error checking AP for {symbol}: {e}", exc_info=True)
             
             await asyncio.sleep(0.05)
         
         # Всегда логировать итоги анализа
-        ap_logger.info(
+        get_action_price_logger().info(
             f"🎯 Action Price analysis complete:\n"
             f"  📊 Total symbols: {len(symbols_to_check)}\n"
             f"  🔍 Analyzed: {symbols_analyzed}\n"
@@ -1670,12 +1670,12 @@ class TradingBot:
             
             session.add(signal)
             session.commit()
-            ap_logger.info(f"💾 Saved AP signal to DB: {ap_signal['symbol']} {ap_signal['direction']}")
+            get_action_price_logger().info(f"💾 Saved AP signal to DB: {ap_signal['symbol']} {ap_signal['direction']}")
             return True
             
         except Exception as e:
             session.rollback()
-            ap_logger.error(f"Failed to save AP signal to DB: {e}", exc_info=True)
+            get_action_price_logger().error(f"Failed to save AP signal to DB: {e}", exc_info=True)
             return False
         finally:
             session.close()
@@ -1813,7 +1813,7 @@ class TradingBot:
             
             # Проверка что Telegram инициализирован
             if not self.telegram_bot or not self.telegram_bot.bot or not self.telegram_bot.chat_id:
-                ap_logger.warning("Telegram bot not initialized - skipping AP signal notification")
+                get_action_price_logger().warning("Telegram bot not initialized - skipping AP signal notification")
                 return
             
             await self.telegram_bot.bot.send_message(
@@ -1821,10 +1821,10 @@ class TradingBot:
                 text=message,
                 parse_mode='HTML'
             )
-            ap_logger.info(f"📤 Sent AP signal to Telegram: {ap_signal['symbol']} {ap_signal['direction']}")
+            get_action_price_logger().info(f"📤 Sent AP signal to Telegram: {ap_signal['symbol']} {ap_signal['direction']}")
             
         except Exception as e:
-            ap_logger.error(f"Failed to send AP signal to Telegram: {e}", exc_info=True)
+            get_action_price_logger().error(f"Failed to send AP signal to Telegram: {e}", exc_info=True)
     
     def _load_active_signals_on_startup(self):
         """Загрузить активные сигналы из БД при старте и заблокировать символы"""
@@ -1915,7 +1915,7 @@ class TradingBot:
             key = f"{symbol}_{direction}"
             if key in self.symbols_blocked_v3:
                 self.symbols_blocked_v3.discard(key)
-                v3_sr_logger.info(f"🔓 V3: {symbol} {direction} unblocked (signal closed)")
+                get_v3_sr_logger().info(f"🔓 V3: {symbol} {direction} unblocked (signal closed)")
         except Exception as e:
             logger.error(f"Error unblocking symbol {symbol} for V3: {e}", exc_info=True)
     
@@ -1938,7 +1938,7 @@ class TradingBot:
         if not symbols_to_check:
             return
         
-        v3_sr_logger.info(f"🔷 Checking V3 S/R signals for {len(symbols_to_check)} symbols")
+        get_v3_sr_logger().info(f"🔷 Checking V3 S/R signals for {len(symbols_to_check)} symbols")
         
         # STEP 1: Load data for all symbols (sequential, cached in DataLoader)
         symbols_data = []
@@ -1963,18 +1963,18 @@ class TradingBot:
                 symbols_data.append((symbol, timeframe_data))
             
             except Exception as e:
-                v3_sr_logger.error(f"Error loading data for {symbol}: {e}", exc_info=True)
+                get_v3_sr_logger().error(f"Error loading data for {symbol}: {e}", exc_info=True)
         
         if not symbols_data:
-            v3_sr_logger.info("⚠️ No symbols with valid data to analyze")
+            get_v3_sr_logger().info("⚠️ No symbols with valid data to analyze")
             return
         
-        v3_sr_logger.info(f"📊 Loaded data for {len(symbols_data)} symbols")
+        get_v3_sr_logger().info(f"📊 Loaded data for {len(symbols_data)} symbols")
         
         # STEP 2: Build zones in PARALLEL for all symbols (ProcessPoolExecutor)
-        v3_sr_logger.info(f"🚀 Building zones in parallel for {len(symbols_data)} symbols...")
+        get_v3_sr_logger().info(f"🚀 Building zones in parallel for {len(symbols_data)} symbols...")
         batch_zones = self.v3_sr_strategy.batch_build_zones_parallel(symbols_data)
-        v3_sr_logger.info(f"✅ Parallel zone building complete: {len(batch_zones)} symbols")
+        get_v3_sr_logger().info(f"✅ Parallel zone building complete: {len(batch_zones)} symbols")
         
         # STEP 3: Analyze each symbol sequentially (zones already cached)
         signals_found = 0
@@ -1983,7 +1983,7 @@ class TradingBot:
         for symbol, timeframe_data in symbols_data:
             # Skip if zones weren't built successfully
             if symbol not in batch_zones:
-                v3_sr_logger.warning(f"⚠️ {symbol}: Zones not available, skipping analysis")
+                get_v3_sr_logger().warning(f"⚠️ {symbol}: Zones not available, skipping analysis")
                 continue
             
             symbols_analyzed += 1
@@ -2022,18 +2022,18 @@ class TradingBot:
                         # Send to Telegram
                         await self._send_v3_sr_telegram(v3_signal)
                         
-                        v3_sr_logger.info(
+                        get_v3_sr_logger().info(
                             f"🔷 V3 Signal: {symbol} {v3_signal['direction']} "
                             f"{v3_signal['setup_type']} @ {v3_signal.get('entry_price', 0):.4f} "
                             f"(Confidence: {v3_signal.get('confidence', 0):.1f}%)"
                         )
             
             except Exception as e:
-                v3_sr_logger.error(f"Error checking V3 for {symbol}: {e}", exc_info=True)
+                get_v3_sr_logger().error(f"Error checking V3 for {symbol}: {e}", exc_info=True)
             
             await asyncio.sleep(0.05)
         
-        v3_sr_logger.info(
+        get_v3_sr_logger().info(
             f"🔷 V3 S/R analysis complete: "
             f"Analyzed: {symbols_analyzed}, Signals: {signals_found}"
         )
@@ -2088,12 +2088,12 @@ class TradingBot:
             session.add(signal)
             session.commit()
             
-            v3_sr_logger.info(f"✅ V3 signal saved to DB: {v3_signal['symbol']} {v3_signal['direction']}")
+            get_v3_sr_logger().info(f"✅ V3 signal saved to DB: {v3_signal['symbol']} {v3_signal['direction']}")
             return True
             
         except Exception as e:
             session.rollback()
-            v3_sr_logger.error(f"❌ Error saving V3 signal to DB: {e}", exc_info=True)
+            get_v3_sr_logger().error(f"❌ Error saving V3 signal to DB: {e}", exc_info=True)
             return False
         finally:
             session.close()
@@ -2123,7 +2123,7 @@ class TradingBot:
             await self.telegram_bot.send_signal(signal_data)
             
         except Exception as e:
-            v3_sr_logger.error(f"Error sending V3 Telegram: {e}", exc_info=True)
+            get_v3_sr_logger().error(f"Error sending V3 Telegram: {e}", exc_info=True)
     
     async def stop(self):
         import traceback

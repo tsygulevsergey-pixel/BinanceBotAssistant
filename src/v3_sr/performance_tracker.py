@@ -12,7 +12,7 @@ import pytz
 
 from src.database.models import V3SRSignal
 from src.binance.client import BinanceClient
-from src.v3_sr.logger import v3_sr_logger as logger
+from src.v3_sr.logger import get_v3_sr_logger
 from src.v3_sr.helpers import calculate_r_multiple
 
 
@@ -39,26 +39,29 @@ class V3SRPerformanceTracker:
         self.signal_logger = signal_logger
         self.config = config or {}
         
+        # ✅ FIX БАГ #5: Get logger instance (lazy initialization)
+        self.logger = get_v3_sr_logger()
+        
         # MFE/MAE tracking (in-memory)
         self.signal_mfe_mae = {}  # {signal_id: {'mfe_r': float, 'mae_r': float}}
     
     async def start(self):
         """Start background tracking task"""
         self.running = True
-        logger.info("🎯 V3 S/R Performance Tracker started")
+        self.logger.info("🎯 V3 S/R Performance Tracker started")
         
         while self.running:
             try:
                 await self._check_active_signals()
                 await asyncio.sleep(self.check_interval)
             except Exception as e:
-                logger.error(f"Error in V3 SR tracker: {e}", exc_info=True)
+                self.logger.error(f"Error in V3 SR tracker: {e}", exc_info=True)
                 await asyncio.sleep(self.check_interval)
     
     async def stop(self):
         """Stop tracker"""
         self.running = False
-        logger.info("V3 S/R Performance Tracker stopped")
+        self.logger.info("V3 S/R Performance Tracker stopped")
     
     async def _check_active_signals(self):
         """Check all active V3 S/R signals"""
@@ -69,10 +72,10 @@ class V3SRPerformanceTracker:
             ).all()
             
             if not active_signals:
-                logger.debug("No active V3 SR signals to check")
+                self.logger.debug("No active V3 SR signals to check")
                 return
             
-            logger.info(f"🔍 Checking {len(active_signals)} active V3 SR signals for exit conditions")
+            self.logger.info(f"🔍 Checking {len(active_signals)} active V3 SR signals for exit conditions")
             
             for signal in active_signals:
                 await self._check_signal(signal, session)
@@ -81,7 +84,7 @@ class V3SRPerformanceTracker:
             
         except Exception as e:
             session.rollback()
-            logger.error(f"Error checking active V3 SR signals: {e}", exc_info=True)
+            self.logger.error(f"Error checking active V3 SR signals: {e}", exc_info=True)
         finally:
             session.close()
     
@@ -115,12 +118,12 @@ class V3SRPerformanceTracker:
         
         except asyncio.TimeoutError:
             # Network timeout - skip this check cycle, will retry on next iteration
-            logger.warning(f"⏱️ Timeout checking V3 SR signal {signal.id} ({signal.symbol}) - will retry next cycle")
+            self.logger.warning(f"⏱️ Timeout checking V3 SR signal {signal.id} ({signal.symbol}) - will retry next cycle")
         except asyncio.CancelledError:
             # Request was cancelled - skip without logging
-            logger.debug(f"Request cancelled for V3 SR signal {signal.id}")
+            self.logger.debug(f"Request cancelled for V3 SR signal {signal.id}")
         except Exception as e:
-            logger.error(f"Error checking V3 SR signal {signal.id}: {e}", exc_info=True)
+            self.logger.error(f"Error checking V3 SR signal {signal.id}: {e}", exc_info=True)
     
     def _update_mfe_mae(self, signal: V3SRSignal, current_price: float):
         """
@@ -231,7 +234,7 @@ class V3SRPerformanceTracker:
                     signal.trailing_active = True
                     signal.trailing_high_water_mark = current_price
                 
-                logger.info(
+                self.logger.info(
                     f"📈 V3 SR TP1 HIT (50%): {signal.symbol} {signal.direction} "
                     f"| Virtual partial close at {tp1:.4f} (+{signal.tp1_pnl_percent:.2f}%) "
                     f"| SL moved to BE {entry:.4f} | Trailing activated for remaining 50%"
@@ -339,15 +342,15 @@ class V3SRPerformanceTracker:
         risk = float(signal.risk_r) if signal.risk_r else abs(entry - float(signal.stop_loss))
         
         # DEBUG LOGGING
-        logger.info(f"🔍 CLOSING V3 SIGNAL: {signal.symbol} {direction}")
-        logger.info(f"  Entry: {entry:.4f} | Exit: {exit_price:.4f} | SL: {signal.stop_loss:.4f}")
-        logger.info(f"  Exit Reason: {exit_reason} | TP1 Hit: {signal.tp1_hit} | Moved to BE: {signal.moved_to_be}")
-        logger.info(f"  PnL Override: {pnl_override}")
+        self.logger.info(f"🔍 CLOSING V3 SIGNAL: {signal.symbol} {direction}")
+        self.logger.info(f"  Entry: {entry:.4f} | Exit: {exit_price:.4f} | SL: {signal.stop_loss:.4f}")
+        self.logger.info(f"  Exit Reason: {exit_reason} | TP1 Hit: {signal.tp1_hit} | Moved to BE: {signal.moved_to_be}")
+        self.logger.info(f"  PnL Override: {pnl_override}")
         
         # Use saved TP1 PnL if provided (breakeven exit after TP1)
         if pnl_override is not None:
             pnl_percent = pnl_override
-            logger.info(f"  Using PnL override: {pnl_percent:.2f}%")
+            self.logger.info(f"  Using PnL override: {pnl_percent:.2f}%")
         else:
             # Calculate full exit PnL
             if direction == 'LONG':
@@ -355,7 +358,7 @@ class V3SRPerformanceTracker:
             else:
                 full_exit_pnl = ((entry - exit_price) / entry) * 100
             
-            logger.info(f"  Full exit PnL calculation: {full_exit_pnl:.2f}%")
+            self.logger.info(f"  Full exit PnL calculation: {full_exit_pnl:.2f}%")
             
             # If TP1 was hit, combine virtual TP1 exit + remaining position exit
             if signal.tp1_hit:
@@ -365,11 +368,11 @@ class V3SRPerformanceTracker:
                 
                 # Combined PnL: TP1 virtual exit + remaining position
                 pnl_percent = tp1_pnl_saved + (remaining_size * full_exit_pnl)
-                logger.info(f"  Combined PnL: TP1 saved {tp1_pnl_saved:.2f}% + remaining {remaining_size*100:.0f}% * {full_exit_pnl:.2f}% = {pnl_percent:.2f}%")
+                self.logger.info(f"  Combined PnL: TP1 saved {tp1_pnl_saved:.2f}% + remaining {remaining_size*100:.0f}% * {full_exit_pnl:.2f}% = {pnl_percent:.2f}%")
             else:
                 # No TP1 hit - use full exit PnL
                 pnl_percent = full_exit_pnl
-                logger.info(f"  No TP1 hit, using full exit PnL: {pnl_percent:.2f}%")
+                self.logger.info(f"  No TP1 hit, using full exit PnL: {pnl_percent:.2f}%")
         
         # Calculate final R-multiple (use original risk_r, not moved BE SL)
         if signal.tp1_hit:
@@ -443,7 +446,7 @@ class V3SRPerformanceTracker:
         if signal.id in self.signal_mfe_mae:
             del self.signal_mfe_mae[signal.id]
         
-        logger.info(f"🎯 V3 SR Signal closed: {signal.symbol} {signal.setup_type} "
+        self.logger.info(f"🎯 V3 SR Signal closed: {signal.symbol} {signal.setup_type} "
                    f"{signal.direction} | Reason: {exit_reason} | "
                    f"PnL: {pnl_percent:.2f}% | Final R: {final_r:.2f}R | "
                    f"MFE: {mfe_mae['mfe_r']:.2f}R | MAE: {mfe_mae['mae_r']:.2f}R")
@@ -453,7 +456,7 @@ class V3SRPerformanceTracker:
             try:
                 self.on_signal_closed_callback(signal.symbol, signal.direction)
             except Exception as e:
-                logger.error(f"Error in V3 SR close callback: {e}")
+                self.logger.error(f"Error in V3 SR close callback: {e}")
     
     async def _log_signal_exit(self, signal: V3SRSignal, mfe_mae: Dict[str, float]):
         """
@@ -483,7 +486,7 @@ class V3SRPerformanceTracker:
                     zone_reaction_occurred=signal.zone_reaction_occurred,
                     zone_reaction_atr=signal.zone_reaction_atr
                 )
-                logger.debug(f"✅ JSONL logged exit: {signal.signal_id} - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
+                self.logger.debug(f"✅ JSONL logged exit: {signal.signal_id} - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
         
         except Exception as e:
-            logger.error(f"Error logging V3 SR signal exit: {e}", exc_info=True)
+            self.logger.error(f"Error logging V3 SR signal exit: {e}", exc_info=True)

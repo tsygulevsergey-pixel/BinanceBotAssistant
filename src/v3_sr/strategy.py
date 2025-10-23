@@ -17,7 +17,7 @@ import pytz
 from src.database.models import V3SRSignal, V3SRZoneEvent, V3SRSignalLock
 from src.utils.v3_zones_provider import get_v3_zones_provider
 from src.indicators.vwap import VWAPCalculator
-from src.v3_sr.logger import v3_sr_logger as logger
+from src.v3_sr.logger import get_v3_sr_logger
 from src.v3_sr.helpers import (
     round_price_to_tick, calculate_r_multiple, generate_signal_id,
     generate_zone_event_id, detect_engulfing, detect_choch,
@@ -84,7 +84,10 @@ class SRZonesV3Strategy:
         arbitrator_config = config.get('cross_tf_policy', {})
         self.arbitrator = CrossTFArbitrator(config=arbitrator_config)
         
-        logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, dual-engine pipeline: M15+H1)")
+        # ✅ FIX БАГ #5: Get logger instance (lazy initialization)
+        self.logger = get_v3_sr_logger()
+        
+        self.logger.info(f"V3 S/R Strategy initialized (enabled={self.enabled}, dual-engine pipeline: M15+H1)")
     
     def batch_build_zones_parallel(self, symbols_data: List[Tuple[str, Dict[str, pd.DataFrame]]]) -> Dict[str, Dict]:
         """
@@ -109,10 +112,10 @@ class SRZonesV3Strategy:
         max_workers = parallel_config.get('max_workers', 4)
         
         if not enabled:
-            logger.info("⏸️ Parallel zone building disabled, using sequential processing")
+            self.logger.info("⏸️ Parallel zone building disabled, using sequential processing")
             return self._batch_build_zones_sequential(symbols_data)
         
-        logger.info(f"🚀 Starting parallel zone building for {len(symbols_data)} symbols (workers={max_workers})")
+        self.logger.info(f"🚀 Starting parallel zone building for {len(symbols_data)} symbols (workers={max_workers})")
         
         results = {}
         tasks = []
@@ -122,7 +125,7 @@ class SRZonesV3Strategy:
             # Get current price from 15m data
             df_15m = dfs.get('15m')
             if df_15m is None or len(df_15m) == 0:
-                logger.warning(f"⚠️ {symbol}: No 15m data, skipping")
+                self.logger.warning(f"⚠️ {symbol}: No 15m data, skipping")
                 continue
             
             current_price = df_15m['close'].iloc[-1]
@@ -141,7 +144,7 @@ class SRZonesV3Strategy:
             })
         
         if not tasks:
-            logger.warning("⚠️ No valid tasks for parallel zone building")
+            self.logger.warning("⚠️ No valid tasks for parallel zone building")
             return {}
         
         # Execute in parallel
@@ -185,14 +188,14 @@ class SRZonesV3Strategy:
                                 }
                                 break
                         
-                        logger.info(f"✅ {symbol}: Zones built successfully (parallel worker)")
+                        self.logger.info(f"✅ {symbol}: Zones built successfully (parallel worker)")
                     else:
-                        logger.error(f"❌ {symbol}: Zone building failed: {result['error']}")
+                        self.logger.error(f"❌ {symbol}: Zone building failed: {result['error']}")
                 
                 except Exception as e:
-                    logger.error(f"❌ {symbol}: Worker exception: {e}", exc_info=True)
+                    self.logger.error(f"❌ {symbol}: Worker exception: {e}", exc_info=True)
         
-        logger.info(f"🎉 Parallel zone building complete: {len(results)}/{len(symbols_data)} symbols successful")
+        self.logger.info(f"🎉 Parallel zone building complete: {len(results)}/{len(symbols_data)} symbols successful")
         return results
     
     def _batch_build_zones_sequential(self, symbols_data: List[Tuple[str, Dict[str, pd.DataFrame]]]) -> Dict[str, Dict]:
@@ -227,10 +230,10 @@ class SRZonesV3Strategy:
                 )
                 
                 results[symbol] = zones
-                logger.info(f"✅ {symbol}: Zones built (sequential)")
+                self.logger.info(f"✅ {symbol}: Zones built (sequential)")
             
             except Exception as e:
-                logger.error(f"❌ {symbol}: Sequential zone building failed: {e}", exc_info=True)
+                self.logger.error(f"❌ {symbol}: Sequential zone building failed: {e}", exc_info=True)
         
         return results
     
@@ -263,17 +266,17 @@ class SRZonesV3Strategy:
         if not self.enabled:
             return None
         
-        logger.info(f"🔍 Analyzing {symbol} | Regime: {market_regime} | Dual-Engine Pipeline")
+        self.logger.info(f"🔍 Analyzing {symbol} | Regime: {market_regime} | Dual-Engine Pipeline")
         
         # Check if symbol is blocked for V3
         if await self._is_symbol_blocked(symbol):
-            logger.info(f"🔒 {symbol} blocked (active signal)")
+            self.logger.info(f"🔒 {symbol} blocked (active signal)")
             return None
         
         # Filter by market regime
         allowed_regimes = self.config.get('filters', {}).get('allowed_regimes', ['TREND', 'RANGE'])
         if market_regime not in allowed_regimes:
-            logger.info(f"❌ {symbol} regime {market_regime} not in allowed list {allowed_regimes}")
+            self.logger.info(f"❌ {symbol} regime {market_regime} not in allowed list {allowed_regimes}")
             return None
         
         # [1] Build/update zones for all timeframes
@@ -285,7 +288,7 @@ class SRZonesV3Strategy:
         })
         
         if not zones_by_tf:
-            logger.info(f"⚠️ {symbol} no zones built")
+            self.logger.info(f"⚠️ {symbol} no zones built")
             return None
         
         # [2] Update ZoneRegistry with fresh zones
@@ -293,7 +296,7 @@ class SRZonesV3Strategy:
         self.zone_registry.update(zones_by_tf, as_of_ts=current_ts)
         
         zone_counts = {tf: len(zones) for tf, zones in zones_by_tf.items()}
-        logger.info(f"📦 {symbol} zones updated in registry: {zone_counts}")
+        self.logger.info(f"📦 {symbol} zones updated in registry: {zone_counts}")
         
         # [3] Get current price and ATR for each TF
         current_price_15m = df_15m['close'].iloc[-1] if len(df_15m) > 0 else None
@@ -318,9 +321,9 @@ class SRZonesV3Strategy:
                     vwap=vwap_15m,
                     as_of_ts=current_ts
                 )
-                logger.info(f"🔧 M15 engine: {len(signals_m15)} raw signals")
+                self.logger.info(f"🔧 M15 engine: {len(signals_m15)} raw signals")
             except Exception as e:
-                logger.error(f"❌ M15 engine error: {e}")
+                self.logger.error(f"❌ M15 engine error: {e}")
                 signals_m15 = []
         
         # [6] Generate H1 signals
@@ -335,27 +338,27 @@ class SRZonesV3Strategy:
                     vwap=vwap_1h,
                     as_of_ts=current_ts
                 )
-                logger.info(f"🔧 H1 engine: {len(signals_h1)} raw signals")
+                self.logger.info(f"🔧 H1 engine: {len(signals_h1)} raw signals")
             except Exception as e:
-                logger.error(f"❌ H1 engine error: {e}")
+                self.logger.error(f"❌ H1 engine error: {e}")
                 signals_h1 = []
         
         # [7] Apply Cross-TF Arbitration
         filtered_m15, filtered_h1 = self.arbitrator.filter(signals_m15, signals_h1)
         
-        logger.info(f"⚖️ Arbitrator: M15 {len(signals_m15)}→{len(filtered_m15)}, H1 {len(signals_h1)}→{len(filtered_h1)}")
+        self.logger.info(f"⚖️ Arbitrator: M15 {len(signals_m15)}→{len(filtered_m15)}, H1 {len(signals_h1)}→{len(filtered_h1)}")
         
         # [8] Collect all passed signals
         all_signals = filtered_h1 + filtered_m15  # H1 priority
         
         if not all_signals:
-            logger.info(f"✅ {symbol} no signals after dual-engine + arbitration")
+            self.logger.info(f"✅ {symbol} no signals after dual-engine + arbitration")
             return None
         
         # [9] Select best signal (highest confidence)
         best_signal = max(all_signals, key=lambda s: s.get('confidence', 0))
         
-        logger.info(f"🎯 {symbol} best signal: {best_signal['tf_entry']} {best_signal['setup_type']} "
+        self.logger.info(f"🎯 {symbol} best signal: {best_signal['tf_entry']} {best_signal['setup_type']} "
                    f"{best_signal['direction']} conf={best_signal['confidence']}")
         
         # [10] Convert to legacy format for compatibility with main.py._save_v3_sr_signal()
@@ -471,7 +474,7 @@ class SRZonesV3Strategy:
             'nearest_resistance': nearest_resistance
         }
         
-        logger.debug(f"✅ Converted signal to legacy format: {symbol} {entry_tf} {legacy_signal['setup_type']}")
+        self.logger.debug(f"✅ Converted signal to legacy format: {symbol} {entry_tf} {legacy_signal['setup_type']}")
         
         return legacy_signal
     
@@ -543,7 +546,7 @@ class SRZonesV3Strategy:
             df_15m = dfs.get('15m')
             current_price = df_15m['close'].iloc[-1] if df_15m is not None and len(df_15m) > 0 else None
             if current_price is None:
-                logger.error(f"❌ {symbol}: No 15m data for current price")
+                self.logger.error(f"❌ {symbol}: No 15m data for current price")
                 return {}
             
             # Use shared V3 zones provider (automatically handles caching)
@@ -568,18 +571,18 @@ class SRZonesV3Strategy:
                             old_strength = zone.get('strength', 0)
                             zone['strength'] = updated_strength
                             zones_updated += 1
-                            logger.debug(f"🔄 {symbol} zone {tf}-{zone.get('kind')} strength: {old_strength:.1f} → {updated_strength:.1f}")
+                            self.logger.debug(f"🔄 {symbol} zone {tf}-{zone.get('kind')} strength: {old_strength:.1f} → {updated_strength:.1f}")
             
             if zones_updated > 0:
-                logger.info(f"✨ {symbol}: Updated strength for {zones_updated} zones based on events")
+                self.logger.info(f"✨ {symbol}: Updated strength for {zones_updated} zones based on events")
             
             # Count zones by TF
             zone_counts = {tf: len(z) for tf, z in zones.items()}
-            logger.debug(f"📦 {symbol} zones from shared cache: {zone_counts}")
+            self.logger.debug(f"📦 {symbol} zones from shared cache: {zone_counts}")
             
             return zones
         except Exception as e:
-            logger.error(f"❌ Error getting V3 zones for {symbol}: {e}")
+            self.logger.error(f"❌ Error getting V3 zones for {symbol}: {e}")
             return {}
     
     async def _check_flip_retest(self, symbol: str, entry_tf: str, df: pd.DataFrame,
@@ -631,7 +634,7 @@ class SRZonesV3Strategy:
         min_strength = self.config.get('general', {}).get('zone_min_strength', 60)
         strong_zones = [z for z in all_zones if z.get('strength', 0) >= min_strength]
         
-        logger.info(f"  📊 {symbol} {entry_tf} Flip-Retest check: {len(strong_zones)} strong zones (min strength: {min_strength})")
+        self.logger.info(f"  📊 {symbol} {entry_tf} Flip-Retest check: {len(strong_zones)} strong zones (min strength: {min_strength})")
         
         if not strong_zones:
             return None
@@ -656,7 +659,7 @@ class SRZonesV3Strategy:
                 if break_idx is None:
                     continue
                 
-                logger.debug(f"  🔺 {symbol} {entry_tf} LONG: Zone break found at bar {break_idx} (R @ {zone_high:.4f})")
+                self.logger.debug(f"  🔺 {symbol} {entry_tf} LONG: Zone break found at bar {break_idx} (R @ {zone_high:.4f})")
                 
                 # Log body_break event
                 self._log_zone_event(
@@ -676,10 +679,10 @@ class SRZonesV3Strategy:
                         break
                 
                 if not confirmed:
-                    logger.debug(f"  ❌ {symbol} {entry_tf} LONG: Break not confirmed")
+                    self.logger.debug(f"  ❌ {symbol} {entry_tf} LONG: Break not confirmed")
                     continue
                 
-                logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Break confirmed ({confirm_closes} closes)")
+                self.logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Break confirmed ({confirm_closes} closes)")
                 
                 # Log flip event
                 self._log_zone_event(
@@ -697,7 +700,7 @@ class SRZonesV3Strategy:
                     low = df['low'].iloc[i]
                     # Price touches zone edge (within delta)
                     if low <= zone_high + (retest_delta_atr * atr):
-                        logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Retest found at bar {i}")
+                        self.logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Retest found at bar {i}")
                         
                         # Log retest event
                         self._log_zone_event(
@@ -713,14 +716,14 @@ class SRZonesV3Strategy:
                         if i < len(df) - 1:
                             trigger = self._check_entry_trigger(df, i, i+1, 'LONG', flip_config)
                             if trigger:
-                                logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Entry trigger confirmed ({trigger})")
+                                self.logger.debug(f"  ✅ {symbol} {entry_tf} LONG: Entry trigger confirmed ({trigger})")
                                 
                                 # VWAP bias check
                                 if not await self._check_vwap_bias(df, 'LONG', indicators):
-                                    logger.debug(f"  ❌ {symbol} {entry_tf} LONG: VWAP bias failed")
+                                    self.logger.debug(f"  ❌ {symbol} {entry_tf} LONG: VWAP bias failed")
                                     continue
                                 
-                                logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Flip-Retest signal!")
+                                self.logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Flip-Retest signal!")
                                 
                                 # Build signal (pass signal_id for zone event linking later)
                                 signal = await self._build_flip_retest_signal(
@@ -755,7 +758,7 @@ class SRZonesV3Strategy:
                 if break_idx is None:
                     continue
                 
-                logger.debug(f"  🔻 {symbol} {entry_tf} SHORT: Zone break found at bar {break_idx} (R @ {zone_low:.4f})")
+                self.logger.debug(f"  🔻 {symbol} {entry_tf} SHORT: Zone break found at bar {break_idx} (R @ {zone_low:.4f})")
                 
                 # Log body_break event
                 self._log_zone_event(
@@ -775,10 +778,10 @@ class SRZonesV3Strategy:
                         break
                 
                 if not confirmed:
-                    logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: Break not confirmed")
+                    self.logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: Break not confirmed")
                     continue
                 
-                logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Break confirmed ({confirm_closes} closes)")
+                self.logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Break confirmed ({confirm_closes} closes)")
                 
                 # Log flip event
                 self._log_zone_event(
@@ -794,7 +797,7 @@ class SRZonesV3Strategy:
                 for i in range(break_idx + confirm_closes, len(df)):
                     high = df['high'].iloc[i]
                     if high >= zone_low - (retest_delta_atr * atr):
-                        logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Retest found at bar {i}")
+                        self.logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Retest found at bar {i}")
                         
                         # Log retest event
                         self._log_zone_event(
@@ -809,13 +812,13 @@ class SRZonesV3Strategy:
                         if i < len(df) - 1:
                             trigger = self._check_entry_trigger(df, i, i+1, 'SHORT', flip_config)
                             if trigger:
-                                logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Entry trigger confirmed ({trigger})")
+                                self.logger.debug(f"  ✅ {symbol} {entry_tf} SHORT: Entry trigger confirmed ({trigger})")
                                 
                                 if not await self._check_vwap_bias(df, 'SHORT', indicators):
-                                    logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: VWAP bias failed")
+                                    self.logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: VWAP bias failed")
                                     continue
                                 
-                                logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Flip-Retest signal!")
+                                self.logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Flip-Retest signal!")
                                 
                                 signal = await self._build_flip_retest_signal(
                                     symbol, entry_tf, df, zone, 'SHORT',
@@ -871,7 +874,7 @@ class SRZonesV3Strategy:
         min_strength = self.config.get('general', {}).get('zone_min_strength', 60)
         strong_zones = [z for z in all_zones if z.get('strength', 0) >= min_strength]
         
-        logger.info(f"  📊 {symbol} {entry_tf} Sweep-Return check: {len(strong_zones)} strong zones (min strength: {min_strength})")
+        self.logger.info(f"  📊 {symbol} {entry_tf} Sweep-Return check: {len(strong_zones)} strong zones (min strength: {min_strength})")
         
         if not strong_zones:
             return None
@@ -906,7 +909,7 @@ class SRZonesV3Strategy:
                 if sweep_idx is None:
                     continue
                 
-                logger.debug(f"  💧 {symbol} {entry_tf} LONG: Support sweep found at bar {sweep_idx} (S @ {zone_low:.4f})")
+                self.logger.debug(f"  💧 {symbol} {entry_tf} LONG: Support sweep found at bar {sweep_idx} (S @ {zone_low:.4f})")
                 
                 # Calculate wick/body ratio for event logging
                 sweep_bar = df.iloc[sweep_idx]
@@ -931,22 +934,22 @@ class SRZonesV3Strategy:
                     
                     # Return condition
                     if return_body_inside and bar['close'] > zone_low:
-                        logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Fast return at bar {i} (within {i - sweep_idx} bars)")
+                        self.logger.debug(f"  🔄 {symbol} {entry_tf} LONG: Fast return at bar {i} (within {i - sweep_idx} bars)")
                         
                         # Check entry trigger
                         if i < len(df) - 1:
                             # Check A-grade sweep
                             is_a_grade = self._check_a_grade_sweep(df, sweep_idx, i, sweep_config)
                             if is_a_grade:
-                                logger.info(f"  ⭐ {symbol} {entry_tf} LONG: A-GRADE sweep detected!")
+                                self.logger.info(f"  ⭐ {symbol} {entry_tf} LONG: A-GRADE sweep detected!")
                             
                             # VWAP bias (allow exception for A-grade)
                             vwap_ok = await self._check_vwap_bias(df, 'LONG', indicators)
                             if not vwap_ok and not is_a_grade:
-                                logger.debug(f"  ❌ {symbol} {entry_tf} LONG: VWAP bias failed (not A-grade)")
+                                self.logger.debug(f"  ❌ {symbol} {entry_tf} LONG: VWAP bias failed (not A-grade)")
                                 continue
                             
-                            logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Sweep-Return signal!")
+                            self.logger.info(f"  🎯 {symbol} {entry_tf} LONG: Building Sweep-Return signal!")
                             
                             # Build signal
                             return await self._build_sweep_return_signal(
@@ -974,7 +977,7 @@ class SRZonesV3Strategy:
                 if sweep_idx is None:
                     continue
                 
-                logger.debug(f"  💧 {symbol} {entry_tf} SHORT: Resistance sweep found at bar {sweep_idx} (R @ {zone_high:.4f})")
+                self.logger.debug(f"  💧 {symbol} {entry_tf} SHORT: Resistance sweep found at bar {sweep_idx} (R @ {zone_high:.4f})")
                 
                 # Calculate wick/body ratio for event logging
                 sweep_bar = df.iloc[sweep_idx]
@@ -997,19 +1000,19 @@ class SRZonesV3Strategy:
                     bar = df.iloc[i]
                     
                     if return_body_inside and bar['close'] < zone_high:
-                        logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Fast return at bar {i} (within {i - sweep_idx} bars)")
+                        self.logger.debug(f"  🔄 {symbol} {entry_tf} SHORT: Fast return at bar {i} (within {i - sweep_idx} bars)")
                         
                         if i < len(df) - 1:
                             is_a_grade = self._check_a_grade_sweep(df, sweep_idx, i, sweep_config)
                             if is_a_grade:
-                                logger.info(f"  ⭐ {symbol} {entry_tf} SHORT: A-GRADE sweep detected!")
+                                self.logger.info(f"  ⭐ {symbol} {entry_tf} SHORT: A-GRADE sweep detected!")
                             
                             vwap_ok = await self._check_vwap_bias(df, 'SHORT', indicators)
                             if not vwap_ok and not is_a_grade:
-                                logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: VWAP bias failed (not A-grade)")
+                                self.logger.debug(f"  ❌ {symbol} {entry_tf} SHORT: VWAP bias failed (not A-grade)")
                                 continue
                             
-                            logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Sweep-Return signal!")
+                            self.logger.info(f"  🎯 {symbol} {entry_tf} SHORT: Building Sweep-Return signal!")
                             
                             return await self._build_sweep_return_signal(
                                 symbol, entry_tf, df, zone, 'SHORT',
@@ -1103,7 +1106,7 @@ class SRZonesV3Strategy:
         # Check min confidence
         min_conf = self.config.get('quality', {}).get('min_confidence', 65)
         if confidence < min_conf:
-            logger.debug(f"V3 SR FlipRetest {symbol} confidence {confidence} < {min_conf}")
+            self.logger.debug(f"V3 SR FlipRetest {symbol} confidence {confidence} < {min_conf}")
             return None
         
         # Find nearest zones for context
@@ -1130,7 +1133,7 @@ class SRZonesV3Strategy:
             'atr': atr
         }
         
-        logger.info(f"🚀 FLIP-RETEST SIGNAL CREATED: {symbol} {direction} {entry_tf} | Entry: {entry_price:.4f} | SL: {sl_price:.4f} | TP1: {tp1_price:.4f} | TP2: {tp2_price:.4f} | Conf: {confidence}%")
+        self.logger.info(f"🚀 FLIP-RETEST SIGNAL CREATED: {symbol} {direction} {entry_tf} | Entry: {entry_price:.4f} | SL: {sl_price:.4f} | TP1: {tp1_price:.4f} | TP2: {tp2_price:.4f} | Conf: {confidence}%")
         
         return signal_data
     
@@ -1177,7 +1180,7 @@ class SRZonesV3Strategy:
         }
         
         a_grade_tag = " [A-GRADE]" if is_a_grade else ""
-        logger.info(f"🚀 SWEEP-RETURN SIGNAL CREATED{a_grade_tag}: {symbol} {direction} {entry_tf} | Entry: {entry_price:.4f} | SL: {sl_price:.4f} | TP1: {tp1_price:.4f} | TP2: {tp2_price:.4f} | Conf: {confidence}%")
+        self.logger.info(f"🚀 SWEEP-RETURN SIGNAL CREATED{a_grade_tag}: {symbol} {direction} {entry_tf} | Entry: {entry_price:.4f} | SL: {sl_price:.4f} | TP1: {tp1_price:.4f} | TP2: {tp2_price:.4f} | Conf: {confidence}%")
         
         return signal_data
     
@@ -1280,7 +1283,7 @@ class SRZonesV3Strategy:
                 tp1_price = sl_price + tick_size
             else:
                 tp1_price = sl_price - tick_size
-            logger.warning(f"⚠️ {symbol} {direction}: TP1 rounded to SL, adjusted by 1 tick to {tp1_price}")
+            self.logger.warning(f"⚠️ {symbol} {direction}: TP1 rounded to SL, adjusted by 1 tick to {tp1_price}")
         
         # ✅ FIX: Ensure SL != Entry after rounding (safety check)
         if entry_price == sl_price:
@@ -1288,7 +1291,7 @@ class SRZonesV3Strategy:
                 sl_price = entry_price - tick_size
             else:
                 sl_price = entry_price + tick_size
-            logger.warning(f"⚠️ {symbol} {direction}: SL rounded to Entry, adjusted by 1 tick to {sl_price}")
+            self.logger.warning(f"⚠️ {symbol} {direction}: SL rounded to Entry, adjusted by 1 tick to {sl_price}")
         
         return entry_price, sl_price, tp1_price, tp2_price
     
@@ -1407,7 +1410,7 @@ class SRZonesV3Strategy:
             ).first()
             
             if existing:
-                logger.debug(f"V3 Zone Event already exists: {event_id}, skipping")
+                self.logger.debug(f"V3 Zone Event already exists: {event_id}, skipping")
                 return
             
             # Determine touch characteristics
@@ -1469,11 +1472,11 @@ class SRZonesV3Strategy:
             session.add(event)
             session.commit()
             
-            logger.debug(f"V3 Zone Event logged: {symbol} {zone.get('tf')}-{zone.get('kind')} {event_type} @ {touch_price:.4f}")
+            self.logger.debug(f"V3 Zone Event logged: {symbol} {zone.get('tf')}-{zone.get('kind')} {event_type} @ {touch_price:.4f}")
         
         except Exception as e:
             session.rollback()
-            logger.error(f"Error logging zone event: {e}", exc_info=True)
+            self.logger.error(f"Error logging zone event: {e}", exc_info=True)
         finally:
             session.close()
     
@@ -1501,7 +1504,7 @@ class SRZonesV3Strategy:
             if not events:
                 return
             
-            logger.info(f"Checking reactions for {len(events)} zone events...")
+            self.logger.info(f"Checking reactions for {len(events)} zone events...")
             
             for event in events:
                 try:
@@ -1561,17 +1564,17 @@ class SRZonesV3Strategy:
                     session.commit()
                     
                     if reaction_occurred:
-                        logger.debug(f"✅ Reaction detected: {event.symbol} {event.zone_tf}-{event.zone_kind} "
+                        self.logger.debug(f"✅ Reaction detected: {event.symbol} {event.zone_tf}-{event.zone_kind} "
                                    f"(+{reaction_magnitude:.2f}R in {reaction_bars} bars)")
                 
                 except Exception as e:
-                    logger.error(f"Error checking reaction for event {event.event_id}: {e}")
+                    self.logger.error(f"Error checking reaction for event {event.event_id}: {e}")
                     continue
             
-            logger.info(f"Reaction check completed for {len(events)} events")
+            self.logger.info(f"Reaction check completed for {len(events)} events")
         
         except Exception as e:
-            logger.error(f"Error in check_zone_reactions: {e}", exc_info=True)
+            self.logger.error(f"Error in check_zone_reactions: {e}", exc_info=True)
         finally:
             session.close()
     
@@ -1632,13 +1635,13 @@ class SRZonesV3Strategy:
             new_strength = base_strength + success_modifier + recency_modifier + magnitude_modifier - touch_penalty
             new_strength = max(0, min(100, new_strength))  # Clamp 0-100
             
-            logger.debug(f"Zone {zone_id} strength update: {base_strength:.1f} → {new_strength:.1f} "
+            self.logger.debug(f"Zone {zone_id} strength update: {base_strength:.1f} → {new_strength:.1f} "
                        f"(success: {success_rate:.1%}, touches: {total_touches}, avg_reaction: {avg_reaction:.2f}R)")
             
             return new_strength
         
         except Exception as e:
-            logger.error(f"Error updating zone strength: {e}", exc_info=True)
+            self.logger.error(f"Error updating zone strength: {e}", exc_info=True)
             return None
         finally:
             session.close()
@@ -1663,11 +1666,11 @@ class SRZonesV3Strategy:
             session.add(lock)
             session.commit()
             
-            logger.info(f"V3 SR: Blocked {symbol} {direction} for signal {signal_id}")
+            self.logger.info(f"V3 SR: Blocked {symbol} {direction} for signal {signal_id}")
         
         except Exception as e:
             session.rollback()
-            logger.error(f"Error blocking symbol: {e}")
+            self.logger.error(f"Error blocking symbol: {e}")
         finally:
             session.close()
     
@@ -1681,10 +1684,10 @@ class SRZonesV3Strategy:
             ).delete()
             session.commit()
             
-            logger.info(f"V3 SR: Unblocked {symbol} {direction}")
+            self.logger.info(f"V3 SR: Unblocked {symbol} {direction}")
         
         except Exception as e:
             session.rollback()
-            logger.error(f"Error unblocking symbol: {e}")
+            self.logger.error(f"Error unblocking symbol: {e}")
         finally:
             session.close()

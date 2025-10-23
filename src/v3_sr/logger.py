@@ -73,5 +73,19 @@ def setup_v3_sr_logger():
     return logger
 
 
-# Singleton instance
-v3_sr_logger = setup_v3_sr_logger()
+# ✅ FIX БАГ #5: Lazy initialization вместо module-level call
+# Это предотвращает инициализацию логгера в каждом ProcessPool worker'е
+_v3_sr_logger_instance = None
+
+def get_v3_sr_logger():
+    """
+    Получить singleton instance V3 S/R logger.
+    Создаёт logger только при первом вызове (lazy initialization).
+    
+    ProcessPool-safe: каждый worker вызовет setup только ОДИН раз при первом использовании,
+    а не при импорте модуля.
+    """
+    global _v3_sr_logger_instance
+    if _v3_sr_logger_instance is None:
+        _v3_sr_logger_instance = setup_v3_sr_logger()
+    return _v3_sr_logger_instance

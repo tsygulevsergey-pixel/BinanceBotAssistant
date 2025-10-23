@@ -10,9 +10,7 @@ import logging
 from src.database.models import ActionPriceSignal
 from src.database.db import db
 from src.binance.client import BinanceClient
-from src.action_price.logger import ap_logger
-
-logger = ap_logger  # Используем Action Price logger для консистентности
+from src.action_price.logger import get_action_price_logger
 
 
 class ActionPricePerformanceTracker:
@@ -35,26 +33,29 @@ class ActionPricePerformanceTracker:
         self.on_signal_closed_callback = on_signal_closed_callback
         self.signal_logger = signal_logger  # JSONL logger
         
+        # ✅ FIX БАГ #5: Get logger instance (lazy initialization)
+        self.logger = get_action_price_logger()
+        
         # MFE/MAE tracking (в памяти)
         self.signal_mfe_mae = {}  # {signal_id: {'mfe_r': float, 'mae_r': float}}
     
     async def start(self):
         """Запустить фоновую задачу трекинга"""
         self.running = True
-        logger.info("🎯 Action Price Performance Tracker started")
+        self.logger.info("🎯 Action Price Performance Tracker started")
         
         while self.running:
             try:
                 await self._check_active_signals()
                 await asyncio.sleep(self.check_interval)
             except Exception as e:
-                logger.error(f"Error in AP tracker: {e}", exc_info=True)
+                self.logger.error(f"Error in AP tracker: {e}", exc_info=True)
                 await asyncio.sleep(self.check_interval)
     
     async def stop(self):
         """Остановить трекер"""
         self.running = False
-        logger.info("Action Price Performance Tracker stopped")
+        self.logger.info("Action Price Performance Tracker stopped")
     
     async def _check_active_signals(self):
         """Проверить все активные Action Price сигналы"""
@@ -65,10 +66,10 @@ class ActionPricePerformanceTracker:
             ).all()
             
             if not active_signals:
-                logger.debug("No active AP signals to check")
+                self.logger.debug("No active AP signals to check")
                 return
             
-            logger.info(f"🔍 Checking {len(active_signals)} active AP signals for exit conditions")
+            self.logger.info(f"🔍 Checking {len(active_signals)} active AP signals for exit conditions")
             
             for signal in active_signals:
                 await self._check_signal(signal, session)
@@ -77,7 +78,7 @@ class ActionPricePerformanceTracker:
             
         except Exception as e:
             session.rollback()
-            logger.error(f"Error checking active AP signals: {e}", exc_info=True)
+            self.logger.error(f"Error checking active AP signals: {e}", exc_info=True)
         finally:
             session.close()
     
@@ -111,7 +112,7 @@ class ActionPricePerformanceTracker:
                 if signal.id in self.signal_mfe_mae:
                     del self.signal_mfe_mae[signal.id]
                 
-                logger.info(f"🎯 AP Signal closed: {signal.symbol} {signal.pattern_type} "
+                self.logger.info(f"🎯 AP Signal closed: {signal.symbol} {signal.pattern_type} "
                           f"{signal.direction} | Reason: {exit_result['reason']} | "
                           f"PnL: {exit_result.get('pnl_percent', 0):.2f}% | "
                           f"MFE: {mfe_mae['mfe_r']:.2f}R | MAE: {mfe_mae['mae_r']:.2f}R")
@@ -121,16 +122,16 @@ class ActionPricePerformanceTracker:
                     try:
                         self.on_signal_closed_callback(signal.symbol)
                     except Exception as e:
-                        logger.error(f"Error in AP close callback: {e}")
+                        self.logger.error(f"Error in AP close callback: {e}")
         
         except asyncio.TimeoutError:
             # Network timeout - skip this check cycle, will retry on next iteration
-            logger.warning(f"⏱️ Timeout checking AP signal {signal.id} ({signal.symbol}) - will retry next cycle")
+            self.logger.warning(f"⏱️ Timeout checking AP signal {signal.id} ({signal.symbol}) - will retry next cycle")
         except asyncio.CancelledError:
             # Request was cancelled - skip without logging
-            logger.debug(f"Request cancelled for AP signal {signal.id}")
+            self.logger.debug(f"Request cancelled for AP signal {signal.id}")
         except Exception as e:
-            logger.error(f"Error checking AP signal {signal.id}: {e}", exc_info=True)
+            self.logger.error(f"Error checking AP signal {signal.id}: {e}", exc_info=True)
     
     def _update_mfe_mae(self, signal: ActionPriceSignal, current_price: float):
         """
@@ -189,12 +190,12 @@ class ActionPricePerformanceTracker:
                     mfe_r=mfe_mae['mfe_r'],
                     mae_r=mfe_mae['mae_r']
                 )
-                logger.debug(f"✅ JSONL logged exit: {signal.id} - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
+                self.logger.debug(f"✅ JSONL logged exit: {signal.id} - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R")
             else:
-                logger.debug(f"Signal {signal.id} exit logged - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R (JSONL disabled)")
+                self.logger.debug(f"Signal {signal.id} exit logged - MFE: {mfe_mae['mfe_r']:.2f}R, MAE: {mfe_mae['mae_r']:.2f}R (JSONL disabled)")
             
         except Exception as e:
-            logger.error(f"Error logging signal exit: {e}", exc_info=True)
+            self.logger.error(f"Error logging signal exit: {e}", exc_info=True)
     
     async def _check_exit_conditions(self, signal: ActionPriceSignal, 
                                      current_price: float) -> Optional[Dict]:
@@ -216,7 +217,7 @@ class ActionPricePerformanceTracker:
         
         # DEBUG: Логируем для первых 3 сигналов чтобы понять почему не срабатывает
         if len(self.signal_mfe_mae) <= 3:
-            logger.debug(f"  [{signal.symbol}] Price: {current_price} | Dir: {direction} | Entry: {entry} | SL: {sl} | TP1: {tp1} | TP2: {tp2} | TP1_hit: {signal.partial_exit_1_at is not None}")
+            self.logger.debug(f"  [{signal.symbol}] Price: {current_price} | Dir: {direction} | Entry: {entry} | SL: {sl} | TP1: {tp1} | TP2: {tp2} | TP1_hit: {signal.partial_exit_1_at is not None}")
         
         # Проверка SL
         if direction == 'LONG' and current_price <= sl:
@@ -271,7 +272,7 @@ class ActionPricePerformanceTracker:
                 signal.partial_exit_1_price = tp1
                 # КРИТИЧНО: Переносим SL в breakeven (entry price) для защиты прибыли
                 signal.stop_loss = entry
-                logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
+                self.logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
                 # Не закрываем сигнал, продолжаем на TP2
                 return None
             elif direction == 'SHORT' and current_price <= tp1:
@@ -279,7 +280,7 @@ class ActionPricePerformanceTracker:
                 signal.partial_exit_1_price = tp1
                 # КРИТИЧНО: Переносим SL в breakeven (entry price) для защиты прибыли
                 signal.stop_loss = entry
-                logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
+                self.logger.info(f"🎯 AP TP1 hit: {signal.symbol} {signal.pattern_type} at {tp1}, SL moved to breakeven {entry}")
                 return None
         
         # Проверка TP2 (частичный выход 40%, остаток на trailing)
@@ -288,14 +289,14 @@ class ActionPricePerformanceTracker:
                 # Записываем TP2 hit
                 signal.partial_exit_2_at = datetime.now(pytz.UTC)
                 signal.partial_exit_2_price = tp2
-                logger.info(f"🎯🎯 AP TP2 hit: {signal.symbol} {signal.pattern_type} at {tp2}, trailing stop active for 30% remainder")
+                self.logger.info(f"🎯🎯 AP TP2 hit: {signal.symbol} {signal.pattern_type} at {tp2}, trailing stop active for 30% remainder")
                 # НЕ закрываем сигнал - остаток 30% на trailing stop
                 return None
             elif direction == 'SHORT' and current_price <= tp2:
                 # Записываем TP2 hit
                 signal.partial_exit_2_at = datetime.now(pytz.UTC)
                 signal.partial_exit_2_price = tp2
-                logger.info(f"🎯🎯 AP TP2 hit: {signal.symbol} {signal.pattern_type} at {tp2}, trailing stop active for 30% remainder")
+                self.logger.info(f"🎯🎯 AP TP2 hit: {signal.symbol} {signal.pattern_type} at {tp2}, trailing stop active for 30% remainder")
                 # НЕ закрываем сигнал - остаток 30% на trailing stop
                 return None
         
@@ -314,18 +315,18 @@ class ActionPricePerformanceTracker:
                 if signal.trailing_peak_price is None:
                     # Первая проверка после TP2 - установить пик и сохранить в БД
                     signal.trailing_peak_price = current_price
-                    logger.debug(f"🎯 Trailing stop initialized: {signal.symbol} peak={current_price:.4f}")
+                    self.logger.debug(f"🎯 Trailing stop initialized: {signal.symbol} peak={current_price:.4f}")
                 
                 if direction == 'LONG':
                     # Обновить пик если цена выше (сохраняем в БД!)
                     if current_price > signal.trailing_peak_price:
                         signal.trailing_peak_price = current_price
-                        logger.debug(f"📈 New peak (LONG): {signal.symbol} peak={current_price:.4f}")
+                        self.logger.debug(f"📈 New peak (LONG): {signal.symbol} peak={current_price:.4f}")
                     
                     # Проверить trailing stop: откат от пика >= trail_distance
                     if signal.trailing_peak_price - current_price >= trail_distance:
                         total_pnl = self._calculate_total_pnl(signal, current_price, entry)
-                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.trailing_peak_price:.4f} → current {current_price:.4f} (pullback {signal.trailing_peak_price - current_price:.4f} >= {trail_distance:.4f})")
+                        self.logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.trailing_peak_price:.4f} → current {current_price:.4f} (pullback {signal.trailing_peak_price - current_price:.4f} >= {trail_distance:.4f})")
                         return {
                             'exit_price': current_price,
                             'reason': 'TRAILING_STOP',
@@ -337,12 +338,12 @@ class ActionPricePerformanceTracker:
                     # Обновить пик (минимум для SHORT) и сохранить в БД!
                     if current_price < signal.trailing_peak_price:
                         signal.trailing_peak_price = current_price
-                        logger.debug(f"📉 New peak (SHORT): {signal.symbol} peak={current_price:.4f}")
+                        self.logger.debug(f"📉 New peak (SHORT): {signal.symbol} peak={current_price:.4f}")
                     
                     # Проверить trailing stop: откат от пика >= trail_distance
                     if current_price - signal.trailing_peak_price >= trail_distance:
                         total_pnl = self._calculate_total_pnl(signal, current_price, entry)
-                        logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.trailing_peak_price:.4f} → current {current_price:.4f} (pullback {current_price - signal.trailing_peak_price:.4f} >= {trail_distance:.4f})")
+                        self.logger.info(f"🛑 AP Trailing Stop: {signal.symbol} peak {signal.trailing_peak_price:.4f} → current {current_price:.4f} (pullback {current_price - signal.trailing_peak_price:.4f} >= {trail_distance:.4f})")
                         return {
                             'exit_price': current_price,
                             'reason': 'TRAILING_STOP',
@@ -475,7 +476,7 @@ class ActionPricePerformanceTracker:
                         pnl_trail = ((entry - final_exit_price) / entry) * 100 * trail_size
                 
                 total_pnl = pnl_tp1 + pnl_tp2 + pnl_trail
-                logger.debug(f"PnL calc (3 levels): {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + TP2: {pnl_tp2:.2f}% (40%) + Trail: {pnl_trail:.2f}% (30%) = Total: {total_pnl:.2f}%")
+                self.logger.debug(f"PnL calc (3 levels): {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + TP2: {pnl_tp2:.2f}% (40%) + Trail: {pnl_trail:.2f}% (30%) = Total: {total_pnl:.2f}%")
                 return total_pnl
             else:
                 # ТОЛЬКО TP1 + ОСТАТОК (70%): TP1 (30%) + Remainder (70%)
@@ -497,7 +498,7 @@ class ActionPricePerformanceTracker:
                         pnl_remainder = ((entry - final_exit_price) / entry) * 100 * remainder_size
                 
                 total_pnl = pnl_tp1 + pnl_remainder
-                logger.debug(f"PnL calc (2 levels): {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + Remainder: {pnl_remainder:.2f}% (70%) = Total: {total_pnl:.2f}%")
+                self.logger.debug(f"PnL calc (2 levels): {signal.symbol} {direction} | TP1: {pnl_tp1:.2f}% (30%) + Remainder: {pnl_remainder:.2f}% (70%) = Total: {total_pnl:.2f}%")
                 return total_pnl
         else:
             # Полный выход без частичных фиксаций (100%)
