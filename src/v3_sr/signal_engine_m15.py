@@ -241,7 +241,8 @@ class SignalEngine_M15(BaseSignalEngine):
             'in_opposite_h1': in_opposite_h1_zone
         }
         
-        signal = self._create_signal(symbol, setup, levels, context, as_of_ts)
+        # CRITICAL FIX: Pass current_price for actual market entry
+        signal = self._create_signal(symbol, setup, levels, context, as_of_ts, current_price=current_price)
         signal['confidence'] = min(100, confidence)
         signal['reasons'] = reasons
         

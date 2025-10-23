@@ -458,7 +458,8 @@ class BaseSignalEngine(ABC):
                       setup: Dict,
                       levels: Dict,
                       context: Dict,
-                      as_of_ts: int) -> Dict:
+                      as_of_ts: int,
+                      current_price: float = None) -> Dict:
         """
         Create normalized signal object
         
@@ -468,6 +469,7 @@ class BaseSignalEngine(ABC):
             levels: {'sl': float, 'tp1': float, 'tp2': float}
             context: Context dict (vwap_bias, htf_summary, etc)
             as_of_ts: Timestamp
+            current_price: Current market price (if None, uses zone edge)
         
         Returns:
             Signal dict
@@ -481,11 +483,15 @@ class BaseSignalEngine(ABC):
             as_of_ts
         )
         
-        # Calculate entry price (zone edge or current price)
-        if setup['direction'] == 'LONG':
-            entry = zone_ref['high']
+        # CRITICAL FIX: Use current_price if provided, otherwise use zone edge
+        if current_price is not None:
+            entry = current_price
         else:
-            entry = zone_ref['low']
+            # Fallback to zone edge
+            if setup['direction'] == 'LONG':
+                entry = zone_ref['high']
+            else:
+                entry = zone_ref['low']
         
         signal = {
             'signal_id': signal_id,
