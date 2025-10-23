@@ -12,14 +12,21 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 **Solution Implemented:**
 1. **builder.py (line 349-352):** Added explicit `zone['meta']['flipped'] = False` for zones that haven't flipped yet
-2. **signal_engine_m15.py (line 145-151):** Added debug logging to track setup detection/filtering statistics
+2. **signal_engine_m15.py (line 145-151):** Added debug logging to track setup detection/filtering statistics (changed to INFO level)
+3. **signal_engine_h1.py (line 142-148):** Added debug logging for H1 engine as well
 
 **Technical Details:**
 - Full diagnostic flow confirmed working: parallel zone building → cache → registry update → signal engines
 - Issue was in signal_engine_base.py:105 where flip check blocked all zones without explicit `flipped` metadata
-- Sweep-Return setup also affected despite not requiring flip status (investigation ongoing)
+- Flip-Retest setup requires `flipped=True` (zones that already flipped), so 0 signals expected on fresh zones
+- Sweep-Return setup does not require flip, investigation needed via debug logs to see why it's filtered
+- Debug logging uses INFO level (not DEBUG) to ensure it appears in V3 log file
 
-**Next Steps:** User to test on local Windows machine after downloading updated code.
+**Next Steps:** User to download updated code and test. New debug logs will show:
+- `zones_checked`: Total M15/H1 zones checked
+- `zones_locked`: How many were already locked
+- `flip_detected` / `flip_filtered`: Flip-Retest setups found and filtered
+- `sweep_detected` / `sweep_filtered`: Sweep-Return setups found and filtered
 
 # User Preferences
 

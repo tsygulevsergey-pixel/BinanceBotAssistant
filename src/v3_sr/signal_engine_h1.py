@@ -78,9 +78,19 @@ class SignalEngine_H1(BaseSignalEngine):
         vwap_value = vwap.iloc[-1] if len(vwap) > 0 else current_price
         
         # Check each H1 zone for setups
+        zones_checked = 0
+        zones_locked = 0
+        flip_detected = 0
+        flip_filtered = 0
+        sweep_detected = 0
+        sweep_filtered = 0
+        
         for zone in h1_zones:
+            zones_checked += 1
+            
             # Check signal lock
             if self._is_zone_locked(zone['zone_id'], as_of_ts):
+                zones_locked += 1
                 continue
             
             # Try Flip-Retest setup
@@ -91,6 +101,7 @@ class SignalEngine_H1(BaseSignalEngine):
             )
             
             if flip_setup:
+                flip_detected += 1
                 # Apply H1 filters
                 signal = self._process_setup(
                     symbol, flip_setup, zone, df,
@@ -102,6 +113,8 @@ class SignalEngine_H1(BaseSignalEngine):
                     signals.append(signal)
                     self._lock_zone(zone['zone_id'], as_of_ts)
                     continue
+                else:
+                    flip_filtered += 1
             
             # Try Sweep-Return setup
             sweep_setup = self._detect_sweep_return(
@@ -110,6 +123,7 @@ class SignalEngine_H1(BaseSignalEngine):
             )
             
             if sweep_setup:
+                sweep_detected += 1
                 signal = self._process_setup(
                     symbol, sweep_setup, zone, df,
                     current_price, atr, vwap_value,
@@ -119,6 +133,16 @@ class SignalEngine_H1(BaseSignalEngine):
                 if signal:
                     signals.append(signal)
                     self._lock_zone(zone['zone_id'], as_of_ts)
+                else:
+                    sweep_filtered += 1
+        
+        # Debug logging
+        if zones_checked > 0 and len(signals) == 0:
+            from src.v3_sr.logger import get_v3_sr_logger
+            logger = get_v3_sr_logger()
+            logger.info(f"🔧 H1 {symbol}: checked={zones_checked}, locked={zones_locked}, "
+                       f"flip_det={flip_detected}, flip_filt={flip_filtered}, "
+                       f"sweep_det={sweep_detected}, sweep_filt={sweep_filtered}")
         
         return signals
     

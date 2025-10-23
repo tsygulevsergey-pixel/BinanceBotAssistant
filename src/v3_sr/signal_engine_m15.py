@@ -143,9 +143,9 @@ class SignalEngine_M15(BaseSignalEngine):
         if zones_checked > 0 and len(signals) == 0:
             from src.v3_sr.logger import get_v3_sr_logger
             logger = get_v3_sr_logger()
-            logger.debug(f"🔧 M15 {symbol}: checked={zones_checked}, locked={zones_locked}, "
-                        f"flip_det={flip_detected}, flip_filt={flip_filtered}, "
-                        f"sweep_det={sweep_detected}, sweep_filt={sweep_filtered}")
+            logger.info(f"🔧 M15 {symbol}: checked={zones_checked}, locked={zones_locked}, "
+                       f"flip_det={flip_detected}, flip_filt={flip_filtered}, "
+                       f"sweep_det={sweep_detected}, sweep_filt={sweep_filtered}")
         
         return signals
     
