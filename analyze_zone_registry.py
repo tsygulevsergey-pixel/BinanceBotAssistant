@@ -256,8 +256,8 @@ def find_latest_log():
     if not log_dir.exists():
         return None
     
-    # Look for v3_sr logs
-    v3_logs = list(log_dir.glob("v3_sr*.log"))
+    # Look for v3_*.log (format: v3_YYYY-MM-DD_HH-MM-SS.log)
+    v3_logs = list(log_dir.glob("v3_*.log"))
     
     if not v3_logs:
         return None
