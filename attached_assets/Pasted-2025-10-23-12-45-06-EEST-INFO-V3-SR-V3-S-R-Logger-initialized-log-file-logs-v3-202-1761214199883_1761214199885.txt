@@ -1,0 +1,1599 @@
+2025-10-23 12:45:06 EEST | INFO     | V3_SR | рџ“Ќ V3 S/R Logger initialized - log file: logs/v3_2025-10-23_12-45-06.log
+2025-10-23 12:45:06 EEST | INFO     | V3_SR | V3 S/R Strategy initialized (enabled=True, dual-engine pipeline: M15+H1)
+2025-10-23 12:45:06 EEST | INFO     | V3_SR | рџ”· V3 S/R Strategy initialized
+2025-10-23 12:45:06 EEST | INFO     | V3_SR | рџ”· Entry timeframes: ['15m', '1h']
+2025-10-23 12:45:06 EEST | INFO     | V3_SR | рџЋЇ V3 S/R Performance Tracker started
+2025-10-23 13:02:30 EEST | INFO     | V3_SR | рџ”· Checking V3 S/R signals for 227 symbols
+2025-10-23 13:02:41 EEST | INFO     | V3_SR | рџ“Љ Loaded data for 227 symbols
+2025-10-23 13:02:41 EEST | INFO     | V3_SR | рџљЂ Building zones in parallel for 227 symbols...
+2025-10-23 13:02:41 EEST | INFO     | V3_SR | рџљЂ Starting parallel zone building for 227 symbols (workers=4)
+2025-10-23 13:02:46 EEST | INFO     | V3_SR | вњ… PENDLEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:47 EEST | INFO     | V3_SR | вњ… TWTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:48 EEST | INFO     | V3_SR | вњ… FARTCOINUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:48 EEST | INFO     | V3_SR | вњ… AI16ZUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:51 EEST | INFO     | V3_SR | вњ… CUDISUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:53 EEST | INFO     | V3_SR | вњ… PUMPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:53 EEST | INFO     | V3_SR | вњ… COAIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:54 EEST | INFO     | V3_SR | вњ… ZORAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:57 EEST | INFO     | V3_SR | вњ… WALUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:58 EEST | INFO     | V3_SR | вњ… RAYSOLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:02:58 EEST | INFO     | V3_SR | вњ… BEAMXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:00 EEST | INFO     | V3_SR | вњ… ATOMUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:03 EEST | INFO     | V3_SR | вњ… ARIAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:04 EEST | INFO     | V3_SR | вњ… LTCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:04 EEST | INFO     | V3_SR | вњ… API3USDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:05 EEST | INFO     | V3_SR | вњ… KNCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:08 EEST | INFO     | V3_SR | вњ… UBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:09 EEST | INFO     | V3_SR | вњ… SANDUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:09 EEST | INFO     | V3_SR | вњ… TAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:11 EEST | INFO     | V3_SR | вњ… HUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:14 EEST | INFO     | V3_SR | вњ… MLNUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:15 EEST | INFO     | V3_SR | вњ… TREEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:16 EEST | INFO     | V3_SR | вњ… FETUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:16 EEST | INFO     | V3_SR | вњ… AEROUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:19 EEST | INFO     | V3_SR | вњ… LINKUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:20 EEST | INFO     | V3_SR | вњ… QUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:22 EEST | INFO     | V3_SR | вњ… STORJUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:23 EEST | INFO     | V3_SR | вњ… WIFUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:25 EEST | INFO     | V3_SR | вњ… DEGOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:25 EEST | INFO     | V3_SR | вњ… HEMIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:27 EEST | INFO     | V3_SR | вњ… WLDUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:29 EEST | INFO     | V3_SR | вњ… BNBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:30 EEST | INFO     | V3_SR | вњ… MIRAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:30 EEST | INFO     | V3_SR | вњ… APEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:33 EEST | INFO     | V3_SR | вњ… EVAAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:33 EEST | INFO     | V3_SR | вњ… MORPHOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:36 EEST | INFO     | V3_SR | вњ… SEIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:37 EEST | INFO     | V3_SR | вњ… PENGUUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:37 EEST | INFO     | V3_SR | вњ… RUNEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:38 EEST | INFO     | V3_SR | вњ… HUMAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:43 EEST | INFO     | V3_SR | вњ… VETUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:44 EEST | INFO     | V3_SR | вњ… DASHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:44 EEST | INFO     | V3_SR | вњ… USELESSUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:45 EEST | INFO     | V3_SR | вњ… NEIROUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:48 EEST | INFO     | V3_SR | вњ… 2ZUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:48 EEST | INFO     | V3_SR | вњ… EPTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:50 EEST | INFO     | V3_SR | вњ… LAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:50 EEST | INFO     | V3_SR | вњ… MEMEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:50 EEST | INFO     | V3_SR | вњ… EULUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:54 EEST | INFO     | V3_SR | вњ… ZBTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:54 EEST | INFO     | V3_SR | вњ… AVNTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:54 EEST | INFO     | V3_SR | вњ… BARDUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:55 EEST | INFO     | V3_SR | вњ… DOGEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:56 EEST | INFO     | V3_SR | вњ… RVVUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:59 EEST | INFO     | V3_SR | вњ… FUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:03:59 EEST | INFO     | V3_SR | вњ… PORT3USDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:02 EEST | INFO     | V3_SR | вњ… STXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:02 EEST | INFO     | V3_SR | вњ… GALAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:03 EEST | INFO     | V3_SR | вњ… CLOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:06 EEST | INFO     | V3_SR | вњ… BROCCOLIF3BUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:06 EEST | INFO     | V3_SR | вњ… ETCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:08 EEST | INFO     | V3_SR | вњ… CFXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:10 EEST | INFO     | V3_SR | вњ… PLUMEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:12 EEST | INFO     | V3_SR | вњ… JELLYJELLYUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:13 EEST | INFO     | V3_SR | вњ… KAITOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:14 EEST | INFO     | V3_SR | вњ… BTCDOMUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:14 EEST | INFO     | V3_SR | вњ… BCHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:19 EEST | INFO     | V3_SR | вњ… UNIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:20 EEST | INFO     | V3_SR | вњ… DOTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:20 EEST | INFO     | V3_SR | вњ… ETHFIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:20 EEST | INFO     | V3_SR | вњ… SPXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:23 EEST | INFO     | V3_SR | вњ… TRUTHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:24 EEST | INFO     | V3_SR | вњ… DOODUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:25 EEST | INFO     | V3_SR | вњ… 1000SATSUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:25 EEST | INFO     | V3_SR | вњ… APTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:26 EEST | INFO     | V3_SR | вњ… AIAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:27 EEST | INFO     | V3_SR | вњ… GIGGLEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:28 EEST | INFO     | V3_SR | вњ… XPINUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:31 EEST | INFO     | V3_SR | вњ… ENSOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:31 EEST | INFO     | V3_SR | вњ… EDENUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:32 EEST | INFO     | V3_SR | вњ… 1000BONKUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:34 EEST | INFO     | V3_SR | вњ… EIGENUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:35 EEST | INFO     | V3_SR | вњ… EDUUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:37 EEST | INFO     | V3_SR | вњ… OMUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:38 EEST | INFO     | V3_SR | вњ… VIRTUALUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:40 EEST | INFO     | V3_SR | вњ… 1000LUNCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:41 EEST | INFO     | V3_SR | вњ… PYTHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:41 EEST | INFO     | V3_SR | вњ… THETAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:41 EEST | INFO     | V3_SR | вњ… LABUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:44 EEST | INFO     | V3_SR | вњ… PNUTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:45 EEST | INFO     | V3_SR | вњ… XPLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:46 EEST | INFO     | V3_SR | вњ… ENSUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:48 EEST | INFO     | V3_SR | вњ… RSRUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:49 EEST | INFO     | V3_SR | вњ… HANAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:50 EEST | INFO     | V3_SR | вњ… SUSHIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:50 EEST | INFO     | V3_SR | вњ… XTZUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:53 EEST | INFO     | V3_SR | вњ… BLESSUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:54 EEST | INFO     | V3_SR | вњ… ZEREBROUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:55 EEST | INFO     | V3_SR | вњ… SOPHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:56 EEST | INFO     | V3_SR | вњ… SUIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:59 EEST | INFO     | V3_SR | вњ… NEARUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:59 EEST | INFO     | V3_SR | вњ… FILUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:04:59 EEST | INFO     | V3_SR | вњ… MOVEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:01 EEST | INFO     | V3_SR | вњ… ASTERUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:05 EEST | INFO     | V3_SR | вњ… CAKEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:06 EEST | INFO     | V3_SR | вњ… ORDIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:06 EEST | INFO     | V3_SR | вњ… SOLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:08 EEST | INFO     | V3_SR | вњ… ZKUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:10 EEST | INFO     | V3_SR | вњ… 4USDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:11 EEST | INFO     | V3_SR | вњ… GRTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:12 EEST | INFO     | V3_SR | вњ… SNXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:12 EEST | INFO     | V3_SR | вњ… PROVEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:16 EEST | INFO     | V3_SR | вњ… PEOPLEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:17 EEST | INFO     | V3_SR | вњ… DOGSUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:18 EEST | INFO     | V3_SR | вњ… FORMUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:19 EEST | INFO     | V3_SR | вњ… FLOWUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:20 EEST | INFO     | V3_SR | вњ… WLFIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:23 EEST | INFO     | V3_SR | вњ… HBARUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:23 EEST | INFO     | V3_SR | вњ… KMNOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:24 EEST | INFO     | V3_SR | вњ… AXSUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:27 EEST | INFO     | V3_SR | вњ… POPCATUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:28 EEST | INFO     | V3_SR | вњ… OGUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:29 EEST | INFO     | V3_SR | вњ… YGGUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:30 EEST | INFO     | V3_SR | вњ… POLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:31 EEST | INFO     | V3_SR | вњ… LIGHTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:34 EEST | INFO     | V3_SR | вњ… SOMIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:34 EEST | INFO     | V3_SR | вњ… TIAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:35 EEST | INFO     | V3_SR | вњ… MAGICUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:35 EEST | INFO     | V3_SR | вњ… TRXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:38 EEST | INFO     | V3_SR | вњ… BASUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:39 EEST | INFO     | V3_SR | вњ… HOLOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:41 EEST | INFO     | V3_SR | вњ… SOONUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:41 EEST | INFO     | V3_SR | вњ… SUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:43 EEST | INFO     | V3_SR | вњ… ONDOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:44 EEST | INFO     | V3_SR | вњ… JUPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:47 EEST | INFO     | V3_SR | вњ… MUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:47 EEST | INFO     | V3_SR | вњ… JTOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:49 EEST | INFO     | V3_SR | вњ… OPENUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:49 EEST | INFO     | V3_SR | вњ… MANAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:52 EEST | INFO     | V3_SR | вњ… IOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:52 EEST | INFO     | V3_SR | вњ… 1000SHIBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:53 EEST | INFO     | V3_SR | вњ… DYDXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:54 EEST | INFO     | V3_SR | вњ… ADAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:56 EEST | INFO     | V3_SR | вњ… COMPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:57 EEST | INFO     | V3_SR | вњ… BOMEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:59 EEST | INFO     | V3_SR | вњ… ZROUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:05:59 EEST | INFO     | V3_SR | вњ… TRBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:03 EEST | INFO     | V3_SR | вњ… ARUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:03 EEST | INFO     | V3_SR | вњ… ZECUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:05 EEST | INFO     | V3_SR | вњ… CRVUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:06 EEST | INFO     | V3_SR | вњ… ARKMUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:08 EEST | INFO     | V3_SR | вњ… ARCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:10 EEST | INFO     | V3_SR | вњ… AUCTIONUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:11 EEST | INFO     | V3_SR | вњ… ALGOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:12 EEST | INFO     | V3_SR | вњ… BLUAIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:12 EEST | INFO     | V3_SR | вњ… TUTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:13 EEST | INFO     | V3_SR | вњ… TRADOORUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:13 EEST | INFO     | V3_SR | вњ… ALICEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:15 EEST | INFO     | V3_SR | вњ… RIVERUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:17 EEST | INFO     | V3_SR | вњ… STRKUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:18 EEST | INFO     | V3_SR | вњ… 1000PEPEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:18 EEST | INFO     | V3_SR | вњ… BERAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:20 EEST | INFO     | V3_SR | вњ… BTCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:20 EEST | INFO     | V3_SR | вњ… METUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:24 EEST | INFO     | V3_SR | вњ… IDOLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:24 EEST | INFO     | V3_SR | вњ… ICPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:25 EEST | INFO     | V3_SR | вњ… RENDERUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:25 EEST | INFO     | V3_SR | вњ… MOODENGUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:27 EEST | INFO     | V3_SR | вњ… YBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:27 EEST | INFO     | V3_SR | вњ… VFYUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:28 EEST | INFO     | V3_SR | вњ… TONUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:31 EEST | INFO     | V3_SR | вњ… B2USDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:33 EEST | INFO     | V3_SR | вњ… LISTAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:33 EEST | INFO     | V3_SR | вњ… KDAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:33 EEST | INFO     | V3_SR | вњ… BATUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:36 EEST | INFO     | V3_SR | вњ… AVAXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:38 EEST | INFO     | V3_SR | вњ… TRUMPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:38 EEST | INFO     | V3_SR | вњ… IMXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:39 EEST | INFO     | V3_SR | вњ… XAIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:41 EEST | INFO     | V3_SR | вњ… NILUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:44 EEST | INFO     | V3_SR | вњ… ENAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:45 EEST | INFO     | V3_SR | вњ… 1000FLOKIUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:45 EEST | INFO     | V3_SR | вњ… KAVAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:47 EEST | INFO     | V3_SR | вњ… IPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:49 EEST | INFO     | V3_SR | вњ… XRPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:50 EEST | INFO     | V3_SR | вњ… HYPEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:51 EEST | INFO     | V3_SR | вњ… OPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:52 EEST | INFO     | V3_SR | вњ… TAOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:54 EEST | INFO     | V3_SR | вњ… ZKJUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:55 EEST | INFO     | V3_SR | вњ… AIXBTUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:55 EEST | INFO     | V3_SR | вњ… XANUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:57 EEST | INFO     | V3_SR | вњ… STBLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:57 EEST | INFO     | V3_SR | вњ… TURTLEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:58 EEST | INFO     | V3_SR | вњ… CELOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:06:59 EEST | INFO     | V3_SR | вњ… INJUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:01 EEST | INFO     | V3_SR | вњ… TURBOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:02 EEST | INFO     | V3_SR | вњ… JASMYUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:03 EEST | INFO     | V3_SR | вњ… NEOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:04 EEST | INFO     | V3_SR | вњ… LYNUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:05 EEST | INFO     | V3_SR | вњ… SIGNUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:07 EEST | INFO     | V3_SR | вњ… ARBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:08 EEST | INFO     | V3_SR | вњ… KASUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:09 EEST | INFO     | V3_SR | вњ… NMRUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:11 EEST | INFO     | V3_SR | вњ… XLMUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:11 EEST | INFO     | V3_SR | вњ… KGENUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:13 EEST | INFO     | V3_SR | вњ… ATHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:14 EEST | INFO     | V3_SR | вњ… ZKCUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:15 EEST | INFO     | V3_SR | вњ… FFUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:15 EEST | INFO     | V3_SR | вњ… PAXGUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:19 EEST | INFO     | V3_SR | вњ… AAVEUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:20 EEST | INFO     | V3_SR | вњ… еёЃе®‰дєєз”џUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:20 EEST | INFO     | V3_SR | вњ… BBUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:20 EEST | INFO     | V3_SR | вњ… ETHUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:20 EEST | INFO     | V3_SR | вњ… LINEAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:24 EEST | INFO     | V3_SR | вњ… SYRUPUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:25 EEST | INFO     | V3_SR | вњ… LDOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:26 EEST | INFO     | V3_SR | вњ… MYXUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:26 EEST | INFO     | V3_SR | вњ… RECALLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:27 EEST | INFO     | V3_SR | вњ… BIOUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:31 EEST | INFO     | V3_SR | вњ… ZENUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:31 EEST | INFO     | V3_SR | вњ… MERLUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:31 EEST | INFO     | V3_SR | вњ… 0GUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:32 EEST | INFO     | V3_SR | вњ… WUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:34 EEST | INFO     | V3_SR | вњ… XMRUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:35 EEST | INFO     | V3_SR | вњ… IOTAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… SAHARAUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… INUSDT: Zones built successfully (parallel worker)
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџЋ‰ Parallel zone building complete: 227/227 symbols successful
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… Parallel zone building complete: 227 symbols
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FARTCOINUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ FARTCOINUSDT zones updated in registry: {'15m': 7, '1h': 7, '4h': 12, '1d': 2}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… FARTCOINUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TWTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ TWTUSDT zones updated in registry: {'15m': 7, '1h': 10, '4h': 6, '1d': 1}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… TWTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AI16ZUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ AI16ZUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 11, '1d': 3}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… AI16ZUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PENDLEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ PENDLEUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 8, '1d': 2}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… PENDLEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing CUDISUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ CUDISUSDT zones updated in registry: {'15m': 2, '1h': 4, '4h': 5, '1d': 3}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… CUDISUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZORAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ ZORAUSDT zones updated in registry: {'15m': 6, '1h': 3, '4h': 4, '1d': 2}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… ZORAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”Ќ Analyzing COAIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ“¦ COAIUSDT zones updated in registry: {'15m': 4, '1h': 8, '4h': 3, '1d': 0}
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:36 EEST | INFO     | V3_SR | вњ… COAIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PUMPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ PUMPUSDT zones updated in registry: {'15m': 5, '1h': 4, '4h': 10, '1d': 0}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… PUMPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RAYSOLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ RAYSOLUSDT zones updated in registry: {'15m': 7, '1h': 9, '4h': 7, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… RAYSOLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BEAMXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ BEAMXUSDT zones updated in registry: {'15m': 10, '1h': 1, '4h': 5, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… BEAMXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing WALUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ WALUSDT zones updated in registry: {'15m': 4, '1h': 5, '4h': 6, '1d': 0}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… WALUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ATOMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ ATOMUSDT zones updated in registry: {'15m': 6, '1h': 7, '4h': 4, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… ATOMUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LTCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ LTCUSDT zones updated in registry: {'15m': 1, '1h': 5, '4h': 8, '1d': 1}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… LTCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing API3USDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ API3USDT zones updated in registry: {'15m': 6, '1h': 8, '4h': 3, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… API3USDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ARIAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ ARIAUSDT zones updated in registry: {'15m': 3, '1h': 3, '4h': 4, '1d': 1}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… ARIAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KNCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ KNCUSDT zones updated in registry: {'15m': 6, '1h': 4, '4h': 5, '1d': 1}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… KNCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SANDUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ SANDUSDT zones updated in registry: {'15m': 6, '1h': 4, '4h': 4, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… SANDUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ TAUSDT zones updated in registry: {'15m': 0, '1h': 3, '4h': 8, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… TAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing UBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ UBUSDT zones updated in registry: {'15m': 2, '1h': 1, '4h': 4, '1d': 0}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… UBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ HUSDT zones updated in registry: {'15m': 3, '1h': 6, '4h': 6, '1d': 1}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… HUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TREEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ“¦ TREEUSDT zones updated in registry: {'15m': 5, '1h': 7, '4h': 6, '1d': 3}
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | вњ… TREEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:37 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MLNUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ MLNUSDT zones updated in registry: {'15m': 13, '1h': 5, '4h': 2, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… MLNUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AEROUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ AEROUSDT zones updated in registry: {'15m': 7, '1h': 8, '4h': 11, '1d': 3}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… AEROUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FETUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ FETUSDT zones updated in registry: {'15m': 7, '1h': 7, '4h': 5, '1d': 3}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… FETUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing QUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ QUSDT zones updated in registry: {'15m': 6, '1h': 5, '4h': 7, '1d': 0}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… QUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LINKUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ LINKUSDT zones updated in registry: {'15m': 7, '1h': 4, '4h': 3, '1d': 2}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… LINKUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing STORJUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ STORJUSDT zones updated in registry: {'15m': 3, '1h': 6, '4h': 7, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… STORJUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing WIFUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ WIFUSDT zones updated in registry: {'15m': 5, '1h': 6, '4h': 6, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… WIFUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HEMIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ HEMIUSDT zones updated in registry: {'15m': 5, '1h': 9, '4h': 10, '1d': 0}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… HEMIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DEGOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ DEGOUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 3, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… DEGOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing WLDUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ WLDUSDT zones updated in registry: {'15m': 4, '1h': 6, '4h': 9, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… WLDUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BNBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ BNBUSDT zones updated in registry: {'15m': 4, '1h': 11, '4h': 11, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… BNBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MIRAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ MIRAUSDT zones updated in registry: {'15m': 10, '1h': 7, '4h': 6, '1d': 0}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… MIRAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing APEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ APEUSDT zones updated in registry: {'15m': 5, '1h': 6, '4h': 3, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… APEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MORPHOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ“¦ MORPHOUSDT zones updated in registry: {'15m': 1, '1h': 2, '4h': 5, '1d': 1}
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:38 EEST | INFO     | V3_SR | вњ… MORPHOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing EVAAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ EVAAUSDT zones updated in registry: {'15m': 6, '1h': 6, '4h': 0, '1d': 0}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… EVAAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SEIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ SEIUSDT zones updated in registry: {'15m': 10, '1h': 10, '4h': 9, '1d': 3}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… SEIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PENGUUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ PENGUUSDT zones updated in registry: {'15m': 7, '1h': 4, '4h': 4, '1d': 3}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… PENGUUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RUNEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ RUNEUSDT zones updated in registry: {'15m': 5, '1h': 4, '4h': 3, '1d': 4}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… RUNEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HUMAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ HUMAUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 3, '1d': 2}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… HUMAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DASHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ DASHUSDT zones updated in registry: {'15m': 6, '1h': 5, '4h': 7, '1d': 0}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… DASHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing VETUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ VETUSDT zones updated in registry: {'15m': 5, '1h': 7, '4h': 6, '1d': 2}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… VETUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing NEIROUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ NEIROUSDT zones updated in registry: {'15m': 9, '1h': 10, '4h': 6, '1d': 2}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… NEIROUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing USELESSUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ USELESSUSDT zones updated in registry: {'15m': 4, '1h': 6, '4h': 2, '1d': 1}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… USELESSUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing EPTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ EPTUSDT zones updated in registry: {'15m': 1, '1h': 3, '4h': 3, '1d': 3}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… EPTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ LAUSDT zones updated in registry: {'15m': 7, '1h': 7, '4h': 1, '1d': 2}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… LAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MEMEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ MEMEUSDT zones updated in registry: {'15m': 10, '1h': 7, '4h': 9, '1d': 2}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… MEMEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 2ZUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ“¦ 2ZUSDT zones updated in registry: {'15m': 4, '1h': 6, '4h': 4, '1d': 0}
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:39 EEST | INFO     | V3_SR | вњ… 2ZUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DOGEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ DOGEUSDT zones updated in registry: {'15m': 7, '1h': 3, '4h': 5, '1d': 2}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… DOGEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing EULUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ EULUSDT zones updated in registry: {'15m': 3, '1h': 6, '4h': 1, '1d': 0}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… EULUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AVNTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ AVNTUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 6, '1d': 0}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… AVNTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZBTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ ZBTUSDT zones updated in registry: {'15m': 15, '1h': 3, '4h': 0, '1d': 0}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… ZBTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BARDUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ BARDUSDT zones updated in registry: {'15m': 3, '1h': 7, '4h': 3, '1d': 0}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… BARDUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PORT3USDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ PORT3USDT zones updated in registry: {'15m': 1, '1h': 8, '4h': 6, '1d': 1}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… PORT3USDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing STXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ STXUSDT zones updated in registry: {'15m': 8, '1h': 6, '4h': 6, '1d': 2}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… STXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ FUSDT zones updated in registry: {'15m': 2, '1h': 4, '4h': 1, '1d': 1}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… FUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RVVUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ RVVUSDT zones updated in registry: {'15m': 6, '1h': 2, '4h': 0, '1d': 0}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… RVVUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing GALAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ GALAUSDT zones updated in registry: {'15m': 4, '1h': 5, '4h': 5, '1d': 2}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… GALAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing CLOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ CLOUSDT zones updated in registry: {'15m': 11, '1h': 3, '4h': 1, '1d': 0}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… CLOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ETCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ ETCUSDT zones updated in registry: {'15m': 4, '1h': 8, '4h': 6, '1d': 2}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… ETCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BROCCOLIF3BUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ BROCCOLIF3BUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 2, '1d': 1}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… BROCCOLIF3BUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”Ќ Analyzing CFXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ“¦ CFXUSDT zones updated in registry: {'15m': 8, '1h': 4, '4h': 8, '1d': 3}
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:40 EEST | INFO     | V3_SR | вњ… CFXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PLUMEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ PLUMEUSDT zones updated in registry: {'15m': 7, '1h': 6, '4h': 7, '1d': 3}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… PLUMEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing JELLYJELLYUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ JELLYJELLYUSDT zones updated in registry: {'15m': 6, '1h': 4, '4h': 7, '1d': 3}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… JELLYJELLYUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KAITOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ KAITOUSDT zones updated in registry: {'15m': 5, '1h': 8, '4h': 4, '1d': 2}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… KAITOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BTCDOMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ BTCDOMUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 5, '1d': 2}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… BTCDOMUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BCHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ BCHUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 2, '1d': 3}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… BCHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SPXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ SPXUSDT zones updated in registry: {'15m': 5, '1h': 6, '4h': 8, '1d': 2}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… SPXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing UNIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ UNIUSDT zones updated in registry: {'15m': 10, '1h': 4, '4h': 8, '1d': 2}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… UNIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ETHFIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ ETHFIUSDT zones updated in registry: {'15m': 2, '1h': 4, '4h': 8, '1d': 3}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… ETHFIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DOTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ DOTUSDT zones updated in registry: {'15m': 7, '1h': 6, '4h': 4, '1d': 2}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… DOTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DOODUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ DOODUSDT zones updated in registry: {'15m': 9, '1h': 7, '4h': 5, '1d': 2}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… DOODUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TRUTHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ TRUTHUSDT zones updated in registry: {'15m': 7, '1h': 3, '4h': 3, '1d': 0}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… TRUTHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 1000SATSUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ 1000SATSUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 9, '1d': 0}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… 1000SATSUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing APTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ APTUSDT zones updated in registry: {'15m': 7, '1h': 8, '4h': 3, '1d': 1}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… APTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AIAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ“¦ AIAUSDT zones updated in registry: {'15m': 0, '1h': 3, '4h': 3, '1d': 0}
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:41 EEST | INFO     | V3_SR | вњ… AIAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XPINUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ XPINUSDT zones updated in registry: {'15m': 3, '1h': 3, '4h': 2, '1d': 0}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… XPINUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing GIGGLEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ GIGGLEUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 2, '1d': 0}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… GIGGLEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 1000BONKUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ 1000BONKUSDT zones updated in registry: {'15m': 6, '1h': 10, '4h': 8, '1d': 1}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… 1000BONKUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing EDENUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ EDENUSDT zones updated in registry: {'15m': 8, '1h': 11, '4h': 4, '1d': 0}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… EDENUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing EIGENUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ EIGENUSDT zones updated in registry: {'15m': 8, '1h': 7, '4h': 9, '1d': 2}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… EIGENUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ENSOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ ENSOUSDT zones updated in registry: {'15m': 14, '1h': 2, '4h': 1, '1d': 0}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… ENSOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing OMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ OMUSDT zones updated in registry: {'15m': 4, '1h': 5, '4h': 8, '1d': 3}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… OMUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing EDUUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ EDUUSDT zones updated in registry: {'15m': 3, '1h': 7, '4h': 4, '1d': 0}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… EDUUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing VIRTUALUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ VIRTUALUSDT zones updated in registry: {'15m': 3, '1h': 11, '4h': 3, '1d': 1}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… VIRTUALUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 1000LUNCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ 1000LUNCUSDT zones updated in registry: {'15m': 8, '1h': 9, '4h': 2, '1d': 1}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… 1000LUNCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PYTHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ PYTHUSDT zones updated in registry: {'15m': 3, '1h': 4, '4h': 7, '1d': 3}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… PYTHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing THETAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ THETAUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 4, '1d': 1}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… THETAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PNUTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ PNUTUSDT zones updated in registry: {'15m': 6, '1h': 13, '4h': 7, '1d': 2}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… PNUTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XPLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ“¦ XPLUSDT zones updated in registry: {'15m': 8, '1h': 6, '4h': 10, '1d': 0}
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:42 EEST | INFO     | V3_SR | вњ… XPLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LABUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ LABUSDT zones updated in registry: {'15m': 2, '1h': 0, '4h': 0, '1d': 0}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… LABUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ENSUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ ENSUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 10, '1d': 2}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… ENSUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RSRUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ RSRUSDT zones updated in registry: {'15m': 8, '1h': 7, '4h': 6, '1d': 2}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… RSRUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SUSHIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ SUSHIUSDT zones updated in registry: {'15m': 4, '1h': 6, '4h': 6, '1d': 2}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… SUSHIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HANAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ HANAUSDT zones updated in registry: {'15m': 3, '1h': 6, '4h': 4, '1d': 0}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… HANAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XTZUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ XTZUSDT zones updated in registry: {'15m': 2, '1h': 1, '4h': 6, '1d': 3}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… XTZUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZEREBROUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ ZEREBROUSDT zones updated in registry: {'15m': 9, '1h': 6, '4h': 4, '1d': 1}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… ZEREBROUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BLESSUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ BLESSUSDT zones updated in registry: {'15m': 12, '1h': 4, '4h': 3, '1d': 0}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… BLESSUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SUIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ SUIUSDT zones updated in registry: {'15m': 12, '1h': 4, '4h': 3, '1d': 1}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… SUIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SOPHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ SOPHUSDT zones updated in registry: {'15m': 4, '1h': 1, '4h': 6, '1d': 2}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… SOPHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FILUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ FILUSDT zones updated in registry: {'15m': 9, '1h': 5, '4h': 5, '1d': 3}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… FILUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing NEARUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ NEARUSDT zones updated in registry: {'15m': 8, '1h': 2, '4h': 7, '1d': 1}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… NEARUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MOVEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ MOVEUSDT zones updated in registry: {'15m': 6, '1h': 8, '4h': 3, '1d': 2}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… MOVEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ASTERUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ“¦ ASTERUSDT zones updated in registry: {'15m': 8, '1h': 9, '4h': 8, '1d': 0}
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:43 EEST | INFO     | V3_SR | вњ… ASTERUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ORDIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ ORDIUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 8, '1d': 3}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… ORDIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing CAKEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ CAKEUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 6, '1d': 2}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… CAKEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SOLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ SOLUSDT zones updated in registry: {'15m': 3, '1h': 6, '4h': 7, '1d': 3}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… SOLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZKUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ ZKUSDT zones updated in registry: {'15m': 11, '1h': 6, '4h': 6, '1d': 3}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… ZKUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 4USDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ 4USDT zones updated in registry: {'15m': 10, '1h': 10, '4h': 2, '1d': 0}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… 4USDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SNXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ SNXUSDT zones updated in registry: {'15m': 10, '1h': 9, '4h': 5, '1d': 0}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… SNXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing GRTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ GRTUSDT zones updated in registry: {'15m': 9, '1h': 9, '4h': 2, '1d': 2}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… GRTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PROVEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ PROVEUSDT zones updated in registry: {'15m': 2, '1h': 3, '4h': 3, '1d': 1}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… PROVEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PEOPLEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ PEOPLEUSDT zones updated in registry: {'15m': 6, '1h': 6, '4h': 9, '1d': 1}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… PEOPLEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DOGSUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ DOGSUSDT zones updated in registry: {'15m': 9, '1h': 8, '4h': 2, '1d': 2}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… DOGSUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FORMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ FORMUSDT zones updated in registry: {'15m': 10, '1h': 7, '4h': 11, '1d': 4}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… FORMUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FLOWUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ FLOWUSDT zones updated in registry: {'15m': 9, '1h': 6, '4h': 7, '1d': 1}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… FLOWUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing WLFIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ“¦ WLFIUSDT zones updated in registry: {'15m': 10, '1h': 6, '4h': 3, '1d': 2}
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | вњ… WLFIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:44 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KMNOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ KMNOUSDT zones updated in registry: {'15m': 5, '1h': 6, '4h': 6, '1d': 1}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… KMNOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HBARUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ HBARUSDT zones updated in registry: {'15m': 9, '1h': 5, '4h': 6, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… HBARUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AXSUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ AXSUSDT zones updated in registry: {'15m': 5, '1h': 4, '4h': 6, '1d': 1}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… AXSUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing POPCATUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ POPCATUSDT zones updated in registry: {'15m': 4, '1h': 8, '4h': 7, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… POPCATUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing POLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ POLUSDT zones updated in registry: {'15m': 10, '1h': 7, '4h': 9, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… POLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing OGUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ OGUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 6, '1d': 4}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… OGUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing YGGUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ YGGUSDT zones updated in registry: {'15m': 7, '1h': 6, '4h': 4, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… YGGUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LIGHTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ LIGHTUSDT zones updated in registry: {'15m': 7, '1h': 2, '4h': 3, '1d': 0}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… LIGHTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TIAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ TIAUSDT zones updated in registry: {'15m': 6, '1h': 3, '4h': 9, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… TIAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SOMIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ SOMIUSDT zones updated in registry: {'15m': 6, '1h': 2, '4h': 8, '1d': 0}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… SOMIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MAGICUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ MAGICUSDT zones updated in registry: {'15m': 4, '1h': 5, '4h': 6, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… MAGICUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TRXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ TRXUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 6, '1d': 3}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… TRXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SOONUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ SOONUSDT zones updated in registry: {'15m': 10, '1h': 7, '4h': 4, '1d': 2}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… SOONUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BASUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ“¦ BASUSDT zones updated in registry: {'15m': 7, '1h': 6, '4h': 3, '1d': 0}
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:45 EEST | INFO     | V3_SR | вњ… BASUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HOLOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ HOLOUSDT zones updated in registry: {'15m': 6, '1h': 4, '4h': 7, '1d': 0}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… HOLOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ SUSDT zones updated in registry: {'15m': 4, '1h': 2, '4h': 11, '1d': 1}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… SUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ONDOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ ONDOUSDT zones updated in registry: {'15m': 6, '1h': 3, '4h': 4, '1d': 2}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… ONDOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing JUPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ JUPUSDT zones updated in registry: {'15m': 8, '1h': 1, '4h': 4, '1d': 1}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… JUPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing JTOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ JTOUSDT zones updated in registry: {'15m': 5, '1h': 7, '4h': 5, '1d': 4}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… JTOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ MUSDT zones updated in registry: {'15m': 4, '1h': 5, '4h': 6, '1d': 1}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… MUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing OPENUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ OPENUSDT zones updated in registry: {'15m': 10, '1h': 7, '4h': 11, '1d': 0}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… OPENUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MANAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ MANAUSDT zones updated in registry: {'15m': 5, '1h': 11, '4h': 6, '1d': 1}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… MANAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing IOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ IOUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 9, '1d': 1}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… IOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 1000SHIBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ 1000SHIBUSDT zones updated in registry: {'15m': 6, '1h': 5, '4h': 4, '1d': 2}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… 1000SHIBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing DYDXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ DYDXUSDT zones updated in registry: {'15m': 5, '1h': 4, '4h': 5, '1d': 2}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… DYDXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ADAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ ADAUSDT zones updated in registry: {'15m': 6, '1h': 7, '4h': 5, '1d': 1}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… ADAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing COMPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ COMPUSDT zones updated in registry: {'15m': 7, '1h': 3, '4h': 6, '1d': 3}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… COMPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BOMEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ“¦ BOMEUSDT zones updated in registry: {'15m': 12, '1h': 2, '4h': 6, '1d': 4}
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:46 EEST | INFO     | V3_SR | вњ… BOMEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZROUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ZROUSDT zones updated in registry: {'15m': 9, '1h': 5, '4h': 3, '1d': 2}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ZROUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TRBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ TRBUSDT zones updated in registry: {'15m': 6, '1h': 7, '4h': 7, '1d': 2}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… TRBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ARUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ARUSDT zones updated in registry: {'15m': 1, '1h': 6, '4h': 10, '1d': 3}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ARUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZECUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ZECUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 5, '1d': 0}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ZECUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing CRVUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ CRVUSDT zones updated in registry: {'15m': 3, '1h': 5, '4h': 6, '1d': 3}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… CRVUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ARKMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ARKMUSDT zones updated in registry: {'15m': 11, '1h': 5, '4h': 9, '1d': 1}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ARKMUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AUCTIONUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ AUCTIONUSDT zones updated in registry: {'15m': 4, '1h': 1, '4h': 2, '1d': 2}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… AUCTIONUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ARCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ARCUSDT zones updated in registry: {'15m': 3, '1h': 3, '4h': 3, '1d': 2}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ARCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TUTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ TUTUSDT zones updated in registry: {'15m': 10, '1h': 6, '4h': 12, '1d': 1}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… TUTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ALGOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ALGOUSDT zones updated in registry: {'15m': 7, '1h': 6, '4h': 7, '1d': 1}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ALGOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ALICEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ ALICEUSDT zones updated in registry: {'15m': 6, '1h': 4, '4h': 3, '1d': 1}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… ALICEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TRADOORUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ TRADOORUSDT zones updated in registry: {'15m': 2, '1h': 6, '4h': 4, '1d': 0}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… TRADOORUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BLUAIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ“¦ BLUAIUSDT zones updated in registry: {'15m': 7, '1h': 0, '4h': 0, '1d': 0}
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | вњ… BLUAIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:47 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 1000PEPEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ 1000PEPEUSDT zones updated in registry: {'15m': 10, '1h': 8, '4h': 8, '1d': 1}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… 1000PEPEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BERAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ BERAUSDT zones updated in registry: {'15m': 7, '1h': 1, '4h': 4, '1d': 2}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… BERAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RIVERUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ RIVERUSDT zones updated in registry: {'15m': 7, '1h': 2, '4h': 0, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… RIVERUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing STRKUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ STRKUSDT zones updated in registry: {'15m': 14, '1h': 4, '4h': 3, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… STRKUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BTCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ BTCUSDT zones updated in registry: {'15m': 1, '1h': 4, '4h': 2, '1d': 5}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… BTCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ICPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ ICPUSDT zones updated in registry: {'15m': 3, '1h': 9, '4h': 8, '1d': 3}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… ICPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing METUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ METUSDT zones updated in registry: {'15m': 3, '1h': 5, '4h': 3, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… METUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing IDOLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ IDOLUSDT zones updated in registry: {'15m': 7, '1h': 4, '4h': 3, '1d': 2}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… IDOLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MOODENGUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ MOODENGUSDT zones updated in registry: {'15m': 7, '1h': 7, '4h': 11, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… MOODENGUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RENDERUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ RENDERUSDT zones updated in registry: {'15m': 4, '1h': 9, '4h': 8, '1d': 1}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… RENDERUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TONUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ TONUSDT zones updated in registry: {'15m': 8, '1h': 5, '4h': 8, '1d': 2}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… TONUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing VFYUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ VFYUSDT zones updated in registry: {'15m': 6, '1h': 9, '4h': 4, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… VFYUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing YBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ YBUSDT zones updated in registry: {'15m': 5, '1h': 9, '4h': 0, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… YBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing B2USDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ“¦ B2USDT zones updated in registry: {'15m': 3, '1h': 5, '4h': 9, '1d': 0}
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | вњ… B2USDT no signals after dual-engine + arbitration
+2025-10-23 13:07:48 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LISTAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ LISTAUSDT zones updated in registry: {'15m': 13, '1h': 6, '4h': 7, '1d': 1}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… LISTAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KDAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ KDAUSDT zones updated in registry: {'15m': 7, '1h': 3, '4h': 3, '1d': 1}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… KDAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BATUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ BATUSDT zones updated in registry: {'15m': 7, '1h': 6, '4h': 4, '1d': 0}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… BATUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AVAXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ AVAXUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 8, '1d': 1}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… AVAXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing IMXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ IMXUSDT zones updated in registry: {'15m': 1, '1h': 2, '4h': 4, '1d': 3}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… IMXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XAIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ XAIUSDT zones updated in registry: {'15m': 4, '1h': 8, '4h': 9, '1d': 2}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… XAIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TRUMPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ TRUMPUSDT zones updated in registry: {'15m': 5, '1h': 7, '4h': 4, '1d': 3}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… TRUMPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing NILUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ NILUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 3, '1d': 0}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… NILUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ENAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ ENAUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 6, '1d': 4}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… ENAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KAVAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ KAVAUSDT zones updated in registry: {'15m': 13, '1h': 6, '4h': 5, '1d': 2}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… KAVAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 1000FLOKIUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ 1000FLOKIUSDT zones updated in registry: {'15m': 5, '1h': 4, '4h': 9, '1d': 1}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… 1000FLOKIUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing IPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ IPUSDT zones updated in registry: {'15m': 7, '1h': 4, '4h': 11, '1d': 1}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… IPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XRPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ XRPUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 7, '1d': 1}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… XRPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”Ќ Analyzing OPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ“¦ OPUSDT zones updated in registry: {'15m': 5, '1h': 9, '4h': 7, '1d': 0}
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:49 EEST | INFO     | V3_SR | вњ… OPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing HYPEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ HYPEUSDT zones updated in registry: {'15m': 4, '1h': 2, '4h': 3, '1d': 4}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… HYPEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TAOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ TAOUSDT zones updated in registry: {'15m': 9, '1h': 7, '4h': 2, '1d': 0}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… TAOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AIXBTUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ AIXBTUSDT zones updated in registry: {'15m': 8, '1h': 7, '4h': 7, '1d': 1}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… AIXBTUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZKJUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ ZKJUSDT zones updated in registry: {'15m': 2, '1h': 3, '4h': 6, '1d': 2}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… ZKJUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XANUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ XANUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 3, '1d': 0}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… XANUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing STBLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ STBLUSDT zones updated in registry: {'15m': 7, '1h': 7, '4h': 7, '1d': 0}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… STBLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing INJUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ INJUSDT zones updated in registry: {'15m': 5, '1h': 6, '4h': 7, '1d': 2}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… INJUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TURBOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ TURBOUSDT zones updated in registry: {'15m': 6, '1h': 7, '4h': 12, '1d': 1}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… TURBOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing CELOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ CELOUSDT zones updated in registry: {'15m': 0, '1h': 3, '4h': 6, '1d': 2}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… CELOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing TURTLEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ TURTLEUSDT zones updated in registry: {'15m': 5, '1h': 0, '4h': 0, '1d': 0}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… TURTLEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing JASMYUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ JASMYUSDT zones updated in registry: {'15m': 1, '1h': 3, '4h': 8, '1d': 2}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… JASMYUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing NEOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ NEOUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 8, '1d': 0}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… NEOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SIGNUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ SIGNUSDT zones updated in registry: {'15m': 5, '1h': 7, '4h': 4, '1d': 2}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… SIGNUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LYNUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ“¦ LYNUSDT zones updated in registry: {'15m': 3, '1h': 3, '4h': 5, '1d': 0}
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | вњ… LYNUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:50 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ARBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ ARBUSDT zones updated in registry: {'15m': 4, '1h': 4, '4h': 8, '1d': 3}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… ARBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KASUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ KASUSDT zones updated in registry: {'15m': 6, '1h': 6, '4h': 5, '1d': 2}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… KASUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing NMRUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ NMRUSDT zones updated in registry: {'15m': 5, '1h': 5, '4h': 6, '1d': 3}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… NMRUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XLMUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ XLMUSDT zones updated in registry: {'15m': 11, '1h': 2, '4h': 5, '1d': 2}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… XLMUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing KGENUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ KGENUSDT zones updated in registry: {'15m': 4, '1h': 7, '4h': 2, '1d': 0}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… KGENUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ATHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ ATHUSDT zones updated in registry: {'15m': 0, '1h': 1, '4h': 12, '1d': 3}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… ATHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing PAXGUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ PAXGUSDT zones updated in registry: {'15m': 6, '1h': 6, '4h': 5, '1d': 3}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… PAXGUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZKCUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ ZKCUSDT zones updated in registry: {'15m': 6, '1h': 6, '4h': 4, '1d': 0}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… ZKCUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing FFUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ FFUSDT zones updated in registry: {'15m': 4, '1h': 5, '4h': 3, '1d': 0}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… FFUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing AAVEUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ AAVEUSDT zones updated in registry: {'15m': 5, '1h': 3, '4h': 2, '1d': 3}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… AAVEUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BBUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ BBUSDT zones updated in registry: {'15m': 5, '1h': 2, '4h': 7, '1d': 2}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… BBUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ETHUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ ETHUSDT zones updated in registry: {'15m': 3, '1h': 4, '4h': 7, '1d': 2}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… ETHUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LINEAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ LINEAUSDT zones updated in registry: {'15m': 11, '1h': 5, '4h': 6, '1d': 1}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… LINEAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”Ќ Analyzing еёЃе®‰дєєз”џUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ“¦ еёЃе®‰дєєз”џUSDT zones updated in registry: {'15m': 7, '1h': 0, '4h': 0, '1d': 0}
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:51 EEST | INFO     | V3_SR | вњ… еёЃе®‰дєєз”џUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SYRUPUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ SYRUPUSDT zones updated in registry: {'15m': 2, '1h': 7, '4h': 4, '1d': 2}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… SYRUPUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MYXUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ MYXUSDT zones updated in registry: {'15m': 5, '1h': 9, '4h': 7, '1d': 3}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… MYXUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing BIOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ BIOUSDT zones updated in registry: {'15m': 11, '1h': 6, '4h': 11, '1d': 3}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… BIOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing LDOUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ LDOUSDT zones updated in registry: {'15m': 5, '1h': 4, '4h': 3, '1d': 4}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… LDOUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing RECALLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ RECALLUSDT zones updated in registry: {'15m': 10, '1h': 3, '4h': 0, '1d': 0}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… RECALLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing ZENUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ ZENUSDT zones updated in registry: {'15m': 4, '1h': 8, '4h': 4, '1d': 1}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… ZENUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing MERLUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ MERLUSDT zones updated in registry: {'15m': 10, '1h': 6, '4h': 3, '1d': 4}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… MERLUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing WUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ WUSDT zones updated in registry: {'15m': 2, '1h': 7, '4h': 7, '1d': 2}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… WUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing 0GUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ 0GUSDT zones updated in registry: {'15m': 6, '1h': 10, '4h': 7, '1d': 0}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… 0GUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing XMRUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ XMRUSDT zones updated in registry: {'15m': 3, '1h': 4, '4h': 2, '1d': 3}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… XMRUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing SAHARAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ SAHARAUSDT zones updated in registry: {'15m': 2, '1h': 5, '4h': 4, '1d': 3}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… SAHARAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing INUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ INUSDT zones updated in registry: {'15m': 10, '1h': 10, '4h': 5, '1d': 1}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… INUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”Ќ Analyzing IOTAUSDT | Regime: TREND | Dual-Engine Pipeline
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ“¦ IOTAUSDT zones updated in registry: {'15m': 4, '1h': 1, '4h': 7, '1d': 2}
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ M15 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”§ H1 engine: 0 raw signals
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вљ–пёЏ Arbitrator: M15 0в†’0, H1 0в†’0
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | вњ… IOTAUSDT no signals after dual-engine + arbitration
+2025-10-23 13:07:52 EEST | INFO     | V3_SR | рџ”· V3 S/R analysis complete: Analyzed: 227, Signals: 0
