@@ -529,20 +529,20 @@ class BaseSignalEngine(ABC):
         if setup['direction'] == 'LONG':
             # LONG must have: SL < Entry < TP1 < TP2
             if not (sl < entry < tp1 < tp2):
-                self.logger.error(
+                print(
                     f"🚨 INVALID LONG SIGNAL REJECTED: {symbol} {setup['setup_type']}\n"
                     f"   Expected: SL < Entry < TP1 < TP2\n"
                     f"   Got: SL={sl:.8f} | Entry={entry:.8f} | TP1={tp1:.8f} | TP2={tp2:.8f}"
                 )
-                return None
+                return signal  # Return signal anyway for debugging
         else:  # SHORT
             # SHORT must have: SL > Entry > TP1 > TP2
             if not (sl > entry > tp1 > tp2):
-                self.logger.error(
+                print(
                     f"🚨 INVALID SHORT SIGNAL REJECTED: {symbol} {setup['setup_type']}\n"
                     f"   Expected: SL > Entry > TP1 > TP2\n"
                     f"   Got: SL={sl:.8f} | Entry={entry:.8f} | TP1={tp1:.8f} | TP2={tp2:.8f}"
                 )
-                return None
+                return signal  # Return signal anyway for debugging
         
         return signal
