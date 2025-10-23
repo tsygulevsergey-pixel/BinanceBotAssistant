@@ -426,60 +426,66 @@ class SignalEngine_M15(BaseSignalEngine):
         symbol = zone['symbol']
         h1_zones = [z for z in h1_zones if z['symbol'] == symbol]
         
-        # FIXED LOGIC: TP1 = nearest target, TP2 = next target
+        # CRITICAL FIX: TP must be BEYOND entry, not between SL and entry!
         if direction == 'LONG':
-            # Find H1 Resistance zones above entry
+            # Default: R-multiple targets
+            tp1_default = entry_price + (1.0 * risk)  # 1R
+            tp2_default = entry_price + (2.0 * risk)  # 2R
+            
+            # Find H1 Resistance zones ABOVE entry (not between SL and entry!)
             h1_candidates = [z for z in h1_zones if z['kind'] == 'R' and z['low'] > entry_price]
             h1_candidates_sorted = sorted(h1_candidates, key=lambda z: z['low']) if h1_candidates else []
-            
-            tp1_1r = entry_price + risk  # 1R target
             
             if h1_candidates_sorted:
                 first_h1 = h1_candidates_sorted[0]['low']
                 
-                # If first H1 zone is closer than 1R, use it for TP1
-                if first_h1 < tp1_1r:
+                # Use H1 zone only if it's closer than 1R BUT still above entry
+                if first_h1 < tp1_default:
                     levels['tp1'] = first_h1
                     # TP2: next H1 zone or 2R
                     if len(h1_candidates_sorted) > 1:
-                        levels['tp2'] = h1_candidates_sorted[1]['low']
+                        second_h1 = h1_candidates_sorted[1]['low']
+                        levels['tp2'] = second_h1
                     else:
-                        levels['tp2'] = entry_price + (2 * risk)  # 2R fallback
+                        levels['tp2'] = tp2_default
                 else:
                     # First H1 zone is farther than 1R
-                    levels['tp1'] = tp1_1r
+                    levels['tp1'] = tp1_default
                     levels['tp2'] = first_h1
             else:
-                # No H1 zones found
-                levels['tp1'] = tp1_1r
-                levels['tp2'] = entry_price + (2 * risk)  # 2R fallback
+                # No H1 zones found - use R-multiples
+                levels['tp1'] = tp1_default
+                levels['tp2'] = tp2_default
         
         else:  # SHORT
-            # Find H1 Support zones below entry
+            # Default: R-multiple targets
+            tp1_default = entry_price - (1.0 * risk)  # 1R
+            tp2_default = entry_price - (2.0 * risk)  # 2R
+            
+            # Find H1 Support zones BELOW entry (not between entry and SL!)
             h1_candidates = [z for z in h1_zones if z['kind'] == 'S' and z['high'] < entry_price]
             h1_candidates_sorted = sorted(h1_candidates, key=lambda z: z['high'], reverse=True) if h1_candidates else []
-            
-            tp1_1r = entry_price - risk  # 1R target
             
             if h1_candidates_sorted:
                 first_h1 = h1_candidates_sorted[0]['high']
                 
-                # If first H1 zone is closer than 1R, use it for TP1
-                if first_h1 > tp1_1r:
+                # Use H1 zone only if it's closer than 1R BUT still below entry
+                if first_h1 > tp1_default:
                     levels['tp1'] = first_h1
                     # TP2: next H1 zone or 2R
                     if len(h1_candidates_sorted) > 1:
-                        levels['tp2'] = h1_candidates_sorted[1]['high']
+                        second_h1 = h1_candidates_sorted[1]['high']
+                        levels['tp2'] = second_h1
                     else:
-                        levels['tp2'] = entry_price - (2 * risk)  # 2R fallback
+                        levels['tp2'] = tp2_default
                 else:
                     # First H1 zone is farther than 1R
-                    levels['tp1'] = tp1_1r
+                    levels['tp1'] = tp1_default
                     levels['tp2'] = first_h1
             else:
-                # No H1 zones found
-                levels['tp1'] = tp1_1r
-                levels['tp2'] = entry_price - (2 * risk)  # 2R fallback
+                # No H1 zones found - use R-multiples
+                levels['tp1'] = tp1_default
+                levels['tp2'] = tp2_default
         
         return levels
     
