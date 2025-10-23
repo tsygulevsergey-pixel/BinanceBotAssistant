@@ -219,10 +219,11 @@ class SignalEngine_M15(BaseSignalEngine):
                 confidence += 15
         
         # [3] HTF Clearance Check
-        entry_price = zone['high'] if direction == 'LONG' else zone['low']
+        # Use zone edge for HTF clearance check (check if zone has room)
+        zone_edge_for_clearance = zone['high'] if direction == 'LONG' else zone['low']
         
         clearance_ok, htf_context = self._htf_clearance_ok(
-            entry_price, direction, htf_bands, atr, self.min_clearance_mult
+            zone_edge_for_clearance, direction, htf_bands, atr, self.min_clearance_mult
         )
         
         if not clearance_ok:
@@ -231,7 +232,8 @@ class SignalEngine_M15(BaseSignalEngine):
         reasons.append('htf_clear')
         
         # [4] Calculate SL/TP
-        levels = self._calc_sl_tp_m15(zone, entry_price, direction, atr)
+        # CRITICAL FIX: Use current_price for SL/TP calculation, not zone edge!
+        levels = self._calc_sl_tp_m15(zone, current_price, direction, atr)
         
         # [5] Create signal
         context = {

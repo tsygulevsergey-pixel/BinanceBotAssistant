@@ -57,3 +57,22 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 - **Exchange**: `python-binance`, `ccxt`.
 - **Scheduling**: `APScheduler`.
 - **Configuration**: `pyyaml`, `python-dotenv`.
+
+---
+
+# Recent Critical Fixes (October 24, 2025)
+
+## Problem #13: TP Levels in "Dead Zone" Between SL and Entry - RESOLVED ✅
+
+**Issue:** TP1/TP2 calculated between SL and Entry making signals untradeable.
+
+**Root Cause:**
+- `signal_engine_h1.py (line 213)` and `signal_engine_m15.py (line 222)` used `zone edge` for SL/TP calculation
+- Then entry overridden with `current_price` in `_create_signal()`
+- Result: SL/TP from one price, entry from another
+
+**Solution:**
+- Use `current_price` for SL/TP calculation consistently
+- Keep zone edge only for HTF clearance check
+
+**Result:** ✅ LONG: Entry < TP1 < TP2  |  ✅ SHORT: Entry > TP1 > TP2
