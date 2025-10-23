@@ -1,0 +1,95 @@
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant>python find_problem.py
+================================================================================
+🔍 V3 PROBLEM DIAGNOSTIC - WHERE ARE ZONES LOST?
+================================================================================
+
+📄 Reading 6510 lines from logs/v3_2025-10-23_04-31-53.log
+
+1️⃣  CHECK: Is batch_build_zones_parallel() called?
+--------------------------------------------------------------------------------
+✅ batch_build_zones_parallel() started: 4 time(s)
+   Example: 2025-10-23 04:49:47 EEST | INFO     | V3_SR | 🚀 Building zones in parallel for 232 symbols...
+✅ Parallel building completed: 8 time(s)
+   Example: 2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🎉 Parallel zone building complete: 232/232 symbols suc
+
+2️⃣  CHECK: Are zones cached after parallel build?
+--------------------------------------------------------------------------------
+✅ Zones cached from workers: 927 symbols
+   Examples:
+     2025-10-23 04:50:06 EEST | INFO     | V3_SR | ✅ AVNTUSDT: Zones built successfully (parallel worker)
+     2025-10-23 04:50:10 EEST | INFO     | V3_SR | ✅ TAOUSDT: Zones built successfully (parallel worker)
+     2025-10-23 04:50:10 EEST | INFO     | V3_SR | ✅ GALAUSDT: Zones built successfully (parallel worker)
+     2025-10-23 04:50:10 EEST | INFO     | V3_SR | ✅ SOLUSDT: Zones built successfully (parallel worker)
+     2025-10-23 04:50:13 EEST | INFO     | V3_SR | ✅ MAGICUSDT: Zones built successfully (parallel worker
+
+3️⃣  CHECK: Is analyze() called for symbols?
+--------------------------------------------------------------------------------
+✅ analyze() called: 927 time(s)
+   Examples:
+     2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🔍 Analyzing TAOUSDT | Regime: TREND | Dual-Engine Pipeline
+     2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🔍 Analyzing GALAUSDT | Regime: TREND | Dual-Engine Pipeline
+     2025-10-23 04:55:43 EEST | INFO     | V3_SR | 🔍 Analyzing SOLUSDT | Regime: TREND | Dual-Engine Pipeline
+     2025-10-23 04:55:44 EEST | INFO     | V3_SR | 🔍 Analyzing AVNTUSDT | Regime: TREND | Dual-Engine Pipeline
+     2025-10-23 04:55:44 EEST | INFO     | V3_SR | 🔍 Analyzing MAGICUSDT | Regime: TREND | Dual-Engine Pipeline
+
+4️⃣  CHECK: Does analyze() find zones?
+--------------------------------------------------------------------------------
+✅ No 'no zones built' errors found
+✅ Registry updated: 927 time(s)
+   Examples:
+     2025-10-23 04:55:42 EEST | INFO     | V3_SR | 📦 TAOUSDT zones updated in registry: {'15m': 8, '1h': 6, '4h': 2, '1d': 0}
+     2025-10-23 04:55:42 EEST | INFO     | V3_SR | 📦 GALAUSDT zones updated in registry: {'15m': 7, '1h': 3, '4h': 5, '1d': 2
+     2025-10-23 04:55:43 EEST | INFO     | V3_SR | 📦 SOLUSDT zones updated in registry: {'15m': 6, '1h': 4, '4h': 8, '1d': 3}
+
+5️⃣  CHECK: Do signal engines generate raw signals?
+--------------------------------------------------------------------------------
+✅ M15 engine logs: 923 time(s)
+   2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+   2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+   2025-10-23 04:55:43 EEST | INFO     | V3_SR | 🔧 M15 engine: 0 raw signals
+✅ H1 engine logs: 919 time(s)
+   2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+   2025-10-23 04:55:42 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+   2025-10-23 04:55:43 EEST | INFO     | V3_SR | 🔧 H1 engine: 0 raw signals
+
+6️⃣  CHECK: What 'zones built' messages exist?
+--------------------------------------------------------------------------------
+Found 927 'zones built' message(s):
+  1. 2025-10-23 04:50:06 EEST | INFO     | V3_SR | ✅ AVNTUSDT: Zones built successfully (parallel worker)
+  2. 2025-10-23 04:50:10 EEST | INFO     | V3_SR | ✅ TAOUSDT: Zones built successfully (parallel worker)
+  3. 2025-10-23 04:50:10 EEST | INFO     | V3_SR | ✅ GALAUSDT: Zones built successfully (parallel worker)
+  4. 2025-10-23 04:50:10 EEST | INFO     | V3_SR | ✅ SOLUSDT: Zones built successfully (parallel worker)
+  5. 2025-10-23 04:50:13 EEST | INFO     | V3_SR | ✅ MAGICUSDT: Zones built successfully (parallel worker)
+  6. 2025-10-23 04:50:14 EEST | INFO     | V3_SR | ✅ BEAMXUSDT: Zones built successfully (parallel worker)
+  7. 2025-10-23 04:50:15 EEST | INFO     | V3_SR | ✅ COMPUSDT: Zones built successfully (parallel worker)
+  8. 2025-10-23 04:50:16 EEST | INFO     | V3_SR | ✅ KMNOUSDT: Zones built successfully (parallel worker)
+  9. 2025-10-23 04:50:20 EEST | INFO     | V3_SR | ✅ MLNUSDT: Zones built successfully (parallel worker)
+  10. 2025-10-23 04:50:22 EEST | INFO     | V3_SR | ✅ STORJUSDT: Zones built successfully (parallel worker)
+
+================================================================================
+📊 DIAGNOSTIC SUMMARY
+================================================================================
+
+Expected flow:
+  1. batch_build_zones_parallel() called → builds zones
+  2. Zones cached in v3_zones_provider.cache
+  3. analyze() called for each symbol
+  4. _get_or_build_zones() reads from cache
+  5. Registry updated with zones
+  6. Signal engines tick → generate signals
+
+Current status:
+  ✅ Step 1: Parallel building works
+  ✅ Step 2: Zones cached from workers
+  ✅ Step 3: analyze() called
+  ✅ Step 5: Registry updated
+  ✅ Step 6: Engines active
+
+================================================================================
+🔍 ROOT CAUSE:
+================================================================================
+✅ Flow looks OK but no signals - check:
+  - Flip metadata (zones not flipped)
+  - VWAP filter (too strict)
+  - Zone strength threshold (too high)
+================================================================================

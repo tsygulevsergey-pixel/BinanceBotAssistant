@@ -343,6 +343,10 @@ class SRZonesV3Builder:
             else:
                 zone['state'] = 'normal'
                 zone['flip_side'] = None
+                # ✅ FIX: Explicitly mark as NOT flipped (for signal engine detection)
+                if 'meta' not in zone:
+                    zone['meta'] = {}
+                zone['meta']['flipped'] = False
         
         return all_zones
     

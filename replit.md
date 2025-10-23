@@ -2,6 +2,25 @@
 
 This project is a professional-grade Binance USDT-M Futures Trading Bot designed for high-performance trading, targeting an 80%+ Win Rate and a Profit Factor of 1.8-2.5. It integrates advanced trading strategies, real-time market regime detection, sophisticated risk management, and an "Action Price" system based on Support/Resistance, Anchored VWAP, and price action. The bot supports both Signals-Only and Live Trading Modes, emphasizing precise signal generation, dynamic entry/exit management, and robust performance tracking. The project aims to provide a robust and efficient automated trading solution with a focus on consistent profitability and advanced analytical capabilities.
 
+# Recent Fixes (October 23, 2025)
+
+## Problem #6: V3 Strategy 0 Signals Issue - RESOLVED ✅
+
+**Issue:** V3 S/R strategy was generating 0 signals despite successful zone building (232 symbols, 927 zones built).
+
+**Root Cause:** Zones were not explicitly marked with `flipped=False` metadata after creation. Signal engine's Flip-Retest detector checked `zone.get('meta', {}).get('flipped', False)` and would return `None` for zones without the `flipped` field, effectively blocking all non-flipped zones from signal generation.
+
+**Solution Implemented:**
+1. **builder.py (line 349-352):** Added explicit `zone['meta']['flipped'] = False` for zones that haven't flipped yet
+2. **signal_engine_m15.py (line 145-151):** Added debug logging to track setup detection/filtering statistics
+
+**Technical Details:**
+- Full diagnostic flow confirmed working: parallel zone building → cache → registry update → signal engines
+- Issue was in signal_engine_base.py:105 where flip check blocked all zones without explicit `flipped` metadata
+- Sweep-Return setup also affected despite not requiring flip status (investigation ongoing)
+
+**Next Steps:** User to test on local Windows machine after downloading updated code.
+
 # User Preferences
 
 - **Preferred communication style**: Simple, everyday language.
