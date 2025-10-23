@@ -118,6 +118,66 @@ Loads configurations, connects to Binance, processes data in parallel, and launc
 
 # Recent Fixes (October 23, 2025)
 
+## Problem #11: Stop-Loss Above Entry for LONG Signals (FlipRetest Direction Bug) - RESOLVED ✅
+
+**Issue:** LONG FlipRetest signals had Stop-Loss ABOVE entry price instead of BELOW, making them impossible to trade.
+
+**Example from BTCUSDT Signal:**
+```
+Entry: 109469.9
+SL: 110555.7  ❌ ABOVE entry for LONG!
+TP1: 112031.2
+TP2: 114482.6
+```
+
+**Root Cause (Identified by Architect):**
+- **signal_engine_base.py (line 111):** `flip_side_original = zone.get('flip_side', zone_kind)`
+- When `flip_side` metadata was missing from zone, code fell back to **current** `zone['kind']` instead of original type BEFORE flip
+- Resistance zones (`zone['kind'] = 'R'`) that should flip to Support were incorrectly treated as still being Resistance
+- Wrong direction determination → SL placed at `zone['low']` (Resistance floor) which is ABOVE market price
+- Result: SL > entry for LONG signals ❌
+
+**Original Logic (WRONG):**
+```python
+flip_side_original = zone.get('flip_side', zone_kind)  # Fallback to current type
+
+if flip_side_original == 'S':
+    expected_direction = 'SHORT'  # Was S, now R
+else:
+    expected_direction = 'LONG'   # Was R, now S
+
+# But if flip_side missing and zone['kind']='R', it thinks "was R" → LONG
+# But zone is STILL R (didn't flip)! → SL above entry
+```
+
+**Corrected Logic:**
+```python
+# Use CURRENT zone type to determine direction
+if zone_kind == 'S':
+    # Current Support → LONG (bounce up)
+    expected_direction = 'LONG'
+    flip_side = 'above'
+else:
+    # Current Resistance → SHORT (rejection down)
+    expected_direction = 'SHORT'
+    flip_side = 'below'
+```
+
+**Solution Implemented:**
+- **signal_engine_base.py (lines 111-123):** Refactored direction logic
+  - Determine direction from **CURRENT** `zone['kind']` after flip
+  - Support zones → LONG signals (expect bounce up)
+  - Resistance zones → SHORT signals (expect rejection down)
+  - No longer relies on potentially missing `flip_side` metadata
+
+**Result:**
+- ✅ LONG signals: SL < Entry (below entry)
+- ✅ SHORT signals: SL > Entry (above entry)
+- ✅ Direction correctly matches zone role
+- ✅ Signals are now tradeable
+
+---
+
 ## Problem #10: TP1 = TP2 When HTF Zone Closer Than 1R - RESOLVED ✅
 
 **Issue:** TP1 and TP2 were identical in signals when HTF zone was closer than 1R risk distance.

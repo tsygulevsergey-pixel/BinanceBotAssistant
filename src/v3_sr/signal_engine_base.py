@@ -105,22 +105,19 @@ class BaseSignalEngine(ABC):
         if not zone.get('meta', {}).get('flipped', False):
             return None
         
-        # ✅ FIX: Use flip_side (ORIGINAL type BEFORE flip) to determine direction
-        # zone['flip_side'] = original type BEFORE flip
-        # zone['kind'] = NEW type AFTER flip
-        flip_side_original = zone.get('flip_side', zone_kind)  # Fallback to current if no flip_side
-        
-        # Determine expected direction after flip
-        # If was Support, now acts as Resistance → expect SHORT
-        # If was Resistance, now acts as Support → expect LONG
-        if flip_side_original == 'S':
-            # Was Support, flipped to Resistance → SHORT signals
-            expected_direction = 'SHORT'
-            flip_side = 'below'
-        else:
-            # Was Resistance, flipped to Support → LONG signals
+        # ✅ CRITICAL FIX: Determine direction from CURRENT zone type after flip
+        # zone['kind'] = CURRENT type (S or R) AFTER flip
+        # For FlipRetest: trade in direction of current zone role
+        # - Support (S) → expect bounce UP → LONG
+        # - Resistance (R) → expect rejection DOWN → SHORT
+        if zone_kind == 'S':
+            # Current Support zone → LONG signals (bounce up)
             expected_direction = 'LONG'
-            flip_side = 'above'
+            flip_side = 'above'  # Retest from above (price returns to S from above)
+        else:
+            # Current Resistance zone → SHORT signals (rejection down)
+            expected_direction = 'SHORT'
+            flip_side = 'below'  # Retest from below (price returns to R from below)
         
         # Look for retest in recent bars
         recent_bars = df.tail(reaction_bars)
