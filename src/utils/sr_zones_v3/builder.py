@@ -134,7 +134,7 @@ class SRZonesV3Builder:
                     htf_zones['1h'] = zones_by_tf['1h']
             
             zones = self._build_zones_for_tf(
-                tf, df, current_price, ema200=ema200, htf_zones=htf_zones
+                symbol, tf, df, current_price, ema200=ema200, htf_zones=htf_zones
             )
             
             zones_by_tf[tf] = zones
@@ -196,6 +196,7 @@ class SRZonesV3Builder:
         return zones_by_tf
     
     def _build_zones_for_tf(self,
+                           symbol: str,
                            tf: str,
                            df: pd.DataFrame,
                            current_price: float,
@@ -250,8 +251,9 @@ class SRZonesV3Builder:
         # 3. Calculate VWAP для confluence
         vwap = self._calculate_vwap(df)
         
-        # 4. Add zone IDs and TF metadata (before any filtering)
+        # 4. Add zone IDs, TF, and SYMBOL metadata (before any filtering)
         for zone in all_zones:
+            zone['symbol'] = symbol  # ✅ CRITICAL FIX: Add symbol to every zone!
             zone['tf'] = tf
             zone_mid = zone['mid']
             zone_kind = zone['kind']

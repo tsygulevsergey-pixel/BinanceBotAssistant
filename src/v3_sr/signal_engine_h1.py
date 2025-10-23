@@ -283,7 +283,8 @@ class SignalEngine_H1(BaseSignalEngine):
         all_htf = htf_zones_4h + htf_zones_1d
         
         # CRITICAL FIX: Filter HTF zones by symbol!
-        symbol = zone.get('symbol', 'BTCUSDT')
+        # NOTE: Zone MUST have symbol at this point (validated in registry)
+        symbol = zone['symbol']
         all_htf = [z for z in all_htf if z['symbol'] == symbol]
         
         # FIXED LOGIC: TP1 = nearest target, TP2 = next target

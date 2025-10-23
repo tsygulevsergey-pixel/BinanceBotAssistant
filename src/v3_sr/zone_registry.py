@@ -156,9 +156,13 @@ class ZoneRegistry:
         zone_class = raw_zone.get('class', 'D')
         
         # Build normalized zone
+        # CRITICAL: Require symbol in zone dict (no fallback!)
+        if 'symbol' not in raw_zone or not raw_zone['symbol']:
+            raise ValueError(f"Zone missing 'symbol' field: {raw_zone}")
+        
         normalized = {
             'zone_id': zone_id,
-            'symbol': raw_zone.get('symbol', 'BTCUSDT'),
+            'symbol': raw_zone['symbol'],
             'tf': raw_zone.get('tf'),
             'kind': raw_zone.get('kind'),
             'low': raw_zone.get('low'),

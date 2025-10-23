@@ -456,7 +456,7 @@ class BaseSignalEngine(ABC):
                       levels: Dict,
                       context: Dict,
                       as_of_ts: int,
-                      current_price: float = None) -> Dict:
+                      current_price: Optional[float] = None) -> Dict:
         """
         Create normalized signal object
         

@@ -420,7 +420,8 @@ class SignalEngine_M15(BaseSignalEngine):
         h1_zones = self.registry.get_zones('1h')
         
         # CRITICAL FIX: Filter H1 zones by symbol!
-        symbol = zone.get('symbol', 'BTCUSDT')
+        # NOTE: Zone MUST have symbol at this point (validated in registry)
+        symbol = zone['symbol']
         h1_zones = [z for z in h1_zones if z['symbol'] == symbol]
         
         # FIXED LOGIC: TP1 = nearest target, TP2 = next target
