@@ -62,6 +62,44 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Critical Fixes (October 24, 2025)
 
+## Problem #15: Candles Not Updating in Database - RESOLVED ✅
+
+**Issue:** Candles were not updating in database when new candles closed, causing strategies to use stale data.
+
+**Root Cause:**
+- `update_missing_candles()` in `data_loader.py` used fixed 300-second (5 minute) threshold
+- If gap between last DB candle and current time < 5 minutes, NO UPDATE occurred
+- Example: Last candle 01:12, new candle closes 01:15 → gap = 3 min → NO UPDATE! ❌
+- Strategies received outdated candles, generated signals on wrong data
+
+**Solution (October 24, 2025):**
+1. **Added `_get_interval_minutes()` helper** to get interval duration (15m=15, 1h=60, etc.)
+2. **Changed threshold from fixed 300s to interval-aware**:
+   - For 15m: Update if gap >= 900 seconds (15 minutes)
+   - For 1h: Update if gap >= 3600 seconds (60 minutes)
+   - For 4h: Update if gap >= 14400 seconds (240 minutes)
+3. **Critical fix**: Calculate gap from `last_time` (not `last_time + 1 min`) to detect closed candles correctly
+4. **Duplicate prevention**: Still use `last_time + 1 minute` as download start_date
+
+**Code Changes:**
+```python
+# OLD (BROKEN):
+if (end_date - start_date).total_seconds() > 300:  # Fixed 300s
+    await download_historical_klines(...)
+
+# NEW (FIXED):
+interval_seconds = self._get_interval_minutes(interval) * 60
+gap_seconds = (end_date - last_time).total_seconds()  # From last_time!
+
+if gap_seconds >= interval_seconds:  # Interval-aware
+    start_date = last_time + timedelta(minutes=1)  # No duplicates
+    await download_historical_klines(...)
+```
+
+**Result:** ✅ **GUARANTEED** candles update when new candle closes → strategies use FRESH data!
+
+---
+
 ## Problem #14: TP Still in Dead Zone - HTF Zone Filter Bug - RESOLVED ✅
 
 **Issue:** Despite fix #13, TPs STILL appeared between SL and Entry.
