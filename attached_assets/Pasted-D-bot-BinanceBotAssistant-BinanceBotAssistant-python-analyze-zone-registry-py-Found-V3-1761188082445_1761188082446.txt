@@ -1,0 +1,59 @@
+D:\bot\Новая папка\BinanceBotAssistant\BinanceBotAssistant>python analyze_zone_registry.py
+Found V3 log: logs\v3_2025-10-23_04-31-53.log
+
+================================================================================
+🔍 ZONE REGISTRY MEMORY ANALYSIS (FROM LOGS)
+================================================================================
+Log file: logs\v3_2025-10-23_04-31-53.log
+================================================================================
+
+📄 Read 6510 lines from log
+
+📊 1. ZONE REGISTRY UPDATES
+--------------------------------------------------------------------------------
+  ❌ NO registry updates found in log!
+     This could mean zone building is failing.
+
+🔄 2. FLIP STATUS IN LOGS
+--------------------------------------------------------------------------------
+  ❌ NO flip metadata found in logs!
+
+  🔍 CRITICAL FINDING:
+     Zones are likely NOT being marked as 'flipped'
+     This would explain 0 signals from Flip-Retest setup!
+
+📡 3. SIGNAL GENERATION ATTEMPTS
+--------------------------------------------------------------------------------
+  Setup Detection:
+    Flip-Retest detected:  0
+    Sweep-Return detected: 0
+
+  Filter Blocks:
+    Blocked by flip requirement:  0
+    Blocked by VWAP bias:         0
+    Blocked by HTF clearance:     0
+
+  ✅ Signals Generated:           0
+
+  ⚠️  WARNING: ZERO signals generated!
+     → Main issue: NO setups detected at all
+
+🏗️  4. ZONE BUILDING STATUS
+--------------------------------------------------------------------------------
+  Successful builds: 931
+  Build errors:      0
+
+================================================================================
+💡 RECOMMENDATIONS
+================================================================================
+1. ❌ CRITICAL: Zone registry is NOT being updated
+   → Check if zone building is running at all
+
+2. ❌ CRITICAL: Zones do NOT have 'flipped' metadata
+   → FlipDetector is NOT running or NOT setting flip metadata
+   → This is likely the PRIMARY reason for 0 signals
+
+   FIX: Check FlipDetector in src/utils/sr_zones_v3/flip_detector.py
+        Verify it sets zone['meta']['flipped'] = True
+
+================================================================================
