@@ -4,6 +4,48 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Fixes (October 23, 2025)
 
+## Problem #8: TP/Nearest Zones Wrong Symbol Filter - RESOLVED ✅
+
+**Issue:** Multiple critical bugs causing TP2 < TP1 and wrong nearest zones in Telegram:
+1. TP2 calculated from zones of ALL symbols (not filtered by symbol)
+2. TP2 could be CLOSER than TP1 when HTF zone was nearby
+3. Nearest zones shown for OTHER symbols in Telegram alerts
+4. Entry could occur INSIDE resistance zones (not blocked by HTF filter)
+
+**Root Causes:**
+- **H1 Engine (line 288-307):** HTF zones not filtered by symbol → TP2 used wrong symbol's zones
+- **M15 Engine (line 427-451):** H1 zones not filtered by symbol → TP2 used wrong symbol's zones
+- **Strategy (line 449-451):** Nearest zones collected from ALL symbols without filtering
+- **Logic error:** No validation that TP2 >= TP1 for LONG (or TP2 <= TP1 for SHORT)
+
+**Examples from BTCUSDT Signals:**
+```
+Signal 1: TP1=111358.7, TP2=111141.8  ❌ TP2 < TP1!
+Signal 2: Entry=110315.3, Resistance=109582.4-109691.7  ❌ Resistance BELOW entry!
+```
+
+**Solution Implemented:**
+1. **signal_engine_h1.py (line 296-320):** Added symbol filter for HTF zones + TP2 >= TP1 validation
+2. **signal_engine_m15.py (line 433-457):** Added symbol filter for H1 zones + TP2 >= TP1 validation  
+3. **strategy.py (line 451):** Added symbol filter when collecting zones for nearest zones display
+4. **TP validation:** `levels['tp2'] = max(levels['tp1'], tp2_candidate)` for LONG, `min()` for SHORT
+
+**Technical Details:**
+- Registry returns zones for ALL symbols, engines MUST filter by current symbol
+- TP2 must always be farther from entry than TP1 (higher for LONG, lower for SHORT)
+- Nearest zones display now shows only zones from current symbol
+- HTF clearance check now works correctly with properly filtered zones
+
+**Result:**
+- ✅ TP2 always >= TP1 for LONG signals
+- ✅ TP2 always <= TP1 for SHORT signals  
+- ✅ Nearest zones show correct symbol's zones
+- ✅ Entry respects HTF resistance/support properly
+
+---
+
+# Recent Fixes (October 23, 2025)
+
 ## Problem #7: ZoneRegistry Blocked ALL Zones - RESOLVED ✅
 
 **Issue:** Registry filtering by `lifecycle_state` blocked ALL zones from builder, resulting in 0 signals despite successful zone building.

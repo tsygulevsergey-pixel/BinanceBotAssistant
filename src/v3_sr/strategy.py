@@ -445,10 +445,11 @@ class SRZonesV3Strategy:
         if current_price is None:
             current_price = entry_price  # Fallback to entry price
         
-        # Find nearest support/resistance for context
+        # Find nearest support/resistance for context - FILTER BY SYMBOL!
         all_zones = []
         for tf, tf_zones in zones_by_tf.items():
-            all_zones.extend(tf_zones)
+            # CRITICAL FIX: Filter zones by symbol before adding to all_zones
+            all_zones.extend([z for z in tf_zones if z.get('symbol') == symbol])
         
         nearest_support = self._find_nearest_zone_legacy(all_zones, current_price, 'below')
         nearest_resistance = self._find_nearest_zone_legacy(all_zones, current_price, 'above')

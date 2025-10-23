@@ -423,25 +423,35 @@ class SignalEngine_M15(BaseSignalEngine):
             tp1_default = entry_price - risk
             levels['tp1'] = tp1_default
         
-        # TP2: Next H1 zone
+        # TP2: Next H1 zone - FILTER BY SYMBOL!
         h1_zones = self.registry.get_zones('1h')
+        
+        # CRITICAL FIX: Filter H1 zones by symbol!
+        symbol = zone.get('symbol', 'BTCUSDT')
+        h1_zones = [z for z in h1_zones if z['symbol'] == symbol]
         
         if direction == 'LONG':
             # Find nearest H1 Resistance above entry
             candidates = [z for z in h1_zones if z['kind'] == 'R' and z['low'] > entry_price]
             if candidates:
                 nearest = min(candidates, key=lambda z: z['low'] - entry_price)
-                levels['tp2'] = nearest['low']
+                tp2_candidate = nearest['low']
             else:
-                levels['tp2'] = entry_price + (2 * risk)  # 2R fallback
+                tp2_candidate = entry_price + (2 * risk)  # 2R fallback
+            
+            # CRITICAL FIX: Ensure TP2 >= TP1
+            levels['tp2'] = max(levels['tp1'], tp2_candidate)
         else:
             # Find nearest H1 Support below entry
             candidates = [z for z in h1_zones if z['kind'] == 'S' and z['high'] < entry_price]
             if candidates:
                 nearest = max(candidates, key=lambda z: entry_price - z['high'])
-                levels['tp2'] = nearest['high']
+                tp2_candidate = nearest['high']
             else:
-                levels['tp2'] = entry_price - (2 * risk)
+                tp2_candidate = entry_price - (2 * risk)
+            
+            # CRITICAL FIX: Ensure TP2 <= TP1 for SHORT
+            levels['tp2'] = min(levels['tp1'], tp2_candidate)
         
         return levels
     
