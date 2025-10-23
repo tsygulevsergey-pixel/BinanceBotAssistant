@@ -277,15 +277,7 @@ class SignalEngine_H1(BaseSignalEngine):
         # Calculate R (risk)
         risk = abs(entry_price - levels['sl'])
         
-        # TP1: 1R default (will snap to nearest H1 zone if closer)
-        if direction == 'LONG':
-            tp1_default = entry_price + risk
-            levels['tp1'] = tp1_default  # TODO: snap to nearest H1 zone
-        else:
-            tp1_default = entry_price - risk
-            levels['tp1'] = tp1_default
-        
-        # TP2: Next HTF zone (H4 or 1D) - FILTER BY SYMBOL!
+        # Get HTF zones (4H or 1D) - FILTER BY SYMBOL!
         htf_zones_4h = self.registry.get_zones('4h')
         htf_zones_1d = self.registry.get_zones('1d')
         all_htf = htf_zones_4h + htf_zones_1d
@@ -294,28 +286,60 @@ class SignalEngine_H1(BaseSignalEngine):
         symbol = zone.get('symbol', 'BTCUSDT')
         all_htf = [z for z in all_htf if z['symbol'] == symbol]
         
+        # FIXED LOGIC: TP1 = nearest target, TP2 = next target
         if direction == 'LONG':
-            # Find nearest HTF Resistance above entry
-            candidates = [z for z in all_htf if z['kind'] == 'R' and z['low'] > entry_price]
-            if candidates:
-                nearest = min(candidates, key=lambda z: z['low'] - entry_price)
-                tp2_candidate = nearest['low']
-            else:
-                tp2_candidate = entry_price + (2 * risk)  # 2R fallback
+            # Find HTF Resistance zones above entry
+            htf_candidates = [z for z in all_htf if z['kind'] == 'R' and z['low'] > entry_price]
+            htf_candidates_sorted = sorted(htf_candidates, key=lambda z: z['low']) if htf_candidates else []
             
-            # CRITICAL FIX: Ensure TP2 >= TP1
-            levels['tp2'] = max(levels['tp1'], tp2_candidate)
-        else:
-            # Find nearest HTF Support below entry
-            candidates = [z for z in all_htf if z['kind'] == 'S' and z['high'] < entry_price]
-            if candidates:
-                nearest = max(candidates, key=lambda z: entry_price - z['high'])
-                tp2_candidate = nearest['high']
-            else:
-                tp2_candidate = entry_price - (2 * risk)
+            tp1_1r = entry_price + risk  # 1R target
             
-            # CRITICAL FIX: Ensure TP2 <= TP1 for SHORT
-            levels['tp2'] = min(levels['tp1'], tp2_candidate)
+            if htf_candidates_sorted:
+                first_htf = htf_candidates_sorted[0]['low']
+                
+                # If first HTF zone is closer than 1R, use it for TP1
+                if first_htf < tp1_1r:
+                    levels['tp1'] = first_htf
+                    # TP2: next HTF zone or 2R
+                    if len(htf_candidates_sorted) > 1:
+                        levels['tp2'] = htf_candidates_sorted[1]['low']
+                    else:
+                        levels['tp2'] = entry_price + (2 * risk)  # 2R fallback
+                else:
+                    # First HTF zone is farther than 1R
+                    levels['tp1'] = tp1_1r
+                    levels['tp2'] = first_htf
+            else:
+                # No HTF zones found
+                levels['tp1'] = tp1_1r
+                levels['tp2'] = entry_price + (2 * risk)  # 2R fallback
+        
+        else:  # SHORT
+            # Find HTF Support zones below entry
+            htf_candidates = [z for z in all_htf if z['kind'] == 'S' and z['high'] < entry_price]
+            htf_candidates_sorted = sorted(htf_candidates, key=lambda z: z['high'], reverse=True) if htf_candidates else []
+            
+            tp1_1r = entry_price - risk  # 1R target
+            
+            if htf_candidates_sorted:
+                first_htf = htf_candidates_sorted[0]['high']
+                
+                # If first HTF zone is closer than 1R, use it for TP1
+                if first_htf > tp1_1r:
+                    levels['tp1'] = first_htf
+                    # TP2: next HTF zone or 2R
+                    if len(htf_candidates_sorted) > 1:
+                        levels['tp2'] = htf_candidates_sorted[1]['high']
+                    else:
+                        levels['tp2'] = entry_price - (2 * risk)  # 2R fallback
+                else:
+                    # First HTF zone is farther than 1R
+                    levels['tp1'] = tp1_1r
+                    levels['tp2'] = first_htf
+            else:
+                # No HTF zones found
+                levels['tp1'] = tp1_1r
+                levels['tp2'] = entry_price - (2 * risk)  # 2R fallback
         
         return levels
     

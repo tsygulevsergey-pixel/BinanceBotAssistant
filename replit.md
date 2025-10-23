@@ -113,3 +113,81 @@ Loads configurations, connects to Binance, processes data in parallel, and launc
 - **Exchange**: python-binance, ccxt.
 - **Scheduling**: APScheduler.
 - **Configuration**: pyyaml, python-dotenv.
+
+---
+
+# Recent Fixes (October 23, 2025)
+
+## Problem #10: TP1 = TP2 When HTF Zone Closer Than 1R - RESOLVED ✅
+
+**Issue:** TP1 and TP2 were identical in signals when HTF zone was closer than 1R risk distance.
+
+**Example from BTCUSDT Signal:**
+```
+Entry: 111175.2
+TP1: 111278.9
+TP2: 111278.9  ❌ Same as TP1!
+```
+
+**Root Cause:**
+- **H1 Engine (line 307):** `levels['tp2'] = max(levels['tp1'], tp2_candidate)`
+- **M15 Engine (line 444):** `levels['tp2'] = max(levels['tp1'], tp2_candidate)`
+- Logic tried to prevent TP2 < TP1 by using max(), but created TP1 = TP2 instead
+
+**Original Logic (WRONG):**
+```python
+tp1 = entry + risk  # 1R always
+tp2 = nearest_htf_zone
+if tp2 < tp1:  # If HTF zone closer than 1R
+    tp2 = tp1  # ❌ Makes them equal!
+```
+
+**Corrected Logic:**
+```python
+# TP1 = nearest target (HTF zone OR 1R, whichever closer)
+# TP2 = next target (next HTF zone OR 2R)
+
+if first_htf_zone < 1R:
+    tp1 = first_htf_zone
+    tp2 = second_htf_zone or 2R
+else:
+    tp1 = 1R
+    tp2 = first_htf_zone
+```
+
+**Solution Implemented:**
+1. **signal_engine_h1.py (lines 292-347):** Refactored TP calculation logic
+   - Sort HTF zones by distance from entry
+   - Compare first HTF zone with 1R
+   - Set TP1 to nearest, TP2 to next target
+   - Fallback to 2R if no second zone exists
+
+2. **signal_engine_m15.py (lines 429-484):** Applied same logic for M15
+   - Uses H1 zones instead of HTF zones
+   - Same sorting and comparison logic
+
+**Result:**
+- ✅ TP1 always shows nearest target (HTF zone or 1R)
+- ✅ TP2 always shows next target (next HTF zone or 2R)
+- ✅ TP2 always > TP1 for LONG (or TP2 < TP1 for SHORT)
+- ✅ Signals now have meaningful tiered targets
+
+---
+
+## Problem #9: Entry Price Used Zone Edge Instead of Current Price - RESOLVED ✅
+
+**Issue:** Signals used zone edge (zone['high'] for LONG, zone['low'] for SHORT) as entry price instead of actual current market price at signal generation time.
+
+**Root Cause:**
+- **signal_engine_base.py (line 484-488):** `_create_signal()` used zone edge for entry calculation
+- Entry price did not reflect actual market conditions at signal time
+
+**Solution Implemented:**
+1. **signal_engine_base.py (line 465, 490-497):** Added `current_price` parameter to `_create_signal()`
+2. **signal_engine_h1.py (line 245):** Pass `current_price` to `_create_signal()`
+3. **signal_engine_m15.py (line 248):** Pass `current_price` to `_create_signal()`
+
+**Result:**
+- ✅ Entry price = actual current market price at signal time
+- ✅ More accurate entry levels for market orders
+- ✅ Better reflects real trading conditions
