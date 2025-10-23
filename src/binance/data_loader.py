@@ -694,15 +694,17 @@ class DataLoader:
                 if last_time.tzinfo is None:
                     last_time = pytz.UTC.localize(last_time)
                 
-                start_date = last_time + timedelta(minutes=1)
                 end_date = datetime.now(pytz.UTC)
                 
                 # FIXED: Interval-aware threshold instead of fixed 300s
-                # Update if gap >= 1 full candle duration
+                # Calculate gap from last_time to detect missing candles correctly
                 interval_seconds = self._get_interval_minutes(interval) * 60
-                gap_seconds = (end_date - start_date).total_seconds()
+                gap_seconds = (end_date - last_time).total_seconds()
                 
+                # Update if gap >= 1 full candle duration
                 if gap_seconds >= interval_seconds:
+                    # Use last_time + 1 minute as start to avoid duplicate candles
+                    start_date = last_time + timedelta(minutes=1)
                     logger.info(f"Updating missing candles for {symbol} {interval} from {start_date}")
                     await self.download_historical_klines(symbol, interval, start_date, end_date)
         finally:
