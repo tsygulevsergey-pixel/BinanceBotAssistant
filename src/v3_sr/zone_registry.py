@@ -43,17 +43,14 @@ class ZoneRegistry:
         for tf in ['15m', '1h', '4h', '1d']:
             raw_zones = zones_by_tf.get(tf, [])
             
-            # Filter только Active/Key зоны
-            filtered = []
+            # Normalize all zones (no lifecycle_state filter - builder doesn't set it!)
+            normalized_zones = []
             for zone in raw_zones:
-                lifecycle_state = zone.get('lifecycle_state', 'candidate')
-                
-                if lifecycle_state in ['active', 'key']:
-                    # Normalize zone format
-                    normalized = self._normalize_zone(zone, as_of_ts)
-                    filtered.append(normalized)
+                # Normalize zone format
+                normalized = self._normalize_zone(zone, as_of_ts)
+                normalized_zones.append(normalized)
             
-            self._zones_by_tf[tf] = filtered
+            self._zones_by_tf[tf] = normalized_zones
     
     def get_zones(self, tf: str) -> List[Dict]:
         """
@@ -155,9 +152,8 @@ class ZoneRegistry:
         # Generate deterministic zone_id
         zone_id = self._generate_zone_id(raw_zone)
         
-        # Extract class from lifecycle_state
-        lifecycle_state = raw_zone.get('lifecycle_state', 'candidate')
-        zone_class = 'key' if lifecycle_state == 'key' else 'active'
+        # Use zone class from builder (A/B/C/D)
+        zone_class = raw_zone.get('class', 'D')
         
         # Build normalized zone
         normalized = {
@@ -176,6 +172,7 @@ class ZoneRegistry:
                 'htf_overlap': raw_zone.get('htf_overlap', []),
                 'touches': raw_zone.get('touches', 0),
                 'last_reaction_atr': raw_zone.get('last_reaction_atr', 0.0),
+                'flipped': raw_zone.get('meta', {}).get('flipped', False),
             },
             'updated_ts': as_of_ts
         }

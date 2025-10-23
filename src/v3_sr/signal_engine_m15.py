@@ -69,15 +69,6 @@ class SignalEngine_M15(BaseSignalEngine):
         all_m15_zones = self.registry.get_zones('15m')
         m15_zones = [z for z in all_m15_zones if z['symbol'] == symbol]
         
-        # Debug: show what's in registry and after filtering
-        from src.v3_sr.logger import get_v3_sr_logger
-        logger = get_v3_sr_logger()
-        logger.info(f"🔍 DEBUG {symbol}: all_m15_zones count = {len(all_m15_zones)}")
-        if len(all_m15_zones) > 0:
-            symbols_in_registry = list(set([z.get('symbol', 'UNKNOWN') for z in all_m15_zones]))
-            logger.info(f"🔍 DEBUG symbols in M15 registry: {symbols_in_registry[:10]}")
-        logger.info(f"🔍 DEBUG {symbol}: after filter m15_zones count = {len(m15_zones)}")
-        
         if not m15_zones:
             return signals
         

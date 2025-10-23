@@ -4,6 +4,29 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Fixes (October 23, 2025)
 
+## Problem #7: ZoneRegistry Blocked ALL Zones - RESOLVED ✅
+
+**Issue:** Registry filtering by `lifecycle_state` blocked ALL zones from builder, resulting in 0 signals despite successful zone building.
+
+**Root Cause:**
+- **Registry filtered by:** `lifecycle_state in ['active', 'key']`
+- **Builder doesn't set:** `lifecycle_state` field at all
+- **Result:** All zones got default `'candidate'` and were DISCARDED by registry
+- **Effect:** `registry.get_zones()` returned empty list → 0 signals
+
+**Solution Implemented:**
+1. **zone_registry.py (line 43-56):** Removed `lifecycle_state` filter from update() method
+2. **zone_registry.py (line 162-163):** Changed to use builder's `class` field (A/B/C/D) instead
+3. **zone_registry.py (line 181):** Added `flipped` metadata to normalized zones
+
+**Technical Details:**
+- Builder creates zones with `class` (A/B/C/D), `state` (normal/flipped), `strength` (score)
+- Builder does NOT create `lifecycle_state` field
+- Registry now accepts ALL zones from builder without filtering
+- Normalized zones use builder's classification system
+
+---
+
 ## Problem #6: V3 Strategy 0 Signals Issue - RESOLVED ✅
 
 **Issue:** V3 S/R strategy was generating 0 signals despite successful zone building (232 symbols, 927 zones built).
