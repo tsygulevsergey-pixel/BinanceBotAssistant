@@ -71,10 +71,93 @@ def check_renderusdt_data():
         conn.close()
         return
     
-    print("📊 Last 20 candles (15m):")
-    for idx, row in df_recent.iterrows():
-        print(f"   {row['open_time']} | O:{row['open']:.3f} H:{row['high']:.3f} L:{row['low']:.3f} C:{row['close']:.3f}")
-    print()
+    # Загрузить последние 500 свечей для расчета EMA200
+    query_500 = """
+    SELECT 
+        open_time,
+        open,
+        high,
+        low,
+        close,
+        volume
+    FROM candles
+    WHERE symbol = 'RENDERUSDT'
+    AND timeframe = '15m'
+    ORDER BY open_time DESC
+    LIMIT 500
+    """
+    
+    df_500 = pd.read_sql_query(query_500, conn)
+    
+    if len(df_500) >= 200:
+        # Сортировать по времени (от старых к новым для правильного расчета EMA)
+        df_500 = df_500.sort_values('open_time').reset_index(drop=True)
+        
+        # Рассчитать EMA200
+        try:
+            import pandas_ta as ta
+            df_500['ema_200'] = ta.ema(df_500['close'], length=200)
+            
+            print(f"✅ Calculated EMA200 for {len(df_500)} candles")
+            print()
+            
+            # Показать последние 20 свечей с EMA200
+            print("📊 Last 20 candles (15m) with EMA200:")
+            for idx, row in df_500.tail(20).iterrows():
+                ema_str = f"{row['ema_200']:.3f}" if pd.notna(row['ema_200']) else "N/A"
+                print(f"   {row['open_time']} | O:{row['open']:.3f} H:{row['high']:.3f} L:{row['low']:.3f} C:{row['close']:.3f} | EMA200: {ema_str}")
+            print()
+            
+            # Показать EMA200 для нужных свечей
+            print("=" * 80)
+            print("🔍 EMA200 Analysis for Signal Candles:")
+            print("=" * 80)
+            
+            # Свеча 22:15 UTC (01:15 local)
+            candle_2215 = df_500[df_500['open_time'].str.contains('22:15')]
+            if not candle_2215.empty:
+                row = candle_2215.iloc[0]
+                print(f"\n🔶 Indicator Candle (23 Oct 22:15 UTC = 24 Oct 01:15 local):")
+                print(f"   O→C: {row['open']:.3f} → {row['close']:.3f}")
+                print(f"   H-L: {row['high']:.3f} - {row['low']:.3f}")
+                print(f"   EMA200: {row['ema_200']:.3f if pd.notna(row['ema_200']) else 'N/A'}")
+                print(f"\n   📋 Expected from Signal:")
+                print(f"   O→C: 2.443 → 2.449")
+                print(f"   EMA200: 2.447")
+                print(f"\n   {'✅ MATCH' if abs(row['ema_200'] - 2.447) < 0.001 else '❌ MISMATCH'}")
+            
+            # Свеча 22:30 UTC (01:30 local)
+            candle_2230 = df_500[df_500['open_time'].str.contains('22:30')]
+            if not candle_2230.empty:
+                row = candle_2230.iloc[0]
+                print(f"\n✅ Confirmation Candle (23 Oct 22:30 UTC = 24 Oct 01:30 local):")
+                print(f"   O→C: {row['open']:.3f} → {row['close']:.3f}")
+                print(f"   H-L: {row['high']:.3f} - {row['low']:.3f}")
+                print(f"   EMA200: {row['ema_200']:.3f if pd.notna(row['ema_200']) else 'N/A'}")
+                print(f"\n   📋 Expected from Signal:")
+                print(f"   H-L: 2.459 - 2.449")
+                print(f"   EMA200: 2.448")
+                print(f"\n   {'✅ MATCH' if abs(row['ema_200'] - 2.448) < 0.001 else '❌ MISMATCH'}")
+            
+            print("\n" + "=" * 80)
+            
+        except ImportError:
+            print("⚠️ pandas_ta not installed, cannot calculate EMA200")
+            print("   Install with: pip install pandas-ta")
+            print()
+            
+            print("📊 Last 20 candles (15m) without EMA200:")
+            for idx, row in df_recent.iterrows():
+                print(f"   {row['open_time']} | O:{row['open']:.3f} H:{row['high']:.3f} L:{row['low']:.3f} C:{row['close']:.3f}")
+            print()
+    else:
+        print(f"⚠️ Only {len(df_500)} candles available, need at least 200 for EMA200")
+        print()
+        
+        print("📊 Last 20 candles (15m):")
+        for idx, row in df_recent.iterrows():
+            print(f"   {row['open_time']} | O:{row['open']:.3f} H:{row['high']:.3f} L:{row['low']:.3f} C:{row['close']:.3f}")
+        print()
     
     # Теперь получить свечи за 24 Oct 00:00 - 02:00 (2025 год!)
     query = """
