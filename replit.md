@@ -26,6 +26,8 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 3. **builder.py (line 349-352):** Added explicit `zone['meta']['flipped'] = False` for new zones
 4. **signal_engine_m15.py (line 149-151):** Added debug logging (INFO level) to track detection/filtering
 5. **signal_engine_h1.py (line 146-148):** Added debug logging for H1 engine
+6. **signal_engine_m15.py (line 75-81):** Added registry content debug logging to diagnose filtering issue
+7. **signal_engine_h1.py (line 75-81):** Added registry content debug logging for H1 engine
 
 **Technical Details:**
 - ZoneRegistry accumulates zones for all symbols (update() doesn't clear previous symbols)

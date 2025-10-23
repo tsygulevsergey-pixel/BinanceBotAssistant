@@ -69,6 +69,15 @@ class SignalEngine_H1(BaseSignalEngine):
         all_h1_zones = self.registry.get_zones('1h')
         h1_zones = [z for z in all_h1_zones if z['symbol'] == symbol]
         
+        # Debug: show what's in registry and after filtering
+        from src.v3_sr.logger import get_v3_sr_logger
+        logger = get_v3_sr_logger()
+        logger.info(f"🔍 DEBUG {symbol}: all_h1_zones count = {len(all_h1_zones)}")
+        if len(all_h1_zones) > 0:
+            symbols_in_registry = list(set([z.get('symbol', 'UNKNOWN') for z in all_h1_zones]))
+            logger.info(f"🔍 DEBUG symbols in H1 registry: {symbols_in_registry[:10]}")
+        logger.info(f"🔍 DEBUG {symbol}: after filter h1_zones count = {len(h1_zones)}")
+        
         if not h1_zones:
             return signals
         
