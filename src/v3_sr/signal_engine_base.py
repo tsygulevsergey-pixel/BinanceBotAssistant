@@ -521,4 +521,28 @@ class BaseSignalEngine(ABC):
             'created_ts': as_of_ts
         }
         
+        # CRITICAL VALIDATION: Verify TP/SL placement is correct
+        sl = levels['sl']
+        tp1 = levels['tp1']
+        tp2 = levels['tp2']
+        
+        if setup['direction'] == 'LONG':
+            # LONG must have: SL < Entry < TP1 < TP2
+            if not (sl < entry < tp1 < tp2):
+                self.logger.error(
+                    f"🚨 INVALID LONG SIGNAL REJECTED: {symbol} {setup['setup_type']}\n"
+                    f"   Expected: SL < Entry < TP1 < TP2\n"
+                    f"   Got: SL={sl:.8f} | Entry={entry:.8f} | TP1={tp1:.8f} | TP2={tp2:.8f}"
+                )
+                return None
+        else:  # SHORT
+            # SHORT must have: SL > Entry > TP1 > TP2
+            if not (sl > entry > tp1 > tp2):
+                self.logger.error(
+                    f"🚨 INVALID SHORT SIGNAL REJECTED: {symbol} {setup['setup_type']}\n"
+                    f"   Expected: SL > Entry > TP1 > TP2\n"
+                    f"   Got: SL={sl:.8f} | Entry={entry:.8f} | TP1={tp1:.8f} | TP2={tp2:.8f}"
+                )
+                return None
+        
         return signal
