@@ -157,14 +157,14 @@ def clear_v3_data():
             # Delete data
             print("\n🧹 Deleting V3 data...")
             
-            session.execute(text("DELETE FROM v3_sr_signals"))
-            signals_deleted = session.rowcount
+            result = session.execute(text("DELETE FROM v3_sr_signals"))
+            signals_deleted = result.rowcount
             
-            session.execute(text("DELETE FROM v3_sr_zone_events"))
-            events_deleted = session.rowcount
+            result = session.execute(text("DELETE FROM v3_sr_zone_events"))
+            events_deleted = result.rowcount
             
-            session.execute(text("DELETE FROM v3_sr_signal_locks"))
-            locks_deleted = session.rowcount
+            result = session.execute(text("DELETE FROM v3_sr_signal_locks"))
+            locks_deleted = result.rowcount
             
             session.commit()
             
