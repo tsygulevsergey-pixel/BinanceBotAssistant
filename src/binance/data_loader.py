@@ -650,7 +650,35 @@ class DataLoader:
         }
         return interval_map.get(interval, 1) * days
     
+    def _get_interval_minutes(self, interval: str) -> int:
+        """Get interval duration in minutes
+        
+        Args:
+            interval: Timeframe string (e.g., '15m', '1h', '4h', '1d')
+        
+        Returns:
+            int: Number of minutes in the interval
+        """
+        interval_map = {
+            '1m': 1,
+            '5m': 5,
+            '15m': 15,
+            '1h': 60,
+            '4h': 240,
+            '1d': 1440
+        }
+        return interval_map.get(interval, 15)
+    
     async def update_missing_candles(self, symbol: str, interval: str):
+        """Update missing candles from last DB candle to current time
+        
+        FIXED (Problem #15): Changed from fixed 300s threshold to interval-aware check.
+        Now updates whenever gap >= 1 full candle duration (e.g., 15m, 1h, 4h).
+        
+        Args:
+            symbol: Trading pair symbol
+            interval: Timeframe (15m, 1h, 4h, 1d)
+        """
         session = db.get_session()
         try:
             latest_candle = session.query(Candle).filter(
@@ -669,7 +697,12 @@ class DataLoader:
                 start_date = last_time + timedelta(minutes=1)
                 end_date = datetime.now(pytz.UTC)
                 
-                if (end_date - start_date).total_seconds() > 300:
+                # FIXED: Interval-aware threshold instead of fixed 300s
+                # Update if gap >= 1 full candle duration
+                interval_seconds = self._get_interval_minutes(interval) * 60
+                gap_seconds = (end_date - start_date).total_seconds()
+                
+                if gap_seconds >= interval_seconds:
                     logger.info(f"Updating missing candles for {symbol} {interval} from {start_date}")
                     await self.download_historical_klines(symbol, interval, start_date, end_date)
         finally:
