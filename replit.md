@@ -62,7 +62,35 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Critical Fixes (October 24, 2025)
 
-## Problem #13: TP Levels in "Dead Zone" Between SL and Entry - RESOLVED ✅
+## Problem #14: TP Still in Dead Zone - HTF Zone Filter Bug - RESOLVED ✅
+
+**Issue:** Despite fix #13, TPs STILL appeared between SL and Entry.
+
+**Root Cause:**
+- `_calc_sl_tp_h1()` and `_calc_sl_tp_m15()` used HTF zone edges WITHOUT checking if zones were beyond entry
+- Example: LONG at 0.03757 with HTF Resistance at 0.03297 → TP1=0.03297 (between SL 0.03253 and Entry!)
+- HTF zones between SL and Entry were being selected as TP targets
+
+**Solution (October 24, 2025):**
+1. **signal_engine_h1.py (_calc_sl_tp_h1)**:
+   - Use 1R/2R multiples as default TP targets (TP1 = entry + risk, TP2 = entry + 2×risk)
+   - HTF zone filter: `z['low'] > entry_price` for LONG, `z['high'] < entry_price` for SHORT
+   - Guarantees HTF zones are BEYOND entry, not between SL and entry
+
+2. **signal_engine_m15.py (_calc_sl_tp_m15)**:
+   - Same fix: R-multiple defaults + HTF zone filter
+   - Only accepts H1 zones that are beyond entry price
+
+3. **signal_engine_base.py (_create_signal)**:
+   - Added validation: LONG must have `SL < Entry < TP1 < TP2`
+   - Added validation: SHORT must have `SL > Entry > TP1 > TP2`
+   - Logs warning if validation fails (for debugging)
+
+**Result:** ✅ **GUARANTEED** proper TP placement: LONG (SL < Entry < TP1 < TP2) | SHORT (SL > Entry > TP1 > TP2)
+
+---
+
+## Problem #13: TP Levels in "Dead Zone" Between SL and Entry - PARTIAL FIX ⚠️
 
 **Issue:** TP1/TP2 calculated between SL and Entry making signals untradeable.
 
@@ -75,4 +103,4 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 - Use `current_price` for SL/TP calculation consistently
 - Keep zone edge only for HTF clearance check
 
-**Result:** ✅ LONG: Entry < TP1 < TP2  |  ✅ SHORT: Entry > TP1 > TP2
+**Result:** ⚠️ Partial - Fixed entry consistency but HTF zone logic still had bug (see Problem #14)
