@@ -8,25 +8,35 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 **Issue:** V3 S/R strategy was generating 0 signals despite successful zone building (232 symbols, 927 zones built).
 
-**Root Cause:** Zones were not explicitly marked with `flipped=False` metadata after creation. Signal engine's Flip-Retest detector checked `zone.get('meta', {}).get('flipped', False)` and would return `None` for zones without the `flipped` field, effectively blocking all non-flipped zones from signal generation.
+**Root Cause Analysis:**
+
+**Primary Cause (CRITICAL):** Signal engines were analyzing zones for ALL symbols instead of filtering by current symbol!
+- `zone_registry.get_zones('15m')` returns zones for ALL symbols (BTCUSDT, ETHUSDT, SOLUSDT, etc.)
+- Engines checked 200+ zones from different symbols against current symbol's price data
+- Setup detection failed because zones didn't match current symbol's price range
+- **Result:** 0 signals generated
+
+**Secondary Cause:** Zones missing `flipped=False` metadata initialization
+- Flip-Retest detector blocked zones without explicit `flipped` field
+- Only affected Flip-Retest setup (Sweep-Return unaffected)
 
 **Solution Implemented:**
-1. **builder.py (line 349-352):** Added explicit `zone['meta']['flipped'] = False` for zones that haven't flipped yet
-2. **signal_engine_m15.py (line 145-151):** Added debug logging to track setup detection/filtering statistics (changed to INFO level)
-3. **signal_engine_h1.py (line 142-148):** Added debug logging for H1 engine as well
+1. **signal_engine_m15.py (line 72-73, 79-80):** Added symbol filtering for M15 and H1 zones
+2. **signal_engine_h1.py (line 72-73):** Added symbol filtering for H1 zones
+3. **builder.py (line 349-352):** Added explicit `zone['meta']['flipped'] = False` for new zones
+4. **signal_engine_m15.py (line 149-151):** Added debug logging (INFO level) to track detection/filtering
+5. **signal_engine_h1.py (line 146-148):** Added debug logging for H1 engine
 
 **Technical Details:**
-- Full diagnostic flow confirmed working: parallel zone building → cache → registry update → signal engines
-- Issue was in signal_engine_base.py:105 where flip check blocked all zones without explicit `flipped` metadata
-- Flip-Retest setup requires `flipped=True` (zones that already flipped), so 0 signals expected on fresh zones
-- Sweep-Return setup does not require flip, investigation needed via debug logs to see why it's filtered
-- Debug logging uses INFO level (not DEBUG) to ensure it appears in V3 log file
+- ZoneRegistry accumulates zones for all symbols (update() doesn't clear previous symbols)
+- Engines must filter zones by symbol: `m15_zones = [z for z in all_m15_zones if z['symbol'] == symbol]`
+- This ensures engines only analyze zones relevant to current symbol
+- Debug logging will now show actual zone counts and setup detection statistics per symbol
 
-**Next Steps:** User to download updated code and test. New debug logs will show:
-- `zones_checked`: Total M15/H1 zones checked
-- `zones_locked`: How many were already locked
-- `flip_detected` / `flip_filtered`: Flip-Retest setups found and filtered
-- `sweep_detected` / `sweep_filtered`: Sweep-Return setups found and filtered
+**Expected Behavior After Fix:**
+- Each symbol analyzed with its own zones only
+- Setup detection should work for Sweep-Return (Flip-Retest requires flipped zones)
+- Debug logs will show: `zones_checked`, `zones_locked`, `flip_detected`, `flip_filtered`, `sweep_detected`, `sweep_filtered`
 
 # User Preferences
 

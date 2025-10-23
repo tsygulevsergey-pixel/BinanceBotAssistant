@@ -65,14 +65,16 @@ class SignalEngine_M15(BaseSignalEngine):
         """
         signals = []
         
-        # Get M15 zones from registry
-        m15_zones = self.registry.get_zones('15m')
+        # Get M15 zones from registry (filter by symbol!)
+        all_m15_zones = self.registry.get_zones('15m')
+        m15_zones = [z for z in all_m15_zones if z['symbol'] == symbol]
         
         if not m15_zones:
             return signals
         
-        # Get H1 zones for enhanced confirmation check
-        h1_zones = self.registry.get_zones('1h')
+        # Get H1 zones for enhanced confirmation check (filter by symbol!)
+        all_h1_zones = self.registry.get_zones('1h')
+        h1_zones = [z for z in all_h1_zones if z['symbol'] == symbol]
         
         # Get HTF bands for clearance check
         htf_bands = self.registry.get_nearest_htf_bands(current_price, symbol)

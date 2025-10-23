@@ -65,8 +65,9 @@ class SignalEngine_H1(BaseSignalEngine):
         """
         signals = []
         
-        # Get H1 zones from registry
-        h1_zones = self.registry.get_zones('1h')
+        # Get H1 zones from registry (filter by symbol!)
+        all_h1_zones = self.registry.get_zones('1h')
+        h1_zones = [z for z in all_h1_zones if z['symbol'] == symbol]
         
         if not h1_zones:
             return signals
