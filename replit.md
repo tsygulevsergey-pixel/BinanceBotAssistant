@@ -62,6 +62,62 @@ This project is a professional-grade Binance USDT-M Futures Trading Bot designed
 
 # Recent Critical Fixes (October 24, 2025)
 
+## Problem #16: V3 Performance Tracker - TP1 Flags Not Saving to DB - RESOLVED ✅
+
+**Issue:** V3 statistics showing contradictory metrics - 7 SL exits but 4 wins with positive PnL, 0 TP hits despite positive outcomes.
+
+**Root Cause:**
+- `_check_active_signals()` called `commit()` ONLY AFTER checking ALL signals
+- If TP1 reached for Signal #100: flags set in memory (`tp1_hit=True`, `moved_to_be=True`, SL updated)
+- If Signal #150 raised error: exception caught, but changes for Signal #100 NOT committed
+- On next iteration: flags still `False` in DB, SL still original value
+- When price crossed moved SL: code saw `moved_to_be=False`, closed as regular SL (not BE)
+- Result: SL exit with POSITIVE PnL (impossible!) ❌
+
+**Examples from Real Data:**
+```
+Signal #309: DEGOUSDT LONG
+  Entry: 1.1031 → Exit: 1.4712 (SL: 1.4712)
+  Exit Reason: SL | PnL: +33.37% ✅ WIN
+  TP1 Hit: 0 | Moved to BE: 0  ❌ FLAGS NOT SAVED!
+
+Signal #214: 4USDT SHORT  
+  Entry: 0.1430 → Exit: 0.1351 (SL: 0.1351)
+  Exit Reason: SL | PnL: +5.55% ✅ WIN
+  TP1 Hit: 0 | Moved to BE: 0  ❌ FLAGS NOT SAVED!
+```
+
+**Solution (October 24, 2025):**
+1. **performance_tracker.py (_check_active_signals)**:
+   - Moved `commit()` INSIDE loop after EACH signal
+   - Added individual try/except for each signal with `rollback()` on error
+   - Guarantees tp1_hit, moved_to_be, trailing_active saved even if next signal errors
+
+2. **bot.py (cmd_v3_stats)**:
+   - Fixed statistics to count by `exit_reason` (TP2, BE, TRAIL, SL, TIMEOUT)
+   - Not by flags `tp1_hit`/`tp2_hit` (these indicate intermediate states, not final exits)
+   - Added `tp1_hit_count` for informational purposes only
+
+**Code Changes:**
+```python
+# OLD (BROKEN):
+for signal in active_signals:
+    await self._check_signal(signal, session)
+session.commit()  # ❌ Only at end - changes lost on error!
+
+# NEW (FIXED):
+for signal in active_signals:
+    try:
+        await self._check_signal(signal, session)
+        session.commit()  # ✅ After EACH signal
+    except Exception as e:
+        session.rollback()  # ✅ Rollback only this signal
+```
+
+**Result:** ✅ **GUARANTEED** TP1 flags save immediately → correct BE exits → accurate statistics!
+
+---
+
 ## Problem #15: Candles Not Updating in Database - RESOLVED ✅
 
 **Issue:** Candles were not updating in database when new candles closed, causing strategies to use stale data.

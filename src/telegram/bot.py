@@ -1213,15 +1213,27 @@ class TelegramBot:
             avg_win = sum(wins_pnl) / len(wins_pnl) if wins_pnl else 0
             avg_loss = sum(losses_pnl) / len(losses_pnl) if losses_pnl else 0
             
-            # TP1/TP2 stats
-            tp1_hit = len([s for s in closed_signals if s.tp1_hit])
-            tp2_hit = len([s for s in closed_signals if s.tp2_hit])
+            # ✅ FIX БАГ #16: Правильный подсчёт TP1/TP2 exits
+            # tp1_hit - это ФЛАГ (означает что TP1 был достигнут, но сигнал продолжил работу)
+            # Для статистики нужны ФИНАЛЬНЫЕ exit reasons
+            
+            # Финальные выходы по TP2 (это включает полное закрытие)
+            tp2_exits = len([s for s in closed_signals if s.exit_reason == 'TP2'])
+            
+            # Breakeven exits (SL был передвинут к BE после TP1, потом сработал)
             be_exits = len([s for s in closed_signals if s.exit_reason == 'BE'])
             
-            # Exit reasons breakdown
+            # Trailing exits (после TP1, trailing stop сработал)
             trail_exits = len([s for s in closed_signals if s.exit_reason == 'TRAIL'])
+            
+            # Stop Loss exits (оригинальный SL, без достижения TP1)
             sl_exits = len([s for s in closed_signals if s.exit_reason == 'SL'])
+            
+            # Timeout exits (validity timeout истёк)
             timeout_exits = len([s for s in closed_signals if s.exit_reason == 'TIMEOUT'])
+            
+            # Для информации: сколько сигналов достигли TP1 (флаг)
+            tp1_hit_count = len([s for s in closed_signals if s.tp1_hit])
             
             # Setups breakdown
             flip_signals = [s for s in closed_signals if s.setup_type == 'FlipRetest']
@@ -1243,12 +1255,13 @@ class TelegramBot:
                 f"🏆 Побед: {wins}\n"
                 f"❌ Поражений: {losses}\n"
                 f"📊 Win Rate: <b>{win_rate:.1f}%</b>\n\n"
-                f"🎯 TP1 Hit: {tp1_hit} ({tp1_hit/closed*100:.0f}%)\n"
-                f"🎯 TP2 Hit: {tp2_hit} ({tp2_hit/closed*100:.0f}%)\n"
-                f"⚖️ Breakeven: {be_exits}\n"
-                f"📉 Trailing: {trail_exits}\n"
-                f"🛑 Stop Loss: {sl_exits}\n"
-                f"⏱️ Timeout: {timeout_exits}\n\n"
+                f"<b>Exit Breakdown:</b>\n"
+                f"🎯 TP2 Reached: {tp2_exits} ({tp2_exits/closed*100:.0f}%)\n"
+                f"⚖️ Breakeven: {be_exits} ({be_exits/closed*100:.0f}%)\n"
+                f"📉 Trailing: {trail_exits} ({trail_exits/closed*100:.0f}%)\n"
+                f"🛑 Stop Loss: {sl_exits} ({sl_exits/closed*100:.0f}%)\n"
+                f"⏱️ Timeout: {timeout_exits} ({timeout_exits/closed*100:.0f}%)\n"
+                f"💡 TP1 Hit (flag): {tp1_hit_count}\n\n"
                 f"💰 Средний PnL: <b>{avg_pnl:+.2f}%</b>\n"
                 f"💵 Общий PnL: <b>{total_pnl:+.2f}%</b>\n\n"
                 f"🟢 Средняя победа: {avg_win:+.2f}%\n"

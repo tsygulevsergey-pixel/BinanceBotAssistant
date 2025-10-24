@@ -78,52 +78,61 @@ class V3SRPerformanceTracker:
             self.logger.info(f"🔍 Checking {len(active_signals)} active V3 SR signals for exit conditions")
             
             for signal in active_signals:
-                await self._check_signal(signal, session)
-            
-            session.commit()
+                try:
+                    await self._check_signal(signal, session)
+                    
+                    # ✅ FIX БАГ #16: Commit ПОСЛЕ КАЖДОГО сигнала
+                    # Гарантирует что tp1_hit, moved_to_be, trailing_active сохраняются в БД
+                    # даже если следующий сигнал вызовет ошибку
+                    session.commit()
+                    
+                except asyncio.TimeoutError:
+                    # Network timeout - skip this signal, rollback changes
+                    session.rollback()
+                    self.logger.warning(f"⏱️ Timeout checking V3 SR signal {signal.id} ({signal.symbol}) - skipping")
+                except asyncio.CancelledError:
+                    # Request cancelled - skip this signal, rollback changes
+                    session.rollback()
+                    self.logger.debug(f"Request cancelled for V3 SR signal {signal.id} - skipping")
+                except Exception as e:
+                    # Any other error - rollback changes for this signal
+                    session.rollback()
+                    self.logger.error(f"Error checking V3 SR signal {signal.id}: {e}", exc_info=True)
             
         except Exception as e:
-            session.rollback()
-            self.logger.error(f"Error checking active V3 SR signals: {e}", exc_info=True)
+            self.logger.error(f"Error in _check_active_signals: {e}", exc_info=True)
         finally:
             session.close()
     
     async def _check_signal(self, signal: V3SRSignal, session):
         """Check one signal for exit with MFE/MAE tracking"""
-        try:
-            symbol_str = str(signal.symbol)
-            price_data = await self.binance_client.get_mark_price(symbol_str)
-            current_price = float(price_data['markPrice'])
-            
-            # Update MFE/MAE
-            self._update_mfe_mae(signal, current_price)
-            
-            # Check validity timeout
-            if await self._check_validity_timeout(signal):
-                await self._close_signal(signal, current_price, 'TIMEOUT', 'Validity timeout expired', session)
-                return
-            
-            # Check exit conditions
-            exit_result = await self._check_exit_conditions(signal, current_price)
-            
-            if exit_result:
-                await self._close_signal(
-                    signal, 
-                    exit_result['exit_price'],
-                    exit_result['reason'],
-                    exit_result['reason'],
-                    session,
-                    pnl_override=exit_result.get('pnl_override')  # Use saved TP1 PnL if breakeven
-                )
+        # ✅ FIX БАГ #16: Убрана обработка ошибок - теперь она в _check_active_signals
+        # Это позволяет корректно делать rollback для каждого сигнала отдельно
         
-        except asyncio.TimeoutError:
-            # Network timeout - skip this check cycle, will retry on next iteration
-            self.logger.warning(f"⏱️ Timeout checking V3 SR signal {signal.id} ({signal.symbol}) - will retry next cycle")
-        except asyncio.CancelledError:
-            # Request was cancelled - skip without logging
-            self.logger.debug(f"Request cancelled for V3 SR signal {signal.id}")
-        except Exception as e:
-            self.logger.error(f"Error checking V3 SR signal {signal.id}: {e}", exc_info=True)
+        symbol_str = str(signal.symbol)
+        price_data = await self.binance_client.get_mark_price(symbol_str)
+        current_price = float(price_data['markPrice'])
+        
+        # Update MFE/MAE
+        self._update_mfe_mae(signal, current_price)
+        
+        # Check validity timeout
+        if await self._check_validity_timeout(signal):
+            await self._close_signal(signal, current_price, 'TIMEOUT', 'Validity timeout expired', session)
+            return
+        
+        # Check exit conditions
+        exit_result = await self._check_exit_conditions(signal, current_price)
+        
+        if exit_result:
+            await self._close_signal(
+                signal, 
+                exit_result['exit_price'],
+                exit_result['reason'],
+                exit_result['reason'],
+                session,
+                pnl_override=exit_result.get('pnl_override')  # Use saved TP1 PnL if breakeven
+            )
     
     def _update_mfe_mae(self, signal: V3SRSignal, current_price: float):
         """

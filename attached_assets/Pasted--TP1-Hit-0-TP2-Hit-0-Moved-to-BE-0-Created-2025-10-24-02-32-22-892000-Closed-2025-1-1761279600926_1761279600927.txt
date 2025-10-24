@@ -1,0 +1,1047 @@
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-24 02:32:22.892000 | Closed: 2025-10-24 02:35:24.912845
+
+🔷 Signal #204: 4USDT LONG FlipRetest
+   Entry: 0.1442 → Exit: 0.1448 (SL: 0.1059)
+   Exit Reason: TIMEOUT
+   PnL: 0.43% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:31:33.281634 | Closed: 2025-10-24 02:35:00.367169
+
+🔷 Signal #203: GALAUSDT SHORT FlipRetest
+   Entry: 0.0109 → Exit: 0.0109 (SL: 0.0114)
+   Exit Reason: TIMEOUT
+   PnL: -0.92% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:31:33.091538 | Closed: 2025-10-24 02:32:20.301021
+
+🔷 Signal #195: DOODUSDT LONG FlipRetest
+   Entry: 0.0064 → Exit: 0.0068 (SL: 0.0064)
+   Exit Reason: TP2
+   PnL: 5.39% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 1 | Moved to BE: 1
+   Created: 2025-10-23 23:02:47.406259 | Closed: 2025-10-24 02:27:57.338462
+
+🔷 Signal #261: WALUSDT LONG FlipRetest
+   Entry: 0.2443 → Exit: 0.2478 (SL: 0.2478)
+   Exit Reason: SL
+   PnL: 1.42% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-24 02:18:56.116555 | Closed: 2025-10-24 02:21:39.695883
+
+🔷 Signal #246: SPKUSDT SHORT FlipRetest
+   Entry: 0.0388 → Exit: 0.0391 (SL: 0.0391)
+   Exit Reason: SL
+   PnL: -0.60% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-24 02:18:53.510749 | Closed: 2025-10-24 02:21:34.410523
+
+🔷 Signal #254: PENGUUSDT SHORT FlipRetest
+   Entry: 0.0205 → Exit: 0.0204 (SL: 0.0204)
+   Exit Reason: SL
+   PnL: 0.34% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-24 02:18:55.050551 | Closed: 2025-10-24 02:21:28.455156
+
+🔷 Signal #309: DEGOUSDT LONG FlipRetest
+   Entry: 1.1031 → Exit: 1.4712 (SL: 1.4712)
+   Exit Reason: SL
+   PnL: 33.37% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-24 02:19:07.693711 | Closed: 2025-10-24 02:21:12.154730
+
+🔷 Signal #214: 4USDT SHORT FlipRetest
+   Entry: 0.1430 → Exit: 0.1351 (SL: 0.1351)
+   Exit Reason: SL
+   PnL: 5.55% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-24 02:18:48.376380 | Closed: 2025-10-24 02:21:02.738258
+
+🔷 Signal #53: ZEREBROUSDT LONG FlipRetest
+   Entry: 0.0320 → Exit: 0.0333 (SL: 0.0320)
+   Exit Reason: TRAIL
+   PnL: 3.24% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:51:40.242680 | Closed: 2025-10-24 02:19:04.122873
+
+🔷 Signal #202: SYRUPUSDT LONG FlipRetest
+   Entry: 0.3748 → Exit: 0.3728 (SL: 0.3520)
+   Exit Reason: TIMEOUT
+   PnL: -0.53% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:16:41.775555 | Closed: 2025-10-24 02:19:01.779367
+
+🔷 Signal #198: RECALLUSDT SHORT FlipRetest
+   Entry: 0.3744 → Exit: 0.3938 (SL: 0.5188)
+   Exit Reason: TIMEOUT
+   PnL: -5.21% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:16:41.195424 | Closed: 2025-10-24 02:19:00.164082
+
+🔷 Signal #200: INUSDT SHORT FlipRetest
+   Entry: 0.1330 → Exit: 0.1343 (SL: 0.1391)
+   Exit Reason: TIMEOUT
+   PnL: -1.03% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:16:41.450115 | Closed: 2025-10-24 02:18:55.319430
+
+🔷 Signal #197: ENAUSDT SHORT FlipRetest
+   Entry: 0.4521 → Exit: 0.4541 (SL: 0.4649)
+   Exit Reason: TIMEOUT
+   PnL: -0.45% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:16:41.020380 | Closed: 2025-10-24 02:18:52.945015
+
+🔷 Signal #201: CATIUSDT LONG FlipRetest
+   Entry: 0.0847 → Exit: 0.0846 (SL: 0.0683)
+   Exit Reason: TIMEOUT
+   PnL: -0.14% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:16:41.555840 | Closed: 2025-10-24 02:18:51.099171
+
+🔷 Signal #143: 币安人生USDT SHORT FlipRetest
+   Entry: 0.2508 → Exit: 0.2653 (SL: 0.2636)
+   Exit Reason: TIMEOUT
+   PnL: -5.76% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:09.146877 | Closed: 2025-10-24 02:12:37.967805
+
+🔷 Signal #94: ZROUSDT SHORT FlipRetest
+   Entry: 1.7122 → Exit: 1.7134 (SL: 1.7658)
+   Exit Reason: TIMEOUT
+   PnL: -0.07% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:52.025914 | Closed: 2025-10-24 02:12:37.734835
+
+🔷 Signal #90: ZORAUSDT SHORT FlipRetest
+   Entry: 0.0906 → Exit: 0.0899 (SL: 0.1002)
+   Exit Reason: TIMEOUT
+   PnL: 0.72% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:48.551773 | Closed: 2025-10-24 02:12:37.503480
+
+🔷 Signal #71: ZKJUSDT SHORT FlipRetest
+   Entry: 0.0725 → Exit: 0.0736 (SL: 0.0763)
+   Exit Reason: TIMEOUT
+   PnL: -1.59% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:45.860397 | Closed: 2025-10-24 02:12:37.272698
+
+🔷 Signal #144: ZENUSDT SHORT FlipRetest
+   Entry: 10.5880 → Exit: 11.0313 (SL: 11.2678)
+   Exit Reason: TIMEOUT
+   PnL: -4.19% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:09.269306 | Closed: 2025-10-24 02:12:36.376792
+
+🔷 Signal #106: ZECUSDT SHORT FlipRetest
+   Entry: 235.5800 → Exit: 252.3917 (SL: 252.3917)
+   Exit Reason: SL
+   PnL: -7.14% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:01.542883 | Closed: 2025-10-24 02:12:36.144731
+
+🔷 Signal #51: ZBTUSDT SHORT FlipRetest
+   Entry: 0.2758 → Exit: 0.2704 (SL: 0.3361)
+   Exit Reason: TIMEOUT
+   PnL: 1.96% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:39.998708 | Closed: 2025-10-24 02:12:35.912630
+
+🔷 Signal #135: YGGUSDT SHORT FlipRetest
+   Entry: 0.1368 → Exit: 0.1380 (SL: 0.1450)
+   Exit Reason: TIMEOUT
+   PnL: -0.84% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:08.025130 | Closed: 2025-10-24 02:12:35.682334
+
+🔷 Signal #74: XRPUSDT SHORT FlipRetest
+   Entry: 2.3923 → Exit: 2.3948 (SL: 2.3987)
+   Exit Reason: TIMEOUT
+   PnL: -0.10% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:46.294825 | Closed: 2025-10-24 02:12:35.221668
+
+🔷 Signal #169: XPLUSDT SHORT FlipRetest
+   Entry: 0.3582 → Exit: 0.3577 (SL: 0.4061)
+   Exit Reason: TIMEOUT
+   PnL: 0.13% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:15.458980 | Closed: 2025-10-24 02:12:34.991102
+
+🔷 Signal #31: XPINUSDT LONG FlipRetest
+   Entry: 0.0085 → Exit: 0.0082 (SL: 0.0038)
+   Exit Reason: TIMEOUT
+   PnL: -4.07% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:34.521360 | Closed: 2025-10-24 02:12:34.758997
+
+🔷 Signal #89: XMRUSDT LONG FlipRetest
+   Entry: 323.1900 → Exit: 325.9976 (SL: 310.8200)
+   Exit Reason: TIMEOUT
+   PnL: 0.87% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:48.443229 | Closed: 2025-10-24 02:12:34.527194
+
+🔷 Signal #165: XLMUSDT SHORT FlipRetest
+   Entry: 0.3111 → Exit: 0.3115 (SL: 0.3260)
+   Exit Reason: TIMEOUT
+   PnL: -0.13% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:14.999608 | Closed: 2025-10-24 02:12:34.294203
+
+🔷 Signal #83: XANUSDT LONG FlipRetest
+   Entry: 0.0418 → Exit: 0.0411 (SL: 0.0409)
+   Exit Reason: TIMEOUT
+   PnL: -1.56% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:47.385621 | Closed: 2025-10-24 02:12:34.064138
+
+🔷 Signal #113: WUSDT SHORT FlipRetest
+   Entry: 0.0720 → Exit: 0.0729 (SL: 0.0731)
+   Exit Reason: TIMEOUT
+   PnL: -1.19% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.444801 | Closed: 2025-10-24 02:12:33.833028
+
+🔷 Signal #112: WLDUSDT SHORT FlipRetest
+   Entry: 0.8564 → Exit: 0.8582 (SL: 0.9213)
+   Exit Reason: TIMEOUT
+   PnL: -0.21% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.332201 | Closed: 2025-10-24 02:12:33.373524
+
+🔷 Signal #45: WALUSDT LONG FlipRetest
+   Entry: 0.2527 → Exit: 0.2423 (SL: 0.2404)
+   Exit Reason: TIMEOUT
+   PnL: -4.12% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:39.223332 | Closed: 2025-10-24 02:12:32.911777
+
+🔷 Signal #156: VIRTUALUSDT SHORT FlipRetest
+   Entry: 0.7776 → Exit: 0.7838 (SL: 0.7890)
+   Exit Reason: TIMEOUT
+   PnL: -0.80% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:10.809859 | Closed: 2025-10-24 02:12:32.680652
+
+🔷 Signal #122: UNIUSDT LONG FlipRetest
+   Entry: 6.2780 → Exit: 6.2830 (SL: 6.0694)
+   Exit Reason: TIMEOUT
+   PnL: 0.08% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:03.507949 | Closed: 2025-10-24 02:12:31.991438
+
+🔷 Signal #9: UBUSDT LONG FlipRetest
+   Entry: 0.0571 → Exit: 0.0593 (SL: 0.0463)
+   Exit Reason: TIMEOUT
+   PnL: 3.93% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:31.761118 | Closed: 2025-10-24 02:12:31.758868
+
+🔷 Signal #58: TWTUSDT SHORT FlipRetest
+   Entry: 1.2538 → Exit: 1.2617 (SL: 1.2834)
+   Exit Reason: TIMEOUT
+   PnL: -0.63% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:40.832151 | Closed: 2025-10-24 02:12:31.529890
+
+🔷 Signal #79: TURTLEUSDT SHORT FlipRetest
+   Entry: 0.1692 → Exit: 0.1725 (SL: 0.2041)
+   Exit Reason: TIMEOUT
+   PnL: -1.95% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:46.872069 | Closed: 2025-10-24 02:12:31.299846
+
+🔷 Signal #146: TURBOUSDT SHORT FlipRetest
+   Entry: 0.0023 → Exit: 0.0024 (SL: 0.0024)
+   Exit Reason: TIMEOUT
+   PnL: -1.46% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:09.548674 | Closed: 2025-10-24 02:12:31.063937
+
+🔷 Signal #134: TRXUSDT SHORT FlipRetest
+   Entry: 0.3136 → Exit: 0.3140 (SL: 0.3188)
+   Exit Reason: TIMEOUT
+   PnL: -0.13% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:07.899141 | Closed: 2025-10-24 02:12:30.834003
+
+🔷 Signal #97: TRUTHUSDT LONG FlipRetest
+   Entry: 0.0168 → Exit: 0.0161 (SL: 0.0151)
+   Exit Reason: TIMEOUT
+   PnL: -4.32% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:52.442701 | Closed: 2025-10-24 02:12:30.602448
+
+🔷 Signal #92: TRBUSDT SHORT FlipRetest
+   Entry: 24.2710 → Exit: 24.5780 (SL: 24.4994)
+   Exit Reason: TIMEOUT
+   PnL: -1.26% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:51.799827 | Closed: 2025-10-24 02:12:30.142175
+
+🔷 Signal #24: TONUSDT SHORT FlipRetest
+   Entry: 2.1241 → Exit: 2.1299 (SL: 2.1784)
+   Exit Reason: TIMEOUT
+   PnL: -0.27% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:33.587881 | Closed: 2025-10-24 02:12:29.910370
+
+🔷 Signal #17: TAOUSDT SHORT FlipRetest
+   Entry: 384.8700 → Exit: 387.6500 (SL: 406.8128)
+   Exit Reason: TIMEOUT
+   PnL: -0.72% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:32.691370 | Closed: 2025-10-24 02:12:27.890275
+
+🔷 Signal #126: SUSDT SHORT FlipRetest
+   Entry: 0.1623 → Exit: 0.1634 (SL: 0.1740)
+   Exit Reason: TIMEOUT
+   PnL: -0.68% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:03.958814 | Closed: 2025-10-24 02:12:27.430962
+
+🔷 Signal #163: SUIUSDT SHORT FlipRetest
+   Entry: 2.4263 → Exit: 2.4154 (SL: 2.6066)
+   Exit Reason: TIMEOUT
+   PnL: 0.45% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:14.768043 | Closed: 2025-10-24 02:12:27.199394
+
+🔷 Signal #138: SPXUSDT SHORT FlipRetest
+   Entry: 0.9661 → Exit: 0.9753 (SL: 1.0295)
+   Exit Reason: TIMEOUT
+   PnL: -0.95% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:08.499329 | Closed: 2025-10-24 02:12:26.509170
+
+🔷 Signal #158: SOPHUSDT LONG FlipRetest
+   Entry: 0.0300 → Exit: 0.0311 (SL: 0.0238)
+   Exit Reason: TIMEOUT
+   PnL: 3.42% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:11.064400 | Closed: 2025-10-24 02:12:26.049114
+
+🔷 Signal #13: SOMIUSDT LONG FlipRetest
+   Entry: 0.5099 → Exit: 0.5078 (SL: 0.5005)
+   Exit Reason: TIMEOUT
+   PnL: -0.41% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:32.236673 | Closed: 2025-10-24 02:12:25.588039
+
+🔷 Signal #173: SNXUSDT SHORT FlipRetest
+   Entry: 1.2590 → Exit: 1.2506 (SL: 1.5525)
+   Exit Reason: TIMEOUT
+   PnL: 0.67% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.026473 | Closed: 2025-10-24 02:12:25.128322
+
+🔷 Signal #43: SEIUSDT SHORT FlipRetest
+   Entry: 0.1915 → Exit: 0.1920 (SL: 0.1937)
+   Exit Reason: TIMEOUT
+   PnL: -0.28% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:38.985966 | Closed: 2025-10-24 02:12:24.899338
+
+🔷 Signal #100: SANDUSDT SHORT FlipRetest
+   Entry: 0.2063 → Exit: 0.2079 (SL: 0.2163)
+   Exit Reason: TIMEOUT
+   PnL: -0.76% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:52.802722 | Closed: 2025-10-24 02:12:24.668723
+
+🔷 Signal #96: RVVUSDT LONG FlipRetest
+   Entry: 0.0122 → Exit: 0.0123 (SL: 0.0122)
+   Exit Reason: TIMEOUT
+   PnL: 2.54% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:51:52.319185 | Closed: 2025-10-24 02:12:24.436761
+
+🔷 Signal #162: RUNEUSDT SHORT FlipRetest
+   Entry: 0.8400 → Exit: 0.8443 (SL: 0.8753)
+   Exit Reason: TIMEOUT
+   PnL: -0.52% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:14.642471 | Closed: 2025-10-24 02:12:24.205852
+
+🔷 Signal #8: RIVERUSDT LONG FlipRetest
+   Entry: 9.1700 → Exit: 9.1960 (SL: 8.7020)
+   Exit Reason: TIMEOUT
+   PnL: 0.28% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:31.657160 | Closed: 2025-10-24 02:12:23.975115
+
+🔷 Signal #82: REDUSDT SHORT FlipRetest
+   Entry: 0.3419 → Exit: 0.3425 (SL: 0.3432)
+   Exit Reason: TIMEOUT
+   PnL: -0.18% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:47.224835 | Closed: 2025-10-24 02:12:23.517172
+
+🔷 Signal #159: PYTHUSDT SHORT FlipRetest
+   Entry: 0.1129 → Exit: 0.1135 (SL: 0.1161)
+   Exit Reason: TIMEOUT
+   PnL: -0.56% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:11.257477 | Closed: 2025-10-24 02:12:22.468589
+
+🔷 Signal #168: PROVEUSDT LONG FlipRetest
+   Entry: 0.8680 → Exit: 0.9242 (SL: 0.8547)
+   Exit Reason: TIMEOUT
+   PnL: 6.47% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:15.334199 | Closed: 2025-10-24 02:12:21.783396
+
+🔷 Signal #65: PNUTUSDT SHORT FlipRetest
+   Entry: 0.1350 → Exit: 0.1360 (SL: 0.1401)
+   Exit Reason: TIMEOUT
+   PnL: -0.77% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:45.074656 | Closed: 2025-10-24 02:12:19.978792
+
+🔷 Signal #75: PEOPLEUSDT SHORT FlipRetest
+   Entry: 0.0121 → Exit: 0.0123 (SL: 0.0125)
+   Exit Reason: TIMEOUT
+   PnL: -0.99% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:46.423037 | Closed: 2025-10-24 02:12:19.517348
+
+🔷 Signal #176: PENGUUSDT SHORT FlipRetest
+   Entry: 0.0202 → Exit: 0.0205 (SL: 0.0217)
+   Exit Reason: TIMEOUT
+   PnL: -1.39% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.377120 | Closed: 2025-10-24 02:12:19.287859
+
+🔷 Signal #141: PENDLEUSDT SHORT FlipRetest
+   Entry: 3.0780 → Exit: 3.1006 (SL: 3.2734)
+   Exit Reason: TIMEOUT
+   PnL: -0.73% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:08.891750 | Closed: 2025-10-24 02:12:19.056372
+
+🔷 Signal #70: PAXGUSDT SHORT FlipRetest
+   Entry: 4107.5400 → Exit: 4113.9000 (SL: 4366.2126)
+   Exit Reason: TIMEOUT
+   PnL: -0.15% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:45.744002 | Closed: 2025-10-24 02:12:18.825957
+
+🔷 Signal #110: OPENUSDT SHORT FlipRetest
+   Entry: 0.3547 → Exit: 0.3505 (SL: 0.3712)
+   Exit Reason: TIMEOUT
+   PnL: 1.18% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.092367 | Closed: 2025-10-24 02:12:18.140162
+
+🔷 Signal #95: ONDOUSDT SHORT FlipRetest
+   Entry: 0.7190 → Exit: 0.7230 (SL: 0.7228)
+   Exit Reason: TIMEOUT
+   PnL: -0.55% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:52.197004 | Closed: 2025-10-24 02:12:17.908186
+
+🔷 Signal #22: OMUSDT LONG FlipRetest
+   Entry: 0.1172 → Exit: 0.1177 (SL: 0.1172)
+   Exit Reason: TRAIL
+   PnL: 0.53% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:51:33.356742 | Closed: 2025-10-24 02:12:17.677307
+
+🔷 Signal #4: NILUSDT LONG FlipRetest
+   Entry: 0.3235 → Exit: 0.3243 (SL: 0.2688)
+   Exit Reason: TIMEOUT
+   PnL: 0.23% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:31.110845 | Closed: 2025-10-24 02:12:16.991640
+
+🔷 Signal #170: NEARUSDT SHORT FlipRetest
+   Entry: 2.1930 → Exit: 2.2060 (SL: 2.2614)
+   Exit Reason: TIMEOUT
+   PnL: -0.59% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:15.572048 | Closed: 2025-10-24 02:12:16.528769
+
+🔷 Signal #30: MYXUSDT SHORT FlipRetest
+   Entry: 2.6240 → Exit: 2.7314 (SL: 2.7578)
+   Exit Reason: TIMEOUT
+   PnL: -4.09% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:34.407480 | Closed: 2025-10-24 02:12:16.296102
+
+🔷 Signal #44: METUSDT SHORT FlipRetest
+   Entry: 0.5326 → Exit: 0.5786 (SL: 0.8416)
+   Exit Reason: TIMEOUT
+   PnL: -8.64% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:39.112902 | Closed: 2025-10-24 02:12:15.378086
+
+🔷 Signal #91: MERLUSDT SHORT FlipRetest
+   Entry: 0.3624 → Exit: 0.3607 (SL: 0.3624)
+   Exit Reason: TRAIL
+   PnL: 0.60% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:51:48.667266 | Closed: 2025-10-24 02:12:15.147654
+
+🔷 Signal #80: MANAUSDT SHORT FlipRetest
+   Entry: 0.2330 → Exit: 0.2340 (SL: 0.2356)
+   Exit Reason: TIMEOUT
+   PnL: -0.45% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:47.000897 | Closed: 2025-10-24 02:12:14.917444
+
+🔷 Signal #20: LISTAUSDT SHORT FlipRetest
+   Entry: 0.2875 → Exit: 0.2914 (SL: 0.2968)
+   Exit Reason: TIMEOUT
+   PnL: -1.34% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:33.052302 | Closed: 2025-10-24 02:12:14.231193
+
+🔷 Signal #88: LINKUSDT SHORT FlipRetest
+   Entry: 17.3630 → Exit: 17.3800 (SL: 18.9282)
+   Exit Reason: TIMEOUT
+   PnL: -0.10% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:48.330928 | Closed: 2025-10-24 02:12:14.002431
+
+🔷 Signal #140: LINEAUSDT SHORT FlipRetest
+   Entry: 0.0156 → Exit: 0.0154 (SL: 0.0180)
+   Exit Reason: TIMEOUT
+   PnL: 0.87% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:08.763481 | Closed: 2025-10-24 02:12:13.771906
+
+🔷 Signal #178: LIGHTUSDT LONG FlipRetest
+   Entry: 2.1790 → Exit: 2.2748 (SL: 1.8051)
+   Exit Reason: TIMEOUT
+   PnL: 4.40% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.599348 | Closed: 2025-10-24 02:12:13.539984
+
+🔷 Signal #86: LAUSDT LONG FlipRetest
+   Entry: 0.4323 → Exit: 0.4263 (SL: 0.4151)
+   Exit Reason: TIMEOUT
+   PnL: -1.39% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:47.873703 | Closed: 2025-10-24 02:12:13.079375
+
+🔷 Signal #125: LABUSDT LONG FlipRetest
+   Entry: 0.2336 → Exit: 0.2508 (SL: 0.2002)
+   Exit Reason: TIMEOUT
+   PnL: 7.35% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:03.840395 | Closed: 2025-10-24 02:12:12.849240
+
+🔷 Signal #187: KDAUSDT SHORT FlipRetest
+   Entry: 0.0619 → Exit: 0.0611 (SL: 0.2324)
+   Exit Reason: TIMEOUT
+   PnL: 1.29% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:17.759470 | Closed: 2025-10-24 02:12:12.159429
+
+🔷 Signal #104: KASUSDT SHORT FlipRetest
+   Entry: 0.0513 → Exit: 0.0515 (SL: 0.0516)
+   Exit Reason: TIMEOUT
+   PnL: -0.28% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:01.298863 | Closed: 2025-10-24 02:12:11.928366
+
+🔷 Signal #194: KAITOUSDT SHORT FlipRetest
+   Entry: 1.0433 → Exit: 1.0513 (SL: 1.0742)
+   Exit Reason: TIMEOUT
+   PnL: -0.77% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:21.689592 | Closed: 2025-10-24 02:12:11.695922
+
+🔷 Signal #172: JUPUSDT LONG FlipRetest
+   Entry: 0.3578 → Exit: 0.3544 (SL: 0.3526)
+   Exit Reason: TIMEOUT
+   PnL: -0.94% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:15.896257 | Closed: 2025-10-24 02:12:11.467160
+
+🔷 Signal #16: JTOUSDT SHORT FlipRetest
+   Entry: 1.0772 → Exit: 1.0854 (SL: 1.1171)
+   Exit Reason: TIMEOUT
+   PnL: -0.76% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:32.572740 | Closed: 2025-10-24 02:12:11.237857
+
+🔷 Signal #116: IPUSDT SHORT FlipRetest
+   Entry: 5.0890 → Exit: 5.1311 (SL: 5.3743)
+   Exit Reason: TIMEOUT
+   PnL: -0.83% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.799781 | Closed: 2025-10-24 02:12:10.780204
+
+🔷 Signal #76: INJUSDT SHORT FlipRetest
+   Entry: 8.3710 → Exit: 8.3890 (SL: 8.6514)
+   Exit Reason: TIMEOUT
+   PnL: -0.22% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:46.537389 | Closed: 2025-10-24 02:12:10.321761
+
+🔷 Signal #111: IMXUSDT SHORT FlipRetest
+   Entry: 0.5033 → Exit: 0.5159 (SL: 0.5166)
+   Exit Reason: TIMEOUT
+   PnL: -2.50% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.202189 | Closed: 2025-10-24 02:12:10.092674
+
+🔷 Signal #26: IDOLUSDT LONG FlipRetest
+   Entry: 0.0377 → Exit: 0.0379 (SL: 0.0325)
+   Exit Reason: TIMEOUT
+   PnL: 0.53% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:33.832374 | Closed: 2025-10-24 02:12:09.860208
+
+🔷 Signal #155: ICPUSDT SHORT FlipRetest
+   Entry: 3.0160 → Exit: 3.0610 (SL: 3.0379)
+   Exit Reason: TIMEOUT
+   PnL: -1.49% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:10.679250 | Closed: 2025-10-24 02:12:09.629071
+
+🔷 Signal #7: HBARUSDT SHORT FlipRetest
+   Entry: 0.1651 → Exit: 0.1649 (SL: 0.1795)
+   Exit Reason: TIMEOUT
+   PnL: 0.09% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:31.545447 | Closed: 2025-10-24 02:12:08.489201
+
+🔷 Signal #66: GMTUSDT SHORT FlipRetest
+   Entry: 0.0270 → Exit: 0.0271 (SL: 0.0281)
+   Exit Reason: TIMEOUT
+   PnL: -0.52% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:45.252697 | Closed: 2025-10-24 02:12:08.023967
+
+🔷 Signal #62: FUSDT LONG FlipRetest
+   Entry: 0.0151 → Exit: 0.0176 (SL: 0.0147)
+   Exit Reason: TIMEOUT
+   PnL: 16.72% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:44.331291 | Closed: 2025-10-24 02:12:07.334868
+
+🔷 Signal #11: FORMUSDT SHORT FlipRetest
+   Entry: 0.7237 → Exit: 0.7240 (SL: 0.8243)
+   Exit Reason: TIMEOUT
+   PnL: -0.04% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:31.995885 | Closed: 2025-10-24 02:12:07.104993
+
+🔷 Signal #189: FILUSDT SHORT FlipRetest
+   Entry: 1.5450 → Exit: 1.5545 (SL: 1.6099)
+   Exit Reason: TIMEOUT
+   PnL: -0.62% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:17.995184 | Closed: 2025-10-24 02:12:06.645770
+
+🔷 Signal #55: FFUSDT LONG FlipRetest
+   Entry: 0.1564 → Exit: 0.1545 (SL: 0.1501)
+   Exit Reason: TIMEOUT
+   PnL: -1.24% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:40.470855 | Closed: 2025-10-24 02:12:06.409046
+
+🔷 Signal #69: FARTCOINUSDT SHORT FlipRetest
+   Entry: 0.3581 → Exit: 0.3692 (SL: 0.3651)
+   Exit Reason: TIMEOUT
+   PnL: -3.09% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:45.618303 | Closed: 2025-10-24 02:12:05.949577
+
+🔷 Signal #142: EVAAUSDT LONG FlipRetest
+   Entry: 6.7019 → Exit: 7.2239 (SL: 5.0370)
+   Exit Reason: TIMEOUT
+   PnL: 7.79% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:09.026646 | Closed: 2025-10-24 02:12:05.719212
+
+🔷 Signal #39: EULUSDT SHORT FlipRetest
+   Entry: 7.3070 → Exit: 7.3119 (SL: 8.3273)
+   Exit Reason: TIMEOUT
+   PnL: -0.07% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:38.489015 | Closed: 2025-10-24 02:12:05.489092
+
+🔷 Signal #32: ETCUSDT SHORT FlipRetest
+   Entry: 15.6810 → Exit: 15.6894 (SL: 16.0784)
+   Exit Reason: TIMEOUT
+   PnL: -0.05% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:37.713127 | Closed: 2025-10-24 02:12:05.031242
+
+🔷 Signal #21: ENSUSDT SHORT FlipRetest
+   Entry: 15.1900 → Exit: 15.2800 (SL: 15.7395)
+   Exit Reason: TIMEOUT
+   PnL: -0.59% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:33.170828 | Closed: 2025-10-24 02:12:04.152590
+
+🔷 Signal #25: ENSOUSDT SHORT FlipRetest
+   Entry: 1.5830 → Exit: 1.5820 (SL: 1.9245)
+   Exit Reason: TIMEOUT
+   PnL: 0.06% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:33.713169 | Closed: 2025-10-24 02:12:03.923864
+
+🔷 Signal #184: EIGENUSDT SHORT FlipRetest
+   Entry: 1.0737 → Exit: 1.0735 (SL: 1.1279)
+   Exit Reason: TIMEOUT
+   PnL: 0.02% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:17.405851 | Closed: 2025-10-24 02:12:02.525643
+
+🔷 Signal #5: DYDXUSDT SHORT FlipRetest
+   Entry: 0.3170 → Exit: 0.3195 (SL: 0.3446)
+   Exit Reason: TIMEOUT
+   PnL: -0.80% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:31.231575 | Closed: 2025-10-24 02:12:01.389424
+
+🔷 Signal #193: DEGOUSDT LONG FlipRetest
+   Entry: 1.8661 → Exit: 1.1053 (SL: 1.8661)
+   Exit Reason: TIMEOUT
+   PnL: -17.14% → ❌ LOSS
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:52:21.568891 | Closed: 2025-10-24 02:11:59.785644
+
+🔷 Signal #102: DASHUSDT SHORT FlipRetest
+   Entry: 41.2900 → Exit: 42.4458 (SL: 42.1832)
+   Exit Reason: TIMEOUT
+   PnL: -2.80% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:01.061898 | Closed: 2025-10-24 02:11:59.552345
+
+🔷 Signal #160: CRVUSDT SHORT FlipRetest
+   Entry: 0.5230 → Exit: 0.5266 (SL: 0.5536)
+   Exit Reason: TIMEOUT
+   PnL: -0.68% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:11.383942 | Closed: 2025-10-24 02:11:59.320041
+
+🔷 Signal #35: COAIUSDT LONG FlipRetest
+   Entry: 15.2750 → Exit: 13.8979 (SL: 10.3369)
+   Exit Reason: TIMEOUT
+   PnL: -9.02% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:38.055615 | Closed: 2025-10-24 02:11:59.088626
+
+🔷 Signal #174: CLOUSDT SHORT FlipRetest
+   Entry: 0.3225 → Exit: 0.3220 (SL: 0.3771)
+   Exit Reason: TIMEOUT
+   PnL: 0.16% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.135308 | Closed: 2025-10-24 02:11:58.410132
+
+🔷 Signal #1: CFXUSDT SHORT FlipRetest
+   Entry: 0.1081 → Exit: 0.1092 (SL: 0.1091)
+   Exit Reason: TIMEOUT
+   PnL: -1.01% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:30.698206 | Closed: 2025-10-24 02:11:58.178144
+
+🔷 Signal #115: BOMEUSDT SHORT FlipRetest
+   Entry: 0.0011 → Exit: 0.0011 (SL: 0.0011)
+   Exit Reason: TIMEOUT
+   PnL: -0.45% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.673465 | Closed: 2025-10-24 02:11:55.608922
+
+🔷 Signal #54: BERAUSDT LONG FlipRetest
+   Entry: 2.0170 → Exit: 1.9910 (SL: 1.8070)
+   Exit Reason: TIMEOUT
+   PnL: -1.29% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:40.353782 | Closed: 2025-10-24 02:11:53.751042
+
+🔷 Signal #23: BELUSDT LONG FlipRetest
+   Entry: 0.2673 → Exit: 0.2582 (SL: 0.2327)
+   Exit Reason: TIMEOUT
+   PnL: -3.39% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:33.466280 | Closed: 2025-10-24 02:11:53.475412
+
+🔷 Signal #77: BBUSDT SHORT FlipRetest
+   Entry: 0.1227 → Exit: 0.1240 (SL: 0.1278)
+   Exit Reason: TIMEOUT
+   PnL: -1.08% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:46.654344 | Closed: 2025-10-24 02:11:52.676208
+
+🔷 Signal #157: BASUSDT SHORT FlipRetest
+   Entry: 0.0152 → Exit: 0.0158 (SL: 0.0264)
+   Exit Reason: TIMEOUT
+   PnL: -3.61% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:10.933988 | Closed: 2025-10-24 02:11:52.443869
+
+🔷 Signal #177: BANKUSDT SHORT FlipRetest
+   Entry: 0.1390 → Exit: 0.1581 (SL: 0.1658)
+   Exit Reason: TIMEOUT
+   PnL: -13.71% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.493126 | Closed: 2025-10-24 02:11:51.194950
+
+🔷 Signal #164: B2USDT LONG FlipRetest
+   Entry: 1.9312 → Exit: 2.0172 (SL: 1.7716)
+   Exit Reason: TIMEOUT
+   PnL: 4.45% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:14.882715 | Closed: 2025-10-24 02:11:50.961850
+
+🔷 Signal #15: AVNTUSDT LONG FlipRetest
+   Entry: 0.6384 → Exit: 0.6709 (SL: 0.5483)
+   Exit Reason: TIMEOUT
+   PnL: 5.10% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:32.463604 | Closed: 2025-10-24 02:11:50.731830
+
+🔷 Signal #180: AVAXUSDT SHORT FlipRetest
+   Entry: 19.1000 → Exit: 19.1726 (SL: 19.3568)
+   Exit Reason: TIMEOUT
+   PnL: -0.38% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.836089 | Closed: 2025-10-24 02:11:50.501318
+
+🔷 Signal #33: ATOMUSDT SHORT FlipRetest
+   Entry: 3.1730 → Exit: 3.1555 (SL: 3.2701)
+   Exit Reason: TIMEOUT
+   PnL: 0.55% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:37.826811 | Closed: 2025-10-24 02:11:49.500297
+
+🔷 Signal #171: ATHUSDT SHORT FlipRetest
+   Entry: 0.0292 → Exit: 0.0291 (SL: 0.0299)
+   Exit Reason: TIMEOUT
+   PnL: 0.46% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:15.687158 | Closed: 2025-10-24 02:11:49.268242
+
+🔷 Signal #121: ARKMUSDT SHORT FlipRetest
+   Entry: 0.3496 → Exit: 0.3525 (SL: 0.3602)
+   Exit Reason: TIMEOUT
+   PnL: -0.83% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:03.383829 | Closed: 2025-10-24 02:11:48.049666
+
+🔷 Signal #196: ARBUSDT SHORT FlipRetest
+   Entry: 0.3131 → Exit: 0.3151 (SL: 0.3144)
+   Exit Reason: TIMEOUT
+   PnL: -0.63% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 23:02:47.841521 | Closed: 2025-10-24 02:11:47.819374
+
+🔷 Signal #152: APEUSDT LONG FlipRetest
+   Entry: 0.4197 → Exit: 0.4461 (SL: 0.3957)
+   Exit Reason: TIMEOUT
+   PnL: 6.29% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:10.322734 | Closed: 2025-10-24 02:11:46.552755
+
+🔷 Signal #192: ALICEUSDT SHORT FlipRetest
+   Entry: 0.3220 → Exit: 0.3185 (SL: 0.3718)
+   Exit Reason: TIMEOUT
+   PnL: 1.07% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:21.366923 | Closed: 2025-10-24 02:11:46.322220
+
+🔷 Signal #41: ALGOUSDT SHORT FlipRetest
+   Entry: 0.1809 → Exit: 0.1814 (SL: 0.1870)
+   Exit Reason: TIMEOUT
+   PnL: -0.26% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:38.750334 | Closed: 2025-10-24 02:11:46.092653
+
+🔷 Signal #179: AIAUSDT SHORT FlipRetest
+   Entry: 1.2926 → Exit: 1.2525 (SL: 1.4889)
+   Exit Reason: TIMEOUT
+   PnL: 3.10% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.705036 | Closed: 2025-10-24 02:11:44.869830
+
+🔷 Signal #29: AAVEUSDT SHORT FlipRetest
+   Entry: 222.6100 → Exit: 224.8775 (SL: 224.8775)
+   Exit Reason: SL
+   PnL: -1.02% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:34.281138 | Closed: 2025-10-24 02:11:44.219342
+
+🔷 Signal #49: 2ZUSDT SHORT FlipRetest
+   Entry: 0.2323 → Exit: 0.2344 (SL: 0.2373)
+   Exit Reason: TIMEOUT
+   PnL: -0.93% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:39.770347 | Closed: 2025-10-24 02:11:43.513006
+
+🔷 Signal #175: 1000SHIBUSDT LONG FlipRetest
+   Entry: 0.0101 → Exit: 0.0101 (SL: 0.0099)
+   Exit Reason: TIMEOUT
+   PnL: 0.50% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.263637 | Closed: 2025-10-24 02:11:43.239345
+
+🔷 Signal #105: 1000SATSUSDT SHORT FlipRetest
+   Entry: 0.0000 → Exit: 0.0000 (SL: 0.0000)
+   Exit Reason: TIMEOUT
+   PnL: -0.42% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:01.412673 | Closed: 2025-10-24 02:11:42.852914
+
+🔷 Signal #52: 1000PEPEUSDT SHORT FlipRetest
+   Entry: 0.0069 → Exit: 0.0070 (SL: 0.0070)
+   Exit Reason: TIMEOUT
+   PnL: -1.09% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:40.126050 | Closed: 2025-10-24 02:11:42.156141
+
+🔷 Signal #133: 1000FLOKIUSDT SHORT FlipRetest
+   Entry: 0.0726 → Exit: 0.0729 (SL: 0.0735)
+   Exit Reason: TIMEOUT
+   PnL: -0.50% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:07.777047 | Closed: 2025-10-24 02:11:41.925207
+
+🔷 Signal #60: 0GUSDT SHORT FlipRetest
+   Entry: 1.7156 → Exit: 1.7327 (SL: 1.7621)
+   Exit Reason: TIMEOUT
+   PnL: -1.00% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:41.063120 | Closed: 2025-10-24 02:11:41.308481
+
+🔷 Signal #205: BLESSUSDT SHORT FlipRetest
+   Entry: 0.0368 → Exit: 0.0368 (SL: 0.0368)
+   Exit Reason: TRAIL
+   PnL: 0.20% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 23:31:33.708113 | Closed: 2025-10-23 23:43:10.609465
+
+🔷 Signal #56: STRKUSDT SHORT FlipRetest
+   Entry: 0.1191 → Exit: 0.1196 (SL: 0.1196)
+   Exit Reason: SL
+   PnL: -0.45% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:40.589650 | Closed: 2025-10-23 23:40:05.322129
+
+🔷 Signal #40: GALAUSDT LONG FlipRetest
+   Entry: 0.0109 → Exit: 0.0109 (SL: 0.0109)
+   Exit Reason: TRAIL
+   PnL: 0.21% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:51:38.623820 | Closed: 2025-10-23 23:27:14.063576
+
+🔷 Signal #199: 4USDT LONG FlipRetest
+   Entry: 0.1383 → Exit: 0.1450 (SL: 0.1383)
+   Exit Reason: TRAIL
+   PnL: 2.63% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 23:16:41.322093 | Closed: 2025-10-23 23:26:58.752118
+
+🔷 Signal #186: BLESSUSDT SHORT FlipRetest
+   Entry: 0.0354 → Exit: 0.0369 (SL: 0.0369)
+   Exit Reason: SL
+   PnL: -4.49% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:17.640030 | Closed: 2025-10-23 23:19:59.746159
+
+🔷 Signal #108: 4USDT LONG FlipRetest
+   Entry: 0.1376 → Exit: 0.1402 (SL: 0.1376)
+   Exit Reason: TRAIL
+   PnL: 1.60% → ✅ WIN
+   TP1 Hit: 1 | TP2 Hit: 0 | Moved to BE: 1
+   Created: 2025-10-23 22:52:01.798953 | Closed: 2025-10-23 23:05:56.312979
+
+🔷 Signal #137: DOODUSDT SHORT FlipRetest
+   Entry: 0.0063 → Exit: 0.0064 (SL: 0.0064)
+   Exit Reason: SL
+   PnL: -0.52% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:08.360478 | Closed: 2025-10-23 22:59:33.334601
+
+🔷 Signal #150: SYRUPUSDT SHORT FlipRetest
+   Entry: 0.3670 → Exit: 0.3705 (SL: 0.3705)
+   Exit Reason: SL
+   PnL: -0.96% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:10.080996 | Closed: 2025-10-23 22:54:43.240444
+
+🔷 Signal #98: RECALLUSDT LONG FlipRetest
+   Entry: 0.3701 → Exit: 0.3778 (SL: 0.3778)
+   Exit Reason: SL
+   PnL: 2.07% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:52.561943 | Closed: 2025-10-23 22:54:38.635090
+
+🔷 Signal #117: INUSDT SHORT FlipRetest
+   Entry: 0.1323 → Exit: 0.1323 (SL: 0.1323)
+   Exit Reason: SL
+   PnL: 0.03% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:02.917753 | Closed: 2025-10-23 22:54:27.294851
+
+🔷 Signal #42: ENAUSDT LONG FlipRetest
+   Entry: 0.4503 → Exit: 0.4542 (SL: 0.4542)
+   Exit Reason: SL
+   PnL: 0.87% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:51:38.863058 | Closed: 2025-10-23 22:54:21.298419
+
+🔷 Signal #130: CATIUSDT SHORT FlipRetest
+   Entry: 0.0837 → Exit: 0.0815 (SL: 0.0815)
+   Exit Reason: SL
+   PnL: 2.61% → ✅ WIN
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:04.422714 | Closed: 2025-10-23 22:54:17.611827
+
+🔷 Signal #181: ARBUSDT SHORT FlipRetest
+   Entry: 0.3111 → Exit: 0.3112 (SL: 0.3112)
+   Exit Reason: SL
+   PnL: -0.04% → ❌ LOSS
+   TP1 Hit: 0 | TP2 Hit: 0 | Moved to BE: 0
+   Created: 2025-10-23 22:52:16.954434 | Closed: 2025-10-23 22:54:11.834749
+
+========================================================================================================================
+
+📊 STATISTICS BREAKDOWN:
+
+Exit Reasons:
+  TIMEOUT: 119
+  SL: 25
+  TRAIL: 17
+  BE: 3
+  TP2: 3
+
+Wins/Losses:
+  Wins (PnL > 0): 69
+  Losses (PnL <= 0): 98
+  Win Rate: 41.3%
+
+Flags:
+  TP1 Hit (flag): 25
+  TP2 Hit (flag): 3
+  Moved to BE (flag): 25
+
+========================================================================================================================
+🔍 CHECKING FOR CONTRADICTIONS:
+
+❌ BUG #1: 12 signals with exit_reason='SL' but POSITIVE PnL:
+   Signal #339: MYXUSDT | PnL: 0.32% | Moved to BE: 0
+   Signal #314: PENGUUSDT | PnL: 0.23% | Moved to BE: 0
+   Signal #313: EDENUSDT | PnL: 0.11% | Moved to BE: 0
+   Signal #312: PENGUUSDT | PnL: 0.14% | Moved to BE: 0
+   Signal #261: WALUSDT | PnL: 1.42% | Moved to BE: 0
+   Signal #254: PENGUUSDT | PnL: 0.34% | Moved to BE: 0
+   Signal #309: DEGOUSDT | PnL: 33.37% | Moved to BE: 0
+   Signal #214: 4USDT | PnL: 5.55% | Moved to BE: 0
+   Signal #98: RECALLUSDT | PnL: 2.07% | Moved to BE: 0
+   Signal #117: INUSDT | PnL: 0.03% | Moved to BE: 0
+   Signal #42: ENAUSDT | PnL: 0.87% | Moved to BE: 0
+   Signal #130: CATIUSDT | PnL: 2.61% | Moved to BE: 0
+
+✅ No moved_to_be=True signals with exit_reason='SL'
+
+✅ All TP1 hits have moved_to_be=True
+
+========================================================================================================================
